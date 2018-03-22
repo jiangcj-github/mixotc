@@ -30,15 +30,13 @@ import Login from '@/components/login/Login'
   }
 </script>
 
-<style scoped>
-  .header{
-    text-align: right;
-    height: 50px;
-    background: skyblue;
-  }
-  .header .log{
-    margin-right:50px;
-    line-height: 50px;
-    cursor:pointer;
-  }
+<style scoped lang='stylus'>
+  .header
+    height 50px
+    text-align right
+    background skyblue
+    .log
+      margin-right 50px
+      line-height 50px
+      cursor pointer
 </style>

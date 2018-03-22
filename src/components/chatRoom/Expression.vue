@@ -140,24 +140,20 @@ export default {
 };
 </script>
 
-<style scoped>
-ul {
-  width: 416px;
-  overflow: hidden;
-  border:1px solid;
-  background-color:seashell;
-}
-ul li {
-  width: 16px;
-  height: 16px;
-  box-sizing:border-box;
-  float: left;
-}
-ul li:hover{
-  border:1px solid #ccc;
-}
-ul li img {
-  width: 16px;
-  height: 16px;
-}
+<style scoped lang='stylus'>
+ul
+  overflow hidden
+  width 416px
+  border 1px solid
+  background-color seashell
+  li 
+    box-sizing border-box
+    float left
+    width 16px
+    height 16px
+    &:hover
+      border 1px solid #CCC
+    img
+      width 16px
+      height 16px
 </style>

@@ -6,6 +6,7 @@ import router from './router';
 import store from './store';
 import jsonBig from 'json-bigint';
 import axios from 'axios';
+import '@/stylus/rest.styl'
 Vue.config.productionTip = false;
 
 Vue.prototype.jsonBig = jsonBig;
@@ -20,7 +21,6 @@ new Vue({
 });
 
 Vue.directive("defaultClick", {
-  // 当被绑定的元素插入到 DOM 中时……
   bind: function(el, binding) {
     function documentHandle(e){
       if(el.contains(e.target)){
@@ -33,5 +33,13 @@ Vue.directive("defaultClick", {
   },
   unbind: function(el, binding) {
     document.removeEventListener("click", el.mid);
+  }
+});
+Vue.directive("clickHide", {
+  bind: function(el, binding) {
+    document.addEventListener("click", binding.value);
+  },
+  unbind: function(el, binding) {
+    document.removeEventListener("click", binding.value);
   }
 });

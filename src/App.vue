@@ -25,16 +25,6 @@ export default {
 </script>
 
 <style>
-*{
-  padding:0;
-  margin:0;
-}
-ul,li,ol{
-  list-style:none;
-}
-html,body{
-  height: 100%;
-}
 #app {
   height: 100%;
   font-family: 'Avenir', Helvetica, Arial, sans-serif;

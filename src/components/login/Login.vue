@@ -22,7 +22,7 @@ export default {
   data () {
     return {
       account: '17634029450@163.com',
-      code: '061004',
+      code: '932265',
       type:  ''
     };
   },
@@ -89,29 +89,27 @@ export default {
 };
 </script>
 
-<style scoped>
-.login {
-  padding: 50px 30px 30px 30px;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  margin-left: -250px;
-  margin-top: -130px;
-  width: 420px;
-  height: 200px;
-  border-radius: 3px;
-  border: 1px solid #333;
-  text-align: left;
-}
-.login span {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.login p {
-  margin-bottom: 30px;
-}
+<style scoped lang='stylus'>
+.login
+  position fixed
+  left 50%
+  top 50%
+  width 420px
+  height 200px
+  padding 50px 30px 30px 30px
+  margin-left -250px
+  margin-top -130px
+  border-radius 3px
+  border 1px solid #333
+  text-align left
+  span 
+    position absolute
+    right 20px
+    top 20px
+    font-size 24px
+    font-weight bold
+    cursor pointer
+  p 
+    margin-bottom 30px
+
 </style>
