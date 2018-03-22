@@ -6,6 +6,7 @@ import router from './router';
 import store from './store';
 import jsonBig from 'json-bigint';
 import axios from 'axios';
+import '@/stylus/rest.styl'
 Vue.config.productionTip = false;
 
 Vue.prototype.jsonBig = jsonBig;
@@ -17,4 +18,28 @@ new Vue({
   store,
   components: { App },
   template: '<App/>'
+});
+
+Vue.directive("defaultClick", {
+  bind: function(el, binding) {
+    function documentHandle(e){
+      if(el.contains(e.target)){
+        return;
+      }
+      binding.value()
+    }
+    el.mid = documentHandle;
+    document.addEventListener("click", documentHandle);
+  },
+  unbind: function(el, binding) {
+    document.removeEventListener("click", el.mid);
+  }
+});
+Vue.directive("clickHide", {
+  bind: function(el, binding) {
+    document.addEventListener("click", binding.value);
+  },
+  unbind: function(el, binding) {
+    document.removeEventListener("click", binding.value);
+  }
 });
