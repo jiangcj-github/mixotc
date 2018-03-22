@@ -1,5 +1,5 @@
 <template>
-  <div class='login' @click.stop>
+  <div class='login'>
     <span @click="hideLoginForm">×</span>
     <p>
       手机/邮箱：
@@ -15,34 +15,37 @@
 </template>
 
 <script>
+import { sendCode, sendLogin } from '@/api/sendConfig.js';
 import Client from "@/js/client.js";
 export default {
+  props:['loginForm'],
   data () {
     return {
       account: '17634029450@163.com',
-      code: '197053'
+      code: '061004',
+      type:  ''
     };
   },
   methods: {
+    checkout(account) {
+      return /^1[34578]\d{9}$/.test(account) ? 'phone' : (/^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(account) ? 'email' : false)
+    },
     hideLoginForm() {
-      if (!this.$store.state.loginForm) return;
-      this.$store.commit({ type: 'changeLoginform', data: false });
+      if (!this.loginForm) return;
+      this.$emit('update:loginForm', false);
     },
     login() {
+      let type = this.checkout(this.account);
+      if (!type) {
+        alert('请输入正确的手机或邮箱！');
+        return;
+      }
+      this.type = type;
       window.ws = new Client().socket;
       window.ws.addEventListener('message', this.loginReplay);
       window.ws.addEventListener('open', () => {
         window.ws.send(
-          JSON.stringify({
-            ver: 1,
-            op: 17,
-            seq: window.ws.seq++,
-            body: {
-              phone: '',
-              email: this.account,
-              code: this.code
-            }
-          })
+          sendLogin(this.type, window.ws.seq++, this.account, this.code)
         );
       })
     },
@@ -58,21 +61,19 @@ export default {
       window.ws.removeEventListener('message', this.loginReplay);
     },
     getCode() {
+      let type = this.checkout(this.account);
+      if (!type) {
+        alert('请输入正确的手机或邮箱！');
+        return;
+      }
+      this.type = type;
       window.ws = new Client().socket;
       window.ws.addEventListener('message', this.codeReplay);
       window.ws.addEventListener('open', () => {
         window.ws.send(
-          JSON.stringify({
-            ver: 1,
-            op: 15,
-            seq: window.ws.seq++,
-            body: {
-              phone: '',
-              email: this.account
-            }
-          })
+          sendCode(this.type, window.ws.seq++, this.account)
         );
-      });
+      })
     },
     codeReplay(evt) {
       let data = JSON.parse(evt.data);

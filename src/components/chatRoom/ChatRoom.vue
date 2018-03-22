@@ -3,7 +3,7 @@
   <div class='chatroom'>
     <div class='top'>聊天{{tid}}</div>
     <div class='content'>
-      <ul>
+      <ul ref='messages'>
         <li v-for="(item, index) of curmessage" :key="index">
           <div class='itemsg' :class="item.from === id ? 'right' : 'left'">
             <p>{{item.from}}</p>
@@ -57,7 +57,7 @@
 </template>
 
 <script>
-import { sendSms } from '@/api/send.js';
+import { sendSms } from '@/api/sendConfig.js';
 import { upload } from '@/api/http.js';
 import Expression from './Expression'
 export default {
@@ -66,7 +66,7 @@ export default {
       expressions:["[/:^_^]","[/:^$^]","[/:Q]","[/:815]","[/:809]","[/:^O^]","[/:081]","[/:087]","[/:086]","[/:H]","[/:012]","[/:806]","[/:b]","[/:^x^]","[/:814]","[/:^W^]","[/:080]","[/:066]","[/:807]","[/:805]","[/:071]","[/:072]","[/:065]","[/:804]","[/:813]","[/:818]","[/:015]","[/:084]","[/:801]","[/:811]","[/:?]","[/:077]","[/:083]","[/:817]","[/:!]","[/:068]","[/:079]","[/:028]","[/:026]","[/:007]","[/:816]",'[/:\'""]',"[/:802]","[/:027]","[/:(Zz...)]","[/:*&*]","[/:810]","[/:>_<]","[/:018]","[/:>O<]","[/:020]","[/:044]","[/:819]","[/:085]","[/:812]",'[/:"]',"[/:>M<]","[/:>@<]","[/:076]","[/:069]","[/:O]","[/:067]","[/:043]","[/:P]","[/:808]","[/:>W<]","[/:073]","[/:008]","[/:803]","[/:074]","[/:O=O]","[/:036]","[/:039]","[/:045]","[/:046]","[/:048]","[/:047]","[/:girl]","[/:man]","[/:052]","[/:(OK)]","[/:8*8]","[/:)-(]","[/:lip]","[/:-F]","[/:-W]","[/:Y]","[/:qp]","[/:$]","[/:%]","[/:(&)]","[/:@]","[/:~B]","[/:U*U]","[/:clock]","[/:R]","[/:C]","[/:plane]","[/:alipay]","[/:wechat]","[/:card]","[/:red]","[/:trans]","[/:secured]"],
       id: '',
       content: '',
-      tid: '195928056529948672',
+      tid: '196715391714594816',
       message: {},
       curmessage: [],
       img: '',
@@ -96,6 +96,20 @@ export default {
         }
       })
     });
+  },
+  watch:{
+    // 监听curmessage变化，发送或收到消息时，自动滚动到底部
+    curmessage:{
+      handler() {
+        let messages = this.$refs.messages;
+        setTimeout(() => {
+          if(messages){
+            messages.scrollTop = messages.scrollHeight;
+          }
+        }, 0);
+      },
+      deep:true
+    }
   },
   methods: {
     changeType(type){
@@ -234,13 +248,21 @@ export default {
   height: 30px;
 }
 .chatroom .content {
-  overflow: auto;
   background: #eee;
   padding: 10px;
   height: 310px;
 }
+.chatroom .content ul{
+  overflow: auto;
+  width: 100%;
+  height: 100%;
+
+}
 .chatroom .content .itemsg {
   font-size: 14px;
+}
+.chatroom .content .itemsg p img{
+  max-width:463px;
 }
 .chatroom .content .itemsg p a{
   display: inline-block;

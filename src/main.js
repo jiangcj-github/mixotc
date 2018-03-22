@@ -18,3 +18,20 @@ new Vue({
   components: { App },
   template: '<App/>'
 });
+
+Vue.directive("defaultClick", {
+  // 当被绑定的元素插入到 DOM 中时……
+  bind: function(el, binding) {
+    function documentHandle(e){
+      if(el.contains(e.target)){
+        return;
+      }
+      binding.value()
+    }
+    el.mid = documentHandle;
+    document.addEventListener("click", documentHandle);
+  },
+  unbind: function(el, binding) {
+    document.removeEventListener("click", el.mid);
+  }
+});
