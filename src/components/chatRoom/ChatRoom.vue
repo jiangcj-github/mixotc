@@ -1,6 +1,17 @@
 <template>
   <!-- 聊天框 -->
   <div class='chatroom'>
+    <div class="friWrap">
+      <div class="self-info">
+        <span v-if="!this.$store.state.userInfo.icon"></span>
+        <span>{{this.$store.state.userInfo.name}}</span>
+      </div>
+      <!-- <ul>
+        <li v-for="(item, index) of curfrilist" :key="index">
+
+        </li>
+      </ul> -->
+    </div>
     <div class='top'>聊天{{tid}}</div>
     <div class='content'>
       <div class='wrap' ref='messages'>
@@ -32,14 +43,14 @@
         v-if="showExpression" 
         :showExpression.sync="showExpression"
         v-on:express="setExpress"
-        >
+      >
       </Expression>
       <div class='icon'>
         <span @click="triggerUpImg"><img :src="require('@/assets/img.png')" alt=""></span>
         <!-- <span @click="triggerUpFile"><img :src="require('@/assets/file.png')" alt=""></span> -->
         <span @click.stop="showExpression = true"><img :src="require('@/assets/express.png')" alt=""></span>
         <div style='display:none'>
-          <form action='' method='post' enctype='multipart/form-data' >
+          <form action='' method='post' enctype='multipart/form-data'>
             <input type='file' ref="up_img" @change="uploadImage">
           </form>
         </div>
@@ -54,7 +65,7 @@
     </div>
     <p class='butt'>
       <button @click="content=''">取消</button>
-      <button @click="sendMessage" >发送</button>
+      <button @click="sendMessage">发送</button>
     </p>
   </div>
 </template>
@@ -115,125 +126,125 @@ export default {
     }
   },
   methods: {
-    changeType(type){
-      this.type = type;
-    },
-    iconNumber(num) {
-      if (num < 10) {
-        return "00" + num;
-      } else if (num < 100) {
-        return "0" + num;
-      } else {
-        return num;
-      }
-    },
-    hideExpression() {
-      this.showExpression = false;
-    },
-    getFileExt(filename) {
-      let index = filename.lastIndexOf(".");
-      let ext = filename.substr(index+1);
-      return ext;
-    },
-    setExpress(payload) {
-      this.express = payload.express;
-      this.sendExpress();
-    },
-    addMessage(obj) {
-      if (!this.message[this.tid]) {
-        this.message[this.tid] = [];
-      }
-      this.message[this.tid].push(obj);
-      this.curmessage = this.message[this.tid];
-    },
-    sendMessage() {
-      if (this.content.trim() === '') return;
-      window.ws.send(
-        sendSms('text', window.ws.seq++, this.jsonBig.parse(this.tid), { msg: this.content.trim() })
-      );
-      this.addMessage({
-        from: this.id,
-        to: this.tid,
-        data: { msg: this.content }
-      })
-      this.content = '';
-    },
-    sendExpress() {
-      window.ws.send(
-        sendSms('text', window.ws.seq++, this.jsonBig.parse(this.tid), { msg: this.express })
-      );
-      this.addMessage({
-        from: this.id,
-        to: this.tid,
-        data: { msg: this.express }
-      })
-    },
-    sendImg() {
-      window.ws.send(
-        sendSms('image', window.ws.seq++, this.jsonBig.parse(this.tid), { id: this.img })
-      );
-      this.addMessage({
-        from: this.id,
-        to: this.tid,
-        data: { id: this.img}
-      })
-      this.$refs.up_img.value = '';
-      this.img = '';
-    },
-    // sendFile(type, mes) {
-    //   window.ws.send(
-    //     sendSms(type, window.ws.seq++, this.jsonBig.parse(this.tid), mes)
-    //   );
-    //   this.addMessage({
-    //     from: this.id,
-    //     to: this.tid,
-    //     data: mes
-    //   })
-    //   this.$refs.up_file.value = '';
-    //   this.file = null;
-    // },
-    triggerUpImg() {
-      this.$refs.up_img.click();
-    },
-    // triggerUpFile() {
-    //   this.$refs.up_file.click();
-    // },
-    uploadImage() {
-      let filename = this.$refs.up_img.value;
-      if (!filename) return;
-      let ext = this.getFileExt(filename);
-      if (ext !== 'jpg' && ext !=='png') {
+      changeType(type) {
+        this.type = type;
+      },
+      iconNumber(num) {
+        if (num < 10) {
+          return "00" + num;
+        } else if (num < 100) {
+          return "0" + num;
+        } else {
+          return num;
+        }
+      },
+      hideExpression() {
+        this.showExpression = false ;
+      },
+      getFileExt(filename) {
+        let index = filename.lastIndexOf(".");
+        let ext = filename.substr(index + 1);
+        return ext;
+      },
+      setExpress(payload) {
+        this.express = payload.express;
+        this.sendExpress();
+      },
+      addMessage(obj) {
+        if (!this.message[this.tid]) {
+          this.message[this.tid] = [];
+        }
+        this.message[this.tid].push(obj);
+        this.curmessage = this.message[this.tid];
+      },
+      sendMessage() {
+        if (this.content.trim() === '') return;
+        window.ws.send(
+          sendSms('text', window.ws.seq++, this.jsonBig.parse(this.tid), {msg: this.content.trim()})
+        );
+        this.addMessage({
+          from: this.id,
+          to: this.tid,
+          data: {msg: this.content}
+        });
+        this.content = '';
+      },
+      sendExpress() {
+        window.ws.send(
+          sendSms('text', window.ws.seq++, this.jsonBig.parse(this.tid), {msg: this.express})
+        );
+        this.addMessage({
+          from: this.id,
+          to: this.tid,
+          data: {msg: this.express}
+        })
+      },
+      sendImg() {
+        window.ws.send(
+          sendSms('image', window.ws.seq++, this.jsonBig.parse(this.tid), {id: this.img})
+        );
+        this.addMessage({
+          from: this.id,
+          to: this.tid,
+          data: {id: this.img}
+        });
         this.$refs.up_img.value = '';
-        alert('图片仅支持jpg及png格式！');
-        return;
-      }
-      this.type = 'image';
-      let self = this;
-      upload('/api/image/', 'uploadimage', this.$refs.up_img.files[0], function(data) {
-        self.img = data;
-        self.sendImg();
-      })
-    },
-    // uploadFile() {
-    //   let filename = this.$refs.up_file.value;
-    //   if (!filename) return;
-    //   let ext = this.getFileExt(filename);
-    //   if (ext !== 'amr' && ext !=='mp4') {
-    //     this.$refs.up_file.value = '';
-    //     alert('文件仅支持amr音频及mp4视频格式！');
-    //     return;
-    //   }
-    //   this.type = ext === 'amr' ? 'audio' : 'video';
-    //   let self = this;
-    //   let file = this.$refs.up_file.files[0],
-    //       size = file.size;
-    //   upload('/api/file/', 'uploadfile', this.$refs.up_file.files[0], function(data) {
-    //     self.file = data;
-    //     self.sendFile(self.type, {id:self.file, length:size, ext:ext});
-    //   })
-    // }
-  }
-};
+        this.img = '';
+      },
+      // sendFile(type, mes) {
+      //   window.ws.send(
+      //     sendSms(type, window.ws.seq++, this.jsonBig.parse(this.tid), mes)
+      //   );
+      //   this.addMessage({
+      //     from: this.id,
+      //     to: this.tid,
+      //     data: mes
+      //   })
+      //   this.$refs.up_file.value = '';
+      //   this.file = null;
+      // },
+      triggerUpImg() {
+        this.$refs.up_img.click();
+      },
+      // triggerUpFile() {
+      //   this.$refs.up_file.click();
+      // },
+      uploadImage() {
+        let filename = this.$refs.up_img.value;
+        if (!filename) return;
+        let ext = this.getFileExt(filename);
+        if (ext !== 'jpg' && ext !== 'png') {
+          this.$refs.up_img.value = '';
+          alert('图片仅支持jpg及png格式！');
+          return;
+        }
+        this.type = 'image';
+        let self = this;
+        upload('/api/image/', 'uploadimage', this.$refs.up_img.files[0], function (data) {
+          self.img = data;
+          self.sendImg();
+        })
+      },
+      // uploadFile() {
+      //   let filename = this.$refs.up_file.value;
+      //   if (!filename) return;
+      //   let ext = this.getFileExt(filename);
+      //   if (ext !== 'amr' && ext !=='mp4') {
+      //     this.$refs.up_file.value = '';
+      //     alert('文件仅支持amr音频及mp4视频格式！');
+      //     return;
+      //   }
+      //   this.type = ext === 'amr' ? 'audio' : 'video';
+      //   let self = this;
+      //   let file = this.$refs.up_file.files[0],
+      //       size = file.size;
+      //   upload('/api/file/', 'uploadfile', this.$refs.up_file.files[0], function(data) {
+      //     self.file = data;
+      //     self.sendFile(self.type, {id:self.file, length:size, ext:ext});
+      //   })
+      // }
+    }
+}
 </script>
 
 <style scoped lang='stylus'>

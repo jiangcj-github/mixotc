@@ -74,19 +74,9 @@ export default {
           sendCode(this.type, window.ws.seq++, this.account)
         );
       })
-    },
-    codeReplay(evt) {
-      let data = JSON.parse(evt.data);
-      if (data.op !== 16) return;
-      if (data.body.ret == 0) {
-        alert('发送成功！');
-      } else {
-        alert('发送失败，请重试！');
-      }
-      window.ws.removeEventListener('message', this.codeReplay);
     }
   }
-};
+}
 </script>
 
 <style scoped lang='stylus'>

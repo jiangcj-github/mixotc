@@ -7,14 +7,15 @@
 </template>
 
 <script>
-import Login from '@/components/login/Login'
+  import Login from '@/components/login/Login'
+
   export default {
     data(){
       return {
         loginForm: false
       }
     },
-    components:{
+    components: {
       Login
     },
     methods:{

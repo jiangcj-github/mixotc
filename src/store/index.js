@@ -10,13 +10,10 @@ const store = new Vuex.Store({
     userInfo: null
   },
   mutations: {
-    changeLogin(state, { data }) {
+    changeLogin(state, {data}) {
       state.isLogin = data;
     },
-    changeLoginform(state, { data }) {
-      state.loginForm = data;
-    },
-    getUserInfo(state, { data }) {
+    getUserInfo(state, {data}) {
       state.userInfo = data;
     }
   },

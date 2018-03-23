@@ -1,5 +1,5 @@
 <template>
-  <div id="app" @click="hideLoginForm">
+  <div id="app">
     <Header></Header>
     <router-view/>
     <ChatRoom v-if="this.$store.state.isLogin"></ChatRoom>
@@ -7,21 +7,16 @@
 </template>
 
 <script>
-import Header from '@/components/header/Header'
-import ChatRoom from '@/components/chatRoom/ChatRoom'
-export default {
-  name: 'App',
-  components:{
-    Header,
-    ChatRoom
-  },
-  methods:{
-    hideLoginForm(){
-      if(!this.$store.state.loginForm) return;
-      this.$store.commit({type:'changeLoginform', data:false})
+  import Header from '@/components/header/Header'
+  import ChatRoom from '@/components/chatRoom/ChatRoom'
+
+  export default {
+    name: 'App',
+    components: {
+      Header,
+      ChatRoom
     }
   }
-}
 </script>
 
 <style>
