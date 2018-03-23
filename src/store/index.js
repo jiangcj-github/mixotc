@@ -8,17 +8,21 @@ const store = new Vuex.Store({
   state: {
     isLogin: false,
     loginForm: false,
-    userInfo: null
+    userInfo: null,
+    oUserInfo: null
   },
   mutations: {
-    changeLogin(state, { data }) {
+    changeLogin(state, {data}) {
       state.isLogin = data;
     },
-    changeLoginform(state, { data }) {
+    changeLoginform(state, {data}) {
       state.loginForm = data;
     },
-    getUserInfo(state, { data }) {
+    getUserInfo(state, {data}) {
       state.userInfo = data;
+    },
+    getOUserInfo(state, {data}) {
+      state.oUserInfo = data;
     }
   },
   plugins: [createLogger()]
