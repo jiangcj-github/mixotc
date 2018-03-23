@@ -12,7 +12,7 @@ Client.prototype.createConnect = function() {
 
   function connect() {
     var heartBeatInterval;
-    var ws = new WebSocket('ws://120.76.213.235:8090/sub');
+    var ws = new WebSocket("ws://39.106.157.67:8090/sub");
     ws.seq = 1; //序列号每send一次依次加1
 
     ws.addEventListener('open', function() {

@@ -22,7 +22,7 @@ export default {
   data () {
     return {
       account: '17634029450@163.com',
-      code: '932265',
+      code: '954063',
       type:  ''
     };
   },

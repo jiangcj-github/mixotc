@@ -16,6 +16,16 @@ export function sendSms(type, seq, tid, obj) {
 }
 
 export function sendCode(type, seq, account) {
+  console.log(jsonBig.stringify({
+    ver: 1,
+    op: 15,
+    seq: seq,
+    body: {
+      phone: type === 'phone' ? account : '',
+      email: type === 'email' ? account : ''
+    }
+  })
+)
   return jsonBig.stringify({
     ver: 1,
     op: 15,
