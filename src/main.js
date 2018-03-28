@@ -35,11 +35,3 @@ Vue.directive("defaultClick", {
     document.removeEventListener("click", el.mid);
   }
 });
-Vue.directive("clickHide", {
-  bind: function(el, binding) {
-    document.addEventListener("click", binding.value);
-  },
-  unbind: function(el, binding) {
-    document.removeEventListener("click", binding.value);
-  }
-});
