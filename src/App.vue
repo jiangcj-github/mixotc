@@ -1,22 +1,10 @@
 <template>
   <div id="app">
-    <Header></Header>
-    <router-view/>
-    <ChatRoom v-if="this.$store.state.isLogin"></ChatRoom>
   </div>
 </template>
 
 <script>
-  import Header from '@/components/header/Header'
-  import ChatRoom from '@/components/chatRoom/ChatRoom'
-
-  export default {
-    name: 'App',
-    components: {
-      Header,
-      ChatRoom
-    }
-  }
+  export default {}
 </script>
 
 <style>
@@ -26,6 +14,5 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
 }
 </style>
