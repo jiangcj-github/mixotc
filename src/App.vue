@@ -1,11 +1,22 @@
 <template>
   <div id="app">
-    <router-view></router-view>
+    <Header></Header>
+    <router-view/>
+    <Footer></Footer>
   </div>
 </template>
 
 <script>
-  export default {}
+  import Header from '@/components/common/Header'
+  import Footer from '@/components/common/Footer'
+
+  export default {
+    name: 'App',
+    components: {
+      Header,
+      Footer
+    }
+  }
 </script>
 
 <style>
@@ -16,4 +27,5 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
 }
+@import "../static/style/reset.css";
 </style>
