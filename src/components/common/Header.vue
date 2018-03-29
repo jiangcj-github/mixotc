@@ -3,7 +3,7 @@
     <section class="upper">
       <div class="wrapper">
         <ul class="upper-left">
-          <li v-for="item of items"><span>{{item.title}}:&nbsp</span><span>{{item.value}}</span></li>
+          <li v-for="(item, index) of items" :key="index"><span>{{item.title}}:&nbsp;</span><span>{{item.value}}</span></li>
         </ul>
         <ul class="upper-right">
           <li><span>简体中文<div class="select-tri white"></div></span></li>
