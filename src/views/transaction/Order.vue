@@ -82,7 +82,7 @@
           <router-link to="" tag="span">我已阅读《OTC购买流程规则》</router-link>
         </div>
       </div>
-      <button :class="{able:agree}">{{copy.type[type]}}</button>
+      <button :class="{able:agree}" :disabled="agree">{{copy.type[type]}}</button>
       <p class="tishi">
         <img :src="require(`@/assets/images/hint.png`)" alt="">
         新用户首次交易前请务必查阅本平台交易流程及规则，如交易出现问题请及时与客服人员沟通
