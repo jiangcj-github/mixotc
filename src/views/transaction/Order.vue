@@ -124,6 +124,8 @@
 
 <style scoped lang="stylus">
   .order
+    margin-top 40px
+    margin-bottom 40px
     h2
       height 30px
       padding-left 30px
