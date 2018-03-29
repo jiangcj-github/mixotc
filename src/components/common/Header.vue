@@ -3,10 +3,7 @@
     <section class="upper">
       <div class="wrapper">
         <ul class="upper-left">
-          <li><span>BitFunex:&nbsp</span><span class="yellow">$9.244.70↑</span></li>
-          <li><span>Kraken:&nbsp</span><span class="grean">€7.468.30↑</span></li>
-          <li><span>Bithumb:&nbsp</span><span class="grean">₩10.186.000.00↑</span></li>
-          <li><span>Bitflyer:&nbsp</span><span class="grean">&yen995.759.00↑</span></li>
+          <li v-for="item of items"><span>{{item.title}}:&nbsp</span><span>{{item.value}}</span></li>
         </ul>
         <ul class="upper-right">
           <li><span>简体中文<div class="select-tri white"></div></span></li>
@@ -19,15 +16,15 @@
     <section class="down">
       <div class="wrapper">
         <ul class="down-tag">
-          <li><a href="/"><img class="top-logo" src="../../../static/img/toplogo.png" alt="MIXOTC官网"></a></li>
+          <li><a href="/"><img class="top-logo" :src="require(`@/assets/images/toplogo.png`)" alt="MIXOTC官网"></a></li>
           <li><a href="">交易中心</a></li>
           <li><a href="">广告</a></li>
           <li><a href="">订单</a></li>
           <li><a href="">钱包</a></li>
-          <li><img class="top-logo" src="../../../static/img/phoneicon.png" alt=""></li>
+          <li><img class="top-logo" :src="require(`@/assets/images/phoneicon.png`)" alt=""></li>
         </ul>
         <div class="user-info">
-          <img src="../../../static/img/OTC_wechat@3x.png" alt="">
+          <img :src="require(`@/assets/images/OTC_wechat@3x.png`)" alt="">
           <span class="user-name">
             zhaocx/185***555
             <div class="select-tri black"></div>
@@ -39,7 +36,15 @@
 </template>
 
 <script>
-  export default {}
+  export default {
+    data(){
+      return{
+        items:[
+          {title:'BitFunex',value:'$9.244.70↑'},{title:'Kraken',value:'€7.468.30↑'},{title:'Bithumb',value:'₩10.186.000.00↑'},{title:'Bitflyer',value:'￥995.759.00↑'}
+        ]
+      }
+    }
+  }
 </script>
 
 <style scoped lang="stylus">
@@ -83,11 +88,13 @@
           span
             color #fff
 
-          .grean
+          span+span
             color #57a100
+          /*.grean*/
+            /*color #57a100*/
 
-          .yellow
-            color #ff794c
+          /*.yellow*/
+            /*color #ff794c*/
 
       .upper-right
         float right

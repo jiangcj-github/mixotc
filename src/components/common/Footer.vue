@@ -2,7 +2,7 @@
   <div class="footer">
     <article class="footer-wrapper">
       <section class="foot-left">
-        <img src="../../../static/img/footlogo.png" alt="">
+        <img :src="require(`@/assets/images/footlogo.png`)" alt="">
       </section>
       <section class="foot-mid">
         <ul class="mid-up">
@@ -17,7 +17,7 @@
         </ul>
       </section>
       <section class="foot-right">
-        <img src="../../../static/img/QRcode.png" alt="">
+        <img :src="require(`@/assets/images/QRcode.png`)" alt="">
         <span class="right-up">微信客服</span>
         <span class="right-down">工作时间：10:00-22:00 (周一至周五)</span>
       </section>
@@ -90,18 +90,18 @@
           float left
 
         span
-          position fixed
+          display inline-block
           color #999
 
         .right-up
           margin-top 10px
-          margin-left -6.5%
+          margin-left 11px
           font-size 14px
           letter-spacing 0.5px
 
         .right-down
-          margin-top 35px
-          margin-left -7.1%
+          margin-top 10px
+          margin-left 3px
           font-size 12px
           -webkit-transform scale(0.916666666)
 </style>
