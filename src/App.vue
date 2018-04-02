@@ -26,5 +26,4 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-@import "../static/style/reset.css";
 </style>

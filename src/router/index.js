@@ -3,6 +3,8 @@ import Router from "vue-router";
 import Transaction from "@/views/transaction/Transaction";
 import Order from "@/views/transaction/Order";
 import TradeRules from "@/views/transaction/tradeRules";
+import DatePicker from "@/components/common/DatePicker";
+import Pagination from "@/components/common/Pagination";
 
 Vue.use(Router);
 

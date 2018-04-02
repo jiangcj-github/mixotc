@@ -1,8 +1,12 @@
+body
+  width 100%;
+  min-width: 1200px;
+
 html,body
   font-size 14px
   background #F4F6FA
 
-body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, button, textarea, p, blockquote, th, td 
+body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h4, h5, h6, pre, code, form, fieldset, legend, input, button, textarea, p, blockquote, th, td
   padding 0
   margin 0
   color  #333
@@ -17,12 +21,28 @@ h1, h2, h3, h4, h5, h6
 img
   display inline-block
   border none
+table
+  border-collapse collapse
+  border-spacing 0
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+main,
+menu,
+nav,
+section,
+summary
+  display block
 em, b, i
   font-weight normal
   font-style normal
-.clearfix 
+.clearfix
   zoom 1
-  &:after 
+  &:after
     display block
     height 0
     clear both

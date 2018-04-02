@@ -82,9 +82,9 @@
 
 
       .foot-right
-        width: 267px
+        width: 270px
         float right
-        margin-right 51px
+        margin-right 48px
 
         img
           float left
@@ -101,7 +101,8 @@
 
         .right-down
           margin-top 10px
-          margin-left 3px
+          margin-left 11px
           font-size 12px
+          -webkit-transform-origin-x 0
           -webkit-transform scale(0.916666666)
 </style>
