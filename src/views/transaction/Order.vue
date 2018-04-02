@@ -318,6 +318,8 @@
         outline 0
       &.able
         background #FFB422
+        &:active
+          background #FEA350
     .tishi
       height 32px
       line-height 32px

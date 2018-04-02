@@ -6,11 +6,15 @@ import router from './router';
 import store from './store';
 import jsonBig from 'json-bigint';
 import axios from 'axios';
+import { DatePicker, Pagination } from "element-ui";
 import '@/stylus/rest.styl'
 Vue.config.productionTip = false;
 
 Vue.prototype.jsonBig = jsonBig;
 Vue.prototype.axios = axios;
+
+Vue.use(DatePicker);
+Vue.use(Pagination);
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
