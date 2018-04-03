@@ -315,6 +315,4 @@
       span
         display inline-block
         fz11()
-
-
 </style>

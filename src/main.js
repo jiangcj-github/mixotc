@@ -6,12 +6,16 @@ import router from './router';
 import store from './store';
 import jsonBig from 'json-bigint';
 import axios from 'axios';
+import client from "./js/client.js";
+import storage from "./js/localStorage.js";
 import { DatePicker } from "element-ui";
 import '@/stylus/rest.styl'
 Vue.config.productionTip = false;
 
 Vue.prototype.jsonBig = jsonBig;
 Vue.prototype.axios = axios;
+Vue.prototype.client = client();
+Vue.prototype.storage = storage;
 
 Vue.use(DatePicker);
 /* eslint-disable no-new */
