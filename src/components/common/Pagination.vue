@@ -86,13 +86,13 @@ export default {
 };
 </script>
 <style lang="stylus">
-.pagination {
-  position: relative;
-  width: 1200px;
-  margin: 0 auto;
-  height: 40px;
-  line-height: 40px;
-  .main {
+.pagination
+  position relative
+  width 1200px
+  margin 0 auto
+  height 40px
+  line-height 40px
+  .main
     position absolute
     top 0
     left 50%
@@ -101,92 +101,77 @@ export default {
     -moz-transform translateX(-50%) 	/* Firefox */
     -webkit-transform translateX(-50%) /* Safari 和 Chrome */
     -o-transform translateX(-50%)
-    p {
-      float: left;
-      font-size: 13px;
-      color: #333;
-      letter-spacing: 0.15px;
+    p
+      float left
+      font-size 13px
+      color #333
+      letter-spacing 0.15px
 
-      input {
-        box-sizing: border-box;
-        width: 50px;
-        height: 40px;
-        margin: 0 5px;
-        text-align: center;
-        background: #FFF;
-        border: 1px solid #E1E1E1;
-        border-radius: 2px;
-      }
+      input
+        box-sizing border-box
+        width 50px
+        height 40px
+        margin 0 5px
+        text-align center
+        background #FFF
+        border 1px solid #E1E1E1
+        border-radius 2px
+      
+      button
+        width 65px
+        height 40px
+        margin-left 20px
+        font-size 13px
+        color #FFF
+        letter-spacing 0.15px
+        background #FFB422
+        border-radius 2px
+        border 0
 
-      button {
-        width: 65px;
-        height: 40px;
-        margin-left: 20px;
-        font-size: 13px;
-        color: #FFF;
-        letter-spacing: 0.15px;
-        background: #FFB422;
-        border-radius: 2px;
-        border: 0;
+        &:active
+          background #FEA350
+        &:focus
+          outline 0
+          cursor pointer
+    ul
+      float left
+      margin-left 20px
+      margin-right 20px
+      li
+        float left
+        width 40px
+        height 40px
+        text-align center
+        font-size 13px
+        color #000
+        letter-spacing 0.15px
+        background-color #FFF
+        cursor pointer
+        &.page:hover, &.current
+          color #FFF
+          background-color #FFB422
+        &.prev, &.next
+          position relative
+        &.prev::before, &.next::after
+          position absolute
+          top 0
+          left 0
+          bottom 0
+          right 0
+          width 0
+          height 0
+          content ''
+          margin auto auto
+          border-right 5px solid #FFA21C
+          border-top 5px solid #FFF
+          border-bottom 5px solid #FFF
+        &.next::after
+          border-left 5px solid #FFA21C
+          border-right 0
+        
+      
+    
+  
 
-        &:active {
-          background: #FEA350;
-        }
-
-        &:focus {
-          outline: 0;
-          cursor: pointer;
-        }
-      }
-    }
-
-    ul {
-      float: left;
-      margin-left: 20px;
-      margin-right: 20px;
-
-      li {
-        float: left;
-        width: 40px;
-        height: 40px;
-        text-align: center;
-        font-size: 13px;
-        color: #000;
-        letter-spacing: 0.15px;
-        background-color: #FFF;
-        cursor: pointer;
-
-        &.page:hover, &.current {
-          color: #FFF;
-          background-color: #FFB422;
-        }
-
-        &.prev, &.next {
-          position: relative;
-        }
-
-        &.prev::before, &.next::after {
-          position: absolute;
-          top: 0;
-          left: 0;
-          bottom: 0;
-          right: 0;
-          width: 0;
-          height: 0;
-          content: '';
-          margin: auto auto;
-          border-right: 5px solid #FFA21C;
-          border-top: 5px solid #FFF;
-          border-bottom: 5px solid #FFF;
-        }
-
-        &.next::after {
-          border-left: 5px solid #FFA21C;
-          border-right: 0;
-        }
-      }
-    }
-  }
-}
 </style>
 

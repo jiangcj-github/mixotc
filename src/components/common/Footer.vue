@@ -32,16 +32,18 @@
 </script>
 
 <style scoped lang="stylus">
+@import "../../stylus/base.styl";
+
   .foot-mid
     ul
       li
         float left
         margin-right 40px
-        color #999
+        color $col999
 
   .footer
     height: 100px
-    background-color: #333
+    background-color: $col333
 
     .footer-wrapper
       display flex
@@ -78,7 +80,7 @@
           .down-left
             margin-right 20px
             padding-right 20px
-            border-right 1px solid #999
+            border-right 1px solid $col999
 
 
       .foot-right
@@ -91,7 +93,7 @@
 
         span
           display inline-block
-          color #999
+          color $col999
 
         .right-up
           margin-top 10px
@@ -102,7 +104,5 @@
         .right-down
           margin-top 10px
           margin-left 11px
-          font-size 12px
-          -webkit-transform-origin-x 0
-          -webkit-transform scale(0.916666666)
+          fz11()
 </style>

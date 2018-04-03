@@ -23,26 +23,41 @@
           <li><a href="">钱包</a></li>
           <li><img class="top-logo" :src="require(`@/assets/images/phoneicon.png`)" alt=""></li>
         </ul>
-        <div class="user-info">
-          <img :src="require(`@/assets/images/OTC_wechat@3x.png`)" alt="">
-          <span class="user-name">
-            zhaocx/185***555
-            <div class="select-tri black"></div>
-          </span>
-        </div>
+        <!--<span class="log" @click="show_loginform">登录/注册</span>-->
+        <!--<Login v-if="loginForm" :loginForm.sync="loginForm"/>-->
+        <span class="log">登录/注册</span>
+        <Login></Login>
+        <!--<div class="user-info" >-->
+          <!--<img :src="require(`@/assets/images/OTC_wechat@3x.png`)" alt="">-->
+          <!--<span class="user-name">-->
+            <!--zhaocx/185***555-->
+            <!--<div class="select-tri black"></div>-->
+          <!--</span>-->
+        <!--</div>-->
       </div>
     </section>
   </article>
 </template>
 
 <script>
+  import Login from '@/components/common/Login'
   export default {
     data(){
       return{
+        // loginForm: false,
         items:[
           {title:'BitFunex',value:'$9.244.70↑'},{title:'Kraken',value:'€7.468.30↑'},{title:'Bithumb',value:'₩10.186.000.00↑'},{title:'Bitflyer',value:'￥995.759.00↑'}
         ]
       }
+    },
+    components: {
+      Login
+    },
+    methods:{
+      // show_loginform(){
+      //   if(this.loginForm) return;
+      //   this.loginForm = true;
+      // }
     }
   }
 </script>
