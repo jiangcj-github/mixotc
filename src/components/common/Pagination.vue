@@ -34,7 +34,7 @@ export default {
     return {
       curPage: 1,
       toPage: '',
-      pageSize: 10 ,
+      pageSize: 15 ,
     };
   },
   computed: {

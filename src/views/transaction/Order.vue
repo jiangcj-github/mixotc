@@ -139,14 +139,13 @@
         position relative
         top 2px
         left 0
-        display inline-block
         content ''
         width 3px
         height 20px
         margin-right 10px
         background-color $col422
     .main
-      box-sizing border-box
+      box-sizing()
       width 100%
       padding 30px
       margin-top 25px
@@ -249,7 +248,7 @@
             display inline-block
             position relative
             input
-              box-sizing border-box
+              box-sizing()
               width 270px
               height 40px
               padding 0 36px 0 10px
