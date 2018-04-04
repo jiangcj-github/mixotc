@@ -2,11 +2,13 @@
   <div class="wrap">
     <div class="login">
       <h2 class="title">登录/注册</h2>
+      <div class="show-tip1">请输入正确的手机号/邮箱</div>
       <p class="account">
         手机号/邮箱
         <input type="text">
       </p>
-      <slider></slider>
+      <Slider></Slider>
+      <div class="show-tip2">请输入正确的验证码</div>
       <p class="yzm">
         <input type="text" placeholder="验证码">
         <button>发送验证码</button>
@@ -15,14 +17,15 @@
       <div class="yhxy">
         <img :src="require(`@/assets/images/rules_checked.png`)" alt="" v-if="agree" @click="agree = false">
         <img :src="require(`@/assets/images/rules_unchecked.png`)" alt="" v-else @click="agree = true">
-        <p>我已阅读并同意 <a href="">用户协议</a></p>
+        <p>&nbsp&nbsp我已阅读并同意 <a href="">&nbsp&nbsp用户协议</a></p>
       </div>
+      <span class="yhxy-tips"><i>!</i>&nbsp&nbsp请勾选用户协议</span>
     </div>
   </div>
 </template>
 
 <script>
-  import slider from './slider.vue'
+  import Slider from './Slider.vue'
 
   export default {
     // props: ['loginForm'],
@@ -34,7 +37,7 @@
 
     },
     components: {
-      slider
+      Slider
     },
     // methods: {
     //
@@ -63,6 +66,36 @@
       background-color: #fff
       z-index 999
 
+      .show-tip1,.show-tip2
+        position absolute
+        padding 0 9px
+        height 28px
+        background-color $col1E1
+        text-align center
+        line-height 30px
+        font-size 12px
+        border-radius 2px
+        box-shadow 0 2px 4px 0 $col999
+        &::after
+          border solid 3px
+          border-color $col1E1 $col1E1 transparent transparent
+          position absolute
+          content ''
+          width 1px
+          height 1px
+          bottom -3px
+          left 50%
+          margin-left -10px
+          overflow hidden
+          pointer-events none
+          transform rotate(135deg)
+          box-shadow 2px -2px 2px $col999
+      .show-tip1
+        top 22%
+        left 30%
+      .show-tip2
+        top 53.5%
+        left 34%
       .title
         height 20px
         padding-left 40px
@@ -125,15 +158,39 @@
         margin-left 25px
 
       .yhxy
-        width 150px
-        margin 20px auto
-        fz11()
+        height: 12px
+        line-height 12px
+        margin 20px 0 10px 125px
 
         img
-          padding-top 3px
+          margin-right 5px
+          cursor pointer
         p
-          float right
-          color $col333
+          display inline-block
+          letter-spacing 0.23px
+          fz11()
+
           a
             color $col100
+            fz11()
+      .yhxy-tips
+        display inline-block
+        margin-left 150px
+        color $col94C
+        text-align center
+        line-height 12px
+        fz11()
+
+        i
+          display inline-block
+          width 12px
+          height 12px
+          background-color: $col94C
+          border 1px solid $col94C
+          border-radius 28px
+          text-align center
+          vertical-align middle
+          line-height 12px
+          color #fff
+          fz11()
 </style>
