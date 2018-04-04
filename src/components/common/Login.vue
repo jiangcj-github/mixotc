@@ -52,6 +52,7 @@
     padding 40px 0
     background-color: #fff
     border 1px solid #000
+    z-index 999
 
     .title
       height 20px
