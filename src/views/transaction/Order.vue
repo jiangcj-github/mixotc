@@ -232,7 +232,7 @@
           font-weight bold
           font-size $fz20
           span
-            float right 
+            float right
             font-weight normal
             font-size $fz13
             color $col422
@@ -255,7 +255,7 @@
               letter-spacing 0.15px
               font-size $fz13
               color $col333
-              background #F4F6FA
+              background $col6FA
               border-radius 2px
               border none
               placeholder()
