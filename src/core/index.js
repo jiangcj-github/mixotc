@@ -4,6 +4,10 @@ import "regenerator-runtime/runtime"//使用promise
 
 import Router from './router'
 
+import JsonBig from "json-bigint";
+
+Vue.prototype.JsonBig = JsonBig;
+
 import HttpProxy from './httpProxy' //fetch后台交互
 Vue.prototype.Proxy = HttpProxy;
 
@@ -53,23 +57,6 @@ Vue.directive('clickoutside', {
     delete el.wfy
   }
 });
-
-Vue.directive("defaultClick", {
-  bind: function(el, binding) {
-    function documentHandle(e){
-      if(el.contains(e.target)){
-        return;
-      }
-      binding.value()
-    }
-    el.mid = documentHandle;
-    document.addEventListener("click", documentHandle);
-  },
-  unbind: function(el, binding) {
-    document.removeEventListener("click", el.mid);
-  }
-});
-
 const RUN_APP = (App, config, plugin) => {
   // console.log(config)
   /* eslint-disable no-new */

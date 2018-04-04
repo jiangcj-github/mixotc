@@ -26,7 +26,7 @@
         <!--<span class="log" @click="show_loginform">登录/注册</span>-->
         <!--<Login v-if="loginForm" :loginForm.sync="loginForm"/>-->
         <span class="log">登录/注册</span>
-        <Login></Login>
+        <Login v-if="false"></Login>
         <!--<div class="user-info" >-->
           <!--<img :src="require(`@/assets/images/OTC_wechat@3x.png`)" alt="">-->
           <!--<span class="user-name">-->

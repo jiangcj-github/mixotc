@@ -8,12 +8,12 @@
  * @returns {{}}
  */
 
-export default function () {
+export default function() {
   let pool = {}, //连接吃对象
     poolSize = 0, //连接池大小
     connects = [], //连接数组
     size, //传入的大小
-    url //地址
+    url; //地址
 
   /**
    * 建立websocket连接方法
@@ -21,58 +21,62 @@ export default function () {
    * @param callBack
    */
   function createConnect(url, callBack) {
-    let webSocket = new WebSocket(url) // 创建链接
+    let webSocket = new WebSocket(url); // 创建链接
 
     //webSocket连接之后的操作
-    webSocket.onopen = event => onOpen(event)
+    webSocket.onopen = event => onOpen(event);
 
     function onOpen(event) {
-      connects.push(webSocket)
-      poolSize = connects.length
-      callBack && connects.length === size && callBack.resolve(true)
+      connects.push(webSocket);
+      poolSize = connects.length;
+      callBack && connects.length === size && callBack.resolve(true);
     }
 
     //webSocket接收信息的操作
-    webSocket.onmessage = event => onMessage(pool, event)
+    webSocket.onmessage = event => onMessage(pool, event);
 
     function onMessage(pool, event) {
       // console.log('webSocket接收信息', JSON.parse(event.data))
-      pool.onMessage && pool.onMessage(event.data)
+      pool.onMessage && pool.onMessage(event.data);
     }
 
     //webSocket断开之后的操作
-    webSocket.onclose = onClose
+    webSocket.onclose = onClose;
 
     function onClose(event) {
       // console.log('webSocket断开', event.target.url)
-      reConnect(webSocket, callBack)
+      // reConnect(webSocket, callBack)
     }
 
     //webSocket出错之后的操作
-    webSocket.onerror = onError
+    webSocket.onerror = onError;
 
     function onError(event) {
-      // console.log('webSocket出错', event.target.url)
-      reConnect(webSocket, callBack)
+      console.error("webSocket出错", event.target.url, event);
+      pool.onError && pool.onError(event);
+      reConnect(webSocket, callBack);
     }
   }
 
   function reConnect(webSocket, callBack, index) {
     // console.log('reConnect 重连');
-    ((index = connects.indexOf(webSocket)) >= 0) && connects.splice(index, 1);
-    !webSocket.hadRemoved && (webSocket.hadRemoved = true) && connects.length < size && pool.reConnectFlag && createConnect(url, callBack)
+    (index = connects.indexOf(webSocket)) >= 0 && connects.splice(index, 1);
+    !webSocket.hadRemoved &&
+      (webSocket.hadRemoved = true) &&
+      connects.length < size &&
+      pool.reConnectFlag &&
+      createConnect(url, callBack);
   }
 
-  pool.start = async function (_url, _size) {
-    url = _url
+  pool.start = async function(_url, _size) {
+    url = _url;
     size = _size;
-    pool.reConnectFlag = true //控制是否开启重连，主动断开不开启重连
+    pool.reConnectFlag = true; //控制是否开启重连，主动断开不开启重连
     return new Promise((resolve, reject) => {
-      var callBack = {size, resolve, reject}
-      for (var i = 0; i < size; i++)
-        createConnect(url, callBack)
-    })
-  }
+      var callBack = { size, resolve, reject };
+      for (var i = 0; i < size; i++) createConnect(url, callBack);
+    });
+  };
 
   /**
    * 发送信息调用函数
@@ -80,24 +84,24 @@ export default function () {
    * 传入的text可以不做json处理
    */
   let index = 0;
-  pool.send = function (text) {
+  pool.send = function(text) {
     // console.log('send text')
-    if (connects.length === 0)
-      throw new Error('==connect is all down!===')
-    poolSize && connects[index++ % poolSize].send(typeof text === 'object' ? JSON.stringify(text) : text)
-  }
+    if (connects.length === 0) throw new Error("==connect is all down!===");
+    poolSize &&
+      connects[index++ % poolSize].send(
+        typeof text === "object" ? JSON.stringify(text) : text
+      );
+  };
 
   /**
    * 关闭连接，
    */
-  pool.close = function () {
+  pool.close = function() {
     // console.log('close all connects in pool')
-    if (connects.length === 0)
-      throw new Error('==connect is all down!===')
-    pool.reConnectFlag = false
-    poolSize && connects.forEach(v => v.close())
-  }
+    if (connects.length === 0) throw new Error("==connect is all down!===");
+    pool.reConnectFlag = false;
+    poolSize && connects.forEach(v => v.close());
+  };
 
-  return pool
+  return pool;
 }
-

@@ -139,6 +139,7 @@
         position relative
         top 2px
         left 0
+        display inline-block
         content ''
         width 3px
         height 20px
