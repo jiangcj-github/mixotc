@@ -128,6 +128,7 @@ pool.start = function(_url) {
  * 传入的text可以不做json处理
  */
 pool.send = function(txt) {
+  pool.seq++;
   if (pool.ws.readyState !== 1) {
     console.log(pool.ws.readyState);
     return false;
@@ -147,7 +148,6 @@ pool.close = function() {
 };
 
 function heartBeat() {
-  console.log("heart");
   pool.ws.send(
     JSON.stringify({
       ver: 1,
