@@ -18,14 +18,20 @@ NUMBER_FUNC.push(number => parseFloat(number.toFixed(6)));
 NUMBER_FUNC.push(number => parseFloat(number.toFixed(8)));
 
 export default {
-  toPercent:{
-    number:2,
-    perfix:['+','-','']
+  base:{
+    format:{
+      numberValue:NUMBER_VALUE,
+      numberSuffixArr:NUMBER_SUFFIX_ARR,
+      numberFunc:NUMBER_FUNC,
+      moneyFix:MONEY_FIX
+    }
   },
-  format:{
-    numberValue:NUMBER_VALUE,
-    numberSuffixArr:NUMBER_SUFFIX_ARR,
-    numberFunc:NUMBER_FUNC,
-    moneyFix:MONEY_FIX
+  core:{
+    toPercent:{
+      number:2,
+      perfix:['+','-','']
+    },
   }
+
+
 }

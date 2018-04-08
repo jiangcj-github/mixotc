@@ -12,12 +12,22 @@ const ROUTES = [
   {
     path: "/transaction/order",
     name: "order",
-    component: resolve => require(['@/views/transaction/Order'], resolve) // 交易中心
+    component: resolve => require(['@/views/transaction/Order'], resolve) // 交易中心购买BTC
   },
   {
     path: "/transaction/tradeRules",
     name: "tradeRules",
-    component: resolve => require(['@/views/transaction/tradeRules'], resolve) // 交易中心
+    component: resolve => require(['@/views/transaction/tradeRules'], resolve) // 交易中心交易规则
+  },
+  {
+    path: "/order",
+    name: "MyOrder",
+    component: resolve => require(['@/views/myOrder/MyOrder'], resolve) // 我的订单
+  },
+  {
+    path: "/order/evaluate",
+    name: "MyOrderEvaluate",
+    component: resolve => require(['@/views/myOrder/MyOrderEvaluate'], resolve) // 我的订单评价
   }
 ]
 
