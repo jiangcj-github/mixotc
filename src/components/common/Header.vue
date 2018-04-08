@@ -17,8 +17,6 @@
       <div class="wrapper">
         <ul class="down-tag">
           <li><a href="/"><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></a></li>
-          <li><a href="">交易中心</a></li>
-          <li><a href="/"><img class="top-logo" :src="require(`@/assets/images/toplogo.png`)" alt="MIXOTC官网"></a></li>
           <li><router-link to="/transaction">交易中心</router-link></li>
           <li><a href="">广告</a></li>
           <li><router-link to="/order">订单</router-link></li>
