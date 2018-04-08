@@ -45,6 +45,7 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl";
   .wrap
+    display none
     position fixed
     top 0
     left 0
