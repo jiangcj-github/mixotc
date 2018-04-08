@@ -13,8 +13,8 @@
       </p>
       <button class="loginbutton">登录</button>
       <div class="yhxy">
-        <img :src="require(`@/assets/images/rules_checked.png`)" alt="" v-if="agree" @click="agree = false">
-        <img :src="require(`@/assets/images/rules_unchecked.png`)" alt="" v-else @click="agree = true">
+        <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
+        <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
         <p>我已阅读并同意 <a href="">用户协议</a></p>
       </div>
     </div>

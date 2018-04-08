@@ -16,19 +16,21 @@
     <section class="down">
       <div class="wrapper">
         <ul class="down-tag">
+          <li><a href="/"><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></a></li>
+          <li><a href="">交易中心</a></li>
           <li><a href="/"><img class="top-logo" :src="require(`@/assets/images/toplogo.png`)" alt="MIXOTC官网"></a></li>
           <li><router-link to="/transaction">交易中心</router-link></li>
           <li><a href="">广告</a></li>
           <li><router-link to="/order">订单</router-link></li>
           <li><a href="">钱包</a></li>
-          <li><img class="top-logo" :src="require(`@/assets/images/phoneicon.png`)" alt=""></li>
+          <li><img class="top-logo" src="/static/images/phoneicon.png" alt=""></li>
         </ul>
         <!--<span class="log" @click="show_loginform">登录/注册</span>-->
         <!--<Login v-if="loginForm" :loginForm.sync="loginForm"/>-->
         <span class="log">登录/注册</span>
-        <Login></Login>
+        <Login v-if="false"></Login>
         <!--<div class="user-info" >-->
-          <!--<img :src="require(`@/assets/images/OTC_wechat@3x.png`)" alt="">-->
+          <!--<img src="/static/images/OTC_wechat@3x.png" alt="">-->
           <!--<span class="user-name">-->
             <!--zhaocx/185***555-->
             <!--<div class="select-tri black"></div>-->
