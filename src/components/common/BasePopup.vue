@@ -33,12 +33,13 @@
     width 100%
     height 100%
     background rgba(0, 0, 0, 0.4)
+    z-index 1000
     .content
       position absolute
       top 29.17%
       left 50%
       transform translateX(-50%)
-      -ms-transform translateX(-50%)	
+      -ms-transform translateX(-50%)
       -moz-transform translateX(-50%)
       -webkit-transform translateX(-50%)
       -o-transform translateX(-50%)
