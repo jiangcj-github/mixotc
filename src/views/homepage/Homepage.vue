@@ -1,7 +1,6 @@
  <template>
   <div class="homepage inner">
     <h2>mixOTC-{{nickname}}的个人主页</h2>
-
     <!-- 个人交易信息 -->
     <div class="info-sec">
       <div class="sec1 clearfix">
@@ -10,13 +9,21 @@
           <span class="nickname">{{nickname}}</span>
           <span class="tran_num">和他交易过{{tran_num}}次</span>
         </div>
-        <div class="trust clearfix">
-          <router-link class="contact" to="" tag="span" :class="{isTrust:is_trust}">
+        <div class="trust clearfix" v-if="is_trust">
+          <router-link class="contact isTrust" to="" tag="span">
             <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
           </router-link>
-          <router-link class="join-trust" to="" tag="span" :class="{isTrust:is_trust}">
-            <i>{{is_trust?'已信任':'加入信任'}}</i>
-          </router-link>
+          <span class="join-trust isTrust" @click="cancelTrust">
+            <i>取消信任</i>
+          </span>
+        </div>
+        <div class="trust clearfix" v-else>
+          <span class="contact">
+            <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
+          </span>
+          <span class="join-trust" @click="joinTrust">
+            <i>加入信任</i>
+          </span>
         </div>
       </div>
       <div class="sec2">
@@ -28,10 +35,14 @@
         <div class="unit"><label>5</label><span>担保</span></div>
       </div>
     </div>
+    <!--取消信任弹框-->
+    <BasePopup :show="cancel_trust_pop">
+      <div class="pop">取消信任成功<i class="close" @click="hideTrustPopup">&times;</i></div>
+    </BasePopup>
     <!--菜单项tab-->
     <ul class="menu-tab">
         <li :class="{active:tab==0}" @click="toggleTab(0)">他的发布</li>
-        <li :class="{active:tab==1}" @click="toggleTab(1)">收到的评价<i>12234</i></li>
+        <li :class="{active:tab==1}" @click="toggleTab(1)">收到的评价<i>&nbsp;12234</i></li>
     </ul>
     <!--发布列表-->
     <div class="release-list" v-show="tab==0">
@@ -59,27 +70,28 @@
         <li class="pay-time">订单期限</li>
         <li class="operation">操作</li>
       </ul>
-      <ReleaseListItem v-for="item of 3" :key="item"></ReleaseListItem>
-      <Pagination :total="75"></Pagination>
+      <ReleaseListItem v-for="item of 5" :key="item"></ReleaseListItem>
+      <Pagination :total="75" emitValue='changeReleasePage'></Pagination>
     </div>
     <!--评价列表-->
     <div class="evaluate-list" v-show="tab==1">
-      <EvaluateListItem v-for="item of 3" :key="item"></EvaluateListItem>
-      <Pagination :total="20"></Pagination>
+      <EvaluateListItem v-for="item of 5" :key="item"></EvaluateListItem>
+      <Pagination :total="20" emitValue='changeEvaluatePage' class="page-bar"></Pagination>
     </div>
   </div>
-
 </template>
 <script>
   import ReleaseListItem from './children/ReleaseListItem';
   import EvaluateListItem from './children/EvaluateListItem';
   import Pagination from '@/components/common/Pagination';
+  import BasePopup from '@/components/common/BasePopup';
 
   export default {
     components: {
       ReleaseListItem,
       EvaluateListItem,
-      Pagination
+      Pagination,
+      BasePopup
     },
     data() {
       return {
@@ -103,7 +115,16 @@
         flt_coin_sel:0,
         flt_coin_show:false,
         tab:0,
+        cancel_trust_pop:false,
       }
+    },
+    mounted() {
+      this.Bus.$on('changeReleasePage',(p) => {
+        console.log(p);
+      });
+      this.Bus.$on('changeEvaluatePage',(p) => {
+        console.log(p);
+      });
     },
     methods: {
       toggleFilterTypes(){
@@ -127,6 +148,16 @@
       toggleTab(i){
         this.tab=i;
       },
+      joinTrust(){
+        this.is_trust=true;
+      },
+      cancelTrust(){
+        this.is_trust=false;
+        this.cancel_trust_pop=true;
+      },
+      hideTrustPopup(){
+        this.cancel_trust_pop=false;
+      }
     }
   }
 </script>
@@ -220,11 +251,11 @@
             text-align center
             cursor pointer
             color: #FFFFFF;
+            border 1px solid #FFB422
             i
               font-size: 13px;
               letter-spacing: 0.29px;
             &.isTrust
-              border 1px solid #FFB422
               background #fff
               color #FFB422
       .sec2
@@ -250,6 +281,26 @@
             font-size 14px
             color #333333
             letter-spacing 0.16px
+    .pop
+      width 100%
+      height 100%
+      display flex
+      justify-content center
+      align-items center
+      font-size: 14px
+      color #333333
+      letter-spacing 0.29px
+      position relative
+      .close
+        position absolute
+        top 0
+        right 0
+        font-size 20px
+        cursor pointer
+        display inline-block
+        line-height 24px
+        width 24px
+        text-align center
     .menu-tab
       margin-top 20px
       height 60px
@@ -339,6 +390,7 @@
       .operation
         width 150px
     .evaluate-list
-      background #fff
-
+      margin-bottom 0
+      .page-bar
+        margin-top 20px
 </style>

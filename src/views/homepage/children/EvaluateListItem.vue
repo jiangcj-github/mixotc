@@ -5,8 +5,10 @@
       <p class="time">2016/03/08 23:57:03</p>
     </div>
     <div class="p2">
-      <span class="heart-wrap"><span class="heart" :style="{width:150-heart*30+'px'}"></span></span>
       <span class="judge">好评</span>
+      <span class="heart-wrap">
+        <img src="/static/images/evaluate_red.png" v-for="i in hearts">
+      </span>
     </div>
     <div class="p3">
       <img src="" alt="">
@@ -16,14 +18,16 @@
 </template>
 <script>
   export default {
-    data() {
-      return {
-        heart:3
-      }
+    props: {
+      text:{type:String, default:''},
+      time:{type:String, default:"2018/04/08 23:57:03"},
+      judge:{type:String, default:"好评"},
+      hearts:{type:Number, default:5},
     },
-    methods: {
-
-    }
+    data() {
+      return {}
+    },
+    methods: {}
   }
 </script>
 
@@ -37,6 +41,8 @@
     font-size 14px
     letter-spacing 0.16px
     color #333333
+    background #fff
+    border-top 1px solid #E1E1E1
     .p1
       min-width 300px
       flex-grow 1
@@ -51,22 +57,20 @@
       align-items center
       width 400px
       .heart-wrap
-        width 150px
-        display inline-block
+        width 300px
+        display inline-flex
         height 30px
-        background-image url(/static/images/heart.png)
-        .heart
-          height 30px
-          display inline-block
-          background #fff
+        align-items center
+        img
+          margin-right 20px
       .judge
         line-height 30px
-        margin-left:30px
+        margin-right:30px
     .p3
-      width 100px
+      width 120px
       display inline-flex
       flex-direction column
-      align-items flex-start
+      align-items center
       justify-content center
       >img
         width 45px
