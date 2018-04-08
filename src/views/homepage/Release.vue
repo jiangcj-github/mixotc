@@ -299,7 +299,6 @@
           width 65px
           text-align center
           &.drop-down
-            display none
             position relative
             margin-right 45px
             cursor pointer
@@ -316,6 +315,7 @@
               top 50%
               margin-top -3px
             .drop
+              display none
               position absolute
               top 40px
               left 0
