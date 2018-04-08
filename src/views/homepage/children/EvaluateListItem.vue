@@ -47,6 +47,7 @@
       min-width 300px
       flex-grow 1
       line-height 21px
+      margin-right 20px
       .text
         color #333333
       .time
@@ -56,6 +57,7 @@
       display inline-flex
       align-items center
       width 400px
+      flex-shrink 0
       .heart-wrap
         width 300px
         display inline-flex
@@ -72,6 +74,7 @@
       flex-direction column
       align-items center
       justify-content center
+      flex-shrink 0
       >img
         width 45px
         height 45px
