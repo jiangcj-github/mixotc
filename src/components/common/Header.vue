@@ -6,7 +6,7 @@
           <li v-for="item of items"><span>{{item.title}}:&nbsp;</span><span>{{item.value}}</span></li>
         </ul>
         <ul class="upper-right">
-          <li><span>简体中文<div class="select-tri white"></div></span></li>
+          <li><span>简体中文<!--<div class="select-tri white"></div>--></span></li>
           <li><a href="">币种资料</a></li>
           <li><a href="">帮助</a></li>
           <li><a href="">大额交易申请</a></li>
