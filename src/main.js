@@ -29,7 +29,6 @@ RUN_APP(App, { RouterConfig, ServerConfig, ProxyConfig, PrototypeConfig:Prototyp
 
 Vue.config.productionTip = false;
 
-Vue.prototype.jsonBig = jsonBig;
 
 /* eslint-disable no-new */
 

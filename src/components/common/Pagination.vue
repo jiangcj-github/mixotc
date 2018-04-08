@@ -16,7 +16,7 @@
         <li class="next" @click="changeCurPage(curPage + 1)"></li>
       </ul>
       <p>
-        <span>跳至<input type="tel" v-model="toPage">页</span>
+        <span>跳至<input ref='input' type="number" @input="inputDeal" v-model="toPage" step="1" min="1" :max="totalPage">页</span>
         <button @click="goToPage(toPage)">跳转</button>
       </p>
     </div>
@@ -30,16 +30,20 @@ export default {
       required: true,
       default: 0
     },
+    pageSize: {
+      type: Number,//每页展示数据条数
+      required: true,
+      default: 15
+    },
     emitValue: {
-      type: String,//数据总条数
+      type: String,//自定义事件名
       required: true
     }
   },
   data() {
     return {
       curPage: 1,
-      toPage: '',
-      pageSize: 15 ,
+      toPage: ''
     };
   },
   computed: {
@@ -77,12 +81,21 @@ export default {
     }
   },
   methods: {
+    inputDeal() {
+      let num = Number(this.toPage),
+          str = this.toPage;
+      if(!/^[0-9]*[1-9][0-9]*$/.test(this.toPage) || num > this.totalPage || num < 1 ){
+        this.toPage = str.substring(0, str.length - 1);
+        this.$refs.input.value = str.substring(0, str.length - 1);
+      }
+    },
     changeCurPage(num) {
       if(num === '...' || num === 0 || num > this.totalPage) return;
       this.curPage = num
       this.Bus.$emit(this.emitValue, num)
     },
     goToPage(str) {
+      if(str === '') return;
       let num = Number(str);
       if(!/^[0-9]*[1-9][0-9]*$/.test(str) || num > this.totalPage) return;
       this.changeCurPage(num);

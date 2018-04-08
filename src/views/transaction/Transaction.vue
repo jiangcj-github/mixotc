@@ -3,23 +3,17 @@
     <div class="transacation inner">
       <TopSearch></TopSearch>
       <div class="filtrate">
-        <div class="select">
-          <i>选择支付方式</i>
-          <!-- <ul>
-            <li>
-              <span></span>
+        <div class="select" @click.stop="showPayment = true">
+          <i>{{payTitle}}</i>
+          <ul class="payment" v-clickoutside="changePaymwnt" v-show="showPayment">
+            <li v-for="(item, index) of payment" :key="index" :class="{selected: item.state}" @click="item.state = !item.state">
+              <span>{{item.type}}</span>
             </li>
-            <li>
-              <span></span>
-            </li>
-            <li>
-              <span></span>
-            </li>
-          </ul> -->
+          </ul>
         </div>
         <div class="price">
-          <input type="text" class="min" placeholder="最低价">
-          <input type="text" class="max" placeholder="最高价">
+          <input type="number" class="min" placeholder="最低价">
+          <input type="number" class="max" placeholder="最高价">
         </div>
         <div class="wholesale">
           <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="filter.isWhole">
@@ -43,7 +37,7 @@
           <li is='ResultListItem' v-for="item of 15" :key="item" :class="{even: item%2 === 0}"></li>
         </ul>
       </div>
-      <Pagination :total="75" emitValue='changePage'></Pagination>
+      <Pagination :total="75" :pageSize="20" emitValue='changePage'></Pagination>
     </div>
     <div class="faq">
       <div class="inner clearfix">
@@ -53,7 +47,7 @@
           <li>如何出售数字币</li>
           <li>费率说明</li>
         </ul>
-        <img src="/static/images/question.jpg" alt="">
+        <img src="/static/images/question.png" alt="">
       </div>
     </div>
   </div>
@@ -69,6 +63,13 @@ import Pagination from '@/components/common/Pagination';
       ResultListItem,
       Pagination
     },
+    created() {
+      // this.Proxy.sales.then(data=>{
+        this.Proxy.sales({type: 1,sort: 1, count: 20}).then(res=>{
+          console.log(res)
+        })
+      // })
+    },
     mounted() {
       this.Bus.$on('changePage',(data) => {
         this.filter.pageNumber = data;
@@ -79,26 +80,49 @@ import Pagination from '@/components/common/Pagination';
     },
     destroyed() {
       this.Bus.$off('changePage');
+      this.Bus.$off('changeInputContent');
     },
     data() {
       return {
+        showPayment: false,
+        payment:[{type: '支付宝', state: false}, {type: '微信', state: false}, {type: '银行卡', state: false}],
         filter:{
-          currency: '',
-          nickname: '',
-          account: '',
-          payment: [],
-          minPrice: '',
-          maxPrice: '',
-          sortBy: '',
-          isWhole: false,
-          pageNumber: 1
+          type: 1,// 1出售，2购买
+          sort: 2,//1智能排序，2最新，3成交最多，4信任数最多，5价格由高到低，6价格由低到高
+          payment: 7,//1支付宝，2微信，4银行卡，可相加，共6种
+          currency: 'BTC',//字符串
+          money: 'CNY',//货币类型CNY
+          min: '',
+          max: '',
+          count: 20//每页广告条数
+          // nickname: '',
+          // isWhole: false,
         },
         result: []
       }
     },
     methods: {
+      hidePayment() {
+        if(!this.showPayment) return;
+        this.showPayment = false
+      },
       changeIsWhole() {
         this.filter.isWhole = !this.filter.isWhole
+      },
+      changePaymwnt() {
+        this.hidePayment();
+        // let count
+      }
+    },
+    computed: {
+      payTitle() {
+        let title = this.payment.filter(item => {
+            return item.state
+        }).map(item => {
+            return item.type
+        })
+        if(title.length ===0) return '选择支付方式'
+        return title.join('/')
       }
     },
     watch: {
@@ -122,6 +146,7 @@ import Pagination from '@/components/common/Pagination';
       height 70px
       background #FFF
       .select
+        box-sizing()
         position absolute
         left 252px
         top 20px
@@ -153,6 +178,37 @@ import Pagination from '@/components/common/Pagination';
           height 15px
           content ''
           background $col1E1
+        .payment
+          position absolute
+          top 28px
+          left -1px
+          width 100%
+          background #FFF
+          border 1px solid $col1E1
+          z-index 9
+          li
+            position relative
+            height 30px
+            line-height 30px
+            cursor pointer
+            &:hover
+              background-color $col3EB
+            &::after
+              position absolute
+              top 8px
+              right 8px
+              content ''
+              width 16px
+              height 16px
+              background url('/static/images/unselect.png')
+            &.selected::after
+              background url('/static/images/selected.png')
+            span
+              float left
+              height 30px
+              padding-left 10px
+              font-size $fz13
+              letter-spacing 0.27px
       .price
         position absolute
         left 583px
@@ -271,6 +327,8 @@ import Pagination from '@/components/common/Pagination';
     position relative
     height 200px
     background-color #FFF
+    .inner
+      position relative
     h2
       float left
       height 30px
@@ -329,8 +387,8 @@ import Pagination from '@/components/common/Pagination';
           border-top 0
     img
       position absolute
-      left 710px
-      top 23px
+      left 650px
+      top 35px
 
 
 </style>
