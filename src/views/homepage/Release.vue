@@ -11,11 +11,11 @@
           <span class="tran_num">和他交易过{{tran_num}}次</span>
         </div>
         <div class="trust clearfix">
-          <router-link class="contact" to="" tag="span">
+          <router-link class="contact" to="" tag="span" :class="{isTrust:is_trust}">
             <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
           </router-link>
-          <router-link class="join-trust" to="" tag="span">
-            <i>加入信任</i>
+          <router-link class="join-trust" to="" tag="span" :class="{isTrust:is_trust}">
+            <i>{{is_trust?'已信任':'加入信任'}}</i>
           </router-link>
         </div>
       </div>
@@ -29,125 +29,104 @@
       </div>
     </div>
     <!--菜单项tab-->
-    <div class="menu-tab">
-      <ul class="head">
-        <li class="active">他的发布</li>
-        <li>收到的评价<i>12234</i></li>
-      </ul>
-      <ul class="filter">
-          <li class="drop-down">
-            全部广告
-            <ul class="drop">
-              <li>全部广告</li>
-              <li>购买</li>
-              <li>出售</li>
-            </ul>
-          </li>
-          <li class="drop-down">
-            全部币种
-            <ul class="drop">
-              <li>全部币种</li>
-              <li>BTC</li>
-              <li>ETH</li>
-              <li>LTC</li>
-              <li>其他</li>
-            </ul>
-          </li>
-      </ul>
-    </div>
+    <ul class="menu-tab">
+        <li :class="{active:tab==0}" @click="toggleTab(0)">他的发布</li>
+        <li :class="{active:tab==1}" @click="toggleTab(1)">收到的评价<i>12234</i></li>
+    </ul>
     <!--发布列表-->
-    <div class="release-list">
-      <div class="head">
-        <span class="time"></span>
-        <span class="type">广告类型</span>
-        <span class="coin">币种</span>
-        <span class="price">报价</span>
-        <span class="limit">订单限额</span>
-        <span class="pay-method">支付方式</span>
-        <span class="pay-time">订单期限</span>
-        <span class="operation">操作</span>
+    <div class="release-list" v-show="tab==0">
+      <div class="filter">
+        <a class="drop-down" @click="toggleFilterTypes" @blur="hideFilterTypes" href="javascript:void(0)">
+          {{flt_types[flt_type_sel].text}}
+          <ul v-show="flt_type_show" class="drop">
+            <li @click="selectFilterType(i)" v-for="(e,i) in flt_types">{{e.text}}</li>
+          </ul>
+        </a>
+        <a class="drop-down" @click="toggleFilterCoins" @blur="hideFilterCoins" href="javascript:void(0)">
+          {{flt_coins[flt_coin_sel].text}}
+          <ul v-show="flt_coin_show" class="drop">
+            <li @click="selectFilterCoin(i)" v-for="(e,i) in flt_coins">{{e.text}}</li>
+          </ul>
+        </a>
       </div>
-      <div class="li">
-        <div class="booth">
-          <span class="time">2016/03/09 13:43:30</span>
-          <span class="type">购买</span>
-          <span class="coin">BTC</span>
-          <span class="price">¥ 123</span>
-          <span class="limit">200.00~10000.00</span>
-          <span class="pay-method">
-            <img src="/static/images/OTC_zhifubao.png" alt=""/>
-            <img src="/static/images/OTC_wechat.png" alt=""/>
-            <img src="/static/images/OTC_Bankcard.png" alt=""/>
-          </span>
-          <span class="pay-time">10min</span>
-          <span class="operation">
-             <router-link class="buy-to" to="" tag="span">
-               <i>向他购买</i>
-             </router-link>
-          </span>
-        </div>
-        <div class="division"></div>
-        <div class="remark">备注：经常在线，可以快速买卖。。。。。</div>
-      </div>
-      <div class="li">
-        <div class="booth">
-          <span class="time">2016/03/09 13:43:30</span>
-          <span class="type">购买</span>
-          <span class="coin">BTC</span>
-          <span class="price">¥ 123</span>
-          <span class="limit">200.00~10000.00</span>
-          <span class="pay-method">
-            <img src="/static/images/OTC_zhifubao.png" alt=""/>
-            <img src="/static/images/OTC_wechat.png" alt=""/>
-            <img src="/static/images/OTC_Bankcard.png" alt=""/>
-          </span>
-          <span class="pay-time">10min</span>
-          <span class="operation">
-             <router-link class="buy-to" to="" tag="span">
-               <i>向他购买</i>
-             </router-link>
-          </span>
-        </div>
-        <div class="division"></div>
-        <div class="remark">备注：经常在线，可以快速买卖。。。。。</div>
-      </div>
-      <div class="li">
-        <div class="booth">
-          <span class="time">2016/03/09 13:43:30</span>
-          <span class="type">购买</span>
-          <span class="coin">BTC</span>
-          <span class="price">¥ 123</span>
-          <span class="limit">200.00~10000.00</span>
-          <span class="pay-method">
-            <img src="/static/images/OTC_zhifubao.png" alt=""/>
-            <img src="/static/images/OTC_wechat.png" alt=""/>
-            <img src="/static/images/OTC_Bankcard.png" alt=""/>
-          </span>
-          <span class="pay-time">10min</span>
-          <span class="operation">
-             <router-link class="buy-to" to="" tag="span">
-               <i>向他购买</i>
-             </router-link>
-          </span>
-        </div>
-        <div class="division"></div>
-        <div class="remark">备注：经常在线，可以快速买卖。。。。。</div>
-      </div>
+      <ul class="head">
+        <li class="time"></li>
+        <li class="type">广告类型</li>
+        <li class="coin">币种</li>
+        <li class="price">报价</li>
+        <li class="limit">订单限额</li>
+        <li class="pay-method">支付方式</li>
+        <li class="pay-time">订单期限</li>
+        <li class="operation">操作</li>
+      </ul>
+      <ReleaseListItem v-for="item of 3" :key="item"></ReleaseListItem>
+      <Pagination :total="75"></Pagination>
     </div>
-
+    <!--评价列表-->
+    <div class="evaluate-list" v-show="tab==1">
+      <EvaluateListItem v-for="item of 3" :key="item"></EvaluateListItem>
+      <Pagination :total="20"></Pagination>
+    </div>
   </div>
 
 </template>
 <script>
+  import ReleaseListItem from './children/ReleaseListItem';
+  import EvaluateListItem from './children/EvaluateListItem';
+  import Pagination from '@/components/common/Pagination';
+
   export default {
+    components: {
+      ReleaseListItem,
+      EvaluateListItem,
+      Pagination
+    },
     data() {
       return {
         nickname: 'xin2378',
         tran_num: 3,
+        is_trust: false,
+        flt_types:[
+          {text:'全部广告',value:''},
+          {text:'购买',value:''},
+          {text:'出售',value:''},
+        ],
+        flt_type_sel:0,
+        flt_type_show:false,
+        flt_coins:[
+          {text:'全部币种',value:''},
+          {text:'BTC',value:''},
+          {text:'ETH',value:''},
+          {text:'LTC',value:''},
+          {text:'其他',value:''},
+        ],
+        flt_coin_sel:0,
+        flt_coin_show:false,
+        tab:0,
       }
     },
     methods: {
-
+      toggleFilterTypes(){
+        this.flt_type_show=!this.flt_type_show;
+      },
+      hideFilterTypes(){
+        this.flt_type_show=false;
+      },
+      selectFilterType(i){
+        this.flt_type_sel=i;
+      },
+      toggleFilterCoins(){
+        this.flt_coin_show=!this.flt_coin_show;
+      },
+      hideFilterCoins(){
+        this.flt_coin_show=false;
+      },
+      selectFilterCoin(i){
+        this.flt_coin_sel=i;
+      },
+      toggleTab(i){
+        this.tab=i;
+      },
     }
   }
 </script>
@@ -155,8 +134,8 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl";
   .homepage
-    margin-top 40px
-    margin-bottom 40px
+    margin-top: 40px;
+    margin-bottom: 40px;
     h2
       height 30px
       padding-left 5px
@@ -230,6 +209,8 @@
               line-height 20px
               letter-spacing 0.23px
               fz11()
+            &.isTrust
+              color #FFB422
           .join-trust
             background: #FFB422
             border-radius: 2px
@@ -238,10 +219,14 @@
             line-height 25px
             text-align center
             cursor pointer
+            color: #FFFFFF;
             i
               font-size: 13px;
-              color: #FFFFFF;
               letter-spacing: 0.29px;
+            &.isTrust
+              border 1px solid #FFB422
+              background #fff
+              color #FFB422
       .sec2
         height 60px
         display flex
@@ -265,34 +250,40 @@
             font-size 14px
             color #333333
             letter-spacing 0.16px
-
-
-
     .menu-tab
       margin-top 20px
+      height 60px
+      background-color #FFF
+      padding-left 30px
+      >li
+        font-size 16px
+        letter-spacing 0.33px
+        color #999999
+        line-height 58px
+        float left
+        margin-right 13px
+        cursor pointer
+        min-width 100px
+        &.active
+          color #FFB422
+          border-bottom 2px solid #FFB422
+    .release-list
       .head
-        height 60px
-        background-color #FFF
-        padding-left 30px
+        height 50px
+        line-height 50px
+        font-size 13px
+        color #999999
+        letter-spacing 0.27px
+        padding 0 30px
         >li
-          font-size 16px
-          letter-spacing 0.33px
-          color #999999
-          line-height 58px
-          float left
-          margin-right 13px
-          cursor pointer
-          min-width 100px
-          &.active
-            color #FFB422
-            border-bottom 2px solid #FFB422
+          display inline-block
       .filter
         margin-top 1px
         height 50px
         background-color #FFF
         padding-left 30px
-        >li
-          float left
+        >a
+          display inline-block
           line-height 50px
           font-size 13px
           letter-spacing 0.27px
@@ -314,8 +305,9 @@
               right -15px
               top 50%
               margin-top -3px
+            &:hover .drop
+              display block
             .drop
-              display none
               position absolute
               top 40px
               left 0
@@ -330,54 +322,6 @@
                 line-height 30px
                 &:hover
                   background #FFF3EB
-
-
-    .release-list
-      .head
-        height 50px
-        line-height 50px
-        font-size 13px
-        color #999999
-        letter-spacing 0.27px
-        padding 0 30px
-        span
-          display inline-block
-      .li
-        padding 20px 30px 0 30px
-        background #fff
-        border 1px solid #E1E1E1
-        margin-bottom 10px
-        span
-          display inline-block
-        .booth
-          font-size 13px
-          color #333333
-          letter-spacing 0.27px
-          height 67px
-          line-height 67px
-          .type
-            color #57A100
-          .operation .buy-to
-              width 100px
-              height 25px
-              line-height 25px
-              background #FFB422
-              border 1px solid #FFB422
-              border-radius 2px
-              font-size: 13px;
-              color: #FFFFFF;
-              letter-spacing: 0.27px;
-              text-align center
-              cursor pointer
-        .division
-          height 1px
-          background: #E1E1E1;
-        .remark
-          height 50px
-          line-height 50px
-          font-size: 13px;
-          color: #999999;
-          letter-spacing: 0.23px;
       .time
         width 200px
       .type
@@ -394,4 +338,7 @@
         width 100px
       .operation
         width 150px
+    .evaluate-list
+      background #fff
+
 </style>
