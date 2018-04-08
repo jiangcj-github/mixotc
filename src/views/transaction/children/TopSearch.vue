@@ -1,7 +1,7 @@
 <template>
   <div class="header clearfix">
     <h2>购买BTC</h2>
-    <SearchInput class="search" :content="content" :title="title" :emitValue="emitValue" :buttonColor="buttonColor"></SearchInput>
+    <SearchInput class="search" :content="content" :title="title" :emitValue1="emitValue1"></SearchInput>
     <ul class="top5 clearfix">
       <li class="tuijian" style="background-color:#FF914C;color:#FFF">ETH</li>
       <li class="tuijian" style="background-color:#FFB422;color:#FFF">BTC</li>
@@ -22,17 +22,16 @@ export default {
     return {
       content: ['币种','商家昵称/账号'],
       title: '搜索更多币种',
-      emitValue: 'changeTitle',
-      buttonColor: '#FFB422'
+      emitValue1: 'changeTitle'
     }
   },
   mounted() {
-    this.Bus.$on(this.emitValue,(data) => {
+    this.Bus.$on(this.emitValue1,(data) => {
       this.title = data
     })
   },
   destroyed() {
-    this.Bus.$off(this.emitValue);
+    this.Bus.$off(this.emitValue1);
   }
 };
 </script>

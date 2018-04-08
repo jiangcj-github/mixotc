@@ -19,7 +19,7 @@
         <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
         <p>我已阅读并同意 <a href="">用户协议</a></p>
       </div>
-      <span class="yhxy-tips"><i>!</i>&nbsp&nbsp请勾选用户协议</span>
+      <span class="yhxy-tips"><i>!</i>&nbsp;&nbsp;请勾选用户协议</span>
     </div>
   </div>
 </template>
@@ -58,7 +58,6 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl";
   .wrap
-    display none
     position fixed
     top 0
     left 0

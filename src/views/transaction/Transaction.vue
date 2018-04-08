@@ -72,10 +72,13 @@ import Pagination from '@/components/common/Pagination';
     mounted() {
       this.Bus.$on('changePage',(data) => {
         this.filter.pageNumber = data;
-      })
+      });
+      this.Bus.$on('changeInputContent',(data) => {
+        console.log(data)
+      });
     },
     destroyed() {
-      this.Bus.$off('changePage')
+      this.Bus.$off('changePage');
     },
     data() {
       return {
