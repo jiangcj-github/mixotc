@@ -27,7 +27,8 @@ export default {
   props: {
     total: {
       type: Number,
-      required: true
+      required: true,
+      default: 0
     }
   },
   data() {
@@ -75,12 +76,12 @@ export default {
     changeCurPage(num) {
       if(num === '...' || num === 0 || num > this.totalPage) return;
       this.curPage = num
+      this.Bus.$emit('changePage', num)
     },
     goToPage(str) {
       let num = Number(str);
-      console.log(num)
       if(!/^[0-9]*[1-9][0-9]*$/.test(str) || num > this.totalPage) return;
-      this.curPage = num;
+      this.changeCurPage(num);
     }
   }
 };

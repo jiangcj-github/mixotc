@@ -12,7 +12,7 @@
         </div>
         <div class="trust clearfix">
           <router-link class="contact" to="" tag="span">
-            <img :src="require(`@/assets/images/conversation_icon.png`)" alt=""><i>联系TA</i>
+            <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
           </router-link>
           <router-link class="join-trust" to="" tag="span">
             <i>加入信任</i>
@@ -75,9 +75,9 @@
           <span class="price">¥ 123</span>
           <span class="limit">200.00~10000.00</span>
           <span class="pay-method">
-            <img :src="require(`@/assets/images/OTC_zhifubao.png`)" alt=""/>
-            <img :src="require(`@/assets/images/OTC_wechat.png`)" alt=""/>
-            <img :src="require(`@/assets/images/OTC_Bankcard.png`)" alt=""/>
+            <img src="/static/images/OTC_zhifubao.png" alt=""/>
+            <img src="/static/images/OTC_wechat.png" alt=""/>
+            <img src="/static/images/OTC_Bankcard.png" alt=""/>
           </span>
           <span class="pay-time">10min</span>
           <span class="operation">
@@ -97,9 +97,9 @@
           <span class="price">¥ 123</span>
           <span class="limit">200.00~10000.00</span>
           <span class="pay-method">
-            <img :src="require(`@/assets/images/OTC_zhifubao.png`)" alt=""/>
-            <img :src="require(`@/assets/images/OTC_wechat.png`)" alt=""/>
-            <img :src="require(`@/assets/images/OTC_Bankcard.png`)" alt=""/>
+            <img src="/static/images/OTC_zhifubao.png" alt=""/>
+            <img src="/static/images/OTC_wechat.png" alt=""/>
+            <img src="/static/images/OTC_Bankcard.png" alt=""/>
           </span>
           <span class="pay-time">10min</span>
           <span class="operation">
@@ -119,9 +119,9 @@
           <span class="price">¥ 123</span>
           <span class="limit">200.00~10000.00</span>
           <span class="pay-method">
-            <img :src="require(`@/assets/images/OTC_zhifubao.png`)" alt=""/>
-            <img :src="require(`@/assets/images/OTC_wechat.png`)" alt=""/>
-            <img :src="require(`@/assets/images/OTC_Bankcard.png`)" alt=""/>
+            <img src="/static/images/OTC_zhifubao.png" alt=""/>
+            <img src="/static/images/OTC_wechat.png" alt=""/>
+            <img src="/static/images/OTC_Bankcard.png" alt=""/>
           </span>
           <span class="pay-time">10min</span>
           <span class="operation">
