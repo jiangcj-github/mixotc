@@ -1,6 +1,6 @@
 <template>
   <div class="wrap">
-    <div class="login">
+    <div class="login" v-clickoutside="hideLoginForm">
       <h2 class="title">登录/注册</h2>
       <div class="show-tip1">请输入正确的手机号/邮箱</div>
       <p class="account">
@@ -58,7 +58,6 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl";
   .wrap
-    display none
     position fixed
     top 0
     left 0
