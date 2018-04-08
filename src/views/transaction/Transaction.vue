@@ -43,7 +43,7 @@
           <li is='ResultListItem' v-for="item of 15" :key="item" :class="{even: item%2 === 0}"></li>
         </ul>
       </div>
-      <Pagination :total="75"></Pagination>
+      <Pagination :total="75" emitValue='changePage'></Pagination>
     </div>
     <div class="faq">
       <div class="inner clearfix">
@@ -72,10 +72,13 @@ import Pagination from '@/components/common/Pagination';
     mounted() {
       this.Bus.$on('changePage',(data) => {
         this.filter.pageNumber = data;
-      })
+      });
+      this.Bus.$on('changeInputContent',(data) => {
+        console.log(data)
+      });
     },
     destroyed() {
-      this.Bus.$off('changePage')
+      this.Bus.$off('changePage');
     },
     data() {
       return {
