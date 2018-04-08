@@ -1,4 +1,4 @@
-// import httpFilter from '@/common/js/filter/HttpFilter'
+import httpFilter from '@/js/filter/HttpFilter'
 
 
 /**
@@ -22,7 +22,7 @@ export default {
    * 注：其他fetch可以传入的参数，也在data里面传入
    */
   httpConfig: {
-    // httpFilter,
+    httpFilter,
     httpProxyList: [
       //test
       // {name: 'test', data: {url: '/exchange/info', method: 'get'}},

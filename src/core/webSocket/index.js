@@ -8,7 +8,7 @@
 import jsonBig from "json-bigint";
 
 const pool = {}; //连接池对象
-let heartBeatInterval, url, reConnectInterval;
+let heartBeatInterval, url, reConnectInterval, clearMessageInterval;
 pool.onMessage = {};
 pool.onOpen = {};
 pool.reConnectFlag = false;
@@ -30,6 +30,8 @@ function createConnect(url) {
   pool.reConnectFlag = true;
   // 创建链接
   heartBeatInterval = null;
+  reConnectInterval = null;
+  clearMessageInterval = null;
   //建立连接先发token
   // let token = storage.getLocal("otcToken");
   // token && !pool.onOpen["token"] &&
@@ -49,6 +51,8 @@ function createConnect(url) {
   function open(pool, event) {
     console.log("open");
     reConnectInterval && clearInterval(reConnectInterval);
+    clearMessageInterval && clearInterval(clearMessageInterval);
+    clearMessageInterval = setInterval(clearMessage, 5000);
     let obj = pool.onOpen;
     for (const key in obj) {
       obj[key](event.data);
@@ -69,17 +73,12 @@ function createConnect(url) {
     for (const key in obj) {
       //被动消息监听，不主动删除
       if (isNaN(Number(key))) {
-        obj[key](data);
-        continue;
-      }
-      //断网后之前的主动请求监听全部删除
-      if (data.seq > key && data.body.ret === 0) {
-        delete obj[key];
+        obj[key].callback(data);
         continue;
       }
       // 处理正常的主动请求监听
       if (data.seq === Number(key)) {
-        obj[key](data);
+        obj[key].callback(data);
         delete obj[key];
       }
     }
@@ -91,9 +90,8 @@ function createConnect(url) {
   function onClose(event) {
     console.log("webSocket断开", event.target.url);
     clearInterval(reConnectInterval);
-    reConnectInterval = null;
     clearInterval(heartBeatInterval);
-
+    clearInterval(clearMessageInterval);
     reConnect();
   }
 
@@ -108,12 +106,23 @@ function createConnect(url) {
 
 function reConnect() {
   console.log("reConnect 重连");
-  if (heartBeatInterval) clearInterval(heartBeatInterval);
+  heartBeatInterval && clearInterval(heartBeatInterval);
   pool.reConnectFlag &&
     !reConnectInterval &&
     (reConnectInterval = setInterval(() => {
       createConnect(url);
     }, 10000)); //10s重连间隔
+}
+
+function clearMessage() {
+  let obj = pool.onMessage,
+    date = new Date();
+  for (const key in obj) {
+    if (obj[key].date && date - obj[key].date > 10000) {
+      obj[key].callback(false);
+      delete obj[key];
+    }
+  }
 }
 
 pool.start = function(_url) {
@@ -129,13 +138,8 @@ pool.start = function(_url) {
  */
 pool.send = function(txt) {
   pool.seq++;
-  if (pool.ws.readyState !== 1) {
-    console.log(pool.ws.readyState);
-    return false;
-  } //websocket断开返回false
   console.log("send text");
   pool.ws.send(txt);
-  return true;
 };
 
 /**
