@@ -1,8 +1,8 @@
 <template>
   <div class="evaluate-release">
     <div class="img-group">
-      <img v-for="url in imgList" :src="url" >
-      <span>中评</span>
+      <span v-for="(item, index) in imgList" :track-by="index" @click="changeRate(index)"></span>
+      <b>中评</b>
     </div>
     <textarea placeholder="评价对方：字数限制0～50个字符"></textarea>
     <button>发布</button>
@@ -26,6 +26,9 @@
     width 620px
     margin 0 auto
     text-align center
+    .img-group
+      span
+        display inline-block
     textarea
       width 620px
       height 151px

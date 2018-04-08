@@ -6,7 +6,7 @@
           <li v-for="item of items"><span>{{item.title}}:&nbsp;</span><span>{{item.value}}</span></li>
         </ul>
         <ul class="upper-right">
-          <li><span>简体中文<div class="select-tri white"></div></span></li>
+          <li><span>简体中文<!--<div class="select-tri white"></div>--></span></li>
           <li><a href="">币种资料</a></li>
           <li><a href="">帮助</a></li>
           <li><a href="">大额交易申请</a></li>
@@ -17,22 +17,27 @@
       <div class="wrapper">
         <ul class="down-tag">
           <li><a href="/"><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></a></li>
-          <li><router-link to="/transaction">交易中心</router-link></li>
+          <li>
+            <router-link to="/transaction">交易中心</router-link>
+          </li>
           <li><a href="">广告</a></li>
-          <li><router-link to="/order">订单</router-link></li>
+          <li>
+            <router-link to="/order">订单</router-link>
+          </li>
           <li><a href="">钱包</a></li>
           <li><img class="top-logo" src="/static/images/phoneicon.png" alt=""></li>
         </ul>
-        <!--<span class="log" @click="show_loginform">登录/注册</span>-->
-        <!--<Login v-if="loginForm" :loginForm.sync="loginForm"/>-->
-        <span class="log">登录/注册</span>
-        <Login v-if="false"></Login>
+        <span class="log" @click="show_loginform">登录/注册</span>
+        <Login v-if="loginForm" :loginForm.sync="loginForm"/>
+        <!--<span class="log">登录/注册</span>-->
+        <!--<Login></Login>-->
+
         <!--<div class="user-info" >-->
-          <!--<img src="/static/images/OTC_wechat@3x.png" alt="">-->
-          <!--<span class="user-name">-->
-            <!--zhaocx/185***555-->
-            <!--<div class="select-tri black"></div>-->
-          <!--</span>-->
+        <!--<img src="/static/images/OTC_wechat@3x.png" alt="">-->
+        <!--<span class="user-name">-->
+        <!--zhaocx/185***555-->
+        <!--<div class="select-tri black"></div>-->
+        <!--</span>-->
         <!--</div>-->
       </div>
     </section>
@@ -41,28 +46,38 @@
 
 <script>
   import Login from '@/components/common/Login'
+
   export default {
-    data(){
-      return{
-        // loginForm: false,
-        items:[
-          {title:'BitFunex',value:'$9.244.70↑'},{title:'Kraken',value:'€7.468.30↑'},{title:'Bithumb',value:'₩10.186.000.00↑'},{title:'Bitflyer',value:'￥995.759.00↑'}
+    data() {
+      return {
+        loginForm: false,
+        items: [
+          {title: 'BitFunex', value: '$9.244.70↑'}, {title: 'Kraken', value: '€7.468.30↑'}, {title: 'Bithumb', value: '₩10.186.000.00↑'}, {title: 'Bitflyer', value: '￥995.759.00↑'}
         ]
       }
     },
     components: {
       Login
     },
-    methods:{
-      // show_loginform(){
-      //   if(this.loginForm) return;
-      //   this.loginForm = true;
-      // }
+    methods: {
+      show_loginform() {
+        if (this.loginForm) return;
+        this.loginForm = true;
+      },
+      hideLoginForm() {
+        if (!this.loginForm) return;
+        this.loginForm = false;
+      },
+      loginOut() {
+        this.storage.removeLocal('otcToken');
+        location.reload();
+      }
     }
   }
 </script>
 
 <style scoped lang="stylus">
+  @import "../../stylus/base.styl";
   .wrapper
     display flex
     flex-direction row
@@ -103,13 +118,13 @@
           span
             color #fff
 
-          span+span
+          span + span
             color #57a100
-          /*.grean*/
-            /*color #57a100*/
+      /*.grean*/
+      /*color #57a100*/
 
-          /*.yellow*/
-            /*color #ff794c*/
+      /*.yellow*/
+      /*color #ff794c*/
 
       .upper-right
         float right
@@ -129,7 +144,6 @@
               line-height 30px
               border-top 5px solid #fff
 
-
     .down
       height 70px
       border 1px solid #E1E1E1
@@ -144,6 +158,11 @@
           text-align center
           vertical-align middle
           line-height 70px
+
+      .log
+        font-size 14px
+        cursor pointer
+        color $col422
 
       .user-info
         display flex
