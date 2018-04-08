@@ -23,10 +23,10 @@
           <li><a href="">钱包</a></li>
           <li><img class="top-logo" :src="require(`@/assets/images/phoneicon.png`)" alt=""></li>
         </ul>
-        <!--<span class="log" @click="show_loginform">登录/注册</span>-->
-        <!--<Login v-if="loginForm" :loginForm.sync="loginForm"/>-->
-        <span class="log">登录/注册</span>
-        <Login></Login>
+        <span class="log" @click="show_loginform">登录/注册</span>
+        <Login v-if="loginForm" :loginForm.sync="loginForm" v-defaultClick="hideLoginForm"/>
+        <!--<span class="log">登录/注册</span>-->
+        <!--<Login></Login>-->
         <!--<div class="user-info" >-->
           <!--<img :src="require(`@/assets/images/OTC_wechat@3x.png`)" alt="">-->
           <!--<span class="user-name">-->
@@ -44,7 +44,7 @@
   export default {
     data(){
       return{
-        // loginForm: false,
+        loginForm: false,
         items:[
           {title:'BitFunex',value:'$9.244.70↑'},{title:'Kraken',value:'€7.468.30↑'},{title:'Bithumb',value:'₩10.186.000.00↑'},{title:'Bitflyer',value:'￥995.759.00↑'}
         ]
@@ -54,15 +54,24 @@
       Login
     },
     methods:{
-      // show_loginform(){
-      //   if(this.loginForm) return;
-      //   this.loginForm = true;
-      // }
+      show_loginform(){
+        if(this.loginForm) return;
+        this.loginForm = true;
+      },
+      hideLoginForm() {
+        if (!this.loginForm) return;
+        this.loginForm = false;
+      },
+      loginOut() {
+        this.storage.removeLocal('otcToken');
+        location.reload();
+      }
     }
   }
 </script>
 
 <style scoped lang="stylus">
+  @import "../../stylus/base.styl";
   .wrapper
     display flex
     flex-direction row
@@ -144,6 +153,11 @@
           text-align center
           vertical-align middle
           line-height 70px
+
+      .log
+        font-size 14px
+        cursor pointer
+        color $col422
 
       .user-info
         display flex

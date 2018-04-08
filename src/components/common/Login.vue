@@ -11,9 +11,9 @@
       <div class="show-tip2">请输入正确的验证码</div>
       <p class="yzm">
         <input type="text" placeholder="验证码">
-        <button>发送验证码</button>
+        <button class="sendCaptcha">发送验证码</button>
       </p>
-      <button class="loginbutton">登录</button>
+      <button :class="{able:agree}" :disabled="agree">登录</button>
       <div class="yhxy">
         <img :src="require(`@/assets/images/rules_checked.png`)" alt="" v-if="agree" @click="agree = false">
         <img :src="require(`@/assets/images/rules_unchecked.png`)" alt="" v-else @click="agree = true">
@@ -28,7 +28,7 @@
   import Slider from './Slider.vue'
 
   export default {
-    // props: ['loginForm'],
+    props: ['loginForm'],
     name: "login",
     data() {
       return{
@@ -39,9 +39,19 @@
     components: {
       Slider
     },
-    // methods: {
-    //
-    // }
+    methods: {
+      checkAccount(account) {
+        return /^1[34578]\d{9}$/.test(account) ? 'phone' : (/^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(account) ? 'email' : false)
+      },
+      checkCaptcha(captcha) {
+        return /^\s*$/.test(captcha) ? '请输入正确的验证码' : true;
+      },
+      hideLoginForm() {
+        if (!this.loginForm) return;
+        this.$emit('update:loginForm', false);
+      }
+
+    }
   }
 </script>
 
@@ -140,15 +150,17 @@
           placeholder()
           padding-left 10px
 
-        button
+        .sendCaptcha
           width 100px
           height 40px
+          margin 0
           background-color: $col422
           text-align center
           line-height 40px
           color #fff
+          cursor pointer
 
-      .loginbutton
+      button
         width 350px
         height 40px
         background-color: $col999
@@ -156,6 +168,12 @@
         line-height 40px
         color #FFF
         margin-left 25px
+        &:focus
+          outline 0
+        &.able
+          background $col422
+          &:active
+            background $col350
 
       .yhxy
         height: 12px
