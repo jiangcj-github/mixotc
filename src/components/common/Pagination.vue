@@ -84,7 +84,7 @@ export default {
     inputDeal() {
       let num = Number(this.toPage),
           str = this.toPage;
-      if(!/^[0-9]*[1-9][0-9]*$/.test(this.toPage) || num > this.totalPage || num < 1 ){
+      if(!/^[0-9]*[1-9][0-9]*$/.test(str) || num > this.totalPage || num < 1 ){
         this.toPage = str.substring(0, str.length - 1);
         this.$refs.input.value = str.substring(0, str.length - 1);
       }

@@ -12,8 +12,8 @@
           </ul>
         </div>
         <div class="price">
-          <input type="number" class="min" placeholder="最低价">
-          <input type="number" class="max" placeholder="最高价">
+          <input type="number" class="min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
+          <input type="number" class="max" v-model="max" placeholder="最高价">
         </div>
         <div class="wholesale">
           <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="filter.isWhole">
@@ -86,6 +86,8 @@ import Pagination from '@/components/common/Pagination';
       return {
         showPayment: false,
         payment:[{type: '支付宝', state: false}, {type: '微信', state: false}, {type: '银行卡', state: false}],
+        min:'',
+        max:'',
         filter:{
           type: 1,// 1出售，2购买
           sort: 2,//1智能排序，2最新，3成交最多，4信任数最多，5价格由高到低，6价格由低到高
@@ -102,6 +104,15 @@ import Pagination from '@/components/common/Pagination';
       }
     },
     methods: {
+      inputDealMin(max) {
+        console.log(9)
+        let num = Number(this.min),
+            str = this.min;
+        if(!/^[0-9]+$/.test(str) || (this.max === '' ? false : num > this.max) || num < 1){
+          this.min = str.substring(0, str.length - 1);
+          this.$refs.min.value = str.substring(0, str.length - 1);
+        }
+      },
       hidePayment() {
         if(!this.showPayment) return;
         this.showPayment = false
@@ -111,7 +122,6 @@ import Pagination from '@/components/common/Pagination';
       },
       changePaymwnt() {
         this.hidePayment();
-        // let count
       }
     },
     computed: {
