@@ -16,23 +16,28 @@
     <section class="down">
       <div class="wrapper">
         <ul class="down-tag">
-          <li><a href="/"><img class="top-logo" :src="require(`@/assets/images/toplogo.png`)" alt="MIXOTC官网"></a></li>
-          <li><a href="">交易中心</a></li>
+          <li><a href="/"><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></a></li>
+          <li>
+            <router-link to="/transaction">交易中心</router-link>
+          </li>
           <li><a href="">广告</a></li>
-          <li><a href="">订单</a></li>
+          <li>
+            <router-link to="/order">订单</router-link>
+          </li>
           <li><a href="">钱包</a></li>
-          <li><img class="top-logo" :src="require(`@/assets/images/phoneicon.png`)" alt=""></li>
+          <li><img class="top-logo" src="/static/images/phoneicon.png" alt=""></li>
         </ul>
         <span class="log" @click="show_loginform">登录/注册</span>
-        <Login v-if="loginForm" :loginForm.sync="loginForm" v-defaultClick="hideLoginForm"/>
+        <Login v-if="loginForm" :loginForm.sync="loginForm"/>
         <!--<span class="log">登录/注册</span>-->
         <!--<Login></Login>-->
+
         <!--<div class="user-info" >-->
-          <!--<img :src="require(`@/assets/images/OTC_wechat@3x.png`)" alt="">-->
-          <!--<span class="user-name">-->
-            <!--zhaocx/185***555-->
-            <!--<div class="select-tri black"></div>-->
-          <!--</span>-->
+        <!--<img src="/static/images/OTC_wechat@3x.png" alt="">-->
+        <!--<span class="user-name">-->
+        <!--zhaocx/185***555-->
+        <!--<div class="select-tri black"></div>-->
+        <!--</span>-->
         <!--</div>-->
       </div>
     </section>
@@ -41,21 +46,22 @@
 
 <script>
   import Login from '@/components/common/Login'
+
   export default {
-    data(){
-      return{
+    data() {
+      return {
         loginForm: false,
-        items:[
-          {title:'BitFunex',value:'$9.244.70↑'},{title:'Kraken',value:'€7.468.30↑'},{title:'Bithumb',value:'₩10.186.000.00↑'},{title:'Bitflyer',value:'￥995.759.00↑'}
+        items: [
+          {title: 'BitFunex', value: '$9.244.70↑'}, {title: 'Kraken', value: '€7.468.30↑'}, {title: 'Bithumb', value: '₩10.186.000.00↑'}, {title: 'Bitflyer', value: '￥995.759.00↑'}
         ]
       }
     },
     components: {
       Login
     },
-    methods:{
-      show_loginform(){
-        if(this.loginForm) return;
+    methods: {
+      show_loginform() {
+        if (this.loginForm) return;
         this.loginForm = true;
       },
       hideLoginForm() {
@@ -112,13 +118,13 @@
           span
             color #fff
 
-          span+span
+          span + span
             color #57a100
-          /*.grean*/
-            /*color #57a100*/
+      /*.grean*/
+      /*color #57a100*/
 
-          /*.yellow*/
-            /*color #ff794c*/
+      /*.yellow*/
+      /*color #ff794c*/
 
       .upper-right
         float right
@@ -137,7 +143,6 @@
               margin-left 3px
               line-height 30px
               border-top 5px solid #fff
-
 
     .down
       height 70px

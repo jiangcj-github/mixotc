@@ -15,9 +15,9 @@
       </p>
       <button :class="{able:agree}" :disabled="agree">登录</button>
       <div class="yhxy">
-        <img :src="require(`@/assets/images/rules_checked.png`)" alt="" v-if="agree" @click="agree = false">
-        <img :src="require(`@/assets/images/rules_unchecked.png`)" alt="" v-else @click="agree = true">
-        <p>&nbsp&nbsp我已阅读并同意 <a href="">&nbsp&nbsp用户协议</a></p>
+        <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
+        <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
+        <p>我已阅读并同意 <a href="">用户协议</a></p>
       </div>
       <span class="yhxy-tips"><i>!</i>&nbsp&nbsp请勾选用户协议</span>
     </div>
@@ -31,7 +31,7 @@
     props: ['loginForm'],
     name: "login",
     data() {
-      return{
+      return {
         agree: false
       }
 
@@ -58,6 +58,7 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl";
   .wrap
+    display none
     position fixed
     top 0
     left 0
@@ -76,7 +77,7 @@
       background-color: #fff
       z-index 999
 
-      .show-tip1,.show-tip2
+      .show-tip1, .show-tip2
         position absolute
         padding 0 9px
         height 28px

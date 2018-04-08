@@ -14,11 +14,11 @@
         </div>
         <div class="contact clearfix">
           <router-link class="conversation" to="" tag="span">
-            <img :src="require(`@/assets/images/conversation_icon.png`)" alt="">
+            <img src="/static/images/conversation_icon.png" alt="">
             <i>联系TA</i>
           </router-link>
           <router-link class="self-page" to="" tag="span">
-            <img :src="require(`@/assets/images/selfpage_icon.png`)" alt="">
+            <img src="/static/images/selfpage_icon.png" alt="">
             <i>访问TA的主页</i>
           </router-link>
         </div>
@@ -42,9 +42,9 @@
           <li>
             <span class="title">付款方式</span>
             <p>
-              <img :src="require(`@/assets/images/OTC_zhifubao.png`)" alt="">
-              <img :src="require(`@/assets/images/OTC_wechat.png`)" alt="">
-              <img :src="require(`@/assets/images/OTC_bankcard.png`)" alt="">
+              <img src="/static/images/OTC_zhifubao.png" alt="">
+              <img src="/static/images/OTC_wechat.png" alt="">
+              <img src="/static/images/OTC_bankcard.png" alt="">
             </p>
           </li>
           <li>
@@ -69,7 +69,7 @@
             <input type="number" :placeholder="`输入${copy.type[type]}金额`" v-model="money" @input="changeMoney">
             <b>CNY</b>
           </div>
-          <img :src="require(`@/assets/images/huansuan.png`)" alt="">
+          <img src="/static/images/huansuan.png" alt="">
           <div>
             <input type="number" :placeholder="`输入${copy.type[type]}数量`" v-model="amount" @input="changeAmount">
             <b>BTC</b>
@@ -77,14 +77,14 @@
         </div>
         <p class="charge" v-if="!type">手续费：0.2%   0BTC</p>
         <div class="rules">
-          <img :src="require(`@/assets/images/rules_checked.png`)" alt="" v-if="agree" @click="agree = false">
-          <img :src="require(`@/assets/images/rules_unchecked.png`)" alt="" v-else @click="agree = true">
+          <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
+          <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
           <router-link to="" tag="span">我已阅读《OTC购买流程规则》</router-link>
         </div>
       </div>
       <button :class="{able:agree}" :disabled="agree">{{copy.type[type]}}</button>
       <p class="tishi">
-        <img :src="require(`@/assets/images/hint.png`)" alt="">
+        <img src="/static/images/hint.png" alt="">
         <span>新用户首次交易前请务必查阅本平台交易流程及规则，如交易出现问题请及时与客服人员沟通</span>
       </p>
     </div>
@@ -139,6 +139,7 @@
         position relative
         top 2px
         left 0
+        display inline-block
         content ''
         width 3px
         height 20px

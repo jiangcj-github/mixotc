@@ -4,7 +4,7 @@ $fz14 = 14px
 $fz13 = 13px
 
 $col422 = #FFB422
-$col350 = #FEA350
+$col350 = #FEA350 //点击色
 $col94C = #FF794C
 $col123 = #00A123
 $col333 = #333
@@ -18,6 +18,11 @@ $col100 = #57A100
 fz11()
   font-size 11px
   -webkit-transform scale(0.916666666)
+  -webkit-transform-origin 0 0
+
+fz10()
+  font-size 10px
+  -webkit-transform scale(0.8333333333333334)
   -webkit-transform-origin 0 0
 
 placeholder()
@@ -34,3 +39,15 @@ box-sizing()
   box-sizing border-box
   -moz-box-sizing border-box
   -webkit-box-sizing border-box
+
+// 小三角：下
+triangle_down($col)
+  border-top 5px solid $col
+  border-left 5.5px solid transparent
+  border-right 5.5px solid transparent
+  
+// 小三角：上
+triangle_up($col)
+  border-bottom 5px solid $col
+  border-left 5.5px solid transparent
+  border-right 5.5px solid transparent
