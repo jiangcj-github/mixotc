@@ -26,9 +26,13 @@
 export default {
   props: {
     total: {
-      type: Number,
+      type: Number,//数据总条数
       required: true,
       default: 0
+    },
+    emitValue: {
+      type: String,//数据总条数
+      required: true
     }
   },
   data() {
@@ -76,7 +80,7 @@ export default {
     changeCurPage(num) {
       if(num === '...' || num === 0 || num > this.totalPage) return;
       this.curPage = num
-      this.Bus.$emit('changePage', num)
+      this.Bus.$emit(this.emitValue, num)
     },
     goToPage(str) {
       let num = Number(str);

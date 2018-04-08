@@ -43,7 +43,7 @@
           <li is='ResultListItem' v-for="item of 15" :key="item" :class="{even: item%2 === 0}"></li>
         </ul>
       </div>
-      <Pagination :total="75"></Pagination>
+      <Pagination :total="75" emitValue='changePage'></Pagination>
     </div>
     <div class="faq">
       <div class="inner clearfix">

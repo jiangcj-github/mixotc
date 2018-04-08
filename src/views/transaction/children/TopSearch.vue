@@ -1,14 +1,8 @@
 <template>
   <div class="header clearfix">
     <h2>购买BTC</h2>
-    <p>
-      <input type="text">
-      <span>搜索更多币种</span>
-    </p>
-    <button>
-      <img src="/static/images/search_icon.png" alt="">
-    </button>
-    <ul class="clearfix">
+    <SearchInput class="search" :content="content" :title="title" :emitValue="emitValue" :buttonColor="buttonColor"></SearchInput>
+    <ul class="top5 clearfix">
       <li class="tuijian" style="background-color:#FF914C;color:#FFF">ETH</li>
       <li class="tuijian" style="background-color:#FFB422;color:#FFF">BTC</li>
       <li class="tuijian" style="background-color:#FFCE16;color:#FFF">ADA</li>
@@ -19,13 +13,34 @@
 </template>
 
 <script>
-export default {};
+import SearchInput from '@/components/common/SearchInput'
+export default {
+  components: {
+    SearchInput
+  },
+  data() {
+    return {
+      content: ['币种','商家昵称/账号'],
+      title: '搜索更多币种',
+      emitValue: 'changeTitle',
+      buttonColor: '#FFB422'
+    }
+  },
+  mounted() {
+    this.Bus.$on(this.emitValue,(data) => {
+      this.title = data
+    })
+  },
+  destroyed() {
+    this.Bus.$off(this.emitValue);
+  }
+};
 </script>
 
 <style scoped lang="stylus">
 @import "../../../stylus/base.styl";
     .header
-      margin-bottom 40px
+      margin-bottom 50px
       h2
         float left
         height 30px
@@ -45,61 +60,16 @@ export default {};
           height 20px
           margin-right 10px
           background-color $col422
-      p
-        height 30px
+      .search
         float left
-        position relative
-        span
-          position absolute
-          left 10px
-          top 0
-          padding-right 16px
-          line-height 30px
-          font-size 13px
-          color #999
-          letter-spacing 0
-          &::after
-            position absolute
-            top 13px
-            right 0
-            content ''
-            triangle_down($col422)
-        input
-          box-sizing() 
-          width 354px
-          height 30px
-          padding-left 110px
-          background $colFFF
-          border 1px solid $col422
-          border-radius 2px 0 0 0
-          &:focus
-            outline 0 
-      button
-        position relative
-        width 72px
-        height 30px
-        margin-right 125px
-        background $col422
-        border-radius 0 2px 2px 0
-        border 0
-        cursor pointer
-        &:active
-          background $col350
-        img
-          position absolute
-          top 50%
-          left 50%
-          margin -8px 0 0 -8px
-          width 16px
-          height 16px
-      ul
+      .top5
         display inline-block
         li
           position relative
           float left
           width 80px
           height 30px
-          margin-right 21px
+          margin-right 20px
           text-align center
           line-height 30px
           font-size 13px
@@ -109,6 +79,8 @@ export default {};
           box-shadow 0 2px 4px 0 $col1E1
           border-radius 2px
           cursor pointer
+          &:last-child
+            margin-right 0
           &.tuijian::before
             position absolute
             left 10px
