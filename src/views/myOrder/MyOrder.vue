@@ -65,7 +65,14 @@
           <li>
             <p>代付款</p>
           </li>
-          <li><router-link to="/order/evaluate">去评价</router-link></li>
+          <li>
+            <p>
+              <router-link :to="{path: '/order/evaluate', query: {type: '0'}}" class="active-btn">去评价</router-link>
+            </p>
+            <p>
+              <router-link :to="{path: '/order/evaluate', query: {type: '1'}}">查看评价</router-link>
+            </p>
+          </li>
         </ul>
         <p class="order-content-extre">
           <span>订单号：123456789098765432</span>
@@ -73,10 +80,8 @@
         </p>
       </div>
     </div>
-    <div>
-      <Pagination :type=10></Pagination>
-    </div>
 
+    <Pagination :total="10"></Pagination>
   </div>
 </template>
 
@@ -225,6 +230,7 @@
           margin 8px 10px 0 0
 
     .order-content
+      margin-bottom 44px
       li
         width 110px
         font-size $fz13
@@ -249,6 +255,8 @@
           border-bottom 1px solid #E1E1E1
           li
             float left
+            p
+              margin-bottom 10px
             .talk
               position relative
               padding-left 30px
@@ -262,12 +270,22 @@
                 content ''
                 background url(/static/images/talk.png) no-repeat
                 background-size 18px 18px
+            .active-btn
+              display inline-block
+              width 100px
+              height 25px
+              text-align center
+              line-height 25px
+              color #FFF
+              background: #FFB422
+              border-radius: 2px
 
           li:nth-child(2)
             color $col100
         .order-content-extre
           padding-top 17px
-
+          font-size 13px
+          color #999
 
 
 

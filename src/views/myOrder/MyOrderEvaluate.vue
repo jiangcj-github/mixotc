@@ -14,18 +14,21 @@
           <b>{{content.info}}</b>
         </dd>
       </dl>
-      <EvaluateRelease></EvaluateRelease>
+      <EvaluateRelease v-if="showContent === 0"></EvaluateRelease>
+      <EvaluateResult v-if="showContent === 1"></EvaluateResult>
     </div>
   </div>
 </template>
 
 <script>
   import EvaluateRelease from '@/views/myOrder/EvaluateRelease' // 引入发布评价页
+  import EvaluateResult from '@/views/myOrder/EvaluateResult' // 引入发布结果页
 
   export default {
     name: "my-order-evaluate",
     data() {
       return {
+        showContent: 0,
         orderList:[
           {'title': '订单类型', 'info': '购买BTC'},
           {'title':'购买单价', 'info': '45678 CNY'},
@@ -39,7 +42,11 @@
       }
     },
     components: {
-      EvaluateRelease
+      EvaluateRelease,
+      EvaluateResult
+    },
+    created() {
+      this.showContent = Number(this.$route.query.type)
     }
   }
 </script>
@@ -94,8 +101,25 @@
             background-size 20px 20px
       dl
         margin-top 20px
-        padding-bottom 20px
         border-bottom 1px solid #E1E1E1
+        dt
+          font-size 20px
+          font-weight bold
+          color #333
+          margin-bottom 23px
+        dd
+          margin-bottom 20px
+          span
+            color #333
+            margin-right 92px
+          b
+            color #999
+        dd:nth-child(2)
+          b
+            font-size 20px
+            color #333
+
+
 
 
 
