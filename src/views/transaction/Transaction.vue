@@ -13,7 +13,7 @@
         </div>
         <div class="price">
           <input type="number" class="min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
-          <input type="number" class="max" v-model="max" placeholder="最高价">
+          <input type="number" class="max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
         </div>
         <div class="wholesale">
           <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="filter.isWhole">
@@ -96,21 +96,28 @@ import Pagination from '@/components/common/Pagination';
           money: 'CNY',//货币类型CNY
           min: '',
           max: '',
-          count: 20//每页广告条数
+          count: 20,//每页广告条数
           // nickname: '',
-          // isWhole: false,
+          isWhole: false
         },
         result: []
       }
     },
     methods: {
       inputDealMin(max) {
-        console.log(9)
         let num = Number(this.min),
             str = this.min;
         if(!/^[0-9]+$/.test(str) || (this.max === '' ? false : num > this.max) || num < 1){
           this.min = str.substring(0, str.length - 1);
           this.$refs.min.value = str.substring(0, str.length - 1);
+        }
+      },
+      inputDealMax(min){
+        let num = Number(this.max),
+            str = this.max;
+        if(!/^[0-9]+$/.test(str) || num < 1){
+          this.max = str.substring(0, str.length - 1);
+          this.$refs.max.value = str.substring(0, str.length - 1);
         }
       },
       hidePayment() {
