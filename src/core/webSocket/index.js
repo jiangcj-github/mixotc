@@ -31,7 +31,6 @@ function createConnect(url) {
   // 创建链接
   heartBeatInterval = null;
   reConnectInterval = null;
-  clearMessageInterval = null;
   //建立连接先发token
   // let token = storage.getLocal("otcToken");
   // token && !pool.onOpen["token"] &&
@@ -51,8 +50,7 @@ function createConnect(url) {
   function open(pool, event) {
     console.log("open");
     reConnectInterval && clearInterval(reConnectInterval);
-    clearMessageInterval && clearInterval(clearMessageInterval);
-    clearMessageInterval = setInterval(clearMessage, 5000);
+    !clearMessageInterval && (clearMessageInterval = setInterval(clearMessage, 5000));
     let obj = pool.onOpen;
     for (const key in obj) {
       obj[key](event.data);
@@ -91,7 +89,6 @@ function createConnect(url) {
     console.log("webSocket断开", event.target.url);
     clearInterval(reConnectInterval);
     clearInterval(heartBeatInterval);
-    clearInterval(clearMessageInterval);
     reConnect();
   }
 
@@ -118,7 +115,7 @@ function clearMessage() {
   let obj = pool.onMessage,
     date = new Date();
   for (const key in obj) {
-    if (obj[key].date && date - obj[key].date > 10000) {
+    if (obj[key].date && date - obj[key].date > 30000) {
       obj[key].callback(false);
       delete obj[key];
     }

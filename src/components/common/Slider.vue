@@ -3,7 +3,7 @@
     <div class="movebox" >
       <div class="movego"></div>
       <div class="txt" id="txt">将滑块拖拽到最右边</div>
-      <div class="move moveBefore" v-move></div>
+      <div class="move moveBefore" v-move="slideStatuss"></div>
     </div>
   </div>
 </template>
@@ -12,7 +12,7 @@
   export default{
     name:'Slider',
     props:{
-
+      slideStatus: String
     },
     components: {
 
@@ -25,13 +25,16 @@
       //console.log($('选择器'))
     },
     methods: {
-
+      slideStatuss(status){
+        this.Bus.$emit(this.slideStatus,status)
+      }
     },
     directives: {
-      move(el) {
-        el.onmousedown = function(e) {
+      move: function (el, binding) {
+        console.log(binding);
+        el.onmousedown = function (e) {
           let X = e.clientX - el.offsetLeft;
-          document.onmousemove = function(e) {
+          document.onmousemove = function (e) {
             let endx = e.clientX - X;
             el.className = 'move moveBefore';
             el.style.left = endx + 'px';
@@ -44,7 +47,7 @@
             //临界值小于
             if (endx <= 0) {
               el.style.left = 0 + 'px';
-              el.parentNode.children[0].style.width = 0 + 'px'
+              el.parentNode.children[0].style.width = 0 + 'px';
               //$('.movego').width(0)
             }
             //临界值大于
@@ -54,13 +57,14 @@
               el.parentNode.children[0].style.width = width + 'px';
               el.parentNode.children[1].innerHTML = '验证通过';
               el.className = 'move moveSuccess';
-              el.onmousedown = null
+              el.onmousedown = null;
+              binding.value();
             }
           }
         };
-        document.onmouseup = function() {
+        document.onmouseup = function () {
           document.onmousemove = null
-        }
+        };
       }
     }
   }
