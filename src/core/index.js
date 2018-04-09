@@ -65,7 +65,7 @@ Vue.directive('focus', {
 })
 const RUN_APP = (App, config, plugin) => {
   // console.log(config)
-  /* eslint-disable no-new */
+  /* eslint-disable no-news */
   let router = Router.install(config.RouterConfig)
   config.ServerConfig && config.ProxyConfig && config.ProxyConfig.useHttp && HttpProxy.install(config.ServerConfig, config.ProxyConfig.httpConfig.httpProxyList, config.ProxyConfig.httpConfig.httpFilter)
   config.ServerConfig && config.ProxyConfig && config.ProxyConfig.useWebSocket && WebSocket.install(config.ServerConfig, config.ProxyConfig.webSocketConfig)
