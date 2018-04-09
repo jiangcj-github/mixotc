@@ -12,12 +12,18 @@
   import Footer from '@/components/common/Footer'
   import News from '@/views/news/News'
 
+
   export default {
     name: 'App',
     components: {
       Header,
       Footer,
       News
+    },
+    data() {
+      return {
+
+      }
     }
   }
 </script>

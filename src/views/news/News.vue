@@ -1,17 +1,40 @@
 <template>
-  <div class="news-wrap clearfix">
-    <div class="chat">
-      <img src="" alt="">
-      <i></i>
+  <div>
+    <div class="news-wrap clearfix">
+      <div class="chat">
+        <img src="/static/images/talk_icon.png" alt="">
+        <i></i>
+      </div>
+      <!--<img src="/static/images/news.png">-->
+      <p @click="openBox">您有<span>1</span>条新消息</p>
     </div>
-    <!--<img src="/static/images/news.png">-->
-    <p>您有<span>1</span>条新消息</p>
+    <NewsInfo :talkBoxShow="showTalkBox" @offTalk="openBox"></NewsInfo>
   </div>
+
 </template>
 
 <script>
+  import NewsInfo from '@/views/news/NewsInfo'
+
   export default {
-    name: "news"
+    name: "news",
+    data() {
+      return {
+        showTalkBox: false
+      }
+    },
+    components: {
+      NewsInfo
+    },
+    methods: {
+      openBox(st) {
+        if (st === 'false') {
+          this.showTalkBox = false
+        } else {
+          this.showTalkBox = true
+        }
+      },
+    }
   }
 </script>
 
@@ -21,7 +44,6 @@
     position fixed
     right 40px
     bottom 200px
-
     -webkit-box-shadow: -3px 0 3px 0 rgba(0,0,0,0.1), 0 -3px 3px 0 rgba(0,0,0,0.1)
     box-shadow: -3px 0 3px 0 rgba(0,0,0,0.1), 0 -3px 3px 0 rgba(0,0,0,0.1)
     .chat
@@ -31,6 +53,11 @@
       height:45px
       background linear-gradient(142deg, #FFBE00 0%, #FF5D21 100%);
       border-radius 2px
+      text-align center
+      img
+        width 22px
+        height 20px
+        margin-top 13px
       i
         position:absolute
         top:44px
@@ -52,6 +79,7 @@
       background #FFF
       text-align center
       letter-spacing 0.29px
+      cursor pointer
       span
         color #FFB422
 </style>
