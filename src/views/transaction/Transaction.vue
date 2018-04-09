@@ -10,10 +10,11 @@
               <span>{{item.type}}</span>
             </li>
           </ul>
+          <img src="/static/images/cancel_icon.png" alt="" v-if="paymentScore !== 0" @click="clearPayment">
         </div>
         <div class="price">
-          <input type="number" class="min" @blur="filte.min = min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
-          <input type="number" class="max" @blur="filte.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
+          <input type="number" class="min" @blur="filte.min = min" @keyup.enter="filte.min = min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
+          <input type="number" class="max" @blur="filte.max = max" @keyup.enter="filte.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
         </div>
         <div class="wholesale">
           <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="filte.isWhole">
@@ -25,13 +26,19 @@
         <div class="thead clearfix">
           <p class="merchant"><span>商家</span></p>
           <p class="payment"><span>付款方式</span></p>
-          <p class="order-volume sort"><span>订单量</span></p>
-          <p class="deal-volume sort"><span>已成交量</span></p>
-          <p class="good-reputation sort"><span>好评率</span></p>
-          <p class="trust-amount sort"><span>信任人数</span></p>
-          <p class="amount sort"><span>数量</span></p>
-          <p class="limit-price sort"><span>限额(CNY)</span></p>
-          <p class="price sort"><span>价格(CNY)</span></p>
+          <p class="order-volume sort"><span>订单量<i class="before"></i><i class="after"></i></span></p>
+          <p class="deal-volume sort"><span>已成交量<i class="before"></i><i class="after"></i></span></p>
+          <p class="good-reputation sort"><span>好评率<i class="before"></i><i class="after"></i></span></p>
+          <p class="trust-amount sort"><span>信任人数<i class="before"></i><i class="after"></i></span></p>
+          <p class="amount sort"><span>数量<i class="before"></i><i class="after"></i></span></p>
+          <p class="limit-price sort"><span>限额(CNY)<i class="before"></i><i class="after"></i></span></p>
+          <p class="price sort" 
+            :class="{'sort-add': filte.sort === 5, 'sort-minus': filte.sort === 6}">
+            <span>价格(CNY)
+              <i class="before" @click="filte.sort = 5"></i>
+              <i class="after" @click="filte.sort = 6"></i>
+            </span>
+          </p>
         </div>
         <ul>
           <li is='ResultListItem' v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
@@ -110,13 +117,6 @@ import Pagination from '@/components/common/Pagination';
           this.result = res.data.sales;
         })
       },
-      switchPayment() {
-        if (!this.showPayment) {
-          this.showPayment = true;
-          return;
-        }
-        this.changePayment()
-      },
       inputDealMin(max) {
         let num = Number(this.min),
             str = this.min;
@@ -133,12 +133,24 @@ import Pagination from '@/components/common/Pagination';
           this.$refs.max.value = str.substring(0, str.length - 1);
         }
       },
+      changeIsWhole() {
+        this.filte.isWhole = !this.filte.isWhole
+      },
+      switchPayment() {
+        if (!this.showPayment) {
+          this.showPayment = true;
+          return;
+        }
+        this.changePayment()
+      },
+      clearPayment() {
+        this.payment.forEach(item => {
+          item.state = false
+        })
+      },
       hidePayment() {
         if(!this.showPayment) return;
         this.showPayment = false
-      },
-      changeIsWhole() {
-        this.filte.isWhole = !this.filte.isWhole
       },
       changePayment() {
         this.hidePayment();
@@ -207,6 +219,10 @@ import Pagination from '@/components/common/Pagination';
         background #FFF
         border 1px solid $col1E1
         border-radius 2px
+        img
+          position absolute
+          top 9px
+          right 30px
         i
           position absolute
           top 0px
@@ -358,20 +374,26 @@ import Pagination from '@/components/common/Pagination';
           &.sort
             span
               position relative
-              &::before
+              i.before
                 position absolute
                 top 3px
                 right -19px
-                content ''
                 triangle_up($col999)
                 cursor pointer
-              &::after
+              i.after
                 position absolute
                 top 10px
                 right -19px
-                content ''
                 triangle_down($col999)
                 cursor pointer
+            &.sort-add
+              span
+                i.before
+                  border-bottom-color $col422
+            &.sort-minus
+              span
+                i.after
+                  border-top-color $col422
       ul
         li.even
           background-color #FFF
