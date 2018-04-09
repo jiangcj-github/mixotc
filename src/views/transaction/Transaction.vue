@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="transacation inner">
-      <TopSearch></TopSearch>
+      <TopSearch :topList="['ETH', 'BTC', 'ADA', 'BAT', 'ETH']"></TopSearch>
       <div class="filtrate">
         <div class="select" @click.stop="showPayment = true">
           <i>{{payTitle}}</i>
@@ -12,8 +12,8 @@
           </ul>
         </div>
         <div class="price">
-          <input type="number" class="min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
-          <input type="number" class="max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
+          <input type="number" class="min" @blur="filter.min = min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
+          <input type="number" class="max" @blur="filter.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
         </div>
         <div class="wholesale">
           <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="filter.isWhole">
@@ -71,21 +71,25 @@ import Pagination from '@/components/common/Pagination';
       // })
     },
     mounted() {
-      this.Bus.$on('changePage',(data) => {
+      this.Bus.$on('changePage',data => {
         this.filter.pageNumber = data;
       });
-      this.Bus.$on('changeInputContent',(data) => {
-        console.log(data)
-      });
+      this.Bus.$on('changeCurrency', data => {
+        this.filter.currency = data
+      })
+      this.Bus.$on('changeInputContent', ({type, data}) => {
+        this.filter[type] = data;
+      })
     },
     destroyed() {
       this.Bus.$off('changePage');
+      this.Bus.$off('changeCurrency');
       this.Bus.$off('changeInputContent');
     },
     data() {
       return {
         showPayment: false,
-        payment:[{type: '支付宝', state: false}, {type: '微信', state: false}, {type: '银行卡', state: false}],
+        payment:[{type: '支付宝', score: 1, state: false}, {type: '微信', score: 2, state: false}, {type: '银行卡', score:4, state: false}],
         min:'',
         max:'',
         filter:{
@@ -94,11 +98,12 @@ import Pagination from '@/components/common/Pagination';
           payment: 7,//1支付宝，2微信，4银行卡，可相加，共6种
           currency: 'BTC',//字符串
           money: 'CNY',//货币类型CNY
-          min: '',
+          min: 200,
           max: '',
           count: 20,//每页广告条数
-          // nickname: '',
-          isWhole: false
+          nickname: '',
+          isWhole: false,
+          pageNumber: 1
         },
         result: []
       }
@@ -129,17 +134,27 @@ import Pagination from '@/components/common/Pagination';
       },
       changePaymwnt() {
         this.hidePayment();
+        this.filter.payment = this.paymentScore
       }
     },
     computed: {
       payTitle() {
         let title = this.payment.filter(item => {
-            return item.state
+            return item.state;
         }).map(item => {
-            return item.type
+            return item.type;
         })
         if(title.length ===0) return '选择支付方式'
-        return title.join('/')
+        return title.join('/');
+      },
+      paymentScore() {
+        let score = 0;
+        this.payment.filter(item => {
+          return item.state;
+        }).forEach(item => {
+          score += item.score;
+        })
+        return score;
       }
     },
     watch: {

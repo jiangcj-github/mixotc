@@ -4,7 +4,7 @@
       <input type="text" :style="{borderColor: color}" ref='input' v-model="inputContent">
       <span ref='title' @click="showSelect = true">{{title}}</span>
       <ul class="clearfix" v-show="showSelect">
-        <li v-for="(item, index) of content" @click.stop="changeTitle(item)" :key="index" :class="{ active: item === title}">{{item}}</li>
+        <li v-for="(item, index) of content" @click.stop="changeTitle(item)" :key="index" :class="{ active: item.title === title}">{{item.title}}</li>
       </ul>
       <img src="/static/images/cancel_icon.png" alt="" v-show="inputContent" @click="inputContent = ''">
     </div>
@@ -39,18 +39,21 @@ export default {
   },
   data() {
     return {
+      type: '',
       showSelect: false,
       inputContent: ''
     }
   },
   methods: {
-    changeTitle(data) {
+    changeTitle(item) {
       this.showSelect = false;
-      this.Bus.$emit(this.emitValue1, data);
+      this.Bus.$emit(this.emitValue1, item.title);
+      this.type = item.type;
     },
     changeInputContent() {
       this.hideSelect();
-      this.Bus.$emit(this.emitValue2, this.inputContent);
+      if (this.type === '' ) this.type = this.content[0].type
+      this.Bus.$emit(this.emitValue2, {type: this.type, data: this.inputContent});
     },
     hideSelect() {
       if(!this.showSelect) return;
