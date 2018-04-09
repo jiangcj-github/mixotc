@@ -66,7 +66,6 @@ Vue.directive('focus', {
 const RUN_APP = (App, config, plugin) => {
   // console.log(config)
   /* eslint-disable no-new */
-   /* eslint-disable no-new */
 
   // 引用vue自定义插件
   plugin && plugin.length && plugin.forEach(v => Vue.use(v))

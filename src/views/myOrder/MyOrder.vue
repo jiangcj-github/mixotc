@@ -85,7 +85,10 @@
         </p>
       </div>
     </div>
-    <Pagination :total="70" emitValue="changePage"></Pagination>
+    <Pagination :total="70"
+                :pageSize="20"
+                emitValue="changePage">
+    </Pagination>
 
     <!--<MyOrderNothing></MyOrderNothing>-->
 
