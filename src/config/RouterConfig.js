@@ -25,6 +25,11 @@ const ROUTES = [
     component: resolve => require(['@/views/homepage/Homepage'], resolve) // 买卖家个人中心-他的发布
   },
   {
+    path: "/verify",
+    name: "verify",
+    component: resolve => require(['@/views/verify/home'], resolve) // 审核中心
+  },
+  {
     path: "/order",
     name: "MyOrder",
     component: resolve => require(['@/views/myOrder/MyOrder'], resolve) // 我的订单
