@@ -1,31 +1,31 @@
 <template>
   <div class="li">
     <div class="p1">
-      <p class="text">速度一般～～～～其实有点慢，价钱也不是很低！！！！</p>
-      <p class="time">2016/03/08 23:57:03</p>
+      <p class="text">{{data.text}}</p>
+      <p class="time">{{data.time}}</p>
     </div>
     <div class="p2">
       <span class="judge">好评</span>
       <span class="heart-wrap">
-        <img src="/static/images/evaluate_red.png" v-for="i in hearts">
+        <img src="/static/images/evaluate_red.png" v-for="i in data.heart_num">
       </span>
     </div>
     <div class="p3">
-      <img src="" alt="">
-      <span>xin2378</span>
+      <img :src="data.headimg" alt="">
+      <span>{{data.nickname}}</span>
     </div>
   </div>
 </template>
 <script>
   export default {
-    props: {
-      text:{type:String, default:''},
-      time:{type:String, default:"2018/04/08 23:57:03"},
-      judge:{type:String, default:"好评"},
-      hearts:{type:Number, default:5},
-    },
+    props:['item'],
     data() {
       return {}
+    },
+    computed:{
+      data(){
+        return this.item;
+      }
     },
     methods: {}
   }
