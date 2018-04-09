@@ -64,8 +64,9 @@ import Pagination from '@/components/common/Pagination';
       Pagination
     },
     created() {
+      console.log(this.Proxy)
       // this.Proxy.sales.then(data=>{
-        this.Proxy.sales({type: 1,sort: 1, count: 20}).then(res=>{
+        this.Proxy.sales({type: 1,sort: 1, count: 20, page:2}).then(res=>{
           console.log(res)
         })
       // })

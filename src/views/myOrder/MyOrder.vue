@@ -85,7 +85,10 @@
         </p>
       </div>
     </div>
-    <Pagination :total="70" emitValue="changePage"></Pagination>
+    <Pagination :total="70"
+                :pageSize="20"
+                emitValue="changePage">
+    </Pagination>
 
     <!--<MyOrderNothing></MyOrderNothing>-->
 
@@ -188,7 +191,7 @@
     },
     data() {
       return {
-        content: ['搜索订单号', '搜索资金码', '搜索商家昵称／账号'],
+        content: [{title: '搜索订单号', type: 'currency'}, {title: '搜索资金码', type: 'nickname'}, {title: '搜索商家昵称/账号', type: 'nickname'}],
         title: '搜索订单号',
         searchValue: 'changeTitle',
         contentTabIndex: 1,

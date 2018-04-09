@@ -66,14 +66,23 @@ Vue.directive('focus', {
 const RUN_APP = (App, config, plugin) => {
   // console.log(config)
   /* eslint-disable no-new */
-  let router = Router.install(config.RouterConfig)
-  config.ServerConfig && config.ProxyConfig && config.ProxyConfig.useHttp && HttpProxy.install(config.ServerConfig, config.ProxyConfig.httpConfig.httpProxyList, config.ProxyConfig.httpConfig.httpFilter)
-  config.ServerConfig && config.ProxyConfig && config.ProxyConfig.useWebSocket && WebSocket.install(config.ServerConfig, config.ProxyConfig.webSocketConfig)
-  config.ProxyConfig && config.ProxyConfig.useStorage && Storage.install(config.ProxyConfig.storageConfig)
-  config.LoopTaskConfig && Object.keys(config.LoopTaskConfig).length && Loop.install(config.LoopTaskConfig)
-  config.PrototypeConfig && Prototype.install(config.PrototypeConfig)
 
+  // 引用vue自定义插件
   plugin && plugin.length && plugin.forEach(v => Vue.use(v))
+
+  //引用vue-router
+  Vue.use(Router)
+  let router = Router.install(config.RouterConfig)
+
+  //引用vuex
+  // Vue.use(Vuex)
+  // let store = Store.install(Vue, config.StoreConfig)
+
+  config.ServerConfig && config.HttpConfig && config.HttpConfig.useHttp && HttpProxy.install(Vue, config.ServerConfig, config.HttpConfig.httpList, config.HttpConfig.httpPreHandler, config.HttpConfig.httpAfterHandler);
+  // config.ServerConfig && config.WebSocketConfig && config.WebSocketConfig.useWebSocket && WebSocket.install(Vue, config.ServerConfig, config.WebSocketConfig.webSocketList);
+  config.StorageConfig && config.StorageConfig.useStorage && Storage.install(config.StorageConfig.storageList);
+  config.LoopTaskConfig && Object.keys(config.LoopTaskConfig).length && Loop.install(config.LoopTaskConfig);
+  config.PrototypeConfig && Prototype.install(config.PrototypeConfig);
 
   new Vue({
     el: '#app',
