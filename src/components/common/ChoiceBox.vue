@@ -103,6 +103,7 @@
       border 1px solid #E1E1E1
       font-size $fz13
       cursor pointer
+      z-index 999
       li
         padding 8px 0 8px 10px
       li:hover

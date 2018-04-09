@@ -2,37 +2,47 @@
   <div class="wrap">
     <div class="login" v-clickoutside="hideLoginForm">
       <h2 class="title">登录/注册</h2>
-      <div class="show-tip1">请输入正确的手机号/邮箱</div>
+      <div :class="{'hide-tip1':type,'show-tip1':!type}">请输入正确的手机号/邮箱</div>
       <p class="account">
         手机号/邮箱
-        <input type="text">
+        <input type="text" value="" v-model="account">
       </p>
-      <Slider></Slider>
-      <div class="show-tip2">请输入正确的验证码</div>
+      <Slider :slideStatus="slideStatus"></Slider>
+      <div :class="{'hide-tip2':captcha,'show-tip2':!captcha}">请输入正确的验证码</div>
       <p class="yzm">
-        <input type="text" placeholder="验证码">
-        <button class="sendCaptcha">发送验证码</button>
+        <input type="text" placeholder="验证码" value="" v-model="code">
+        <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend}" @click="sendCode">{{isSend ? time + '秒后重发': sendText}}</button>
       </p>
-      <button :class="{able:agree}" :disabled="agree">登录</button>
+      <button :class="{able:!slideStatus && agree}" :disabled="slideStatus || !agree" @click="login">登录</button>
       <div class="yhxy">
         <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
         <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
         <p>我已阅读并同意 <a href="">用户协议</a></p>
       </div>
-      <span class="yhxy-tips"><i>!</i>&nbsp;&nbsp;请勾选用户协议</span>
+      <span :class="{'hide-tips':agree,'yhxy-tips':!agree}"><i>!</i>&nbsp&nbsp请勾选用户协议</span>
     </div>
   </div>
 </template>
 
 <script>
   import Slider from './Slider.vue'
+  import sendConfig from '@/api/SendConfig.js'
 
   export default {
     props: ['loginForm'],
     name: "login",
     data() {
       return {
-        agree: false
+        slideStatus: 'slideStatuss',
+        agree: true,
+        account: '',
+        code: '',
+        type: true,
+        captcha: true,
+        isSend: false,
+        time:'',
+        sendText: '发送验证码',
+        interval: null
       }
 
     },
@@ -43,14 +53,58 @@
       checkAccount(account) {
         return /^1[34578]\d{9}$/.test(account) ? 'phone' : (/^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(account) ? 'email' : false)
       },
-      checkCaptcha(captcha) {
-        return /^\s*$/.test(captcha) ? '请输入正确的验证码' : true;
+      checkCaptcha(code) {
+        return /^\d{6}$/.test(code);
+      },
+      checkAgree() {
+        return agree;
+      },
+      sendCode(){
+        this.type = this.checkAccount(this.account);
+        if(!this.type) return;
+        const $ = 60;
+        if(!this.interval){
+          this.time = $;
+          this.isSend = true;
+          this.interval = setInterval(() =>{
+            if(this.time > 0 && this.time <= $){
+              this.time--;
+            }else{
+              this.isSend = false;
+              clearInterval(this.interval);
+              this.interval = null;
+            }
+          },1000);
+        }
+        let ws =this.WebSocket;
+        ws.start('ws://39.106.157.67:8090/sub');
+        let seq = ws.seq;
+        ws.onMessage[seq]={
+          callback: (data) =>{
+
+          }
+        }
+      },
+      login(){
+        console.log("sdsad");
+        this.type = this.checkAccount(this.account);
+        this.captcha = this.checkCaptcha(this.code);
+        this.agree = this.checkAgree();
       },
       hideLoginForm() {
         if (!this.loginForm) return;
         this.$emit('update:loginForm', false);
       }
 
+    },
+    mounted(){
+      this.Bus.$on(this.slideStatus,(status) => {
+        console.log(status);
+        this.slideStatus = status
+      })
+    },
+    destroyed(){
+      this.Bus.$off(this.slideStatus);
     }
   }
 </script>
@@ -103,9 +157,13 @@
       .show-tip1
         top 22%
         left 30%
+      .hide-tip1
+        display none
       .show-tip2
         top 53.5%
         left 34%
+      .hide-tip2
+        display none
       .title
         height 20px
         padding-left 40px
@@ -159,6 +217,16 @@
           line-height 40px
           color #fff
           cursor pointer
+        .sendedCaptcha
+          width 100px
+          height 40px
+          margin 0
+          background-color: $col999
+          text-align center
+          line-height 40px
+          color #fff
+          pointer-events none
+          cursor default
 
       button
         width 350px
@@ -191,6 +259,9 @@
           a
             color $col100
             fz11()
+
+      .hide-tips
+        display none
       .yhxy-tips
         display inline-block
         margin-left 150px
@@ -198,7 +269,6 @@
         text-align center
         line-height 12px
         fz11()
-
         i
           display inline-block
           width 12px
