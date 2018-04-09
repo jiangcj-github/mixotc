@@ -38,6 +38,7 @@
         account: '',
         code: '',
         type: true,
+        accType: '',
         captcha: true,
         isSend: false,
         time:'',
@@ -45,6 +46,9 @@
         interval: null
       }
 
+    },
+    mounted(){
+      console.log(this.Storage.otcToken);
     },
     components: {
       Slider
@@ -56,11 +60,9 @@
       checkCaptcha(code) {
         return /^\d{6}$/.test(code);
       },
-      checkAgree() {
-        return agree;
-      },
-      sendCode(){
+      sendCode({accType,account}){
         this.type = this.checkAccount(this.account);
+        this.accType = this.checkAccount(this.account);
         if(!this.type) return;
         const $ = 60;
         if(!this.interval){
@@ -77,19 +79,53 @@
           },1000);
         }
         let ws =this.WebSocket;
-        ws.start('ws://39.106.157.67:8090/sub');
+        ws.start('ws://120.76.213.235:8090/sub');
         let seq = ws.seq;
-        ws.onMessage[seq]={
-          callback: (data) =>{
-
-          }
+        ws.onOpen[seq]= () =>{
+          ws.send(sendConfig('send_code',{
+            seq: seq,
+            body:{
+              action: 'send_code',
+              phone: accType === "phone" ? account : "",
+              email: accType === "email" ? account : ""
+            }
+          }))
         }
+
       },
       login(){
         console.log("sdsad");
         this.type = this.checkAccount(this.account);
         this.captcha = this.checkCaptcha(this.code);
-        this.agree = this.checkAgree();
+        if(!this.type || !this.captcha) return;
+        let ws =this.WebSocket;
+        ws.start('ws://120.76.213.235:8090/sub');
+        let seq = ws.seq;
+        ws.onMessage[seq]= {
+          callback:(data)=>{
+            if(!data || data.body.ret !== 0) return;
+            this.$store.commit({
+              type: 'getUserInfo',
+              data: data.body
+            })
+          }
+        };
+        ws.onOpen[seq]= () =>{
+          ws.send(sendConfig('login',{
+            seq: seq,
+            body:{
+              action: 'login',
+              phone: accType === "phone" ? account : "",
+              email: accType === "email" ? account : "",
+              code: this.code,
+              country: 'CN',
+              version: 1,
+              mode: 0,
+              device: '',
+              os: 1
+            }
+          }))
+        }
       },
       hideLoginForm() {
         if (!this.loginForm) return;

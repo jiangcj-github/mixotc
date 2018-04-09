@@ -5,8 +5,18 @@ import createLogger from 'vuex/dist/logger.js';
 Vue.use(Vuex);
 
 const store = new Vuex.Store({
-  state: {},
-  mutations: {},
+  state: {
+    isLogin: false,
+    userInfo: null
+  },
+  mutations: {
+    changeLogin(state, {data}) {
+      state.isLogin = data;
+    },
+    getUserInfo(state, {data}) {
+      state.userInfo = data;
+    }
+  },
   plugins: [createLogger()]
 });
 
