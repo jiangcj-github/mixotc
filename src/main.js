@@ -30,7 +30,7 @@ RUN_APP(App, { RouterConfig, ServerConfig, ProxyConfig, PrototypeConfig:Prototyp
 Vue.config.productionTip = false;
 
 
-/* eslint-disable no-new */
+/* eslint-disable no-news */
 
 
 

@@ -16,7 +16,7 @@ const HTTP_PROXY = {
     httpProxyList.forEach(v => {
       HTTP_PROXY[v.name] = async params => {
         let data = {...v.data}
-        // data.headers = new Headers({'tes1t': '1111'})//自定义请求头
+        // data.headers = news Headers({'tes1t': '1111'})//自定义请求头
         data.url && (data.url = `http://${host}:${port}${data.url}`)
         if (params && data.method === 'post') data.body = JSON.stringify(params)
         if (params && data.method === 'get') (data.url += `?`) && Object.keys(params).forEach((key, index) => (data.url += `${key}=${params[key]}`) && Object.keys(params).length - 1 !== index && (data.url += '&'))

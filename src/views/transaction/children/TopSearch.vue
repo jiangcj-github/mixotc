@@ -3,8 +3,8 @@
     <h2>购买BTC</h2>
     <SearchInput class="search" :content="content" :title="title" :emitValue1="emitValue1"></SearchInput>
     <ul class="top5 clearfix">
-      <li v-for="(item, index) of topList" 
-          :key="index" :class="{tuijian: index < 3}" 
+      <li v-for="(item, index) of topList"
+          :key="index" :class="{tuijian: index < 3}"
           :style="{backgroundColor: topListColor[index]}"
           @click="changeCurrency(item)"
       >
@@ -33,7 +33,6 @@ export default {
   data() {
     return {
       content: [{title: '币种', type: 'currency'},{title: '商家昵称/账号', type: 'nickname'}],
-      
       title: '搜索更多币种',
       emitValue1: 'changeTitle',
       topListColor: ['#FF914C', '#FFB422', '#FFCE16', '#FFF', '#FFF']
