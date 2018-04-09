@@ -81,7 +81,7 @@
           },1000);
         }
         let ws =this.WebSocket;
-        ws.start('ws://120.76.213.235:8090/sub');
+        ws.start('ws://39.106.157.67:8090/sub');
         let seq = ws.seq;
         ws.onOpen[seq]= () =>{
           ws.send(sendConfig('send_code',{
@@ -135,6 +135,7 @@
       },
       hideLoginForm() {
         if (!this.loginForm) return;
+        if (!this.slideStatus) return;
         this.$emit('update:loginForm', false);
       }
 
