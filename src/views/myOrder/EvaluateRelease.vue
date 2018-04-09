@@ -22,17 +22,19 @@
     name: "evaluate-release",
     data() {
       return {
-        score: 0
+        score: 0,
+        flagCache: 0,
+        scoreCache: 0,
       }
     },
     computed: { //计算属性
       imgList() {
-        this.score > 5 ? this.score = 5 :  this.score;
+        this.score > 5 ? this.score = 5 : this.score;
         let result = [];
         console.log('result', result)
         console.log('score', this.score)
         for (let i = 0; i < this.score; i++) {
-          result.push({item: 'on', flag: 0});
+          result.push({item: 'on', flag: this.flagCache});
         }
         while (result.length < 5) {
           result.push({item: 'off', flag: 0});
@@ -42,27 +44,32 @@
     },
     methods: {
       changeRate(index) {
+        this.flagCache = 1
         this.score = index + 1
-        console.log('click', this.score)
-        this.imgList.forEach(v => {
-          if (v.item.indexOf('off')) {
-            v.flag = 1
-          }
-        })
+        this.scoreCache = index + 1
+        console.log('click', this.score, this.flagCache, this.scoreCache)
+        // this.imgList.forEach(v => {
+        //   if (v.item.indexOf('off')) {
+        //     v.flag = 1
+        //   }
+        // })
         console.log('this.imgList', this.imgList)
       },
       inRate(evt, item, index) {
         if (evt.target.className.indexOf('off') && (item.flag == 0)) {
+          // let score = this.store
+          // this.scoreCache = this.store
+          this.flagCache = 0
           this.score = index + 1
-          //evt.target.className = 'rate on'
         }
-        console.log('hover', this.score)
+        console.log('hover1', this.score, this.flagCache, )
         console.log('hoverthis.imgList', this.imgList)
       },
       outRate(evt, item, index) {
         if (evt.target.className.indexOf('on') && (item.flag == 0)) {
-          this.score = index + 1 - this.score
-          //evt.target.className = 'rate off'
+          this.flagCache = 1
+          this.score = this.scoreCache
+          console.log('hover2', this.score, this.flagCache, this.scoreCache)
         }
       }
     }

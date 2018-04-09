@@ -29,6 +29,8 @@ function createConnect(url) {
   pool.ws = new WebSocket(url);
   pool.reConnectFlag = true;
   // 创建链接
+  clearInterval(heartBeatInterval);
+  clearInterval(reConnectInterval);
   heartBeatInterval = null;
   reConnectInterval = null;
   //建立连接先发token
