@@ -29,14 +29,15 @@
             <li><DatePicker></DatePicker></li>
           </ol>
           <ul class="clearfix">
-            <li v-for="item in timeList">{{item}}</li>
+            <li v-for="(item, index) in timeList" :class="{'time-active': index == num}" @click="selectTime(index)">{{item}}</li>
           </ul>
         </div>
       </div>
-      <div class="order-search clearfix">
-        <input type="text" placeholder="搜索订单号"/>
-        <div><img src="/static/images/search.png"></div>
-      </div>
+      <SearchInput :content="content"
+                   :title="title"
+                   :emitValue1="searchValue"
+                   color="#E1E1E1">
+      </SearchInput>
     </div>
 
     <div class="order-content">
@@ -65,7 +66,18 @@
           <li>
             <p>代付款</p>
           </li>
-          <li><router-link to="/order/evaluate">去评价</router-link></li>
+          <li>
+            <p>
+              <router-link :to="{path: '/order/evaluate', query: {type: '0'}}" class="active-btn">去评价</router-link>
+            </p>
+            <p>
+              <router-link :to="{path: '/order/evaluate', query: {type: '1'}}">查看评价</router-link>
+            </p>
+            <p @click="remindCoin()">提醒放币</p>
+            <p @click="explain">申诉</p>
+            <p @click="cancelExplain">取消申诉</p>
+            <p @click="buy">购买</p>
+          </li>
         </ul>
         <p class="order-content-extre">
           <span>订单号：123456789098765432</span>
@@ -73,10 +85,86 @@
         </p>
       </div>
     </div>
-    <div>
-      <Pagination :type=10></Pagination>
-    </div>
+    <Pagination :total="70" emitValue="changePage"></Pagination>
 
+    <!--<MyOrderNothing></MyOrderNothing>-->
+
+    <!-- 提醒放币弹窗 -->
+    <BasePopup :show="remindCoinLayer" class="remind-coin-layer">{{remindCoinContent}}</BasePopup>
+    <!-- 申述弹窗 -->
+    <BasePopup class="explain-layer"
+               :show="explainLayer"
+               :width=470
+               :height=194>
+      <img src="/static/images/close_btn.png" alt="" @click="closePopup">
+      <p>请先与对方联系，核实对方是否放币</p>
+      <div>
+        <em>申诉</em>
+        <i>联系对方</i>
+      </div>
+    </BasePopup>
+    <!-- 取消申述 -->
+    <BasePopup class="explain-layer"
+               :show="cancelExplainLayer"
+               :width=470
+               :height=194>
+      <img src="/static/images/close_btn.png" alt="" @click="closePopup">
+      <p>请先与对方联系，核实对方是否放币</p>
+      <div>
+        <em @click="closePopup">取消</em>
+        <i>确定</i>
+      </div>
+    </BasePopup>
+    <!-- 购买 -->
+    <BasePopup class="buy-layer"
+               :show="buyLayer"
+               :width=470
+               :height=250>
+      <img src="/static/images/close_btn.png" alt="" @click="closePopup">
+      <div class="buy-layer-content">
+        <h1>请输入支付密码</h1>
+        <input type="password"/>
+        <div>
+          <em @click="closePopup">取消</em>
+          <i @click="buyNext">下一步</i>
+        </div>
+      </div>
+    </BasePopup>
+    <!-- 输入短信验证码 -->
+    <BasePopup class="info-layer"
+               :show="infoLayer"
+               :width=470
+               :height=250>
+      <img src="/static/images/close_btn.png" alt="" @click="closePopup">
+      <div class="buy-layer-content">
+        <h1>请输入短信验证码</h1>
+        <p>
+          <input type="text"/><span @click="sendVerify" :class="{offBg: showOffBg}">{{verifyCode}}</span>
+        </p>
+        <div>
+          <em @click="closePopup">取消</em>
+          <i>确定</i>
+        </div>
+      </div>
+    </BasePopup>
+    <!-- 输入谷歌验证码 -->
+    <BasePopup class="geogle-layer"
+               :show="geogleLayer"
+               :width=470
+               :height=250>
+      <img src="/static/images/close_btn.png" alt="" @click="closePopup">
+      <div class="buy-layer-content">
+        <h1>请输入谷歌验证码</h1>
+        <input type="tel" maxlength="6" class="realInput" v-model="realInput"  @keyup="getNum()" @keydown="delNum()">
+        <ul class="clearfix">
+          <li v-for="disInput in disInputs"><input type="tel" maxlength="1"  v-model="disInput.value" ></li>
+        </ul>
+        <div>
+          <em @click="closePopup">取消</em>
+          <i>确定</i>
+        </div>
+      </div>
+    </BasePopup>
   </div>
 </template>
 
@@ -84,17 +172,41 @@
   import ChoiceBox from '@/components/common/ChoiceBox' // 引入下拉选择框
   import Pagination from '@/components/common/Pagination' // 引入分页
   import DatePicker from '@/components/common/DatePicker' // 引入日历
+  import SearchInput from '@/components/common/SearchInput' // 引入搜索下拉框
+  import BasePopup from '@/components/common/BasePopup' // 引入弹窗
+  import MyOrderNothing from '@/views/myOrder/MyOrderNothing' // 引入无订单页面
 
   export default {
     name: "my-order",
     components: {
       ChoiceBox,
       Pagination,
-      DatePicker
+      DatePicker,
+      SearchInput,
+      BasePopup,
+      MyOrderNothing
     },
     data() {
       return {
+        content: ['搜索订单号', '搜索资金码', '搜索商家昵称／账号'],
+        title: '搜索订单号',
+        searchValue: 'changeTitle',
         contentTabIndex: 1,
+        num: 0,
+        remindCoinLayer: false,
+        remindCoinContent: '提醒发送成功',
+        explainLayer: false,
+        cancelExplainLayer: false,
+        buyLayer: false,
+        infoLayer: false,
+        geogleLayer: false,
+        verifyCode: '发送验证码',
+        flag: true,
+        showOffBg: false,
+        count: 60,
+        geogleLayer: false,
+        disInputs:[{value:''},{value:''},{value:''},{value:''},{value:''},{value:''}],
+        realInput:'',
         timeList: ['今天', '三天', '七天'],
         orderType: ['全部类型', '购买', '出售'],
         orderTypeValue: 'orderTypeValue',
@@ -109,7 +221,7 @@
       }
     },
     mounted() {
-      // 监听时间值，将值传给子组件
+      // 监听下拉框值，将值传给子组件
       this.Bus.$on(this.orderTypeValue, (data) => {
         console.log('orderTypeValue', data)
       });
@@ -119,10 +231,85 @@
       this.Bus.$on(this.allStatusValue, (data) => {
         console.log('allStatusValue', data)
       });
+      // 监听搜索框值
+      this.Bus.$on(this.searchValue,(data) => {
+        this.title = data
+      })
+    },
+    destroyed() {
+      this.Bus.$off(this.orderTypeValue);
+      this.Bus.$off(this.currencyValue);
+      this.Bus.$off(this.allStatusValue);
+      this.Bus.$off(this.searchValue);
     },
     methods: {
       selectStatus(type) { // Tab切换
         this.contentTabIndex = type;
+      },
+      selectTime(index) { // 时间切换
+        this.num = index;
+      },
+      remindCoin() {
+        this.remindCoinLayer = true;
+        setTimeout(() => {
+          this.remindCoinLayer = false
+        }, 3000)
+      },
+      explain() {
+        this.explainLayer = true
+      },
+      cancelExplain() {
+        this.cancelExplainLayer = true
+      },
+      buy() {
+        this.buyLayer = true;
+      },
+      buyNext() {
+        this.buyLayer = false;
+        // this.infoLayer = true;
+        this.geogleLayer = true
+      },
+      sendVerify() {
+        if (this.flag && this.infoLayer) {
+          this.flag = false;
+          this.count = 60;
+          let _this = this;
+          let verifyFn = function () {
+            _this.count--;
+            _this.verifyCode = `${_this.count}秒后重发`;
+            _this.showOffBg = true;
+            if (_this.count <= 0) {
+              _this.verifyCode = '发送验证码';
+              _this.flag = true;
+              _this.showOffBg = false;
+              clearInterval(timer)
+            }
+          };
+          verifyFn();
+          let timer = setInterval(verifyFn, 1000)
+        }
+      },
+      getNum(){
+        for (var i = 0; i < this.realInput.length; i++) {
+          this.disInputs[i].value = this.realInput.charAt(i) // 表示字符串中某个位置的数字，即字符在字符串中的下标
+
+        }
+      },
+      delNum(){
+        let oEvent = window.event;
+        console.log(oEvent)
+        if (oEvent.keyCode === 8) {
+          if (this.realInput.length > 0) {
+            this.disInputs[this.realInput.length-1].value=''
+          }
+        }
+      },
+      closePopup() {
+        this.explainLayer = false;
+        this.cancelExplainLayer = false;
+        this.buyLayer = false;
+        this.infoLayer = false;
+        this.geogleLayer = false
       }
     }
   }
@@ -155,6 +342,7 @@
       background #FFF
       line-height 60px
       font-size 16px
+      cursor pointer
       span
         padding 18px 15px
       span:first-child
@@ -219,12 +407,19 @@
           li
             width 50px
             text-align center
+            background #FFF3EB
+            color #999
+            cursor pointer
+          .time-active
+            background #FFF
+            color #FFB422
         img
           width 16px
           height 16px
           margin 8px 10px 0 0
 
     .order-content
+      margin-bottom 44px
       li
         width 110px
         font-size $fz13
@@ -249,6 +444,9 @@
           border-bottom 1px solid #E1E1E1
           li
             float left
+            p
+              margin-bottom 10px
+              cursor pointer
             .talk
               position relative
               padding-left 30px
@@ -262,14 +460,133 @@
                 content ''
                 background url(/static/images/talk.png) no-repeat
                 background-size 18px 18px
+            .active-btn
+              display inline-block
+              width 100px
+              height 25px
+              text-align center
+              line-height 25px
+              color #FFF
+              background: #FFB422
+              border-radius: 2px
 
           li:nth-child(2)
             color $col100
         .order-content-extre
           padding-top 17px
+          font-size 13px
+          color #999
 
+  /*弹窗部分*/
+  .remind-coin-layer
+    text-align center
+    line-height 94px
 
+  .explain-layer
+    text-align center
+    img
+      width 12px
+      height 12px
+      margin-top 10.6px
+      margin-left 442.6px
+      cursor pointer
+    p
+      margin 32.4px 0 60px
+    div
+      em, i
+        display inline-block
+        width 160px
+        height 40px
+        text-align center
+        line-height 40px
+        cursor pointer
+      em
+        color #FFB422
+        background #FFF
+        border 1px solid #FFB422
+        border-radius 2px
+        margin-right 30px
+      i
+        color #FFF
+        background #FFB422
+        border-radius 2px
 
+  .buy-layer, .info-layer, .geogle-layer
+    img
+      width 12px
+      height 12px
+      margin-top 10.6px
+      margin-left 442.6px
+      cursor pointer
+    .buy-layer-content
+      margin-top 32.4px
+      margin-left 60px
+      input
+        width 340px
+        height 40px
+        padding-left 10px
+        margin-bottom 40px
+        background #F4F6FA
+        border-radius 2px
+      div
+        em, i
+          display inline-block
+          width 160px
+          height 40px
+          text-align center
+          line-height 40px
+          cursor pointer
+        em
+          color #FFB422
+          background #FFF
+          border 1px solid #FFB422
+          border-radius 2px
+          margin-right 30px
+        i
+          color #FFF
+          background #FFB422
+          border-radius 2px
 
+  .info-layer
+    .buy-layer-content
+      p
+        input
+          width 250px
+          vertical-align top
+        span
+          display inline-block
+          width 100px
+          height 40px
+          text-align center
+          line-height 40px
+          color #FFF
+          background #FFB422
+          border-radius 0 2px 2px 0
+          cursor pointer
+        .offBg
+          background #999
+
+  .geogle-layer
+    .buy-layer-content
+      .realInput
+        position: absolute
+        padding 0
+        background: none
+        text-indent: -5em;
+      ul
+        margin-bottom 40px
+        li
+          float left
+          width 40px
+          height 40px
+          margin-right 20px
+          input
+            width 40px
+            height 40px
+            text-align center
+            line-height 40px
+            padding 0
+        li:last-child
+          margin-right 0
 
 </style>

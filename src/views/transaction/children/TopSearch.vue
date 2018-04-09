@@ -1,13 +1,15 @@
 <template>
   <div class="header clearfix">
     <h2>购买BTC</h2>
-    <SearchInput class="search" :content="content" :title="title" :emitValue="emitValue" :buttonColor="buttonColor"></SearchInput>
+    <SearchInput class="search" :content="content" :title="title" :emitValue1="emitValue1"></SearchInput>
     <ul class="top5 clearfix">
-      <li class="tuijian" style="background-color:#FF914C;color:#FFF">ETH</li>
-      <li class="tuijian" style="background-color:#FFB422;color:#FFF">BTC</li>
-      <li class="tuijian" style="background-color:#FFCE16;color:#FFF">ADA</li>
-      <li>BAT</li>
-      <li>ETH</li>
+      <li v-for="(item, index) of topList" 
+          :key="index" :class="{tuijian: index < 3}" 
+          :style="{backgroundColor: topListColor[index]}"
+          @click="changeCurrency(item)"
+      >
+      {{item}}
+      </li>
     </ul>
   </div>
 </template>
@@ -15,24 +17,40 @@
 <script>
 import SearchInput from '@/components/common/SearchInput'
 export default {
+  props: {
+    topList: {
+      type: Array,
+      default: ['ETH', 'BTC', 'ADA', 'BAT', 'ETH']
+    },
+    emitValue: {
+      type: String,
+      default: 'changeCurrency'
+    }
+  },
   components: {
     SearchInput
   },
   data() {
     return {
-      content: ['币种','商家昵称/账号'],
+      content: [{title: '币种', type: 'currency'},{title: '商家昵称/账号', type: 'nickname'}],
+      
       title: '搜索更多币种',
-      emitValue: 'changeTitle',
-      buttonColor: '#FFB422'
+      emitValue1: 'changeTitle',
+      topListColor: ['#FF914C', '#FFB422', '#FFCE16', '#FFF', '#FFF']
+    }
+  },
+  methods: {
+    changeCurrency(currency) {
+      this.Bus.$emit(this.emitValue, currency)
     }
   },
   mounted() {
-    this.Bus.$on(this.emitValue,(data) => {
+    this.Bus.$on(this.emitValue1,data => {
       this.title = data
     })
   },
   destroyed() {
-    this.Bus.$off(this.emitValue);
+    this.Bus.$off(this.emitValue1);
   }
 };
 </script>
@@ -81,6 +99,8 @@ export default {
           cursor pointer
           &:last-child
             margin-right 0
+          &.tuijian
+            color #FFF
           &.tuijian::before
             position absolute
             left 10px

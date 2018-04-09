@@ -39,7 +39,6 @@ import store from "../store";
 Vue.config.productionTip = false;
 Vue.directive('clickoutside', {
   bind: function (el, binding, vode) {
-    // console.log('1234566', el, binding);
     function documentHandler(e) {
       if (el.contains(e.target)) {
         return false
@@ -57,6 +56,13 @@ Vue.directive('clickoutside', {
     delete el.wfy
   }
 });
+Vue.directive('focus', {
+  // 当绑定元素插入到 DOM 中。
+  inserted: function (el) {
+    // 聚焦元素
+    el.focus()
+  }
+})
 const RUN_APP = (App, config, plugin) => {
   // console.log(config)
   /* eslint-disable no-new */
