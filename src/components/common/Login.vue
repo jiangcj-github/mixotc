@@ -47,8 +47,10 @@
       }
 
     },
-    mounted(){
-      console.log(this.Storage.otcToken);
+    created(){
+      this.Storage.otcToken.set('ggggggggggggg')
+
+      console.log(this.Storage.otcToken.get());
     },
     components: {
       Slider
@@ -99,7 +101,7 @@
         this.captcha = this.checkCaptcha(this.code);
         if(!this.type || !this.captcha) return;
         let ws =this.WebSocket;
-        ws.start('ws://120.76.213.235:8090/sub');
+        ws.start('ws://39.106.157.67:8090/sub');
         let seq = ws.seq;
         ws.onMessage[seq]= {
           callback:(data)=>{
@@ -107,8 +109,12 @@
             this.$store.commit({
               type: 'getUserInfo',
               data: data.body
-            })
-          }
+            });
+            data.body.msg && this.Storage.otcToken.set(data.body.msg);
+            this.$store.commit({ type: 'changeLogin', data: true });
+            this.hideLoginForm();
+          },
+          date:new Date()
         };
         ws.onOpen[seq]= () =>{
           ws.send(sendConfig('login',{

@@ -27,7 +27,8 @@
           <li><a href="">钱包</a></li>
           <li><img class="top-logo" src="/static/images/phoneicon.png" alt=""></li>
         </ul>
-        <span class="log" @click="show_loginform">登录/注册</span>
+        <span class="log" @click="show_loginform" v-if="!this.$store.state.isLogin">登录/注册</span>
+        <span class="log" v-else>{{this.$store.state.userInfo.name}}</span>
         <Login v-if="loginForm" :loginForm.sync="loginForm"/>
         <!--<span class="log">登录/注册</span>-->
         <!--<Login></Login>-->
