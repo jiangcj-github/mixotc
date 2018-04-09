@@ -11,7 +11,7 @@
       <div :class="{'hide-tip2':captcha,'show-tip2':!captcha}">请输入正确的验证码</div>
       <p class="yzm">
         <input type="text" placeholder="验证码" value="" v-model="code">
-        <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend}" @click="sendCode" ref="sendCode">发送验证码</button>
+        <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend}" @click="sendCode">{{isSend ? time + '秒后重发': sendText}}</button>
       </p>
       <button :class="{able:!slideStatus && agree}" :disabled="slideStatus || !agree" @click="login">登录</button>
       <div class="yhxy">
@@ -39,7 +39,10 @@
         code: '',
         type: true,
         captcha: true,
-        isSend: false
+        isSend: false,
+        time:'',
+        sendText: '发送验证码',
+        interval: null
       }
 
     },
@@ -59,18 +62,26 @@
       sendCode(){
         this.type = this.checkAccount(this.account);
         if(!this.type) return;
+        const $ = 60;
+        if(!this.interval){
+          this.time = $;
+          this.isSend = true;
+          this.interval = setInterval(() =>{
+            if(this.time > 0 && this.time <= $){
+              this.time--;
+            }else{
+              this.isSend = false;
+              clearInterval(this.interval);
+              this.interval = null;
+            }
+          },1000);
+        }
         let ws =this.WebSocket;
         ws.start('ws://39.106.157.67:8090/sub');
         let seq = ws.seq;
         ws.onMessage[seq]={
           callback: (data) =>{
-            this.isSend = true;
-            const preText = '发送验证码';
-            const msg = '$秒后重发';
-            const left = 60;
-            let interval = setInterval((function () {
-              if(left>0){}
-            }))
+
           }
         }
       },
