@@ -1,4 +1,4 @@
-import httpFilter from '@/js/filter/HttpFilter'
+// import httpFilter from '@/js/filter/HttpFilter'
 
 
 /**
@@ -12,7 +12,7 @@ export default {
    *  2.直接this.Proxy.XXX生成链接，返回promise
    *      注：若需要参数，this.Proxy.XXX（params）
    */
-  useHttp: true,// 是否开启http
+  useHttp: true, // 是否开启http
   /**
    * name:请求标识
    * data:请求数据
@@ -22,13 +22,12 @@ export default {
    * 注：其他fetch可以传入的参数，也在data里面传入
    */
   httpConfig: {
-    httpFilter,
+    // httpFilter,
     httpProxyList: [
       //test
-      // {name: 'test', data: {url: '/exchange/info', method: 'get'}},
+      { name: "sales", data: { url: "/otc/sales/0", method: "get" }}
       // {name: 'getHomeData2', data: {url: '/home/data/zhexian2', method: 'get'}},
       // {name: 'test1', data: {url: '/v1/home/mySymbolList', method: 'get'}},
-
     ]
   },
   /**
@@ -39,7 +38,7 @@ export default {
    *  3.调用this.WebSocket.XXX.get方法获得连接或连接组
    *  4.调用this.WebSocket.getAll返回所有连接
    */
-  useWebSocket: false,  // 是否开启websocket
+  useWebSocket: false, // 是否开启websocket
   /**
    * name:连接标识，名称
    * url:连接路径
@@ -61,7 +60,7 @@ export default {
    *    removeAll：删除所有
    *     【具体操作查看libs/Storage.js】
    */
-  useStorage: true,// 是否开启Storage
+  useStorage: true, // 是否开启Storage
   /**
    * name:标识，名称
    * duration:失效间隔
@@ -74,5 +73,5 @@ export default {
     // {name: 'filterItems', duration: 0, expiryTime: 0}//首页时间和币种维度筛选
     // // {name: 'optional1', duration:1, expiryTime: 1 },
   ]
-}
+};
 

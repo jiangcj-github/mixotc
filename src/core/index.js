@@ -39,7 +39,6 @@ import store from "../store";
 Vue.config.productionTip = false;
 Vue.directive('clickoutside', {
   bind: function (el, binding, vode) {
-    // console.log('1234566', el, binding);
     function documentHandler(e) {
       if (el.contains(e.target)) {
         return false
