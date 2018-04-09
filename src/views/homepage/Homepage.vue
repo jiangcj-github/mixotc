@@ -286,6 +286,8 @@
             cursor pointer
             color: #FFFFFF;
             border 1px solid #FFB422
+            &:hover
+              background #f1a45c
             i
               font-size: 13px;
               letter-spacing: 0.29px;

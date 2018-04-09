@@ -158,10 +158,17 @@
       <img src="/static/images/close_btn.png" alt="" @click="closePopup">
       <div class="buy-layer-content">
         <h1>请输入谷歌验证码</h1>
-        <input type="tel" maxlength="6" class="realInput" v-model="realInput"  @keyup="getNum()" @keydown="delNum()">
-        <ul class="clearfix">
-          <li v-for="disInput in disInputs"><input type="tel" maxlength="1"  v-model="disInput.value" ></li>
-        </ul>
+        <input type="text"
+               v-for="index in 6"
+               v-focus="index === inputContent"
+               v-model="inputGroup[index-1]"
+               maxlength="1"
+               @keyup="getNum(index)"
+               @keydown="delNum(index)"/>
+        <!--<input type="tel" maxlength="6" class="realInput" v-model="realInput"  @keyup="getNum()" @keydown="delNum()">-->
+        <!--<ul class="clearfix">-->
+          <!--<li v-for="(disInput, index) in disInputs"><input type="tel" maxlength="1"  v-model="disInput.value" v-focus="index"></li>-->
+        <!--</ul>-->
         <div>
           <em @click="closePopup">取消</em>
           <i>确定</i>
@@ -208,8 +215,11 @@
         showOffBg: false,
         count: 60,
         geogleLayer: false,
-        disInputs:[{value:''},{value:''},{value:''},{value:''},{value:''},{value:''}],
-        realInput:'',
+        // disInputs:[{value:''},{value:''},{value:''},{value:''},{value:''},{value:''}],
+        // realInput:'',
+        inputContent: '',
+        inputGroup: [],
+
         timeList: ['今天', '三天', '七天'],
         orderType: ['全部类型', '购买', '出售'],
         orderTypeValue: 'orderTypeValue',
@@ -244,6 +254,14 @@
       this.Bus.$off(this.currencyValue);
       this.Bus.$off(this.allStatusValue);
       this.Bus.$off(this.searchValue);
+    },
+    watch: {
+      inputGroup(newValue, oldValue) {
+        console.log(newValue, oldValue, newValue[newValue.length - 1].length)
+        // if (newValue[newValue.length - 1].length) {
+        //   this.inputContent =  newValue.length + 1
+        // }
+      }
     },
     methods: {
       selectStatus(type) { // Tab切换
@@ -292,19 +310,29 @@
           let timer = setInterval(verifyFn, 1000)
         }
       },
-      getNum(){
-        for (var i = 0; i < this.realInput.length; i++) {
-          this.disInputs[i].value = this.realInput.charAt(i) // 表示字符串中某个位置的数字，即字符在字符串中的下标
-
-        }
+      // getNum(){
+      //   for (var i = 0; i < this.realInput.length; i++) {
+      //     this.disInputs[i].value = this.realInput.charAt(i) // 表示字符串中某个位置的数字，即字符在字符串中的下标
+      //   }
+      // },
+      // delNum(){
+      //   let oEvent = window.event;
+      //   console.log(oEvent)
+      //   if (oEvent.keyCode === 8) {
+      //     if (this.realInput.length > 0) {
+      //       this.disInputs[this.realInput.length-1].value=''
+      //     }
+      //   }
+      getNum(index) {
+        console.log('keyup', this.inputContent, this.inputGroup, index)
+        this.inputContent = index + 1
       },
-      delNum(){
+      delNum(index) {
         let oEvent = window.event;
-        console.log(oEvent)
+        // console.log(oEvent)
         if (oEvent.keyCode === 8) {
-          if (this.realInput.length > 0) {
-            this.disInputs[this.realInput.length-1].value=''
-          }
+          console.log('keyCode', 1111)
+          this.inputContent = index + 1
         }
       },
       closePopup() {
@@ -571,7 +599,14 @@
 
   .geogle-layer
     .buy-layer-content
-      .realInput
+      input
+        width 40px
+        height 40px
+        margin-right 20px
+        padding 0
+        text-align center
+        line-height 40px
+      /*.realInput
         position: absolute
         padding 0
         background: none
@@ -590,6 +625,6 @@
             line-height 40px
             padding 0
         li:last-child
-          margin-right 0
+          margin-right 0*/
 
 </style>

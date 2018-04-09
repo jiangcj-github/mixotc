@@ -29,14 +29,14 @@ const HTTP_PROXY = {
           let urlArr = req.data.url.split(":"),
             url = urlArr[0],
             replaceKey = urlArr[1];
-          console.log(
-            "req.data.url.indexOf",
-            req.data.url,
-            req.data.url.indexOf(":"),
-            urlArr,
-            url,
-            replaceKey
-          );
+          // console.log(
+          //   "req.data.url.indexOf",
+          //   req.data.url,
+          //   req.data.url.indexOf(":"),
+          //   urlArr,
+          //   url,
+          //   replaceKey
+          // );
           req.data.url = `${url}${req.params[replaceKey]}`;
           delete req.params[replaceKey];
         }

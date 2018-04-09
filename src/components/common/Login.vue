@@ -19,7 +19,7 @@
         <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
         <p>我已阅读并同意 <a href="">用户协议</a></p>
       </div>
-      <span :class="{'hide-tips':agree,'yhxy-tips':!agree}"><i>!</i>&nbsp&nbsp请勾选用户协议</span>
+      <span :class="{'hide-tips':agree,'yhxy-tips':!agree}"><i>!</i>&nbsp;&nbsp;请勾选用户协议</span>
     </div>
   </div>
 </template>
@@ -92,7 +92,6 @@
 
       },
       login(){
-        console.log("sdsad");
         this.type = this.checkAccount(this.account);
         this.captcha = this.checkCaptcha(this.code);
         if(!this.type || !this.captcha) return;
@@ -138,7 +137,6 @@
     },
     mounted(){
       this.Bus.$on(this.slideStatus,(status) => {
-        console.log(status);
         this.slideStatus = status
       })
     },

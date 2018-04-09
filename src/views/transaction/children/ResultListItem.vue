@@ -1,23 +1,23 @@
 <template>
   <li class="item clearfix">
-    <div class="merchant">
-      <img src="" alt="">
-      <span class="nickname">xin2378</span>
+    <div class="title merchant">
+      <img :src="data.icon ? `http://192.168.113.26/image/${data.icon}` : `/static/images/default_avator.jpg`" alt="">
+      <span class="nickname">{{data.trader}}</span>
       <span class="trust">信任</span>
     </div>
-    <div class="payment">
-      <img src="/static/images/OTC_zhifubao.png" alt="">
-      <img src="/static/images/OTC_wechat.png" alt="">
-      <img src="/static/images/OTC_Bankcard.png" alt="">
+    <div class="title payment">
+      <img src="/static/images/OTC_zhifubao.png" alt="" v-if="data.payments %2 === 1">
+      <img src="/static/images/OTC_wechat.png" alt="" v-if="[3, 6, 7].includes(data.payments)">
+      <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(data.payments)">
     </div>
-    <div class="order-volume">178</div>
-    <div class="deal-volume">1.00+BTC</div>
-    <div class="good-reputation">100%</div>
-    <div class="trust-amount">150</div>
-    <div class="amount">123.45</div>
-    <div class="limit-price">200-100000</div>
-    <div class="price">70000.0</div>
-    <div class="button">
+    <div class="title order-volume">{{data.trade ? data.trade : '-'}}</div>
+    <div class="title deal-volume">1+BTC</div>
+    <div class="title good-reputation">{{data.rate ? `${data.rate}%` : '-'}}</div>
+    <div class="title trust-amount">{{data.trust ? data.trade : '-'}}</div>
+    <div class="title amount">123.45</div>
+    <div class="title limit-price">{{`${data.min}-${data.max}`}}</div>
+    <div class="title price">{{data.price}}</div>
+    <div class="title button">
       <button>
         购买
       </button>
@@ -26,7 +26,9 @@
 </template>
 
 <script>
-export default {};
+export default {
+  props: ['data']
+};
 </script>
 
 <style scoped lang="stylus">
@@ -35,13 +37,19 @@ export default {};
   div
     position relative
     float left
+    overflow hidden
     height 85px
     font-size 14px
     color $col333
     letter-spacing 0.16px
     line-height 85px
+    &.title
+      box-sizing()
+      padding-right 10px
+      white-space nowrap
+      text-overflow ellipsis
     &.merchant 
-      width 160px
+      width 190px
       padding-left 30px
       img
         position absolute
@@ -49,11 +57,14 @@ export default {};
         left 30px
         width 45px
         height 45px
-        background-color skyblue
         border-radius 50%
       span
         position absolute
         left 85px
+        width 90px
+        overflow hidden
+        white-space nowrap
+        text-overflow ellipsis
         &.nickname
           top 22px
           font-size 14px

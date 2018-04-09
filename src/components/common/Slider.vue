@@ -31,7 +31,7 @@
     },
     directives: {
       move: function (el, binding) {
-        console.log(binding);
+        // console.log(binding);
         el.onmousedown = function (e) {
           let X = e.clientX - el.offsetLeft;
           document.onmousemove = function (e) {
