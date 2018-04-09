@@ -6,8 +6,8 @@
         <p>2016/03/08 23:57:03</p>
       </li>
       <li>
-        <img :src="src" alt="" v-for="src in imgList">
         <span>中评</span>
+        <img :src="src" alt="" v-for="src in imgList">
       </li>
       <li>
         <button>删除评价</button>
@@ -21,7 +21,7 @@
     name: "evaluate-result",
     data() {
       return {
-        imgList:['/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png']
+        imgList:['/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png']
       }
     }
   }
@@ -48,7 +48,7 @@
           margin-right 20px
           vertical-align middle
         span
-          margin-left 20px
+          margin-right 40px
       li:last-child
         flex 1
         button
