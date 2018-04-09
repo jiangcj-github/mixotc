@@ -19,11 +19,7 @@
         <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
         <p>我已阅读并同意 <a href="">用户协议</a></p>
       </div>
-<<<<<<< HEAD
       <span :class="{'hide-tips':agree,'yhxy-tips':!agree}"><i>!</i>&nbsp&nbsp请勾选用户协议</span>
-=======
-      <span class="yhxy-tips"><i>!</i>&nbsp;&nbsp;请勾选用户协议</span>
->>>>>>> b89d29203f070755758ae22a1ca1a78865692d02
     </div>
   </div>
 </template>
