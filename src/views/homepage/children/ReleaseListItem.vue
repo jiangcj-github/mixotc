@@ -72,6 +72,8 @@
         letter-spacing: 0.27px;
         text-align center
         cursor pointer
+        &:hover
+          background-color #f1a45c
     .division
       height 1px
       background: #E1E1E1;

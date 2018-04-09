@@ -3,20 +3,20 @@
     <div class="transacation inner">
       <TopSearch :topList="['ETH', 'BTC', 'ADA', 'BAT', 'ETH']"></TopSearch>
       <div class="filtrate">
-        <div class="select" @click.stop="showPayment = true">
+        <div class="select" @click.stop="switchPayment">
           <i>{{payTitle}}</i>
-          <ul class="payment" v-clickoutside="changePaymwnt" v-show="showPayment">
-            <li v-for="(item, index) of payment" :key="index" :class="{selected: item.state}" @click="item.state = !item.state">
+          <ul class="payment" v-clickoutside="changePayment" v-show="showPayment">
+            <li v-for="(item, index) of payment" :key="index" :class="{selected: item.state}" @click.stop="item.state = !item.state">
               <span>{{item.type}}</span>
             </li>
           </ul>
         </div>
         <div class="price">
-          <input type="number" class="min" @blur="filter.min = min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
-          <input type="number" class="max" @blur="filter.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
+          <input type="number" class="min" @blur="filte.min = min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
+          <input type="number" class="max" @blur="filte.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
         </div>
         <div class="wholesale">
-          <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="filter.isWhole">
+          <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="filte.isWhole">
           <img src="/static/images/unselect.png" alt="" @click="changeIsWhole" v-else>
           <span>大额交易区</span>
         </div>
@@ -34,7 +34,7 @@
           <p class="price sort"><span>价格(CNY)</span></p>
         </div>
         <ul>
-          <li is='ResultListItem' v-for="item of 15" :key="item" :class="{even: item%2 === 0}"></li>
+          <li is='ResultListItem' v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
         </ul>
       </div>
       <Pagination :total="75" :pageSize="20" emitValue='changePage'></Pagination>
@@ -64,22 +64,17 @@ import Pagination from '@/components/common/Pagination';
       Pagination
     },
     created() {
-      console.log(this.Proxy)
-      // this.Proxy.sales.then(data=>{
-        this.Proxy.sales({type: 1,sort: 1, count: 20, page:2}).then(res=>{
-          console.log(res)
-        })
-      // })
+      this.fetchData({type: 1, count: 20, page: 0 })
     },
     mounted() {
       this.Bus.$on('changePage',data => {
-        this.filter.pageNumber = data;
+        this.filte.page = data - 1 ;
       });
       this.Bus.$on('changeCurrency', data => {
-        this.filter.currency = data
+        this.filte.currency = data.toLowerCase()
       })
       this.Bus.$on('changeInputContent', ({type, data}) => {
-        this.filter[type] = data;
+        this.filte[type] = data;
       })
     },
     destroyed() {
@@ -93,23 +88,35 @@ import Pagination from '@/components/common/Pagination';
         payment:[{type: '支付宝', score: 1, state: false}, {type: '微信', score: 2, state: false}, {type: '银行卡', score:4, state: false}],
         min:'',
         max:'',
-        filter:{
+        filte:{
           type: 1,// 1出售，2购买
           sort: 2,//1智能排序，2最新，3成交最多，4信任数最多，5价格由高到低，6价格由低到高
-          payment: 7,//1支付宝，2微信，4银行卡，可相加，共6种
-          currency: 'BTC',//字符串
+          payment: '',//1支付宝，2微信，4银行卡，可相加，共6种
+          currency: 'btc',//字符串
           money: 'CNY',//货币类型CNY
           min: 200,
           max: '',
           count: 20,//每页广告条数
           nickname: '',
           isWhole: false,
-          pageNumber: 1
+          page: 0
         },
         result: []
       }
     },
     methods: {
+      fetchData(params) {
+        this.Proxy.sales(params).then(res=>{
+          this.result = res.data.sales;
+        })
+      },
+      switchPayment() {
+        if (!this.showPayment) {
+          this.showPayment = true;
+          return;
+        }
+        this.changePayment()
+      },
       inputDealMin(max) {
         let num = Number(this.min),
             str = this.min;
@@ -131,11 +138,15 @@ import Pagination from '@/components/common/Pagination';
         this.showPayment = false
       },
       changeIsWhole() {
-        this.filter.isWhole = !this.filter.isWhole
+        this.filte.isWhole = !this.filte.isWhole
       },
-      changePaymwnt() {
+      changePayment() {
         this.hidePayment();
-        this.filter.payment = this.paymentScore
+        if (this.paymentScore === 0 ) {
+          this.filte.payment = ''
+          return;
+        }
+        this.filte.payment = this.paymentScore
       }
     },
     computed: {
@@ -159,9 +170,17 @@ import Pagination from '@/components/common/Pagination';
       }
     },
     watch: {
-      filter: {
+      filte: {
         handler(curVal){
-          console.log(curVal)
+          let min = Number(curVal.min),
+              max = Number(curVal.max);
+          if (curVal.min === '') curVal.min = 200
+          if ((min > max && curVal.min !== '' && curVal.max !== '') || curVal.min < 200) {
+            alert('请输入有效价格范围！')
+            return;
+          }
+          let obj = JSON.parse(JSON.stringify(curVal))
+          this.fetchData(obj)
         },
         deep: true
       }
