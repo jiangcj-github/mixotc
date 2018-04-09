@@ -1,7 +1,15 @@
 <template>
   <div class="evaluate-release-wrap">
     <div class="img-group">
-      <span v-for="(item, index) in imgList" :class="item" class="rate" :track-by="index" @click="changeRate(index)"></span>
+      <span v-for="(item, index) in imgList"
+            :class="item.item"
+            :from-click="item.flag"
+            class="rate"
+            :track-by="index"
+            @click="changeRate(index)"
+            @mouseenter="inRate($event, item, index)"
+            @mouseleave="outRate($event, item, index)">
+      </span>
       <b>中评</b>
     </div>
     <textarea placeholder="评价对方：字数限制0～50个字符"></textarea>
@@ -22,22 +30,40 @@
         this.score > 5 ? this.score = 5 :  this.score;
         let result = [];
         console.log('result', result)
-
         console.log('score', this.score)
-
-        for(let i=0;i<this.score;i++){
-          result.push('on');
+        for (let i = 0; i < this.score; i++) {
+          result.push({item: 'on', flag: 0});
         }
-        while(result.length < 5){
-          result.push('off');
+        while (result.length < 5) {
+          result.push({item: 'off', flag: 0});
         }
         return result;
       }
     },
     methods: {
-      changeRate (index) {
+      changeRate(index) {
         this.score = index + 1
-        console.log('index', index)
+        console.log('click', this.score)
+        this.imgList.forEach(v => {
+          if (v.item.indexOf('off')) {
+            v.flag = 1
+          }
+        })
+        console.log('this.imgList', this.imgList)
+      },
+      inRate(evt, item, index) {
+        if (evt.target.className.indexOf('off') && (item.flag == 0)) {
+          this.score = index + 1
+          //evt.target.className = 'rate on'
+        }
+        console.log('hover', this.score)
+        console.log('hoverthis.imgList', this.imgList)
+      },
+      outRate(evt, item, index) {
+        if (evt.target.className.indexOf('on') && (item.flag == 0)) {
+          this.score = index + 1 - this.score
+          //evt.target.className = 'rate off'
+        }
       }
     }
   }

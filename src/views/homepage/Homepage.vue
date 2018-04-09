@@ -27,12 +27,12 @@
         </div>
       </div>
       <div class="sec2">
-        <div class="unit"><label>123</label><span>订单次数</span></div>
-        <div class="unit"><label>1.00+BTC</label><span>历史成交量</span></div>
-        <div class="unit"><label>90%</label><span>好评率</span></div>
-        <div class="unit"><label>30</label><span>被信任</span></div>
-        <div class="unit"><label>10</label><span>信任</span></div>
-        <div class="unit"><label>5</label><span>担保</span></div>
+        <div class="unit"><label>{{order_num}}</label><span>订单次数</span></div>
+        <div class="unit"><label>{{volumn}}</label><span>历史成交量</span></div>
+        <div class="unit"><label>{{praise_rate}}</label><span>好评率</span></div>
+        <div class="unit"><label>{{be_trusted}}</label><span>被信任</span></div>
+        <div class="unit"><label>{{trust}}</label><span>信任</span></div>
+        <div class="unit"><label>{{guarantee}}</label><span>担保</span></div>
       </div>
     </div>
     <!--取消信任弹框-->
@@ -42,7 +42,7 @@
     <!--菜单项tab-->
     <ul class="menu-tab">
         <li :class="{active:tab==0}" @click="toggleTab(0)">他的发布</li>
-        <li :class="{active:tab==1}" @click="toggleTab(1)">收到的评价<i>&nbsp;12234</i></li>
+        <li :class="{active:tab==1}" @click="toggleTab(1)">收到的评价<i>&nbsp;{{evaluate_num}}</i></li>
     </ul>
     <!--发布列表-->
     <div class="release-list" v-show="tab==0">
@@ -70,12 +70,12 @@
         <li class="pay-time">订单期限</li>
         <li class="operation">操作</li>
       </ul>
-      <ReleaseListItem v-for="item of 5" :key="item"></ReleaseListItem>
+      <ReleaseListItem v-for="(item,i) in releases" :key="i" :item="item"></ReleaseListItem>
       <Pagination :total="75" emitValue='changeReleasePage'></Pagination>
     </div>
     <!--评价列表-->
     <div class="evaluate-list" v-show="tab==1">
-      <EvaluateListItem v-for="item of 5" :key="item"></EvaluateListItem>
+      <EvaluateListItem v-for="(item,i) in evaluates" :key="i" :item="item"></EvaluateListItem>
       <Pagination :total="20" emitValue='changeEvaluatePage' class="page-bar"></Pagination>
     </div>
   </div>
@@ -95,9 +95,43 @@
     },
     data() {
       return {
+        uid:'xxxx',
+        self_uid:'xxxx',
+
         nickname: 'xin2378',
         tran_num: 3,
         is_trust: false,
+        order_num:100,
+        volumn:1+'+BTC',
+        praise_rate:90+'%',
+        be_trusted:100,
+        trust:100,
+        guarantee:100,
+        evaluate_num:100,
+        pay_methods:[
+          {key:'zfb',str:'支付宝',img:''},
+          {key:'wx',str:'微信',img:''},
+          {key:'yhk',str:'银行卡',img:''},
+        ],
+        releases:[
+          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
+          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
+          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
+          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
+          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
+          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
+          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
+          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
+        ],
+        evaluates:[
+          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
+          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
+          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
+          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
+          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
+          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
+        ],
+
         flt_types:[
           {text:'全部广告',value:''},
           {text:'购买',value:''},

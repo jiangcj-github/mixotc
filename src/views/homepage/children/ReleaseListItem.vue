@@ -1,17 +1,17 @@
 <template>
   <div class="li">
         <div class="booth">
-          <span class="time">2016/03/09 13:43:30</span>
-          <span class="type">购买</span>
-          <span class="coin">BTC</span>
-          <span class="price">¥ 123</span>
-          <span class="limit">200.00~10000.00</span>
+          <span class="time">{{data.time}}</span>
+          <span class="type">{{data.type}}</span>
+          <span class="coin">{{data.coin}}</span>
+          <span class="price">{{data.currency}}&nbsp;{{data.price}}</span>
+          <span class="limit">{{data.min_limit}}~{{data.max_limit}}</span>
           <span class="pay-method">
             <img src="/static/images/OTC_zhifubao.png" alt=""/>
             <img src="/static/images/OTC_wechat.png" alt=""/>
             <img src="/static/images/OTC_Bankcard.png" alt=""/>
           </span>
-          <span class="pay-time">10min</span>
+          <span class="pay-time">{{data.deadline}}</span>
           <span class="operation">
              <router-link class="buy-to" to="" tag="span">
                <i>向他购买</i>
@@ -19,14 +19,20 @@
           </span>
         </div>
         <div class="division"></div>
-        <div class="remark">备注：经常在线，可以快速买卖。。。。。</div>
+        <div class="remark">备注：{{data.remark}}</div>
       </div>
 </template>
 <script>
   export default {
+    props:['item'],
     data() {
       return {
 
+      }
+    },
+    computed:{
+      data(){
+        return this.item;
       }
     },
     methods: {
