@@ -22,9 +22,10 @@
     },
     created: function () {
       let token = this.Storage.otcToken.get();
+      console.log('sdsad',token)
       if(!token) return;
       let ws = this.WebSocket;
-      ws.start('ws://39.106.157.67:8090/sub');
+      ws.start('ws://192.168.113.26:8090/sub');
       !ws.onMessage['token'] && (ws.onMessage['token'] = {
         callback:(data) =>{
           if(data.op !== 18) return;
@@ -40,7 +41,7 @@
         }});
       ws.onOpen['token']= () =>{
         ws.send(sendConfig('login',{
-          seq: seq,
+          seq: ws.seq,
           body: token
         }))
       }
