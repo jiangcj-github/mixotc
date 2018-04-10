@@ -332,7 +332,6 @@
         // console.log(oEvent)
         if (oEvent.keyCode === 8) {
           console.log('keyCode', 1111)
-          this.inputContent = index + 1
         }
       },
       closePopup() {

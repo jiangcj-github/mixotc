@@ -28,12 +28,14 @@
     },
     methods: {
       openBox(st) {
+        console.log(st)
         if (st === 'false') {
           this.showTalkBox = false
         } else {
           this.showTalkBox = true
+          console.log(1111)
         }
-      },
+      }
     }
   }
 </script>
