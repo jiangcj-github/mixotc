@@ -17,7 +17,7 @@
       <div class="wrapper">
         <ul class="down-tag">
           <li><a href="/"><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></a></li>
-          <li class="tag">
+          <li class="tag transaction">
             <router-link to="/transaction">交易中心</router-link>
           </li>
           <!--<li><a href="">广告</a></li>-->
@@ -35,10 +35,19 @@
           
         </ul>
         <span class="log" @click="show_loginform" v-if="!this.$store.state.isLogin">登录/注册</span>
-        <span class="login" v-else @mouseenter="showXl" @mouseleave="hideXl">{{this.$store.state.userInfo.name}}</span>
-        <ul :class="{'show-xl' : hovered , 'hide-xl' : !hovered}">
-          <li><img src="/static/images/logoutIcon.png" alt=""><span>退出</span></li>
-        </ul>
+        <div class="info" v-else>
+          <img class="avator" :src="icon ? `http://192.168.113.26/image/${icon}` : `/static/images/default_avator.png`" alt="">
+          <div class="name" @click="showMenu = !showMenu" >
+            <span class="login" >{{name}}</span>
+            <img class="select-icon" src='/static/images/triangle_black.png' alt="">
+            <ul v-if="showMenu">
+              <li class="center">个人中心</li>
+              <li class="safe">安全设置</li>
+              <li class="auth">身份认证</li>
+              <li class="logout" @click="logout">退出</li>
+            </ul>
+          </div>
+        </div>
         <Login v-if="loginForm" :loginForm.sync="loginForm"/>
       </div>
     </section>
@@ -52,8 +61,8 @@
     data() {
       return {
         isHover: false,
-        hovered: false,
-        loginForm: false,
+        loginForm : false,
+        showMenu: false,
         items: [
           {title: 'BitFunex', value: '$9.244.70↑'}, {title: 'Kraken', value: '€7.468.30↑'}, {title: 'Bithumb', value: '₩10.186.000.00↑'}, {title: 'Bitflyer', value: '￥995.759.00↑'}
         ]
@@ -81,11 +90,19 @@
       hideQr() {
         this.isHover = false;
       },
-      showXl() {
-        this.hovered = true;
+      logout() {
+        this.Storage.otcToken.removeAll()
+        this.$store.commit({type: 'changeLogin', data: false});
+        this.WebSocket.reConnectFlag = false;
+        this.WebSocket.close();
+      }
+    },
+    computed: {
+      icon() {
+        return this.$store.state.userInfo.icon
       },
-      hideXl() {
-        this.hovered = false;
+      name() {
+        return this.$store.state.userInfo.name
       }
     }
   }
@@ -170,17 +187,18 @@
         li
           position relative
           float left
+          margin-right 50px
           text-align center
-          margin-right 48px
           vertical-align middle
           line-height 71px
         .tag
-          padding 0 12px
           &.order
             width 70px
+          &.transaction
+            width 80px
         .itag
           line-height 60px
-          padding 0 46px
+          padding 0 41.5px
         .tag, .itag
           &:hover,&.active
             border-bottom 2px solid $col422
@@ -189,14 +207,14 @@
             position absolute
             left 1px
             top 75px
-            width 108px
-            height 108px
+            width 100px
+            height 100px
             background-color #FFF
             z-index 9
             img
               width 60px
               height 60px
-              margin 10px 24px 5px
+              margin 10px 20px 5px
             span
               position absolute
               left 3px
@@ -205,34 +223,75 @@
               height 12px
               line-height 12px
               fz11()
-      .log, .login
-        font-size 14px
-        cursor pointer
       .log
+        font-size 14px
         color $col422
-      .login
-        color $col333
-      .show-xl
+        cursor pointer
+      .info
+        position relative
+        height 100%
+        .avator
+          float left
+          margin 12.5px 13px 0 0
+        .name
+          position relative
+          float left
+          width 120px
+          cursor pointer
+          &:hover::after
+            position absolute
+            left 0
+            bottom 0
+            content ''
+            width 100%
+            height 2px
+            background $col422 
+          .login
+            float left
+            position relative
+            overflow hidden
+            width 104px
+            height 70px
+            margin-right 5px
+            white-space nowrap
+            text-overflow ellipsis
+            line-height 70px
+          .select-icon
+            position absolute
+            top 50%
+            right 0 
+            margin-top -2.5px
+          ul
+            position absolute
+            top 68px
+            left 0
+            background #FFF
+            border-top 2px solid $col422
+            box-shadow: 0 2px 4px 0 $col;
+            z-index 9
+            li
+              box-sizing()
+              position relative
+              width 120px
+              height 40px
+              padding-left 40px
+              line-height 40px
+              &:hover
+                background $col3EB
+              &::before
+                position absolute
+                top 11px
+                left 11px
+                content ''
+                width 20px
+                height 20px
+              &.center::before
+                background url('/static/images/center.png')
+              &.auth::before
+                background url('/static/images/auth.png')
+              &.safe::before
+                background url('/static/images/safe.png')
+              &.logout::before
+                background url('/static/images/logout.png')
 
-      .user-info
-        display flex
-        width 180px
-        height 45px
-        line-height 45px
-        text-align center
-        vertical-align middle
-
-        img
-          width: 35px
-          height: 35px
-          margin 5px 5px 0 0
-          border-radius 50%
-
-        .user-name
-          font-size 14px
-
-          .black
-            margin-left 5px
-            margin-bottom 4px
-            border-top 5px solid #000
 </style>
