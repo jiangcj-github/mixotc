@@ -59,9 +59,8 @@
       },
       sendCode(){
         let type = this.checkAccount(this.account);
-        let accType = this.checkAccount(this.account);
         if(!type) return;
-        this.accType = accType;
+        this.accType = type;
         const $ = 60;
         if(!this.interval){
           this.time = $;
@@ -77,7 +76,7 @@
           },1000);
         }
         let ws =this.WebSocket;
-        ws.start('ws://192.168.113.26:8090/sub');
+        ws.start('ws://39.106.157.67:8090/sub');
         let seq = ws.seq;
         ws.onOpen[seq]= () =>{
           ws.send(sendConfig('send_code',{
@@ -94,9 +93,10 @@
       login(){
         this.type = this.checkAccount(this.account);
         this.captcha = this.checkCaptcha(this.code);
+        this.accType = this.type;
         if(!this.type || !this.captcha) return;
         let ws =this.WebSocket;
-        ws.start('ws://192.168.113.26:8090/sub');
+        ws.start('ws://39.106.157.67:8090/sub');
         let seq = ws.seq;
         ws.onMessage[seq]= {
           callback:(data)=>{

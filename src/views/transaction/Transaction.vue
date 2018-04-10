@@ -115,6 +115,9 @@ import Pagination from '@/components/common/Pagination';
       fetchData(params) {
         this.Proxy.sales(params).then(res=>{
           this.result = res.data.sales;
+          let id = '198175299773403140'
+          let initid =  this.JsonBig.parse(id)
+          console.log(this.JsonBig.stringify({id: initid}))
         })
       },
       inputDealMin(max) {
