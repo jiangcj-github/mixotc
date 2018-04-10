@@ -17,17 +17,26 @@
       <div class="wrapper">
         <ul class="down-tag">
           <li><a href="/"><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></a></li>
-          <li>
+          <li class="tag">
             <router-link to="/transaction">交易中心</router-link>
           </li>
-          <li><a href="">广告</a></li>
-          <li>
-            <router-link to="/order">订单</router-link>
+          <!--<li><a href="">广告</a></li>-->
+          <li class="tag">
+            <router-link to="/order" v-if="this.$store.state.isLogin">订单</router-link>
           </li>
-          <li><a href="">钱包</a></li>
-          <li><img class="top-logo" src="/static/images/phoneicon.png" alt=""></li>
+          <!--<li><a href="">钱包</a></li>-->
+          <li class="itag" @mouseenter="showQr" @mouseleave="hideQr"><img class="top-logo" src="/static/images/phoneicon.png" alt=""></li>
+          <div :class="{'show-qr' : isHover , 'hide-qr' : !isHover}">
+            <img src="/static/images/QRcode.png" alt="">
+            <span>APP安卓端下载</span>
+          </div>
         </ul>
-        <span class="log" @click="show_loginform">登录/注册</span>
+        <span class="log" @click="show_loginform" v-if="!this.$store.state.isLogin">登录/注册</span>
+        <span class="login" v-else @mouseenter="showXl" @mouseleave="hideXl">{{this.$store.state.userInfo.name}}</span>
+        <ul :class="{'show-xl' : hovered , 'hide-xl' : !hovered}">
+          <li><img src="/static/images/selfCentre.png" alt=""><span>个人中心</span></li>
+          <li><img src="/static/images/logoutIcon.png" alt=""><span>退出</span></li>
+        </ul>
         <Login v-if="loginForm" :loginForm.sync="loginForm"/>
         <!--<span class="log">登录/注册</span>-->
         <!--<Login></Login>-->
@@ -50,6 +59,8 @@
   export default {
     data() {
       return {
+        isHover: false,
+        hovered: false,
         loginForm: false,
         items: [
           {title: 'BitFunex', value: '$9.244.70↑'}, {title: 'Kraken', value: '€7.468.30↑'}, {title: 'Bithumb', value: '₩10.186.000.00↑'}, {title: 'Bitflyer', value: '￥995.759.00↑'}
@@ -71,6 +82,18 @@
       loginOut() {
         this.storage.removeLocal('otcToken');
         location.reload();
+      },
+      showQr() {
+        this.isHover = true;
+      },
+      hideQr() {
+        this.isHover = false;
+      },
+      showXl() {
+        this.hovered = true;
+      },
+      hideXl() {
+        this.hovered = false;
       }
     }
   }
@@ -153,16 +176,50 @@
         font-size 14px
 
         li
-          margin-right 60px
+          margin-right 48px
           float left
           text-align center
           vertical-align middle
-          line-height 70px
+          line-height 71px
+        .tag
+          padding 0 12px
+        .itag
+          line-height 60px
+          padding 0 46px
+        .tag, .itag
+          &:hover,&.active
+            border-bottom 2px solid $col422
 
-      .log
+        .show-qr
+          display -webkit-box
+          display -ms-flexbox
+          position fixed
+          left 38.1%
+          top 103px
+          width 108px
+          height 108px
+          background-color: #fff
+          z-index 998
+
+          img
+            width 60px
+            height 60px
+            margin 10px 24px 5px
+          span
+            padding-left 14px
+            fz11()
+
+        .hide-qr
+          display none
+
+      .log, .login
         font-size 14px
         cursor pointer
+      .log
         color $col422
+      .login
+        color $col333
+      .show-xl
 
       .user-info
         display flex

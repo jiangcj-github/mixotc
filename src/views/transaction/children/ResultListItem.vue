@@ -18,9 +18,7 @@
     <div class="title limit-price">{{`${data.min}-${data.max}`}}</div>
     <div class="title price">{{data.price}}</div>
     <div class="title button">
-      <button>
-        购买
-      </button>
+      <router-link tag='button' :to="{ name: 'order', params: { userId: 123 }}">购买</router-link>
     </div>
   </li>
 </template>

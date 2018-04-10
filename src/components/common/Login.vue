@@ -38,6 +38,7 @@
         account: '',
         code: '',
         type: true,
+        accType: '',
         captcha: true,
         isSend: false,
         time:'',
@@ -56,12 +57,11 @@
       checkCaptcha(code) {
         return /^\d{6}$/.test(code);
       },
-      checkAgree() {
-        return agree;
-      },
       sendCode(){
-        this.type = this.checkAccount(this.account);
-        if(!this.type) return;
+        let type = this.checkAccount(this.account);
+        let accType = this.checkAccount(this.account);
+        if(!type) return;
+        this.accType = accType;
         const $ = 60;
         if(!this.interval){
           this.time = $;
@@ -77,18 +77,57 @@
           },1000);
         }
         let ws =this.WebSocket;
-        ws.start('ws://39.106.157.67:8090/sub');
+        ws.start('ws://192.168.113.26:8090/sub');
         let seq = ws.seq;
-        ws.onMessage[seq]={
-          callback: (data) =>{
-
-          }
+        ws.onOpen[seq]= () =>{
+          ws.send(sendConfig('send_code',{
+            seq: seq,
+            body:{
+              action: 'send_code',
+              phone: this.accType === "phone" ? this.account : "",
+              email: this.accType === "email" ? this.account : ""
+            }
+          }))
         }
+
       },
       login(){
         this.type = this.checkAccount(this.account);
         this.captcha = this.checkCaptcha(this.code);
-        this.agree = this.checkAgree();
+        if(!this.type || !this.captcha) return;
+        let ws =this.WebSocket;
+        ws.start('ws://192.168.113.26:8090/sub');
+        let seq = ws.seq;
+        ws.onMessage[seq]= {
+          callback:(data)=>{
+            if(!data || data.body.ret !== 0) return;
+            this.$store.commit({
+              type: 'getUserInfo',
+              data: data.body
+            });
+            data.body.msg && this.Storage.otcToken.set(data.body.msg);
+            this.$store.commit({ type: 'changeLogin', data: true });
+            console.log(this);
+            this.hideLoginForm();
+          },
+          date:new Date()
+        };
+        ws.onOpen[seq]= () =>{
+          ws.send(sendConfig('login',{
+            seq: seq,
+            body:{
+              action: 'Login',
+              phone: this.accType === "phone" ? this.account : "",
+              email: this.accType === "email" ? this.account : "",
+              code: this.code,
+              country: 'CN',
+              version: 1,
+              mode: 0,
+              device: '',
+              os: 1
+            }
+          }))
+        }
       },
       hideLoginForm() {
         if (!this.loginForm) return;
