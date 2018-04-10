@@ -27,7 +27,7 @@ const ROUTES = [
   {
     path: "/verify",
     name: "verify",
-    component: resolve => require(['@/views/verify/home'], resolve) // 审核中心
+    component: resolve => require(['@/views/verify/Verify'], resolve) // 审核中心
   },
   {
     path: "/order",

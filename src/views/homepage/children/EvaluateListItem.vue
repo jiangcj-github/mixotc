@@ -1,36 +1,26 @@
 <template>
   <div class="li">
     <div class="p1">
-      <p class="text">{{data.text}}</p>
-      <p class="time">{{data.time}}</p>
+      <p class="text">{{data.comment_c}}</p>
+      <p class="time">{{data.date_c}}</p>
     </div>
     <div class="p2">
-      <span class="judge">好评</span>
+      <span class="judge">{{data.transit_c}}</span>
       <span class="heart-wrap">
-        <img src="/static/images/evaluate_red.png" v-for="i in data.heart_num">
+        <img src="/static/images/evaluate_red.png" v-for="i in data.credit_c">
       </span>
     </div>
     <div class="p3">
-      <img :src="data.headimg" alt="">
-      <span>{{data.nickname}}</span>
+      <img :src="data.icon_c" alt="">
+      <span>{{data.name_c}}</span>
     </div>
   </div>
 </template>
 <script>
   export default {
-    props:['item'],
-    data() {
-      return {}
-    },
-    computed:{
-      data(){
-        return this.item;
-      }
-    },
-    methods: {}
+    props:['data'],
   }
 </script>
-
 <style scoped lang="stylus">
   @import "../../../stylus/base.styl";
   .li
