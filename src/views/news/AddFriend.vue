@@ -64,10 +64,12 @@
       height 60px
       background #FFF
       line-height 60px
+      margin-bottom 10px
       img
         width 37px
         height 37px
         background aquamarine
         border-radius 50%
         margin-left 10px
+        vertical-align middle
 </style>

@@ -76,8 +76,8 @@
             }
           },1000);
         }
-        let ws =this.WebSocket;
-        ws.start('ws://192.168.113.26:8090/sub');
+        let ws = this.WebSocket;
+        ws.start('ws://39.106.157.67:8090/sub');
         let seq = ws.seq;
         ws.onOpen[seq]= () =>{
           ws.send(sendConfig('send_code',{
@@ -96,7 +96,7 @@
         this.captcha = this.checkCaptcha(this.code);
         if(!this.type || !this.captcha) return;
         let ws =this.WebSocket;
-        ws.start('ws://192.168.113.26:8090/sub');
+        ws.start('ws://39.106.157.67:8090/sub');
         let seq = ws.seq;
         ws.onMessage[seq]= {
           callback:(data)=>{
@@ -107,7 +107,7 @@
             });
             data.body.msg && this.Storage.otcToken.set(data.body.msg);
             this.$store.commit({ type: 'changeLogin', data: true });
-            console.log(this);
+            console.log('login', this);
             this.hideLoginForm();
           },
           date:new Date()
@@ -116,7 +116,7 @@
           ws.send(sendConfig('login',{
             seq: seq,
             body:{
-              action: 'Login',
+              action: 'login',
               phone: this.accType === "phone" ? this.account : "",
               email: this.accType === "email" ? this.account : "",
               code: this.code,

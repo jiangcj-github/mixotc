@@ -185,6 +185,7 @@
   import SearchInput from '@/components/common/SearchInput' // 引入搜索下拉框
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
   import MyOrderNothing from '@/views/myOrder/MyOrderNothing' // 引入无订单页面
+  import sendConfig from '@/api/SendConfig.js'// 引入websocket发送包
 
   export default {
     name: "my-order",
@@ -233,6 +234,9 @@
         ]
       }
     },
+    created() {
+      this.initData()
+    },
     mounted() {
       // 监听下拉框值，将值传给子组件
       this.Bus.$on(this.orderTypeValue, (data) => {
@@ -264,6 +268,33 @@
       }
     },
     methods: {
+      initData() {
+        let ws = this.WebSocket; // 创建websocket连接
+        let seq = ws.seq;
+
+        ws.onMessage[seq] = { // 监听
+          callback: (data) => {
+            if(!data || data.body.ret !== 0) return;
+            console.log('11111111111')
+            console.log('order', data)
+          },
+          date:new Date()
+        };
+
+        ws.send(sendConfig('otc', { // 发包
+          seq: seq,
+          body:{
+            'action': 'orders',
+            data: {
+              "type": 1, // 1 买; 2 卖; 3 全部  <-state=0
+              "state": 0, // 0进行中; 1 已完成   <- type=0
+              "origin": 0
+            }
+
+          }
+        }))
+
+      },
       selectStatus(type) { // Tab切换
         this.contentTabIndex = type;
       },
