@@ -25,7 +25,13 @@ function createConnect(url) {
     pool.ws.onclose = null;
     pool.ws.onerror = null;
   }
-  pool.onOpen = {};
+  // pool.onOpen = {};
+  let obj = pool.onOpen;
+  for (const key in obj) {
+    if (!isNaN(Number(key))) {
+      delete obj[key];
+    }
+  }
   pool.ws = new WebSocket(url);
   pool.reConnectFlag = true;
   // 创建链接
@@ -33,26 +39,14 @@ function createConnect(url) {
   clearInterval(reConnectInterval);
   heartBeatInterval = null;
   reConnectInterval = null;
-  //建立连接先发token
-  // let token = storage.getLocal("otcToken");
-  // token && !pool.onOpen["token"] &&
-  //   (pool.onOpen["token"] = () => {
-  //     pool.onMessage[pool.seq] = function (data) {
-  //       console.log("dddddddddddddd")
-  //       if(data.body.ret === 1) {
-  //         storage.removeLocal("otcToken");
-  //         pool.reConnectFlag = false;
-  //       }
-  //     };
-  //     pool.ws.send(sendToken({ seq: pool.seq++, body: token }));
-  //   });
-  //webSocket连接之后的操作
+
   pool.ws.onopen = event => open(pool, event);
 
   function open(pool, event) {
     console.log("open");
     reConnectInterval && clearInterval(reConnectInterval);
-    !clearMessageInterval && (clearMessageInterval = setInterval(clearMessage, 5000));
+    !clearMessageInterval &&
+      (clearMessageInterval = setInterval(clearMessage, 5000));
     let obj = pool.onOpen;
     for (const key in obj) {
       obj[key](event.data);
