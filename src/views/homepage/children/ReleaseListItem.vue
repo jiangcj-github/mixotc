@@ -1,46 +1,31 @@
 <template>
   <div class="li">
         <div class="booth">
-          <span class="time">{{data.time}}</span>
-          <span class="type">{{data.type}}</span>
-          <span class="coin">{{data.coin}}</span>
-          <span class="price">{{data.currency}}&nbsp;{{data.price}}</span>
-          <span class="limit">{{data.min_limit}}~{{data.max_limit}}</span>
+          <span class="time">{{data.create_c}}</span>
+          <span class="type">{{data.type_c}}</span>
+          <span class="coin">{{data.currency_c}}</span>
+          <span class="price">{{data.price_c}}</span>
+          <span class="limit">{{data.minmax_c}}</span>
           <span class="pay-method">
-            <img src="/static/images/OTC_zhifubao.png" alt=""/>
-            <img src="/static/images/OTC_wechat.png" alt=""/>
-            <img src="/static/images/OTC_Bankcard.png" alt=""/>
+            <img src="/static/images/OTC_zhifubao.png" alt="" v-if="data.pays_c %2 === 1">
+            <img src="/static/images/OTC_wechat.png" alt="" v-if="[3, 6, 7].includes(data.pays_c)">
+            <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(data.pays_c)">
           </span>
-          <span class="pay-time">{{data.deadline}}</span>
+          <span class="pay-time">{{data.dead_c}}</span>
           <span class="operation">
-             <router-link class="buy-to" to="" tag="span">
-               <i>向他购买</i>
-             </router-link>
+             <router-link class="buy-to" to="" tag="span" v-if="data.type_c=='出售'"><i>向他购买</i></router-link>
+             <router-link class="buy-to" to="" tag="span" v-if="data.type_c=='购买'"><i>向他出售</i></router-link>
           </span>
         </div>
         <div class="division"></div>
-        <div class="remark">备注：{{data.remark}}</div>
+        <div class="remark">备注：{{data.info_c}}</div>
       </div>
 </template>
 <script>
   export default {
-    props:['item'],
-    data() {
-      return {
-
-      }
-    },
-    computed:{
-      data(){
-        return this.item;
-      }
-    },
-    methods: {
-
-    }
+    props:['data'],
   }
 </script>
-
 <style scoped lang="stylus">
   @import "../../../stylus/base.styl";
   .li
@@ -67,9 +52,9 @@
         background #FFB422
         border 1px solid #FFB422
         border-radius 2px
-        font-size: 13px;
-        color: #FFFFFF;
-        letter-spacing: 0.27px;
+        font-size 13px
+        color #FFFFFF
+        letter-spacing 0.27px
         text-align center
         cursor pointer
         &:hover
@@ -80,9 +65,9 @@
     .remark
       height 50px
       line-height 50px
-      font-size: 13px;
-      color: #999999;
-      letter-spacing: 0.23px;
+      font-size 13px
+      color #999999
+      letter-spacing 0.23px
   .time
     width 200px
   .type
