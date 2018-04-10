@@ -13,6 +13,7 @@
           <img src="/static/images/cancel_icon.png" alt="" v-if="paymentScore !== 0" @click="clearPayment">
         </div>
         <div class="price">
+          <b :class="{tip}">最大限额不能低于最小限额且最小限额为200</b>
           <input type="number" class="min" @blur="filte.min = min" @keyup.enter="filte.min = min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
           <input type="number" class="max" @blur="filte.max = max" @keyup.enter="filte.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
         </div>
@@ -91,6 +92,7 @@ import Pagination from '@/components/common/Pagination';
     },
     data() {
       return {
+        tip: false,
         showPayment: false,
         payment:[{type: '支付宝', score: 1, state: false}, {type: '微信', score: 2, state: false}, {type: '银行卡', score:4, state: false}],
         min:'',
@@ -115,9 +117,7 @@ import Pagination from '@/components/common/Pagination';
       fetchData(params) {
         this.Proxy.sales(params).then(res=>{
           this.result = res.data.sales;
-          let id = '198175299773403140'
-          let initid =  this.JsonBig.parse(id)
-          console.log(this.JsonBig.stringify({id: initid}))
+          console.log(this.result)
         })
       },
       inputDealMin(max) {
@@ -191,9 +191,11 @@ import Pagination from '@/components/common/Pagination';
               max = Number(curVal.max);
           if (curVal.min === '') curVal.min = 200
           if ((min > max && curVal.min !== '' && curVal.max !== '') || curVal.min < 200) {
-            alert('请输入有效价格范围！')
+            console.log(this.tip)
+            this.tip = true
             return;
           }
+          this.tip && (this.tip = false)
           let obj = JSON.parse(JSON.stringify(curVal))
           this.fetchData(obj)
         },
@@ -286,6 +288,15 @@ import Pagination from '@/components/common/Pagination';
         top 20px
         width 245px
         height 50px
+        b
+          display none
+          position absolute
+          left 0
+          top 32px
+          color $col422
+          fz11()
+          &.tip
+            display block
         input
           position relative
           float left
