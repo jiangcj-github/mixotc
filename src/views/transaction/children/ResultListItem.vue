@@ -14,12 +14,12 @@
     <div class="title order-volume">{{data.trade ? data.trade : '-'}}</div>
     <div class="title deal-volume">1+BTC</div>
     <div class="title good-reputation">{{data.rate ? `${data.rate}%` : '-'}}</div>
-    <div class="title trust-amount">{{data.trust ? data.trade : '-'}}</div>
+    <div class="title trust-amount">{{data.trust ? data.trust : '-'}}</div>
     <div class="title amount">123.45</div>
     <div class="title limit-price">{{`${data.min}-${data.max}`}}</div>
     <div class="title price">{{data.price}}</div>
     <div class="title button">
-      <router-link tag='button' :to="{ name: 'order', query: { id: this.JsonBig.stringify(data.sid) }}">购买</router-link>
+      <router-link tag='button' :to="{ name: 'order', query: { id: this.JsonBig.stringify(data.id) }}">购买</router-link>
     </div>
   </li>
 </template>
@@ -28,8 +28,8 @@
 export default {
   props: ['data'],
   methods: {
-    toHomePage(id) {
-      this.$router.push({ name: 'homepage', query: { id: this.JsonBig.stringify(id) }})
+    toHomePage(sid) {
+      this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})
     }
   }
 };
@@ -75,13 +75,13 @@ export default {
         overflow hidden
         white-space nowrap
         text-overflow ellipsis
-        cursor pointer
         &.nickname
           top 22px
           font-size 14px
           color $col333
           letter-spacing 0.16px
           line-height 15px
+          cursor pointer
         &.trust
           bottom 22px
           width 30px

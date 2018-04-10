@@ -3,10 +3,10 @@
     <section class="upper">
       <div class="wrapper">
         <ul class="upper-left">
-          <li v-for="item of items"><span>{{item.title}}:&nbsp;</span><span>{{item.value}}</span></li>
+          <li v-for="(item, index) of items" :key="index"><span>{{item.title}}:&nbsp;</span><span>{{item.value}}</span></li>
         </ul>
         <ul class="upper-right">
-          <li><span>简体中文<!--<div class="select-tri white"></div>--></span></li>
+          <li><span>简体中文</span></li>
           <li><a href="">币种资料</a></li>
           <li><a href="">帮助</a></li>
           <li><a href="">大额交易申请</a></li>
@@ -21,33 +21,25 @@
             <router-link to="/transaction">交易中心</router-link>
           </li>
           <!--<li><a href="">广告</a></li>-->
-          <li class="tag">
+          <li class="tag order">
             <router-link to="/order" v-if="this.$store.state.isLogin">订单</router-link>
           </li>
           <!--<li><a href="">钱包</a></li>-->
-          <li class="itag" @mouseenter="showQr" @mouseleave="hideQr"><img class="top-logo" src="/static/images/phoneicon.png" alt=""></li>
-          <div :class="{'show-qr' : isHover , 'hide-qr' : !isHover}">
-            <img src="/static/images/QRcode.png" alt="">
-            <span>APP安卓端下载</span>
-          </div>
+          <li class="itag" @mouseenter="showQr" @mouseleave="hideQr">
+            <img class="top-logo" src="/static/images/phoneicon.png" alt="">
+            <div class="show-qr" v-show="isHover">
+              <img src="/static/images/QRcode.png" alt="">
+              <span>APP安卓端下载</span>
+            </div>
+          </li>
+          
         </ul>
         <span class="log" @click="show_loginform" v-if="!this.$store.state.isLogin">登录/注册</span>
         <span class="login" v-else @mouseenter="showXl" @mouseleave="hideXl">{{this.$store.state.userInfo.name}}</span>
         <ul :class="{'show-xl' : hovered , 'hide-xl' : !hovered}">
-          <li><img src="/static/images/selfCentre.png" alt=""><span>个人中心</span></li>
           <li><img src="/static/images/logoutIcon.png" alt=""><span>退出</span></li>
         </ul>
         <Login v-if="loginForm" :loginForm.sync="loginForm"/>
-        <!--<span class="log">登录/注册</span>-->
-        <!--<Login></Login>-->
-
-        <!--<div class="user-info" >-->
-        <!--<img src="/static/images/OTC_wechat@3x.png" alt="">-->
-        <!--<span class="user-name">-->
-        <!--zhaocx/185***555-->
-        <!--<div class="select-tri black"></div>-->
-        <!--</span>-->
-        <!--</div>-->
       </div>
     </section>
   </article>
@@ -176,13 +168,16 @@
         font-size 14px
 
         li
-          margin-right 48px
+          position relative
           float left
           text-align center
+          margin-right 48px
           vertical-align middle
           line-height 71px
         .tag
           padding 0 12px
+          &.order
+            width 70px
         .itag
           line-height 60px
           padding 0 46px
@@ -190,28 +185,26 @@
           &:hover,&.active
             border-bottom 2px solid $col422
 
-        .show-qr
-          display -webkit-box
-          display -ms-flexbox
-          position fixed
-          left 38.1%
-          top 103px
-          width 108px
-          height 108px
-          background-color: #fff
-          z-index 998
-
-          img
-            width 60px
-            height 60px
-            margin 10px 24px 5px
-          span
-            padding-left 14px
-            fz11()
-
-        .hide-qr
-          display none
-
+          .show-qr
+            position absolute
+            left 1px
+            top 75px
+            width 108px
+            height 108px
+            background-color #FFF
+            z-index 9
+            img
+              width 60px
+              height 60px
+              margin 10px 24px 5px
+            span
+              position absolute
+              left 3px
+              bottom 15px
+              width 100%
+              height 12px
+              line-height 12px
+              fz11()
       .log, .login
         font-size 14px
         cursor pointer

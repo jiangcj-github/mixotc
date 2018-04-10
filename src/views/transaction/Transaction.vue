@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="transacation inner">
-      <TopSearch :topList="['ETH', 'BTC', 'ADA', 'BAT', 'ETH']"></TopSearch>
+      <TopSearch :topList="['ETH', 'BTC', 'ADA', 'BAT', 'LTC']"></TopSearch>
       <div class="filtrate">
         <div class="select" @click.stop="switchPayment">
           <i>{{payTitle}}</i>
@@ -45,7 +45,7 @@
           <li is='ResultListItem' v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
         </ul>
       </div>
-      <Pagination :total="75" :pageSize="20" emitValue='changePage'></Pagination>
+      <Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>
     </div>
     <div class="faq">
       <div class="inner clearfix">
