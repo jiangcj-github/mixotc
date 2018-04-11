@@ -1,18 +1,18 @@
 <template>
   <div class="li">
     <div class="p1">
-      <p class="text">{{data.comment_c}}</p>
-      <p class="time">{{data.date_c}}</p>
+      <p class="text">{{data.comment}}</p>
+      <p class="time">{{data.date}}</p>
     </div>
     <div class="p2">
-      <span class="judge">{{data.transit_c}}</span>
+      <span class="judge">{{data.transit}}</span>
       <span class="heart-wrap">
-        <img src="/static/images/evaluate_red.png" v-for="i in data.credit_c">
+        <img src="/static/images/evaluate_red.png" v-for="i in data.credit">
       </span>
     </div>
     <div class="p3">
-      <img :src="data.icon_c" alt="">
-      <span>{{data.name_c}}</span>
+      <img :src="data.icon" alt="">
+      <span>{{data.name}}</span>
     </div>
   </div>
 </template>

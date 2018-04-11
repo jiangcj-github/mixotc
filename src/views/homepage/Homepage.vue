@@ -1,15 +1,15 @@
  <template>
   <div class="homepage inner">
-    <h2>mixOTC-{{nickname}}的个人主页</h2>
+    <h2>mixOTC-{{trade_info.nickname}}的个人主页</h2>
     <!-- 个人交易信息 -->
     <div class="info-sec">
       <div class="sec1 clearfix">
         <div class="info">
           <div class="avatar"><img src="" alt=""><i class="is-online"></i></div>
-          <span class="nickname">{{nickname}}</span>
-          <span class="tran_num">和他交易过{{tran_num}}次</span>
+          <span class="nickname">{{trade_info.nickname}}</span>
+          <span class="tran_num">和他交易过{{trade_info.trade_with_num}}次</span>
         </div>
-        <div class="trust clearfix" v-if="is_trust">
+        <div class="trust clearfix" v-if="trade_info.is_trust">
           <router-link class="contact isTrust" to="" tag="span">
             <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
           </router-link>
@@ -27,12 +27,12 @@
         </div>
       </div>
       <div class="sec2">
-        <div class="unit"><label>{{order_num}}</label><span>订单次数</span></div>
-        <div class="unit"><label>{{volumn}}</label><span>历史成交量</span></div>
-        <div class="unit"><label>{{praise_rate}}</label><span>好评率</span></div>
-        <div class="unit"><label>{{be_trusted}}</label><span>被信任</span></div>
-        <div class="unit"><label>{{trust}}</label><span>信任</span></div>
-        <div class="unit"><label>{{guarantee}}</label><span>担保</span></div>
+        <div class="unit"><label>{{trade_info.order_num}}</label><span>订单次数</span></div>
+        <div class="unit"><label>{{trade_info.volumn}}</label><span>历史成交量</span></div>
+        <div class="unit"><label>{{trade_info.praise_rate}}</label><span>好评率</span></div>
+        <div class="unit"><label>{{trade_info.trusted_num}}</label><span>被信任</span></div>
+        <div class="unit"><label>{{trade_info.trust_num}}</label><span>信任</span></div>
+        <div class="unit"><label>{{trade_info.secured_num}}</label><span>担保</span></div>
       </div>
     </div>
     <!--取消信任弹框-->
@@ -47,16 +47,16 @@
     <!--发布列表-->
     <div class="release-list" v-show="tab==0">
       <div class="filter">
-        <a class="drop-down" @click="flt_type_show=!flt_type_show" @blur="flt_type_show=false" href="javascript:void(0)">
-          {{flt_types[flt_type_sel].text}}
-          <ul v-show="flt_type_show" class="drop">
-            <li @click="flt_type_sel=i" v-for="(e,i) in flt_types" :key="i">{{e.text}}</li>
+        <a class="drop-down" @click="ft_type_show=!ft_type_show" @blur="ft_type_show=false" href="javascript:void(0)">
+          {{ft_types[ft_type_sel].text}}
+          <ul v-show="ft_type_show" class="drop">
+            <li @click="ft_type_sel=i" v-for="(e,i) in ft_types" :key="i">{{e.text}}</li>
           </ul>
         </a>
-        <a class="drop-down" @click="flt_coin_show=!flt_coin_show" @blur="flt_coin_show=false" href="javascript:void(0)">
-          {{flt_coins[flt_coin_sel].text}}
-          <ul v-show="flt_coin_show" class="drop">
-            <li @click="flt_coin_sel=i" v-for="(e,i) in flt_coins" :key="i">{{e.text}}</li>
+        <a class="drop-down" @click="ft_coin_show=!ft_coin_show" @blur="ft_coin_show=false" href="javascript:void(0)">
+          {{ft_coins[ft_coin_sel].text}}
+          <ul v-show="ft_coin_show" class="drop">
+            <li @click="ft_coin_sel=i" v-for="(e,i) in ft_coins" :key="i">{{e.text}}</li>
           </ul>
         </a>
       </div>
@@ -70,12 +70,12 @@
         <li class="pay-time">订单期限</li>
         <li class="operation">操作</li>
       </ul>
-      <ReleaseListItem v-for="(item,i) in sales_c" :key="i" :data="item"></ReleaseListItem>
+      <ReleaseListItem v-for="(item,i) in sales" :key="i" :data="item"></ReleaseListItem>
       <Pagination :total="sales_num" :pageSize="sales_pgsize" emitValue='changeSalesPage'></Pagination>
     </div>
     <!--评价列表-->
     <div class="evaluate-list" v-show="tab==1">
-      <EvaluateListItem v-for="(item,i) in rates_c" :key="i" :data="item"></EvaluateListItem>
+      <EvaluateListItem v-for="(item,i) in rates" :key="i" :data="item"></EvaluateListItem>
       <Pagination :total="rates_num" :pageSize="rates_pgsize" emitValue='changeRatesPage' class="page-bar"></Pagination>
     </div>
   </div>
@@ -85,7 +85,7 @@
   import EvaluateListItem from './children/EvaluateListItem';
   import Pagination from '@/components/common/Pagination';
   import BasePopup from '@/components/common/BasePopup';
-  import WebSocketProxy from '@/api/WebSocketSend.js';
+  import WebSocketProxy from '@/api/WebSocketProxy.js';
 
   export default {
     components: {
@@ -96,187 +96,133 @@
     },
     data() {
       return {
-        uid:'xxxx',
-        self_uid:'xxxx',
+        proxy: new WebSocketProxy(this.WebSocket),
 
-        nickname: 'xin2378',
-        tran_num: 3,
-        is_trust: false,
-        order_num:100,
-        volumn:1+'+BTC',
-        praise_rate:90+'%',
-        be_trusted:100,
-        trust:100,
-        guarantee:100,
-        evaluate_num:100,
+        login_uid: this.JsonBig.parse('197102307060486144'),
+        uid: this.JsonBig.parse('197113028456484864'),
 
-        sales:[],
-        sales_num:0,
-        sales_pgsize:0,
+        trade_info2:{},
 
-        rates:[],
-        rates_num:0,
-        rates_pgsize:0,
+        sales2:[],
+        sales_num:1,
+        sales_pgsize:1,
 
-        flt_types:[
+        rates2:[],
+        rates_num:1,
+        rates_pgsize:1,
+
+        ft_types:[
           {text:'全部广告',value:''},
           {text:'购买',value:''},
           {text:'出售',value:''},
         ],
-        flt_type_sel:0,
-        flt_type_show:false,  //下拉框-发布类型
+        ft_type_sel:0,
+        ft_type_show:false,  //下拉框-发布类型
 
-        flt_coins:[
+        ft_coins:[
           {text:'全部币种',value:''},
           {text:'BTC',value:''},
           {text:'ETH',value:''},
           {text:'LTC',value:''},
           {text:'其他',value:''},
         ],
-        flt_coin_sel:0,
-        flt_coin_show:false,  //下拉框-币种
+        ft_coin_sel:0,
+        ft_coin_show:false,  //下拉框-币种
 
         tab:0,  //他的发布，他的评价
         show_untrust_pop:false,
       }
     },
     computed:{
-      sales_c(){
-        this.sales.forEach(function(item) {
-          item.create_c=item.create;
-          item.type_c={1:"购买",2:"出售"}[item.type+""];
-          item.currency_c=item.currency.toUpperCase();
-          item.price_c={"CNY":"¥"}[item.money.toUpperCase()]+" "+item.price;
-          item.minmax_c=item.min+"~"+item.max;
-          item.pays_c=item.payments;
-          item.dead_c=item.limit+"min";
-          item.info_c=item.info;
-        });
-        return this.sales;
+      trade_info(){
+        let o=this.trade_info2;
+        return {
+          nickname: o.name || 'unknown',
+          headimg: o.icon || '/static/images/default_avator.png',
+          trade_with_num: o.mytrade || 0,
+          order_num: o.trade || 0,
+          volumn: "10+BTC" || "0+BTC",
+          praise_rate: (o.rate || 0) +"%",
+          trusted_num: 100 || 0,
+          trust_num: o.trust || 0,
+          secured_num: 100 || 0,
+          is_trust: o.is_trust || false,
+        }
       },
-      rates_c(){
-        this.rates.forEach(function(item) {
-          item.comment_c=item.comment;
-          item.date_c=item.date;
-          item.credit_c=item.credit;
-          item.transit_c={1:"差评",2:"中评",3:"好评"}[item.transit];
-          item.icon_c=item.icon;
-          item.name_c=item.name;
+      sales(){
+        let arr=[];
+        this.sales2.forEach(function(item) {
+          arr.push({
+            create: new Date(item.create).dateHandle("yyyy/MM/dd hh:mm:ss"),
+            type: {1:"购买",2:"出售"}[item.type+""],
+            currency: item.currency.toUpperCase(),
+            price: {"CNY":"¥"}[item.money.toUpperCase()]+" "+item.price,
+            minmax: item.min+"~"+item.max,
+            pays: item.payments,
+            dead: item.limit+"min",
+            info: item.info,
+          });
         });
-        return this.rates;
+        return arr;
+      },
+      rates(){
+        let arr=[];
+        this.rates2.forEach(function(item) {
+          arr.push({
+            comment: item.comment,
+            date: new Date(item.date).dateHandle("yyyy/MM/dd hh:mm:ss"),
+            credit: item.credit,
+            transit: {1:"差评",2:"中评",3:"好评"}[item.transit],
+            icon: item.icon,
+            name: item.name,
+          });
+        });
+        return arr;
       }
     },
     mounted() {
-
-      let uid = this.JsonBig.parse('197113028456484864');
-      let uid2 = this.JsonBig.parse('197102307060486144');
-
-      let proxy=new WebSocketProxy(this.WebSocket);
-
-      /*
-
-      //ws请求-获取交易信息
-      let seq3 = ws.seq;
-      ws.onMessage[seq3]= {
-        callback:(data)=>{
-          if(!data || data.body.ret !== 0) return;
-
-        },
-        date:new Date()
-      };
-      ws.send(sendConfig('otc',{
-        seq: seq,
-        body:{action: 'trader_info', data:{"id":uid2, "origin":0}}
-      }));
-      */
-
-      var _this=this;
-
-      proxy.send('otc','trader_info',{
-
-      }).message(function(data){
-        if(!data || data.body.ret !== 0) return;
-        _this.sales=data.body.data.sales;
-        _this.sales_num=100;
-        _this.sales_pgsize=data.body.data.count;
+      //this.login_uid=this.JsonBig.stringify(this.$store.state.userInfo.uid);
+      this.proxy.send('otc','trader_info',{uid:this.login_uid, id:this.uid}).then((data)=>{
+        this.trade_info2=data;
       });
-
-      proxy.send('otc','his_sales',{
-        "id":uid2, "origin":0
-      }).message(function(data){
-        if(!data || data.body.ret !== 0) return;
-        _this.sales=data.body.data.sales;
-        _this.sales_num=100;
-        _this.sales_pgsize=data.body.data.count;
+      this.proxy.send('otc','his_sales',{id:this.login_uid, origin:0}).then((data)=>{
+        this.sales2=data.sales;
+        this.sales_num=1;
+        this.sales_pgsize=data.count;
       });
-
-      proxy.send('otc','rates',{
-        "id":uid, "origin":0
-      }).message(function(data){
-        if(!data || data.body.ret !== 0) return;
-        _this.rates=data.body.data.rates;
-        _this.rates_num=100;
-        _this.rates_pgsize=data.body.data.count;
+      this.proxy.send('otc','rates',{id:this.uid, origin:0}).then((data)=>{
+        this.rates2=data.rates;
+        this.rates_num=1;
+        this.rates_pgsize=data.count;
       });
-
-
-      /*
-      //ws请求-获取发布信息
-      let seq = ws.seq;
-      ws.onMessage[seq]= {
-        callback:(data)=>{
-          if(!data || data.body.ret !== 0) return;
-          this.sales=data.body.data.sales;
-          this.sales_num=100;
-          this.sales_pgsize=data.body.data.count;
-        },
-        date:new Date()
-      };
-      ws.send(sendConfig('otc',{
-        seq: seq,
-        body:{action: 'his_sales', data:{"id":uid2, "origin":0}}
-      }));
-
-      //ws请求-获取评价
-      let seq2=ws.seq;
-      ws.onMessage[seq2]={
-        callback:(data)=>{
-          if(!data || data.body.ret !== 0) return;
-          this.rates=data.body.data.rates;
-          this.rates_num=100;
-          this.rates_pgsize=data.body.data.count;
-        },
-        date:new Date()
-      };
-      ws.send(sendConfig('otc',{
-        seq: seq2,
-        body:{action: 'rates', data:{"id":uid, "origin":0}}
-      }));
-
-      */
-
       //翻页事件
       this.Bus.$on('changeSalesPage',(p) => {
-        // ws.send(sendConfig('otc',{
-        //   seq: seq,
-        //   body:{action: 'his_sales', data:{"id":uid2, "origin":p}}
-        // }));
+        this.proxy.send('otc','his_sales',{id:this.login_uid, origin:p}).then((data)=>{
+          this.sales2=data.sales;
+          this.sales_num=100;
+          this.sales_pgsize=data.count;
+        });
       });
       this.Bus.$on('changeRatesPage',(p) => {
-        // ws.send(sendConfig('otc',{
-        //   seq: seq2,
-        //   body:{action: 'rates', data:{"id":uid, "origin":p}}
-        // }));
+        this.proxy.send('otc','rates',{id:this.uid, origin:p}).then((data)=>{
+          this.rates2=data.rates;
+          this.rates_num=1;
+          this.rates_pgsize=data.count;
+        });
       });
     },
     methods: {
       joinTrust(){
-        this.is_trust=true;
+        this.proxy.send('otc','new_trust',{uid:this.login_uid, id:this.uid}).then((data)=>{
+          this.trade_info2.is_trust=true;
+        })
       },
       cancelTrust(){
-        this.is_trust=false;
-        this.cancel_trust_pop=true;
-      }
+        this.proxy.send('otc','new_trust',{uid:this.login_uid, id:this.uid}).then((data)=>{
+          this.show_untrust_pop=true;
+          this.trade_info2.is_trust=false;
+        });
+      },
     }
   }
 </script>
