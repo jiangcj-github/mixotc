@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="movebox" >
+    <div class="movebox" ref="movebox">
       <div class="movego"></div>
       <div class="txt" id="txt">将滑块拖拽到最右边</div>
       <div class="move moveBefore" v-move="slideStatuss"></div>
@@ -46,13 +46,14 @@
             el.parentNode.children[1].innerHTML = '将滑块拖拽到最右边';
             //临界值小于
             if (endx <= 0) {
-              el.style.left = 0 + 'px';
+              endx = 0 ;
+              el.style.left = endx + 'px';
               el.parentNode.children[0].style.width = 0 + 'px';
               //$('.movego').width(0)
             }
             //临界值大于
             // console.log(el.style.left)
-            if (parseInt(el.style.left) >= width) {
+            if (endx >= width) {
               el.style.left = width + 'px';
               el.parentNode.children[0].style.width = width + 'px';
               el.parentNode.children[1].innerHTML = '验证通过';

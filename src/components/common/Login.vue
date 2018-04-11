@@ -227,9 +227,11 @@
         color $col999
 
         input
+          box-sizing()
           display inline-block
           width 320px
           height 40px
+          padding-left 20px
           margin 10px 0 15px
           background-color $col6FA
           border-radius 2px

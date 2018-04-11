@@ -7,9 +7,10 @@
         </ul>
         <ul class="upper-right">
           <li><span>简体中文</span></li>
-          <li><a href="">币种资料</a></li>
-          <li><a href="">帮助</a></li>
-          <li><a href="">大额交易申请</a></li>
+          <li>帮助</li>
+          <li>大额交易申请</li>
+          <li>审核</li>
+          <li>仲裁</li>
         </ul>
       </div>
     </section>
@@ -41,9 +42,9 @@
             <span class="login" >{{name}}</span>
             <img class="select-icon" src='/static/images/triangle_black.png' alt="">
             <ul v-if="showMenu">
-              <li class="center">个人中心</li>
+              <!-- <li class="center">个人中心</li>
               <li class="safe">安全设置</li>
-              <li class="auth">身份认证</li>
+              <li class="auth">身份认证</li> -->
               <li class="logout" @click="logout">退出</li>
             </ul>
           </div>
@@ -160,17 +161,14 @@
 
       .upper-right
         float right
-
         li
-          margin-left 30px
           float right
+          margin-left 30px
           text-align center
           vertical-align middle
           line-height 30px
-
           a, span
             color #fff
-
             .white
               margin-left 3px
               line-height 30px
@@ -267,7 +265,7 @@
             left 0
             background #FFF
             border-top 2px solid $col422
-            box-shadow: 0 2px 4px 0 $col;
+            box-shadow: 0 2px 4px 0 $col1E1;
             z-index 9
             li
               box-sizing()

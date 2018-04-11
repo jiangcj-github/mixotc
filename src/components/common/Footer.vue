@@ -6,10 +6,10 @@
       </section>
       <section class="foot-mid">
         <ul class="mid-up">
-          <a href=""><li>关于我们</li></a>
-          <a href=""><li>用户协议</li></a>
-          <a href=""><li>隐私政策</li></a>
-          <a href=""><li>帮助中心</li></a>
+          <li>关于我们</li>
+          <li>用户协议</li>
+          <li>隐私政策</li>
+          <li>币种资料</li>
         </ul>
         <ul class="mid-down">
           <li class="down-left">市场有风险，投资需谨慎</li>
@@ -68,18 +68,22 @@
           li
             font-size 14px
             letter-spacing 0.5px
-
+            cursor pointer
 
         .mid-down
           margin-left 54px
           width: 301px
 
           li
-            font-size 11px
+            fz11()
+            line-height 12px
+            height 12px
 
           .down-left
             margin-right 20px
             padding-right 20px
+            color $col94C
+            letter-spacing 0.23px
             border-right 1px solid $col999
 
 
