@@ -59,6 +59,7 @@
       },
       sendCode(){
         let type = this.checkAccount(this.account);
+        let accType = this.checkAccount(this.account);
         if(!type) return;
         this.accType = type;
         const $ = 60;
@@ -75,7 +76,7 @@
             }
           },1000);
         }
-        let ws =this.WebSocket;
+        let ws = this.WebSocket;
         ws.start('ws://39.106.157.67:8090/sub');
         let seq = ws.seq;
         ws.onOpen[seq]= () =>{
@@ -107,7 +108,7 @@
             });
             data.body.msg && this.Storage.otcToken.set(data.body.msg);
             this.$store.commit({ type: 'changeLogin', data: true });
-            console.log(this);
+            console.log('login', this);
             this.hideLoginForm();
           },
           date:new Date()
@@ -116,7 +117,7 @@
           ws.send(sendConfig('login',{
             seq: seq,
             body:{
-              action: 'Login',
+              action: 'login',
               phone: this.accType === "phone" ? this.account : "",
               email: this.accType === "email" ? this.account : "",
               code: this.code,

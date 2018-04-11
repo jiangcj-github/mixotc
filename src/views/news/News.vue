@@ -1,14 +1,14 @@
 <template>
   <div>
-    <div class="news-wrap clearfix">
+    <div class="news-wrap clearfix" @click="openBox">
       <div class="chat">
         <img src="/static/images/talk_icon.png" alt="">
         <i></i>
       </div>
       <!--<img src="/static/images/news.png">-->
-      <p @click="openBox">您有<span>1</span>条新消息</p>
+      <p v-show="haveNews">您有<span>1</span>条新消息</p>
     </div>
-    <NewsInfo :talkBoxShow="showTalkBox" @offTalk="openBox"></NewsInfo>
+    <NewsInfo :talkBoxShow="showTalkBox" @click="openBox"></NewsInfo>
   </div>
 
 </template>
@@ -20,20 +20,20 @@
     name: "news",
     data() {
       return {
-        showTalkBox: false
+        showTalkBox: false,
+        haveNews: false
       }
     },
     components: {
       NewsInfo
     },
+    computed: {
+
+    },
     methods: {
       openBox(st) {
-        if (st === 'false') {
-          this.showTalkBox = false
-        } else {
-          this.showTalkBox = true
-        }
-      },
+        this.$store.commit({'type':'changeChatBox', data: true})
+      }
     }
   }
 </script>
@@ -44,6 +44,7 @@
     position fixed
     right 40px
     bottom 200px
+    cursor pointer
     -webkit-box-shadow: -3px 0 3px 0 rgba(0,0,0,0.1), 0 -3px 3px 0 rgba(0,0,0,0.1)
     box-shadow: -3px 0 3px 0 rgba(0,0,0,0.1), 0 -3px 3px 0 rgba(0,0,0,0.1)
     .chat
@@ -79,7 +80,6 @@
       background #FFF
       text-align center
       letter-spacing 0.29px
-      cursor pointer
       span
         color #FFB422
 </style>

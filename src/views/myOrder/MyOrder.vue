@@ -44,27 +44,27 @@
       <ol class="clearfix">
         <li v-for="content in contentTitleList">{{content}}</li>
       </ol>
-      <div class="order-content-info">
+      <div class="order-content-info" v-for="content in contentList">
         <ul class="clearfix">
           <li>
             <p>2016/03/09</p>
             <p>13:43</p>
           </li>
-          <li>购买</li>
-          <li>BTC</li>
+          <li>{{content.type}}</li>
+          <li>{{content.currency}}</li>
           <li>
-            <p>lihh/130***123</p>
+            <p>{{content.name}}/130***123</p>
             <p class="talk">联系他</p>
           </li>
-          <li>1.12345678</li>
+          <li>{{content.price}}</li>
           <li>
             <p>+1.12 BTC</p>
             <p>0.00004</p>
           </li>
-          <li>1.12345678</li>
+          <li>{{content.amountc}}</li>
           <li>234abc</li>
           <li>
-            <p>代付款</p>
+            <p>{{content.state}}</p>
           </li>
           <li>
             <p>
@@ -185,6 +185,7 @@
   import SearchInput from '@/components/common/SearchInput' // 引入搜索下拉框
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
   import MyOrderNothing from '@/views/myOrder/MyOrderNothing' // 引入无订单页面
+  import sendConfig from '@/api/SendConfig.js'// 引入websocket发送包
 
   export default {
     name: "my-order",
@@ -233,6 +234,9 @@
         ]
       }
     },
+    created() {
+      this.initData()
+    },
     mounted() {
       // 监听下拉框值，将值传给子组件
       this.Bus.$on(this.orderTypeValue, (data) => {
@@ -264,6 +268,34 @@
       }
     },
     methods: {
+      initData() {
+        let ws = this.WebSocket; // 创建websocket连接
+        let seq = ws.seq;
+
+        ws.onMessage[seq] = { // 监听
+          callback: (data) => {
+            if(!data || data.body.ret !== 0) return;
+            console.log('order', data.body.data.orders)
+            this.contentList = data.body.data.orders
+            console.log('contentTitleList', this.contentTitleList)
+          },
+          date:new Date()
+        };
+
+        ws.send(sendConfig('otc', { // 发包
+          seq: seq,
+          body:{
+            "action": "orders",
+            data: {
+              "type": 1, // 1 买; 2 卖; 3 全部  <-state=0
+              "state": 0, // 0进行中; 1 已完成   <- type=0
+              "origin": 0
+            }
+
+          }
+        }))
+
+      },
       selectStatus(type) { // Tab切换
         this.contentTabIndex = type;
       },
@@ -332,7 +364,6 @@
         // console.log(oEvent)
         if (oEvent.keyCode === 8) {
           console.log('keyCode', 1111)
-          this.inputContent = index + 1
         }
       },
       closePopup() {
@@ -470,6 +501,7 @@
         padding 18px 30px
         border 1px solid #E1E1E1
         background #FFF
+        margin-bottom 10px
         ul
           padding-bottom 10px
           border-bottom 1px solid #E1E1E1

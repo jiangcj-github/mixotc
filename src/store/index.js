@@ -7,7 +7,8 @@ Vue.use(Vuex);
 const store = new Vuex.Store({
   state: {
     isLogin: false,
-    userInfo: null
+    userInfo: null,
+    showChat: false
   },
   mutations: {
     changeLogin(state, {data}) {
@@ -15,6 +16,9 @@ const store = new Vuex.Store({
     },
     getUserInfo(state, {data}) {
       state.userInfo = data;
+    },
+    changeChatBox(state, {data}) {
+      state.showChat = data;
     }
   },
   plugins: [createLogger()]
