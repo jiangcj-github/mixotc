@@ -8,7 +8,7 @@
       <!--<img src="/static/images/news.png">-->
       <p v-show="haveNews">您有<span>1</span>条新消息</p>
     </div>
-    <NewsInfo :talkBoxShow="showTalkBox" @offTalk="openBox"></NewsInfo>
+    <NewsInfo :talkBoxShow="showTalkBox" @click="openBox"></NewsInfo>
   </div>
 
 </template>
@@ -27,15 +27,12 @@
     components: {
       NewsInfo
     },
+    computed: {
+
+    },
     methods: {
       openBox(st) {
-        console.log(st)
-        if (st === 'false') {
-          this.showTalkBox = false
-        } else {
-          this.showTalkBox = true
-          console.log(1111)
-        }
+        this.$store.commit({'type':'changeChatBox', data: true})
       }
     }
   }

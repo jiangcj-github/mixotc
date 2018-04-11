@@ -76,7 +76,7 @@
             }
           },1000);
         }
-        let ws =this.WebSocket;
+        let ws = this.WebSocket;
         ws.start('ws://39.106.157.67:8090/sub');
         let seq = ws.seq;
         ws.onOpen[seq]= () =>{
@@ -108,7 +108,7 @@
             });
             data.body.msg && this.Storage.otcToken.set(data.body.msg);
             this.$store.commit({ type: 'changeLogin', data: true });
-            console.log(this);
+            console.log('login', this);
             this.hideLoginForm();
           },
           date:new Date()

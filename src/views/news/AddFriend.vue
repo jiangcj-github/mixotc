@@ -4,7 +4,7 @@
       <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeFriend">
     </p>
     <div class="user-name">
-      <img src="">
+      <img src="" alt="">
       <span>lihh / 130***123</span>
     </div>
     <textarea placeholder="请填写认证信息"></textarea>
@@ -71,5 +71,21 @@
         background aquamarine
         border-radius 50%
         margin-left 10px
+        margin-right 20px
         vertical-align middle
+    textarea
+      width 290px
+      height 80px
+      resize none
+      border none
+      padding 10px 0 0 10px
+      margin-bottom 30px
+    button
+      width 200px
+      height 40px
+      background #FFB422
+      border-radius 2px
+      color #FFF
+      letter-spacing 0.16px
+      margin-left 60px
 </style>
