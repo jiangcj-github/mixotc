@@ -8,18 +8,37 @@
       <span>lihh / 130***123</span>
     </div>
     <textarea placeholder="请填写认证信息"></textarea>
-    <button>添加好友</button>
+    <button @click="openFirendLayer">添加好友</button>
+    <!-- 添加好友弹窗 -->
+    <BasePopup class="firend-layer"
+               :show="firendLayer"
+               :width=135
+               :height=50
+               :top=50
+               :wrapStyleObject="firendWrap">已发送，等待对方同意</BasePopup>
   </div>
 </template>
 
 <script>
+  import BasePopup from '@/components/common/BasePopup' // 引入弹窗
+
   export default {
     name: "add-friend",
     props: ['addFriendShow'],
     data() {
       return {
-        friendShow: this.addFriendShow
+        friendShow: this.addFriendShow,
+        firendLayer: false,
+        firendWrap: {
+          width: '560px',
+          height: '420px',
+          right: 0,
+          bottom: '100px'
+        }
       }
+    },
+    components: {
+      BasePopup
     },
     watch: {
       addFriendShow(state) {
@@ -33,6 +52,12 @@
     methods: {
       closeFriend() {
         this.$emit('offAddFriend', 'false')
+      },
+      openFirendLayer() {
+        this.firendLayer = true
+        setTimeout(() => {
+          this.firendLayer = false
+        }, 3000)
       }
     }
   }
@@ -88,4 +113,8 @@
       color #FFF
       letter-spacing 0.16px
       margin-left 60px
+  .firend-layer
+    font-size 12px
+    text-align center
+    line-height 50px
 </style>

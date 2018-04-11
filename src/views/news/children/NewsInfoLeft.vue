@@ -4,28 +4,17 @@
       <input type="text" placeholder="查找昵称／账号"/>
       <img src="/static/images/search_gray.png"/>
     </div>
-    <ul class="firend-list">
-      <li>
-        <img src="" alt="" class="head-portrait">
-        <span>lihh/130***123</span>
-        <img src="/static/images/close_btn.png" alt="" class="close-head">
-      </li>
-      <li>
-        <img src="" alt="" class="head-portrait" @click="openCheckGroup">
-        <span>群聊</span>
-        <img src="/static/images/close_btn.png" alt="" class="close-head">
-      </li>
-      <li>
-        <img src="" alt="" class="head-portrait">
-        <span>lihh/130***123</span>
-        <img src="/static/images/close_btn.png" alt="" class="close-head">
-      </li>
-      <li>
-        <img src="" alt="" class="head-portrait">
-        <span>lihh/130***123</span>
-        <img src="/static/images/close_btn.png" alt="" class="close-head">
-      </li>
-    </ul>
+
+    <!--<EasyScrollbar :barOption="changeBar">-->
+      <ul class="firend-list">
+        <li v-for="(content, index) in userList">
+          <img src="" alt="" class="head-portrait" @click="openCheckGroup">
+          <span>{{content.name}}/130***123</span>
+          <img src="/static/images/close_btn.png" alt="" class="close-head" @click="delUser(index)">
+        </li>
+      </ul>
+    <!--</EasyScrollbar>-->
+
     <p class="other-item">
       <img src="/static/images/notice_icon.png">
       <img src="/static/images/service_icon.png" class="service-img">
@@ -43,7 +32,39 @@
     name: "new-info-left",
     data() {
       return {
-        showCheckGroup: false
+        showCheckGroup: false,
+        changeBar: {
+          barColor:"#959595",   //滚动条颜色
+          barWidth:3,           //滚动条宽度
+          railColor:"#eee",     //导轨颜色
+        },
+        userList: [
+          {name: 'liiihhh'},
+          {name: '群聊'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+          {name: 'liiihhh'},
+        ]
       }
     },
     components: {
@@ -56,6 +77,9 @@
         } else {
           this.showCheckGroup = true
         }
+      },
+      delUser(index) {
+        this.userList.splice(index, 1)
       }
     }
   }
@@ -88,8 +112,10 @@
           width 18px
           height 18px
       .firend-list
-        height 330px
+        height 325px
         background #FFF
+        overflow auto
+        margin-bottom 5px
         li
           position relative
           height 42px
@@ -108,9 +134,16 @@
             right 8px
             width 5px
             height 5px
+            cursor pointer
           span
+            display inline-block
+            width 90px
             font-size 12px
             margin-right 5px
+            overflow hidden
+            white-space nowrap
+            text-overflow ellipsis
+            vertical-align middle
       .other-item
         width 140px
         padding 8px 0 6px

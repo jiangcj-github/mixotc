@@ -1,6 +1,6 @@
 <template>
-  <div class="wrap" v-if="show">
-    <div class="content" :style="{width: `${width}px`, height: `${height}px`}">
+  <div class="wrap" v-if="show" :style="wrapStyleObject">
+    <div class="content" :style="{width: `${width}px`, height: `${height}px`, top: `${top}%`}">
       <slot></slot>
     </div>
   </div>
@@ -20,6 +20,21 @@
       height: {
         type: Number,
         default: 94
+      },
+      top: {
+        type: Number,
+        default: 29.17
+      },
+      wrapStyleObject: {
+        type: Object,
+        default() {
+          return {
+            top: 0,
+            left: 0,
+            width: '100%',
+            height: '100%'
+          }
+        }
       }
     }
   }
@@ -28,21 +43,21 @@
 <style scoped lang="stylus">
   .wrap
     position fixed
-    top 0
-    left 0
-    width 100%
-    height 100%
     background rgba(0, 0, 0, 0.4)
     z-index 1000
     .content
       position absolute
-      top 29.17%
       left 50%
       transform translateX(-50%)
       -ms-transform translateX(-50%)
       -moz-transform translateX(-50%)
       -webkit-transform translateX(-50%)
       -o-transform translateX(-50%)
+      transform translateY(-50%)
+      -ms-transform translateY(-50%)
+      -moz-transform translateY(-50%)
+      -webkit-transform translateY(-50%)
+      -o-transform translateY(-50%)
       background #FFF
       border-radius 2px
 </style>

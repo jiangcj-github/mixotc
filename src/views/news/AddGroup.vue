@@ -6,20 +6,15 @@
       <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeGroup">
     </p>
     <div class="contacts">
-      <img src="" alt="">
-      <img src="" alt="">
-      <img src="" alt="">
-      <img src="" alt="">
-      <img src="" alt="">
+      <img :src="item.src" alt="" v-for="item in addList">
       <input type="text" placeholder="查找联系人"/>
     </div>
     <ul>
       <li v-for="(content, index) in groupList">
-        <img class="user-portrait" src="" alt="">
-        <span>{{content.name}}</span>
-        <i @click="checkContact">
-          <b class="no-select" v-if="noContact === index + 1"></b>
-          <img class="have-select" src="/static/images/slideOk.png" v-show="!noContact">
+        <img class="user-portrait" :src="content.src" alt="">
+        <span>{{content.name}}/130***123</span>
+        <i @click="checkContact($event, index)">
+          <b class="no-select"></b>
         </i>
       </li>
     </ul>
@@ -35,9 +30,14 @@
         groupShow: this.addGroupShow,
         noContact: false,
         groupList: [
-          {name: 'lihh / 130***123'},
-          {name: 'lihh / 130***123'}
-        ]
+          {src: '/static/images/calendar.png', name: 'lihh'},
+          {src: '/static/images/hint.png', name: 'lihh'},
+          // {src: '/static/images/search.png', name: 'lihh'},
+          // {src: '/static/images/footlogo.png', name: 'lihh'},
+          // {src: '/static/images/huansuan.png', name: 'lihh'},
+          // {src: '/static/images/news.png', name: 'lihh'}
+        ],
+        addList: []
       }
     },
     watch: {
@@ -53,8 +53,16 @@
       closeGroup() {
         this.$emit('offAddGroup', 'false')
       },
-      checkContact() {
-        this.noContact = !this.noContact
+      checkContact(evt, index) {
+        if (evt.target.className.indexOf("no-select") == -1) {
+          evt.target.className = 'no-select'
+          this.addList.splice(this.addList[index].flag, 1)
+        } else {
+          evt.target.className = 'have-select'
+          this.addList.push({src: this.groupList[index].src, flag: index})
+        }
+        console.log(this.addList)
+        if (this.addList.length > 5) return
       }
     }
   }
@@ -127,6 +135,8 @@
           margin-right 120px
         b
           display inline-block
+          cursor pointer
+        .no-select
           width 10px
           height 10px
           border 1px solid #999
@@ -134,5 +144,7 @@
         .have-select
           width 12px
           height 12px
+          background url("/static/images/slideOk.png") no-repeat
+          background-size 12px 12px
 </style>
 
