@@ -10,6 +10,7 @@
     "build": "node build/build.js"
   },
   "dependencies": {
+    "easyscroll": "^1.0.1",
     "element-ui": "^2.3.2",
     "json-bigint": "^0.2.3",
     "stylus": "^0.54.5",

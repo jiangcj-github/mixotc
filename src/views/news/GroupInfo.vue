@@ -18,7 +18,7 @@
     </ol>
     <h1>群成员(10)</h1>
     <div class="operation">
-      <img src="/static/images/add_user.png" alt="">
+      <img src="/static/images/add_user.png" alt="" @click="openAddGroup">
       <img src="/static/images/del_user.png" alt="" @click="openDelGroup">
     </div>
     <ul class="clearfix">
@@ -34,10 +34,13 @@
     </ul>
     <!-- 删除群成员 -->
     <DeletGroup :delGroupShow="showDelGroup" @offDelGroup="openDelGroup"></DeletGroup>
+    <!-- 新增群成员 -->
+    <AddGroup :addGroupShow="showAddGroup" @offAddGroup="openAddGroup"></AddGroup>
   </div>
 </template>
 
 <script>
+  import AddGroup from '@/views/news/AddGroup' // 添加群
   import DeletGroup from '@/views/news/DeletGroup' // 删除群成员
 
   export default {
@@ -46,11 +49,13 @@
     data() {
       return {
         groupInfoShow: this.checkGroupShow,
-        showDelGroup: false
+        showDelGroup: false,
+        showAddGroup: false
       }
     },
     components: {
-      DeletGroup
+      DeletGroup,
+      AddGroup
     },
     watch: {
       checkGroupShow(state) {
@@ -71,6 +76,13 @@
         } else {
           this.showDelGroup = true
         }
+      },
+      openAddGroup(st) {
+        if (st === 'false') {
+          this.showAddGroup = false
+        } else {
+          this.showAddGroup = true
+        }
       }
     }
   }
@@ -87,6 +99,7 @@
     background #F4F6FA
     -webkit-box-shadow: -2px -2px 8px 0 rgba(51,51,51,0.30)
     box-shadow: -2px -2px 8px 0 rgba(51,51,51,0.30)
+    z-index 1
     .wrap-title
       position relative
       height 40px

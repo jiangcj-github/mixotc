@@ -8,7 +8,7 @@
           <i></i>
           <ul>
             <li @click="openAddFriend">+好友</li>
-            <li>+信任</li>
+            <li @click="openBeliveLayer">+信任</li>
             <li @click="openAddGroup">+建群</li>
           </ul>
         </div>
@@ -35,6 +35,17 @@
         <img src="" alt="">
       </div>
     </div>
+    <div class="system-info">
+      <div>
+        <img src="" alt="">
+        <ul>
+          <li>Andy</li>
+          <li>我是李小蹦，想添加你为好友</li>
+        </ul>
+        <button>同意</button>
+      </div>
+    </div>
+
     <ol class="input-text clearfix">
       <li>
         <input type="text">
@@ -52,12 +63,20 @@
     <AddFriend :addFriendShow="showAddFriend" @offAddFriend="openAddFriend"></AddFriend>
     <!-- 添加群聊弹窗 -->
     <AddGroup :addGroupShow="showAddGroup" @offAddGroup="openAddGroup"></AddGroup>
+    <!-- 添加信任弹窗 -->
+    <BasePopup class="belive-layer"
+               :show="beliveLayer"
+               :width=135
+               :height=50
+               :top=50
+               :wrapStyleObject="beliveWrap">已加信任</BasePopup>
   </div>
 </template>
 
 <script>
   import AddFriend from '@/views/news/AddFriend' // 添加好友
   import AddGroup from '@/views/news/AddGroup' // 添加群
+  import BasePopup from '@/components/common/BasePopup' // 引入弹窗
 
   export default {
     name: "news-info-right",
@@ -65,13 +84,20 @@
       return {
         seletAdd: false,
         showAddFriend: false,
-        showAddGroup: false
-
+        showAddGroup: false,
+        beliveLayer: false,
+        beliveWrap: {
+          width: '560px',
+          height: '420px',
+          right: 0,
+          bottom: '100px'
+        }
       }
     },
     components: {
       AddFriend,
       AddGroup,
+      BasePopup
     },
     methods: {
       closeTalk() {
@@ -96,6 +122,12 @@
         } else {
           this.showAddGroup = true
         }
+      },
+      openBeliveLayer() {
+        this.beliveLayer = true
+        setTimeout(() => {
+          this.beliveLayer = false
+        }, 3000)
       }
     }
   }
@@ -188,6 +220,7 @@
 
 
     .news-info-talk
+
       width 399px
       height 320px
       padding-top 10px
@@ -255,6 +288,39 @@
           right -16px
           border-color transparent transparent transparent #FFB422
 
+    .system-info
+      display none
+      width 399px
+      height 320px
+      padding-top 10px
+      div
+        display flex
+        align-items center
+        width 345px
+        height 37px
+        padding 12px 20px 11px 15px
+        background #FFF
+        margin 0 auto
+        img
+          width 37px
+          height 37px
+          border-radius 50%
+          background aquamarine
+          margin-right 16px
+        button
+          width 56px
+          height 24px
+          background #FFB422
+          border-radius 2px
+          color #FFF
+          margin-left 80px
+        ul
+          li:first-child
+            font-size 14px
+          li:last-child
+            font-size 12px
+            color #999
+
     .input-text
       padding 7px 0 3px
       background #FFF
@@ -286,4 +352,9 @@
         img
           width 19.4px
           height 19px
+  /*弹窗*/
+  .belive-layer
+    text-align center
+    line-height 50px
+    font-size 12px
 </style>

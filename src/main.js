@@ -5,6 +5,7 @@ import App from './App';
 import store from './store';
 import jsonBig from 'json-bigint';
 import { DatePicker } from "element-ui";
+import EasyScroll from 'easyscroll'
 import '@/stylus/rest.styl'
 
 import BaseFunction from '@/js/BaseFunction'//引入自定义插件
@@ -32,7 +33,7 @@ RUN_APP(
     PrototypeConfig: PrototypeConfig.core,
     LoopTaskConfig
   },
-  [DatePicker]
+  [DatePicker, EasyScroll]
 );
 
 
