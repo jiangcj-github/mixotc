@@ -32,7 +32,7 @@
           <p class="good-reputation sort"><span>好评率<i class="before"></i><i class="after"></i></span></p>
           <p class="trust-amount sort"><span>信任人数<i class="before"></i><i class="after"></i></span></p>
           <p class="amount sort"><span>数量<i class="before"></i><i class="after"></i></span></p>
-          <p class="limit-price sort"><span>限额(CNY)<i class="before"></i><i class="after"></i></span></p>
+          <p class="limit-price"><span>限额(CNY)</span></p>
           <p class="price sort" 
             :class="{'sort-add': filte.sort === 5, 'sort-minus': filte.sort === 6}">
             <span>价格(CNY)

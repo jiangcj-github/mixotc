@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="movebox" ref="movebox">
+    <div class="movebox">
       <div class="movego"></div>
       <div class="txt" id="txt">将滑块拖拽到最右边</div>
       <div class="move moveBefore" v-move="slideStatuss"></div>
@@ -14,15 +14,9 @@
     props:{
       slideStatus: String
     },
-    components: {
-
-    },
-    data() {
-      return {
-      }
-    },
-    mounted() {
-      //console.log($('选择器'))
+    destroyed() {
+      document.onmousemove = null;
+      document.onmousedown = null;
     },
     methods: {
       slideStatuss(status){
@@ -30,42 +24,53 @@
       }
     },
     directives: {
-      move: function (el, binding) {
-        // console.log(binding);
-        el.onmousedown = function (e) {
-          let X = e.clientX - el.offsetLeft;
-          document.onmousemove = function (e) {
-            let endx = e.clientX - X;
-            el.className = 'move moveBefore';
-            el.style.left = endx + 'px';
-            // console.log(el.parentNode.children[0])
-            const movebox = document.querySelector('.movebox');
-            const move = document.querySelector('.move');
-            const width = movebox.clientWidth - move.clientWidth;
-            el.parentNode.children[0].style.width = endx + 'px';
-            el.parentNode.children[1].innerHTML = '将滑块拖拽到最右边';
-            //临界值小于
-            if (endx <= 0) {
-              endx = 0 ;
-              el.style.left = endx + 'px';
-              el.parentNode.children[0].style.width = 0 + 'px';
-              //$('.movego').width(0)
+      move: {
+        bind: function (el, binding) {
+          // console.log(binding);
+          el.onmousedown = function (e) {
+            let X = e.clientX - el.offsetLeft;
+            document.onmousemove = function (e) {
+              el.endx = e.clientX - X;
+              el.className = 'move moveBefore';
+              el.style.left = el.endx + 'px';
+              // console.log(el.parentNode.children[0])
+              let movebox = document.querySelector('.movebox');
+              let move = document.querySelector('.move');
+              el.width = movebox.clientWidth - move.clientWidth;
+              el.parentNode.children[0].style.width = el.endx + 'px';
+              el.parentNode.children[1].innerHTML = '将滑块拖拽到最右边';
+              //临界值小于
+              if (el.endx <= 0) {
+                el.endx = 0 ;
+                el.style.left = el.endx + 'px';
+                el.parentNode.children[0].style.width = 0 + 'px';
+                //$('.movego').width(0)
+              }
+              //临界值大于
+              // console.log(el.style.left)
+              if (el.endx >= el.width) {
+                el.style.left = el.width + 'px';
+                el.parentNode.children[0].style.width = el.width + 'px';
+                el.parentNode.children[1].innerHTML = '验证通过';
+                el.className = 'move moveSuccess';
+                el.onmousedown = null;
+                binding.value();
+                document.onmousemove = null;
+              }
             }
-            //临界值大于
-            // console.log(el.style.left)
-            if (endx >= width) {
-              el.style.left = width + 'px';
-              el.parentNode.children[0].style.width = width + 'px';
-              el.parentNode.children[1].innerHTML = '验证通过';
-              el.className = 'move moveSuccess';
-              el.onmousedown = null;
-              binding.value();
+          };
+          document.onmouseup = function (e) {
+            if (el.endx > 0 && el.endx < el.width) {
+                el.endx = 0 ;
+                el.style.left = el.endx + 'px';
+                el.parentNode.children[0].style.width = 0 + 'px';
             }
-          }
-        };
-        document.onmouseup = function () {
-          document.onmousemove = null
-        };
+            document.onmousemove = null
+          };
+        },
+        unbind: function (el, binding) {
+          el.onmousedown = null;
+        }
       }
     }
   }

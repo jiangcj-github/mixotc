@@ -23,7 +23,7 @@
     },
     created: function () {
       let token = this.Storage.otcToken.get();
-      console.log('sdsad', token)
+      // console.log('sdsad', token)
       if (!token) return;
       let ws = this.WebSocket;
       ws.start('ws://39.106.157.67:8090/sub');

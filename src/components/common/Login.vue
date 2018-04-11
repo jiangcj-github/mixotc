@@ -1,11 +1,11 @@
 <template>
   <div class="wrap">
-    <div class="login" v-clickoutside="hideLoginForm">
+    <div class="login" v-mousedownOutside="hideLoginForm">
       <h2 class="title">登录/注册</h2>
       <div :class="{'hide-tip1':type,'show-tip1':!type}">请输入正确的手机号/邮箱</div>
       <p class="account">
         手机号/邮箱
-        <input type="text" value="" v-model="account">
+        <input type="text" value="" v-model="account" @blur="type = checkAccount(account)">
       </p>
       <Slider :slideStatus="slideStatus"></Slider>
       <div :class="{'hide-tip2':captcha,'show-tip2':!captcha}">请输入正确的验证码</div>
@@ -58,10 +58,10 @@
         return /^\d{6}$/.test(code);
       },
       sendCode(){
-        let type = this.checkAccount(this.account);
+       this.type = this.checkAccount(this.account);
         let accType = this.checkAccount(this.account);
-        if(!type) return;
-        this.accType = type;
+        if(!this.type) return;
+        this.accType = this.type;
         const $ = 60;
         if(!this.interval){
           this.time = $;
@@ -107,8 +107,8 @@
               data: data.body
             });
             data.body.msg && this.Storage.otcToken.set(data.body.msg);
+            this.Storage.otcAccount.set(this.account);
             this.$store.commit({ type: 'changeLogin', data: true });
-            console.log('login', this);
             this.hideLoginForm();
           },
           date:new Date()
@@ -136,13 +136,37 @@
       }
 
     },
-    mounted(){
+    mounted() {
+      if (this.Storage.otcAccount.get()) {
+        this.account = this.Storage.otcAccount.get()
+      }
       this.Bus.$on(this.slideStatus,(status) => {
         this.slideStatus = status
       })
     },
-    destroyed(){
+    destroyed() {
       this.Bus.$off(this.slideStatus);
+    },
+    directives: {
+      mousedownOutside: {
+        bind: function (el, binding, vode) {
+          function documentHandler(e) {
+            if (el.contains(e.target)) {
+              return false
+            }
+            if (binding.expression) {
+              binding.value(e);
+            }
+          }
+
+          el.wfy = documentHandler;
+          document.addEventListener('mousedown', documentHandler)
+        },
+        unbind: function (el, binding) {
+          document.removeEventListener('mousedown', el.wfy);
+          delete el.wfy
+        }
+      }
     }
   }
 </script>
@@ -157,6 +181,7 @@
     height 100%
     background rgba(0, 0, 0, 0.4)
     z-index 999
+    noselect()
     .login
       position fixed
       top 30px
@@ -232,7 +257,7 @@
           display inline-block
           width 320px
           height 40px
-          padding-left 20px
+          padding-left 10px
           margin 10px 0 15px
           background-color $col6FA
           border-radius 2px

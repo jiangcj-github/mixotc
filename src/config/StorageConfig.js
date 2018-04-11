@@ -19,13 +19,13 @@ export default {
    */
   storageList: [
     {name: 'otcToken', duration:86400000, expiryTime: 0, default:[], useDefault:false, arrPath:['a'] },
-    // {
-    //   name: "optional",
-    //   duration: 0,
-    //   expiryTime: 0,
-    //   default: [],
-    //   useDefault: true
-    // }, //自选
+    {
+      name: "otcAccount",
+      duration: 0,
+      expiryTime: 0,
+      default: [],
+      useDefault: false
+    } //自选
     // {
     //   name: "token",
     //   duration: 0,
