@@ -1,8 +1,9 @@
 <template>
   <li class="item clearfix">
     <div class="title merchant">
-      <img :src="data.icon ? `http://192.168.113.26/image/${data.icon}` : `/static/images/default_avator.jpg`" alt="">
-      <span class="nickname">{{data.trader}}</span>
+      <!-- <img class="whole" src="/static/images/whole_icon2.png" alt="" > -->
+      <img class="avatar" @click="toHomePage(data.id)" :src="data.icon ? `http://192.168.113.26/image/${data.icon}` : `/static/images/default_avator.png`" alt="">
+      <span class="nickname" @click="toHomePage(data.id)">{{data.trader}}</span>
       <span class="trust">信任</span>
     </div>
     <div class="title payment">
@@ -13,19 +14,24 @@
     <div class="title order-volume">{{data.trade ? data.trade : '-'}}</div>
     <div class="title deal-volume">1+BTC</div>
     <div class="title good-reputation">{{data.rate ? `${data.rate}%` : '-'}}</div>
-    <div class="title trust-amount">{{data.trust ? data.trade : '-'}}</div>
+    <div class="title trust-amount">{{data.trust ? data.trust : '-'}}</div>
     <div class="title amount">123.45</div>
     <div class="title limit-price">{{`${data.min}-${data.max}`}}</div>
     <div class="title price">{{data.price}}</div>
     <div class="title button">
-      <router-link tag='button' :to="{ name: 'order', params: { userId: 123 }}">购买</router-link>
+      <router-link tag='button' :to="{ name: 'order', query: { id: this.JsonBig.stringify(data.id) }}">购买</router-link>
     </div>
   </li>
 </template>
 
 <script>
 export default {
-  props: ['data']
+  props: ['data'],
+  methods: {
+    toHomePage(sid) {
+      this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})
+    }
+  }
 };
 </script>
 
@@ -49,13 +55,19 @@ export default {
     &.merchant 
       width 190px
       padding-left 30px
-      img
+      .whole
+        position absolute
+        top 20px
+        left 30px
+        _rotate(-45deg)
+      .avatar
         position absolute
         top 21px
         left 30px
         width 45px
         height 45px
         border-radius 50%
+        cursor pointer
       span
         position absolute
         left 85px
@@ -69,6 +81,7 @@ export default {
           color $col333
           letter-spacing 0.16px
           line-height 15px
+          cursor pointer
         &.trust
           bottom 22px
           width 30px

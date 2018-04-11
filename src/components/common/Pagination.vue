@@ -1,6 +1,6 @@
 <template>
   <div class="pagination">
-    <div class="main clearfix" :style="`width:${370 + (pageArr.length - 1) * 40}px`">
+    <div class="main clearfix" ref="pagination">
       <p>共{{totalPage}}</p>
       <ul class="clearfix">
         <li class="prev" @click="changeCurPage(curPage - 1)"></li>
@@ -105,20 +105,13 @@ export default {
 </script>
 <style lang="stylus">
 .pagination
-  position relative
+  display flex
+  justify-content:center;
   width 1200px
   margin 0 auto
   height 40px
   line-height 40px
   .main
-    position absolute
-    top 0
-    left 50%
-    transform translateX(-50%)
-    -ms-transform translateX(-50%) 	/* IE 9 */
-    -moz-transform translateX(-50%) 	/* Firefox */
-    -webkit-transform translateX(-50%) /* Safari 和 Chrome */
-    -o-transform translateX(-50%)
     p
       float left
       font-size 13px

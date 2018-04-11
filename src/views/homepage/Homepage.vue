@@ -36,27 +36,27 @@
       </div>
     </div>
     <!--取消信任弹框-->
-    <BasePopup :show="cancel_trust_pop">
-      <div class="pop">取消信任成功<i class="close" @click="hideTrustPopup">&times;</i></div>
+    <BasePopup :show="show_untrust_pop">
+      <div class="pop">取消信任成功<i class="close" @click="show_untrust_pop=false">&times;</i></div>
     </BasePopup>
     <!--菜单项tab-->
     <ul class="menu-tab">
-        <li :class="{active:tab==0}" @click="toggleTab(0)">他的发布</li>
-        <li :class="{active:tab==1}" @click="toggleTab(1)">收到的评价<i>&nbsp;{{evaluate_num}}</i></li>
+        <li :class="{active:tab==0}" @click="tab=0">他的发布</li>
+        <li :class="{active:tab==1}" @click="tab=1">收到的评价<i>&nbsp;{{rates_num}}</i></li>
     </ul>
     <!--发布列表-->
     <div class="release-list" v-show="tab==0">
       <div class="filter">
-        <a class="drop-down" @click="toggleFilterTypes" @blur="hideFilterTypes" href="javascript:void(0)">
+        <a class="drop-down" @click="flt_type_show=!flt_type_show" @blur="flt_type_show=false" href="javascript:void(0)">
           {{flt_types[flt_type_sel].text}}
           <ul v-show="flt_type_show" class="drop">
-            <li @click="selectFilterType(i)" v-for="(e,i) in flt_types">{{e.text}}</li>
+            <li @click="flt_type_sel=i" v-for="(e,i) in flt_types" :key="i">{{e.text}}</li>
           </ul>
         </a>
-        <a class="drop-down" @click="toggleFilterCoins" @blur="hideFilterCoins" href="javascript:void(0)">
+        <a class="drop-down" @click="flt_coin_show=!flt_coin_show" @blur="flt_coin_show=false" href="javascript:void(0)">
           {{flt_coins[flt_coin_sel].text}}
           <ul v-show="flt_coin_show" class="drop">
-            <li @click="selectFilterCoin(i)" v-for="(e,i) in flt_coins">{{e.text}}</li>
+            <li @click="flt_coin_sel=i" v-for="(e,i) in flt_coins" :key="i">{{e.text}}</li>
           </ul>
         </a>
       </div>
@@ -70,13 +70,13 @@
         <li class="pay-time">订单期限</li>
         <li class="operation">操作</li>
       </ul>
-      <ReleaseListItem v-for="(item,i) in releases" :key="i" :item="item"></ReleaseListItem>
-      <Pagination :total="75" emitValue='changeReleasePage'></Pagination>
+      <ReleaseListItem v-for="(item,i) in sales_c" :key="i" :data="item"></ReleaseListItem>
+      <Pagination :total="sales_num" :pageSize="sales_pgsize" emitValue='changeSalesPage'></Pagination>
     </div>
     <!--评价列表-->
     <div class="evaluate-list" v-show="tab==1">
-      <EvaluateListItem v-for="(item,i) in evaluates" :key="i" :item="item"></EvaluateListItem>
-      <Pagination :total="20" emitValue='changeEvaluatePage' class="page-bar"></Pagination>
+      <EvaluateListItem v-for="(item,i) in rates_c" :key="i" :data="item"></EvaluateListItem>
+      <Pagination :total="rates_num" :pageSize="rates_pgsize" emitValue='changeRatesPage' class="page-bar"></Pagination>
     </div>
   </div>
 </template>
@@ -85,6 +85,7 @@
   import EvaluateListItem from './children/EvaluateListItem';
   import Pagination from '@/components/common/Pagination';
   import BasePopup from '@/components/common/BasePopup';
+  import WebSocketProxy from '@/api/WebSocketSend.js';
 
   export default {
     components: {
@@ -108,29 +109,14 @@
         trust:100,
         guarantee:100,
         evaluate_num:100,
-        pay_methods:[
-          {key:'zfb',str:'支付宝',img:''},
-          {key:'wx',str:'微信',img:''},
-          {key:'yhk',str:'银行卡',img:''},
-        ],
-        releases:[
-          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
-          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
-          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
-          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
-          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
-          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
-          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
-          {time:'2016/03/09 13:43:30',type:'购买',coin:'BTC',price:'123',currency:'¥',min_limit:200,max_limit:1000,pay_method:[0,1,2],deadline:'10min',remark:'经常在线，可以快速买卖。。。。。'},
-        ],
-        evaluates:[
-          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
-          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
-          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
-          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
-          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
-          {time:'2016/03/08 23:57:03',text:'速度一般～～～～其实有点慢，价钱也不是很低！！！！',judge:'好评',heart_num:4,nickname:'xin2378',headimg:''},
-        ],
+
+        sales:[],
+        sales_num:0,
+        sales_pgsize:0,
+
+        rates:[],
+        rates_num:0,
+        rates_pgsize:0,
 
         flt_types:[
           {text:'全部广告',value:''},
@@ -138,7 +124,8 @@
           {text:'出售',value:''},
         ],
         flt_type_sel:0,
-        flt_type_show:false,
+        flt_type_show:false,  //下拉框-发布类型
+
         flt_coins:[
           {text:'全部币种',value:''},
           {text:'BTC',value:''},
@@ -147,55 +134,152 @@
           {text:'其他',value:''},
         ],
         flt_coin_sel:0,
-        flt_coin_show:false,
-        tab:0,
-        cancel_trust_pop:false,
+        flt_coin_show:false,  //下拉框-币种
+
+        tab:0,  //他的发布，他的评价
+        show_untrust_pop:false,
+      }
+    },
+    computed:{
+      sales_c(){
+        this.sales.forEach(function(item) {
+          item.create_c=item.create;
+          item.type_c={1:"购买",2:"出售"}[item.type+""];
+          item.currency_c=item.currency.toUpperCase();
+          item.price_c={"CNY":"¥"}[item.money.toUpperCase()]+" "+item.price;
+          item.minmax_c=item.min+"~"+item.max;
+          item.pays_c=item.payments;
+          item.dead_c=item.limit+"min";
+          item.info_c=item.info;
+        });
+        return this.sales;
+      },
+      rates_c(){
+        this.rates.forEach(function(item) {
+          item.comment_c=item.comment;
+          item.date_c=item.date;
+          item.credit_c=item.credit;
+          item.transit_c={1:"差评",2:"中评",3:"好评"}[item.transit];
+          item.icon_c=item.icon;
+          item.name_c=item.name;
+        });
+        return this.rates;
       }
     },
     mounted() {
-      this.Bus.$on('changeReleasePage',(p) => {
-        console.log(p);
+
+      let uid = this.JsonBig.parse('197113028456484864');
+      let uid2 = this.JsonBig.parse('197102307060486144');
+
+      let proxy=new WebSocketProxy(this.WebSocket);
+
+      /*
+
+      //ws请求-获取交易信息
+      let seq3 = ws.seq;
+      ws.onMessage[seq3]= {
+        callback:(data)=>{
+          if(!data || data.body.ret !== 0) return;
+
+        },
+        date:new Date()
+      };
+      ws.send(sendConfig('otc',{
+        seq: seq,
+        body:{action: 'trader_info', data:{"id":uid2, "origin":0}}
+      }));
+      */
+
+      var _this=this;
+
+      proxy.send('otc','trader_info',{
+
+      }).message(function(data){
+        if(!data || data.body.ret !== 0) return;
+        _this.sales=data.body.data.sales;
+        _this.sales_num=100;
+        _this.sales_pgsize=data.body.data.count;
       });
-      this.Bus.$on('changeEvaluatePage',(p) => {
-        console.log(p);
+
+      proxy.send('otc','his_sales',{
+        "id":uid2, "origin":0
+      }).message(function(data){
+        if(!data || data.body.ret !== 0) return;
+        _this.sales=data.body.data.sales;
+        _this.sales_num=100;
+        _this.sales_pgsize=data.body.data.count;
+      });
+
+      proxy.send('otc','rates',{
+        "id":uid, "origin":0
+      }).message(function(data){
+        if(!data || data.body.ret !== 0) return;
+        _this.rates=data.body.data.rates;
+        _this.rates_num=100;
+        _this.rates_pgsize=data.body.data.count;
+      });
+
+
+      /*
+      //ws请求-获取发布信息
+      let seq = ws.seq;
+      ws.onMessage[seq]= {
+        callback:(data)=>{
+          if(!data || data.body.ret !== 0) return;
+          this.sales=data.body.data.sales;
+          this.sales_num=100;
+          this.sales_pgsize=data.body.data.count;
+        },
+        date:new Date()
+      };
+      ws.send(sendConfig('otc',{
+        seq: seq,
+        body:{action: 'his_sales', data:{"id":uid2, "origin":0}}
+      }));
+
+      //ws请求-获取评价
+      let seq2=ws.seq;
+      ws.onMessage[seq2]={
+        callback:(data)=>{
+          if(!data || data.body.ret !== 0) return;
+          this.rates=data.body.data.rates;
+          this.rates_num=100;
+          this.rates_pgsize=data.body.data.count;
+        },
+        date:new Date()
+      };
+      ws.send(sendConfig('otc',{
+        seq: seq2,
+        body:{action: 'rates', data:{"id":uid, "origin":0}}
+      }));
+
+      */
+
+      //翻页事件
+      this.Bus.$on('changeSalesPage',(p) => {
+        // ws.send(sendConfig('otc',{
+        //   seq: seq,
+        //   body:{action: 'his_sales', data:{"id":uid2, "origin":p}}
+        // }));
+      });
+      this.Bus.$on('changeRatesPage',(p) => {
+        // ws.send(sendConfig('otc',{
+        //   seq: seq2,
+        //   body:{action: 'rates', data:{"id":uid, "origin":p}}
+        // }));
       });
     },
     methods: {
-      toggleFilterTypes(){
-        this.flt_type_show=!this.flt_type_show;
-      },
-      hideFilterTypes(){
-        this.flt_type_show=false;
-      },
-      selectFilterType(i){
-        this.flt_type_sel=i;
-      },
-      toggleFilterCoins(){
-        this.flt_coin_show=!this.flt_coin_show;
-      },
-      hideFilterCoins(){
-        this.flt_coin_show=false;
-      },
-      selectFilterCoin(i){
-        this.flt_coin_sel=i;
-      },
-      toggleTab(i){
-        this.tab=i;
-      },
       joinTrust(){
         this.is_trust=true;
       },
       cancelTrust(){
         this.is_trust=false;
         this.cancel_trust_pop=true;
-      },
-      hideTrustPopup(){
-        this.cancel_trust_pop=false;
       }
     }
   }
 </script>
-
 <style scoped lang="stylus">
   @import "../../stylus/base.styl";
   .homepage

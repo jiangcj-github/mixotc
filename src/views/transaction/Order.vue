@@ -109,6 +109,9 @@
         },
       }
     },
+    mounted() {
+      console.log(this.$route.query.id)
+    },
     methods: {
       changeMoney() {
         this.amount = this.money/(this.rate);
