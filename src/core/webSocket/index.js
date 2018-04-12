@@ -13,6 +13,7 @@ pool.onMessage = {};
 pool.onOpen = {};
 pool.reConnectFlag = false;
 pool.createConnect = createConnect;
+pool.beforeSend = null
 pool.seq = 1;
 /**
  * 建立websocket连接方法
@@ -93,7 +94,7 @@ function createConnect(url) {
 
   function onError(event) {
     console.log("webSocket出错", event.target.url);
-    pool.ws.close();
+    pool.ws && pool.ws.close();
   }
 }
 
@@ -130,6 +131,7 @@ pool.start = function(_url) {
  * 传入的text可以不做json处理
  */
 pool.send = function(txt) {
+  if(!(pool.beforeSend && pool.beforeSend(txt))) return;
   pool.seq++;
   console.log("send text");
   pool.ws.send(txt);
@@ -141,7 +143,7 @@ pool.send = function(txt) {
 pool.close = function() {
   // console.log('close all connects in pool')
   pool.reConnectFlag = false;
-  pool.ws.close();
+  pool.ws && pool.ws.close();
 };
 
 function heartBeat() {

@@ -97,8 +97,8 @@ const RUN_APP = (App, config, plugin) => {
       next();
       return;
     }
-    if (!store.state.isLogin) {
-      next({path: "/transaction"});
+    if (!sessionStorage.getItem("otcToken")) {
+      next({ path: "/transaction" });
       return;
     }
     next()

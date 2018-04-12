@@ -1,24 +1,24 @@
 <template>
   <div class="li">
         <div class="booth">
-          <span class="time">{{data.create_c}}</span>
-          <span class="type">{{data.type_c}}</span>
-          <span class="coin">{{data.currency_c}}</span>
-          <span class="price">{{data.price_c}}</span>
-          <span class="limit">{{data.minmax_c}}</span>
+          <span class="time">{{data.create}}</span>
+          <span class="type">{{data.type}}</span>
+          <span class="coin">{{data.currency}}</span>
+          <span class="price">{{data.price}}</span>
+          <span class="limit">{{data.minmax}}</span>
           <span class="pay-method">
-            <img src="/static/images/OTC_zhifubao.png" alt="" v-if="data.pays_c %2 === 1">
-            <img src="/static/images/OTC_wechat.png" alt="" v-if="[3, 6, 7].includes(data.pays_c)">
-            <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(data.pays_c)">
+            <img src="/static/images/OTC_zhifubao.png" alt="" v-if="data.pays %2 === 1">
+            <img src="/static/images/OTC_wechat.png" alt="" v-if="[3, 6, 7].includes(data.pays)">
+            <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(data.pays)">
           </span>
-          <span class="pay-time">{{data.dead_c}}</span>
+          <span class="pay-time">{{data.dead}}</span>
           <span class="operation">
-             <router-link class="buy-to" to="" tag="span" v-if="data.type_c=='出售'"><i>向他购买</i></router-link>
-             <router-link class="buy-to" to="" tag="span" v-if="data.type_c=='购买'"><i>向他出售</i></router-link>
+             <router-link class="buy-to" to="" tag="span" v-if="data.type=='出售'"><i>向他购买</i></router-link>
+             <router-link class="buy-to" to="" tag="span" v-if="data.type=='购买'"><i>向他出售</i></router-link>
           </span>
         </div>
         <div class="division"></div>
-        <div class="remark">备注：{{data.info_c}}</div>
+        <div class="remark">备注：{{data.info}}</div>
       </div>
 </template>
 <script>

@@ -2,6 +2,7 @@
   <div>
     <div class="transacation inner">
       <TopSearch :topList="['ETH', 'BTC', 'ADA', 'BAT', 'LTC']"></TopSearch>
+
       <div class="filtrate">
         <div class="select" @click.stop="switchPayment">
           <i>{{payTitle}}</i>
@@ -13,7 +14,7 @@
           <img src="/static/images/cancel_icon.png" alt="" v-if="paymentScore !== 0" @click="clearPayment">
         </div>
         <div class="price">
-          <b :class="{tip}">最大限额不能低于最小限额且最小限额为200</b>
+          <b :class="{tip}">!最大限额不能低于最小限额，且最小限额为200</b>
           <input type="number" class="min" @blur="filte.min = min" @keyup.enter="filte.min = min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
           <input type="number" class="max" @blur="filte.max = max" @keyup.enter="filte.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
         </div>
@@ -23,16 +24,16 @@
           <span>大额交易区</span>
         </div>
       </div>
+
       <div class="result-list">
         <div class="thead clearfix">
-          <p class="merchant"><span>商家</span></p>
-          <p class="payment"><span>付款方式</span></p>
-          <p class="order-volume sort"><span>订单量<i class="before"></i><i class="after"></i></span></p>
+          <p class="merchant"><span>广告主</span></p>
           <p class="deal-volume sort"><span>已成交量<i class="before"></i><i class="after"></i></span></p>
+          <p class="order-volume sort"><span>完成订单量<i class="before"></i><i class="after"></i></span></p>
           <p class="good-reputation sort"><span>好评率<i class="before"></i><i class="after"></i></span></p>
-          <p class="trust-amount sort"><span>信任人数<i class="before"></i><i class="after"></i></span></p>
-          <p class="amount sort"><span>数量<i class="before"></i><i class="after"></i></span></p>
-          <p class="limit-price sort"><span>限额(CNY)<i class="before"></i><i class="after"></i></span></p>
+          <p class="limit-price"><span>限额(CNY)</span></p>
+          <p class="payment"><span>付款方式</span></p>
+          <p class="amount sort"><span>可交易量<i class="before"></i><i class="after"></i></span></p>
           <p class="price sort" 
             :class="{'sort-add': filte.sort === 5, 'sort-minus': filte.sort === 6}">
             <span>价格(CNY)
@@ -45,8 +46,10 @@
           <li is='ResultListItem' v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
         </ul>
       </div>
+
       <Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>
     </div>
+    
     <div class="faq">
       <div class="inner clearfix">
         <h2>常见问题</h2>
@@ -286,7 +289,7 @@ import Pagination from '@/components/common/Pagination';
         position absolute
         left 583px
         top 20px
-        width 245px
+        width 260px
         height 50px
         b
           display none
@@ -321,7 +324,7 @@ import Pagination from '@/components/common/Pagination';
         &::after
           position absolute
           top 7.5px
-          right 0
+          right 10px
           width 1px
           height 15px
           content ''
@@ -367,22 +370,20 @@ import Pagination from '@/components/common/Pagination';
           color $col999
           letter-spacing 0.27px
           &.merchant
-            width 160px
+            width 170px
             padding-left 30px
           &.payment
-            width 110px
+            width 120px
           &.order-volume
-            width 100px
+            width 110px
           &.deal-volume
-            width 110px
+            width 120px
           &.good-reputation
-            width 100px
-          &.trust-amount
-            width 100px
+            width 110px
           &.amount
-            width 110px
+            width 120px
           &.limit-price
-            width 110px
+            width 140px
           &.price
             width 150px
           &.sort

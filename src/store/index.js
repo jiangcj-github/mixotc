@@ -6,11 +6,15 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
+    showLoginForm: false,
     isLogin: false,
     userInfo: null,
     showChat: false
   },
   mutations: {
+    changeLoginForm(state, {data}) {
+      state.showLoginForm = data;
+    },
     changeLogin(state, {data}) {
       state.isLogin = data;
     },

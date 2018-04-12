@@ -35,13 +35,13 @@
           </li>
           
         </ul>
-        <span class="log" @click="show_loginform" v-if="!this.$store.state.isLogin">登录/注册</span>
+        <span class="log" @click="changeLoginForm(true)" v-if="!this.$store.state.isLogin">登录/注册</span>
         <div class="info" v-else>
           <img class="avator" :src="icon ? `http://192.168.113.26/image/${icon}` : `/static/images/default_avator.png`" alt="">
           <div class="name" @click="showMenu = !showMenu" >
             <span class="login" >{{name}}</span>
             <img class="select-icon" src='/static/images/triangle_black.png' alt="">
-            <ul v-if="showMenu">
+            <ul v-if="showMenu" v-clickoutside="hideShowMenu">
               <!-- <li class="center">个人中心</li>
               <li class="safe">安全设置</li>
               <li class="auth">身份认证</li> -->
@@ -49,7 +49,7 @@
             </ul>
           </div>
         </div>
-        <Login v-if="loginForm" :loginForm.sync="loginForm"/>
+        <Login v-if="showLoginForm"/>
       </div>
     </section>
   </article>
@@ -62,7 +62,6 @@
     data() {
       return {
         isHover: false,
-        loginForm : false,
         showMenu: false,
         items: [
           {title: 'BitFunex', value: '$9.244.70↑'}, {title: 'Kraken', value: '€7.468.30↑'}, {title: 'Bithumb', value: '₩10.186.000.00↑'}, {title: 'Bitflyer', value: '￥995.759.00↑'}
@@ -73,13 +72,8 @@
       Login
     },
     methods: {
-      show_loginform() {
-        if (this.loginForm) return;
-        this.loginForm = true;
-      },
-      hideLoginForm() {
-        if (!this.loginForm) return;
-        this.loginForm = false;
+      changeLoginForm(state) {
+        this.$store.commit({type: 'changeLoginForm', data: state});
       },
       loginOut() {
         this.storage.removeLocal('otcToken');
@@ -92,10 +86,17 @@
         this.isHover = false;
       },
       logout() {
-        this.Storage.otcToken.removeAll()
+        sessionStorage.removeItem('otcToken');
         this.$store.commit({type: 'changeLogin', data: false});
         this.WebSocket.reConnectFlag = false;
         this.WebSocket.close();
+        if (this.path !== '/' && this.path !== 'transaction') {
+          this.$router.push('transaction')
+        }
+      },
+      hideShowMenu() {
+        if (!this.showMenu) return;
+        this.showMenu = false
       }
     },
     computed: {
@@ -104,6 +105,12 @@
       },
       name() {
         return this.$store.state.userInfo.name
+      },
+      path() {
+        return this.$route.path
+      },
+      showLoginForm() {
+        return this.$store.state.showLoginForm
       }
     }
   }
