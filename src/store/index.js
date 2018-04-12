@@ -17,7 +17,7 @@ const store = new Vuex.Store({
     getUserInfo(state, {data}) {
       state.userInfo = data;
     },
-    changeChatBox(state, {data}) {
+    changeChatBox(state, {data}) { // 控制右下方消息框显示
       state.showChat = data;
     }
   },

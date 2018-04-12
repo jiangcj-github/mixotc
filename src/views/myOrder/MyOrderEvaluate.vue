@@ -1,20 +1,37 @@
 <template>
   <div class="my-order-evaluate-wrap inner">
-    <h1>mixOTC-我的订单-评价</h1>
+    <h1>
+      <router-link to="/transaction">mixOTC</router-link>-
+      <router-link to="/order">我的订单</router-link>-
+      <router-link to="/order/evaluate">评价</router-link>
+    </h1>
     <div class="evaluate-content">
       <p>
         <img src="" alt="">
-        <em>xin2378</em>
-        <i>访问TA的主页</i>
+        <em>{{name}}</em>
+        <router-link to="/homepage">访问TA的主页</router-link>
       </p>
-      <dl>
-        <dt>评价对方</dt>
-        <dd v-for="content in orderList">
-          <span>{{content.title}}</span>
-          <b>{{content.info}}</b>
-        </dd>
-      </dl>
-      <EvaluateRelease v-if="showContent === 0"></EvaluateRelease>
+      <div class="content-info clearfix">
+        <h2>评价对方</h2>
+        <ul>
+          <li v-for="content in titleList">{{content}}</li>
+        </ul>
+        <ol>
+          <li>{{currency}}</li>
+          <li>{{price}}</li>
+          <li>{{num}}</li>
+          <li>{{amountc}}</li>
+          <li>{{create}}</li>
+          <li>{{id}}</li>
+          <li>{{limit}}</li>
+          <li>{{info}}</li>
+        </ol>
+      </div>
+      <EvaluateRelease v-if="showContent === 0"
+                       :id="propsId"
+                       :receiver="propsSid"
+                       :type="propsType">
+      </EvaluateRelease>
       <EvaluateResult v-if="showContent === 1"></EvaluateResult>
     </div>
   </div>
@@ -29,16 +46,19 @@
     data() {
       return {
         showContent: 0,
-        orderList:[
-          {'title': '订单类型', 'info': '购买BTC'},
-          {'title':'购买单价', 'info': '45678 CNY'},
-          {'title':'购买数量', 'info': '0.12345 BTC'},
-          {'title':'购买金额', 'info': '45678 CNY'},
-          {'title':'创建时间', 'info': '2016/03/08 23:57:03'},
-          {'title':'订单编号', 'info': '123456789098765432'},
-          {'title':'订单期限', 'info': '10min'},
-          {'title':'订单备注', 'info': '请使用微信支付哦～及时联系'}
-        ]
+        titleList: ['订单类型', '购买单价', '购买数量', '购买金额', '创建时间', '订单编号', '订单期限', '订单备注'],
+        name: '',
+        currency: '',
+        price: '',
+        num: '',
+        amountc: '',
+        create: '',
+        id: '',
+        limit: '',
+        info: '',
+        propsId: '',
+        propsSid: '',
+        propsType: ''
       }
     },
     components: {
@@ -47,6 +67,23 @@
     },
     created() {
       this.showContent = Number(this.$route.query.type)
+      this.orderList = this.$route.query.data
+      console.log('orderList', this.orderList)
+      this.name = this.orderList.name
+      this.currency = `${this.orderList.type == 1 ? '购买' : '出售'}${this.orderList.currency.toUpperCase()}`
+      this.price = `${this.orderList.price}CNY`
+      this.num = '1111111'
+      this.amountc = `${this.orderList.amountc}CNY`
+      this.create = (Number(this.orderList.create) * 1000).toDate('yyyy/MM/dd HH:mm:ss')
+      this.id = this.JsonBig.stringify(this.orderList.id)
+      this.limit = '222222'
+      this.info = this.orderList.info
+      this.propsId = this.orderList.id
+      this.propsType = this.orderList.type
+      this.propsSid = this.orderList.sid
+      this.Bus.$on('showReult', data => { // 接收订单完成后的变量提示，变为订单结果
+        this.showContent = data
+      })
     }
   }
 </script>
@@ -82,11 +119,12 @@
           height 45px
           background aquamarine
           margin 30px 20px 0 0
+          border-radius 50%
         em
           position relative
           top -25px
           margin-right 115px
-        i
+        a
           position relative
           top -18px
           padding-left 28px
@@ -99,25 +137,31 @@
             content ''
             background url(/static/images/visit.png) no-repeat
             background-size 20px 20px
-      dl
+      .content-info
         margin-top 20px
         border-bottom 1px solid #E1E1E1
-        dt
+        h2
           font-size 20px
           font-weight bold
           color #333
           margin-bottom 23px
-        dd
+        li
+          height 20px
+          line-height 20px
           margin-bottom 20px
-          span
+        ul
+          float left
+          margin-right 92px
+          li
             color #333
-            margin-right 92px
-          b
+        ol
+          float left
+          li
             color #999
-        dd:nth-child(2)
-          b
+          li:first-child
             font-size 20px
             color #333
+
 
 
 

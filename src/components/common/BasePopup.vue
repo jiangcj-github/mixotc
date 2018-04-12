@@ -48,16 +48,11 @@
     .content
       position absolute
       left 50%
-      transform translateX(-50%)
-      -ms-transform translateX(-50%)
-      -moz-transform translateX(-50%)
-      -webkit-transform translateX(-50%)
-      -o-transform translateX(-50%)
-      transform translateY(-50%)
-      -ms-transform translateY(-50%)
-      -moz-transform translateY(-50%)
-      -webkit-transform translateY(-50%)
-      -o-transform translateY(-50%)
+      transform translate(-50%, -50%)
+      -ms-transform translate(-50%, -50%)
+      -moz-transform translate(-50%, -50%)
+      -webkit-transform translate(-50%, -50%)
+      -o-transform translate(-50%, -50%)
       background #FFF
       border-radius 2px
 </style>

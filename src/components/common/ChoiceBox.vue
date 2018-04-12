@@ -57,7 +57,7 @@
         // 从父组件接收的emitValue值，触发emitValue事件，可在其他组件听过$on监听emitValue获取选的的值;
         this.Bus.$emit(this.emitValue, this.selectValue[index]);
         this.show = false;
-        // onlySelectEmitValue 又本组件触发，由本组件监听， 目的为了实现互斥
+        // onlySelectEmitValue 由本组件触发，由本组件监听， 目的为了实现互斥
         this.isExchange && (this.items = selected) || this.Bus.$emit('onlySelectEmitValue', selected) && (this.isActive = true) && (this.selectNum = index)
       },
     },
@@ -83,18 +83,19 @@
       display inline-block
       width 70px
       font-size $fz13
-      color $col333
+      color #999
       position relative
       cursor pointer
       &:after
         position absolute
         top 8px
         right  0px
-        width 11px
-        height 5px
+        /*width 11px*/
+        /*height 5px*/
         content ''
-        background url(/static/images/triangle_black.png) no-repeat
-        background-size 11px 5px
+        triangle_down($col999)
+        //background url(/static/images/triangle_black.png) no-repeat
+        /*background-size 11px 5px*/
     ul
       position absolute
       top 20px
