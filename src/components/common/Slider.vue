@@ -19,8 +19,8 @@
       document.onmousedown = null;
     },
     methods: {
-      slideStatuss(status){
-        this.Bus.$emit(this.slideStatus,status)
+      slideStatuss() {
+        this.Bus.$emit(this.slideStatus, true)
       }
     },
     directives: {

@@ -13,7 +13,7 @@
         <input type="text" placeholder="验证码" value="" v-model="code">
         <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend}" @click="sendCode">{{isSend ? time + '秒后重发': sendText}}</button>
       </p>
-      <button :class="{able:!slideStatus && agree}" :disabled="slideStatus || !agree" @click="login">登录</button>
+      <button :class="{able: moveTrue && agree}" :disabled="!moveTrue || !agree" @click="login">登录</button>
       <div class="yhxy">
         <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
         <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
@@ -32,6 +32,7 @@
     name: "login",
     data() {
       return {
+        moveTrue: false,
         slideStatus: 'slideStatuss',
         agree: true,
         account: '',
@@ -59,7 +60,10 @@
       sendCode(){
        this.type = this.checkAccount(this.account);
         let accType = this.checkAccount(this.account);
-        if(!this.type) return;
+        if (!this.type) return;
+        if (!this.moveTrue) {
+          return;
+        }
         this.accType = this.type;
         const $ = 60;
         if(!this.interval){
@@ -142,8 +146,9 @@
       if (this.Storage.otcAccount.get()) {
         this.account = this.Storage.otcAccount.get()
       }
-      this.Bus.$on(this.slideStatus,(status) => {
-        this.slideStatus = status
+      this.Bus.$on(this.slideStatus, (status) => {
+        this.moveTrue = status
+        this.sendCode()
       })
     },
     destroyed() {

@@ -22,7 +22,8 @@
     },
     data() {
       return {
-        timer: null
+        timer1: null,
+        timer2: null
       }
     },
     created: function () {
@@ -75,16 +76,23 @@
       }
     },
     destroyed() {
-      this.timer && (this.timer = clearTimeout(this.timer));
+      this.timer1 && (this.timer1 = clearTimeout(this.timer1));
+      this.timer2 && (this.timer2 = clearInterval(this.timer2));
       window.onmousedown = null
     },
     methods: {
+      //退出登录逻辑
       logout() {
-        console.log('logout');
+        // console.log('logout');
+        // 移除token
         sessionStorage.removeItem('otcToken');
+        //改变vuex登录状态
         this.$store.commit({type: 'changeLogin', data: false});
+        //重连置否
         this.WebSocket.reConnectFlag = false;
+        //websocket链接关闭
         this.WebSocket.close();
+        //其他页面跳转至主页
         if (this.path !== '/' && this.path !== 'transaction') {
           this.$router.push('transaction')
         }
@@ -98,19 +106,26 @@
     watch: {
       //监听登录状态
       isLogin(curVal, oldVal) {
-        //登录时设置定时器，绑定事件监听用户操作
         if (curVal) {
-          this.timer && (this.timer = clearTimeout(this.timer));
-          this.timer = setTimeout(this.logout, 600000);
+        //登录时设置定时器，绑定事件监听用户操作
+          this.timer1 && (this.timer1 = clearTimeout(this.timer1));
+          this.timer1 = setTimeout(this.logout, 600000);
           window.onmousedown = (event) => {
             //用户操作时重新计时
-            this.timer = clearTimeout(this.timer);
-            this.timer = setTimeout(this.logout, 600000);
+            this.timer1 = clearTimeout(this.timer1);
+            this.timer1 = setTimeout(this.logout, 600000);
           }
+          //定时查询token，token删除即退出登录
+          this.timer2 && (this.timer2 = clearInterval(this.timer2));
+          this.timer2 = setInterval(() => {
+            if(sessionStorage.getItem('otcToken')) return;
+            this.logout()
+          }, 1000);
           return;
         }
         //退出登录时清理定时器，移除监听
-         this.timer = clearTimeout(this.timer);
+         this.timer1 = clearTimeout(this.timer1);
+         this.timer2 = clearTimeout(this.timer2);
          window.onmousedown = null
       }
     }

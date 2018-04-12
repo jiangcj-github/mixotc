@@ -83,6 +83,7 @@ function createConnect(url) {
   pool.ws.onclose = onClose;
 
   function onClose(event) {
+    console.log(pool.reConnectFlag);
     console.log("webSocket断开", event.target.url);
     clearInterval(reConnectInterval);
     clearInterval(heartBeatInterval);

@@ -13,13 +13,15 @@ if (event.key == "getSessionStorage") {
     JSON.stringify(sessionStorage.getItem("otcToken"))
   );
   localStorage.removeItem("otcToken");
-} else if (event.key == "otcToken" && !sessionStorage.getItem("otcToken")) {
+} else if (event.key == "removeSessionStorage"){
+// 已存在的标签页会收到这个事件
+  sessionStorage.removeItem("otcToken");
+
+}else if (event.key == "otcToken" && !sessionStorage.getItem("otcToken")) {
   // 新开启的标签页会收到这个事件
-  //  var data = JSON.parse(event.newValue);
+
   if(event.newValue === 'null') return;
-  //  for (key in data) {
      event.newValue && sessionStorage.setItem("otcToken", event.newValue.substring(1, event.newValue.length - 1));
-  //  }
     }
  });
 })();
