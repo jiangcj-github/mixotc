@@ -29,7 +29,6 @@
   import sendConfig from '@/api/SendConfig.js'
 
   export default {
-    props: ['loginForm'],
     name: "login",
     data() {
       return {
@@ -99,14 +98,14 @@
         let ws =this.WebSocket;
         ws.start('ws://39.106.157.67:8090/sub');
         let seq = ws.seq;
-        ws.onMessage[seq]= {
-          callback:(data)=>{
+        ws.onMessage[seq] = {
+          callback: (data)=>{
             if(!data || data.body.ret !== 0) return;
             this.$store.commit({
               type: 'getUserInfo',
               data: data.body
             });
-            data.body.msg && this.Storage.otcToken.set(data.body.msg);
+            data.body.msg && sessionStorage.setItem('otcToken', data.body.msg);
             this.Storage.otcAccount.set(this.account);
             this.$store.commit({ type: 'changeLogin', data: true });
             this.hideLoginForm();
@@ -131,8 +130,7 @@
         }
       },
       hideLoginForm() {
-        if (!this.loginForm) return;
-        this.$emit('update:loginForm', false);
+        this.$store.commit({type: 'changeLoginForm', data: false});
       }
 
     },

@@ -31,7 +31,7 @@
 
     },
     methods: {
-      openBox(st) {
+      openBox() {
         this.$store.commit({'type':'changeChatBox', data: true})
       }
     }

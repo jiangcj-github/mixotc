@@ -1,143 +1,145 @@
 <template>
-  <div class="right">
-    <ul class="tab">
-      <li :class="{active:tab==1}" @click="tab=1">待审核(3)</li>
-      <li :class="{active:tab==2}" @click="tab=2">已审核</li>
-    </ul>
-    <!--待审核-->
-    <div class="uncheck" v-show="tab==1">
-      <div class="search-bar">
-        <div class="search">
-          <input type="text" placeholder="查找昵称/帐号" @input="searchCheck" v-model="srch_key">
-          <img src="/static/images/search_gray.png">
-        </div>
-        <ul class="results">
-          <li class="active">lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-          <li>lihh / 130***123</li>
-        </ul>
-      </div>
-      <div class="upload-info">
-        <h3>lihh / 130***123</h3>
-        <sup>第1次认证</sup>
-        <p class="inf-li"><label>提交时间</label><span>2018/03/09 23:30:42</span></p>
-        <p class="inf-li"><label>姓名</label><span>李小蹦</span></p>
-        <p class="inf-li"><label>身份证号</label><span>189099087656567890</span></p>
-        <p class="inf-li"><label>银行卡号</label><span>189099087656567890</span></p>
-        <p class="inf-li"><label>开户行</label><span>北京银行中关村支行</span></p>
-        <p class="check-img">
-          <img src="">
-          <img src="">
-          <img src="">
-        </p>
-        <div class="form">
-          <p style="margin-bottom:12px">
-            <span class="checkbox" :class="{check:check_result==1}" @click="checkSuccess">审核通过</span>
-            <span class="checkbox" :class="{check:check_result==0}" @click="checkFailed" style="margin-left:20px">审核不通过</span>
-          </p>
-          <div class="textarea">
-            <textarea placeholder="不通过原因：字数限制0～50个字符。" v-model="check_remark" @input="isValidateReason"></textarea>
-            <p class="indicator">{{check_remark.length}}/50</p>
+  <LeftLayout :leftBar="1">
+    <div class="right" slot="right">
+      <ul class="tab">
+        <li :class="{active:tab==1}" @click="tab=1">待审核(3)</li>
+        <li :class="{active:tab==2}" @click="tab=2">已审核</li>
+      </ul>
+      <!--待审核-->
+      <div class="uncheck" v-show="tab==1">
+        <div class="search-bar">
+          <div class="search">
+            <input type="text" placeholder="查找昵称/帐号" @input="searchCheck" v-model="srch_key">
+            <img src="/static/images/search_gray.png">
           </div>
-          <div class="mali">
-            <span class="radio" :class="{check:is_mali}" @click="is_mali=!is_mali">是否恶意上传认证</span>
-            <ul>
-              <li>恶意认证提交后，封锁该用户3天认证功能</li>
-              <li>3次恶意认证后，永久封锁认证功能</li>
-            </ul>
-          </div>
-          <div class="btn-wrap">
-            <button class="submit-btn" :class="{active:can_submit}">提交</button>
-          </div>
+          <ul class="results">
+            <li class="active">lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+            <li>lihh / 130***123</li>
+          </ul>
         </div>
-      </div>
-    </div>
-    <!--已审核-->
-    <div class="checked" v-show="tab==2">
-      <div class="filter">
-        <div class="f1">
-          <input type="text" placeholder="搜索商家昵称/账号">
-          <a href="javascript:void(0)"></a>
-        </div>
-        <div class="f2">
-          <img src="/static/images/date_icon.png" class="data-icon">
-          <DatePicker text="开始日期"></DatePicker>
-          <span class="to">-</span>
-          <DatePicker text="截止日期"></DatePicker>
-        </div>
-        <div class="f3">
-          <a href="javascript:void(0)" :class="{active:flt_days==1}" @click="flt_days=1">今天</a>
-          <a href="javascript:void(0)" :class="{active:flt_days==3}" @click="flt_days=3">三天</a>
-          <a href="javascript:void(0)" :class="{active:flt_days==7}" @click="flt_days=7">七天</a>
-        </div>
-      </div>
-      <div class="tb-head">
-        <span class="tjsj">提交时间</span>
-        <span class="yh">用户</span>
-        <span class="shr">审批人</span>
-        <span class="shsj">审核时间</span>
-        <span class="ys">用时</span>
-        <span class="zt">状态</span>
-        <span class="cz">操作</span>
-      </div>
-      <div class="li" v-for="item of 4">
-        <div class="booth">
-          <span class="tjsj">2016/03/09 13:24</span>
-          <span class="yh">lihh/130***123</span>
-          <span class="shr">lihh/130***123</span>
-          <span class="shsj">2016/03/09 13:24</span>
-          <span class="ys">6min30s</span>
-          <span class="zt">通过</span>
-          <span class="cz"><a href="javascript:void(0)" class="ck" @click="showPop">查看</a></span>
-        </div>
-        <div class="division"></div>
-        <div class="remark">备注：照片不清晰，模糊看不清</div>
-      </div>
-      <Pagination total="6" emitValue="changePage" style="width:100%;margin-top:20px"></Pagination>
-      <!--查看弹框-->
-      <BasePopup :show="show_pop" :width="764" :height="382">
-        <div class="pop">
+        <div class="upload-info">
+          <h3>lihh / 130***123</h3>
+          <sup>第1次认证</sup>
           <p class="inf-li"><label>提交时间</label><span>2018/03/09 23:30:42</span></p>
-          <p class="inf-li"><label>银行卡号</label><span>189099087656567890</span></p>
-          <p class="inf-li"><label>开户行</label><span>北京银行中关村支行</span></p>
+          <p class="inf-li"><label>姓名</label><span>李小蹦</span></p>
+          <p class="inf-li"><label>身份证号</label><span>189099087656567890</span></p>
           <p class="check-img">
             <img src="">
             <img src="">
             <img src="">
           </p>
-          <i class="close" @click="show_pop=false">&times;</i>
+          <div class="form">
+            <p style="margin-bottom:12px">
+              <span class="checkbox" :class="{check:check_result==1}" @click="checkSuccess">审核通过</span>
+              <span class="checkbox" :class="{check:check_result==0}" @click="checkFailed" style="margin-left:20px">审核不通过</span>
+            </p>
+            <div class="textarea">
+              <textarea placeholder="不通过原因：字数限制0～50个字符。" v-model="check_remark" @input="isValidateText" ref="textarea"></textarea>
+              <p class="indicator">{{check_remark.length}}/50</p>
+            </div>
+            <div class="mali">
+              <span class="radio" :class="{check:is_mali}" @click="is_mali=!is_mali">是否恶意上传认证</span>
+              <ul>
+                <li>恶意认证提交后，封锁该用户3天认证功能</li>
+                <li>3次恶意认证后，永久封锁认证功能</li>
+              </ul>
+            </div>
+            <div class="btn-wrap">
+              <button class="submit-btn" :class="{active:can_submit}">提交</button>
+            </div>
+          </div>
         </div>
-      </BasePopup>
+      </div>
+      <!--已审核-->
+      <div class="checked" v-show="tab==2">
+        <div class="filter">
+          <div class="f1">
+            <input type="text" placeholder="搜索商家昵称/账号">
+            <a href="javascript:void(0)"></a>
+          </div>
+          <div class="f2">
+            <img src="/static/images/date_icon.png" class="data-icon">
+            <DatePicker text="开始日期"></DatePicker>
+            <span class="to">-</span>
+            <DatePicker text="截止日期"></DatePicker>
+          </div>
+          <div class="f3">
+            <a href="javascript:void(0)" :class="{active:flt_days==1}" @click="flt_days=1">今天</a>
+            <a href="javascript:void(0)" :class="{active:flt_days==3}" @click="flt_days=3">三天</a>
+            <a href="javascript:void(0)" :class="{active:flt_days==7}" @click="flt_days=7">七天</a>
+          </div>
+        </div>
+        <div class="tb-head">
+          <span class="tjsj">提交时间</span>
+          <span class="yh">用户</span>
+          <span class="shr">审批人</span>
+          <span class="shsj">审核时间</span>
+          <span class="ys">用时</span>
+          <span class="zt">状态</span>
+          <span class="cz">操作</span>
+        </div>
+        <div class="li" v-for="item of 4">
+          <div class="booth">
+            <span class="tjsj">2016/03/09 13:24</span>
+            <span class="yh">lihh/130***123</span>
+            <span class="shr">lihh/130***123</span>
+            <span class="shsj">2016/03/09 13:24</span>
+            <span class="ys">6min30s</span>
+            <span class="zt">通过</span>
+            <span class="cz"><a href="javascript:void(0)" class="ck" @click="showPop">查看</a></span>
+          </div>
+          <div class="division"></div>
+          <div class="remark">备注：照片不清晰，模糊看不清</div>
+        </div>
+        <Pagination :total="6" :pageSize="3" emitValue="changePage" style="width:100%;margin-top:20px"></Pagination>
+        <BasePopup :show="show_pop" :width="764" :height="382">
+          <div class="pop">
+            <p class="inf-li"><label>提交时间</label><span>2018/03/09 23:30:42</span></p>
+            <p class="inf-li"><label>姓名</label><span>李小蹦</span></p>
+            <p class="inf-li"><label>身份证号</label><span>189099087656567890</span></p>
+            <p class="check-img">
+              <img src="">
+              <img src="">
+              <img src="">
+            </p>
+            <i class="close" @click="show_pop=false">&times;</i>
+          </div>
+        </BasePopup>
+      </div>
     </div>
-  </div>
+  </LeftLayout>
 </template>
 <script>
   import Pagination from "@/components/common/Pagination";
   import DatePicker from "@/components/common/DatePicker";
   import BasePopup from "@/components/common/BasePopup";
-
+  import LeftLayout from "./layout/LeftLayout";
+  import WebSocketProxy from '@/api/WebSocketProxy.js';
   export default {
     components: {
+      LeftLayout,
+      BasePopup,
       Pagination,
       DatePicker,
-      BasePopup,
     },
     data() {
       return {
-        tab:1,    //审核，未审核
+        proxy: new WebSocketProxy(this.WebSocket),
+        tab:1,  //审核，未审核
 
         srch_key:'',
 
@@ -148,8 +150,7 @@
         can_submit:false,
 
         flt_days:1,
-
-        show_pop:false,  //弹框-查看
+        show_pop:false,  //弹窗-查看
       }
     },
     methods: {
@@ -161,9 +162,10 @@
         this.check_result=0;
         this.can_submit=this.check_remark.length>0;
       },
-      isValidateReason(e){
+      isValidateText(){
         if(this.check_remark.length>50){
           this.check_remark=this.check_remark_old;
+          this.$refs.textarea.value=this.check_remark_old;
         }else{
           this.check_remark_old=this.check_remark;
         }
@@ -177,12 +179,28 @@
       showPop(){
         //
         this.show_pop=true;
-      }
+      },
+      //
+      loadUnchecks(){
+        this.proxy.send("otc","",{
+
+        }).then(function(data){
+
+        })
+      },
+    },
+
+    mounted(){
+      //
+      //
+      this.Bus.$on('changePage',(p) => {
+
+      });
     }
   }
 </script>
 <style scoped lang="stylus">
-  @import "../../../stylus/base.styl";
+  @import "../../stylus/base.styl";
   .right
     width 1000px
     margin-left 200px
@@ -380,6 +398,55 @@
         span
           display inline-block
           line-height 50px
+        .tjsj
+          width 160px
+        .yh
+          width 140px
+        .shr
+          width 140px
+        .cz
+          width 100px
+        .shsj
+          width 160px
+        .ys
+          width 100px
+        .zt
+          width 100px
+      .pop
+        padding 60px 80px
+        position relative
+        .inf-li
+          font-size 14px
+          letter-spacing 0.16px
+          line-height 20px
+          margin-bottom 10px
+          label
+            color #999
+            width 150px
+            display inline-block
+          span
+            color #333
+            display inline-block
+        .check-img
+          height 180px
+          display flex
+          align-items center
+          >img
+            width 180px
+            height 120px
+            border 1px solid #EEEEEE
+            border-radius 2px
+            margin-right 20px
+        .close
+          position absolute
+          top 10px
+          right 10px
+          font-size 20px
+          cursor pointer
+          display inline-block
+          line-height 24px
+          width 24px
+          text-align center
       .li
         padding 0 30px
         background #fff
@@ -423,41 +490,6 @@
         width 100px
       .zt
         width 100px
-      .pop
-        padding 60px 80px
-        position relative
-        .inf-li
-          font-size 14px
-          letter-spacing 0.16px
-          line-height 20px
-          margin-bottom 10px
-          label
-            color #999
-            width 150px
-            display inline-block
-          span
-            color #333
-            display inline-block
-        .check-img
-          height 180px
-          display flex
-          align-items center
-          >img
-            width 180px
-            height 120px
-            border 1px solid #EEEEEE
-            border-radius 2px
-            margin 0 10px
-        .close
-          position absolute
-          top 10px
-          right 10px
-          font-size 20px
-          cursor pointer
-          display inline-block
-          line-height 24px
-          width 24px
-          text-align center
   .textarea
     border 1px solid #E1E1E1
     border-radius 2px

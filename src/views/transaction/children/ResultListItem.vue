@@ -6,20 +6,19 @@
       <span class="nickname" @click="toHomePage(data.id)">{{data.trader}}</span>
       <span class="trust">信任</span>
     </div>
+    <div class="title deal-volume">1+BTC</div>
+    <div class="title order-volume">{{data.trade ? data.trade : '-'}}</div>
+    <div class="title good-reputation">{{data.rate ? `${data.rate}%` : '-'}}</div>
+    <div class="title limit-price">{{`${data.min}-${data.max}`}}</div>
     <div class="title payment">
       <img src="/static/images/OTC_zhifubao.png" alt="" v-if="data.payments %2 === 1">
       <img src="/static/images/OTC_wechat.png" alt="" v-if="[3, 6, 7].includes(data.payments)">
       <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(data.payments)">
     </div>
-    <div class="title order-volume">{{data.trade ? data.trade : '-'}}</div>
-    <div class="title deal-volume">1+BTC</div>
-    <div class="title good-reputation">{{data.rate ? `${data.rate}%` : '-'}}</div>
-    <div class="title trust-amount">{{data.trust ? data.trust : '-'}}</div>
     <div class="title amount">123.45</div>
-    <div class="title limit-price">{{`${data.min}-${data.max}`}}</div>
     <div class="title price">{{data.price}}</div>
     <div class="title button">
-      <router-link tag='button' :to="{ name: 'order', query: { id: this.JsonBig.stringify(data.id) }}">购买</router-link>
+      <button @click="toOrder(data.id)">购买</button>
     </div>
   </li>
 </template>
@@ -28,8 +27,19 @@
 export default {
   props: ['data'],
   methods: {
-    toHomePage(sid) {
+    toHomePage(sid) {  
+      if (!this.$store.state.isLogin) {
+        this.$store.commit({type: 'changeLoginForm', data: true});
+        return;
+      }
       this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})
+    },
+    toOrder(id) {
+       if (!this.$store.state.isLogin) {
+        this.$store.commit({type: 'changeLoginForm', data: true});
+        return;
+      }
+      this.$router.push({ name: 'order', query: { id: this.JsonBig.stringify(id) }})
     }
   }
 };
@@ -53,7 +63,7 @@ export default {
       white-space nowrap
       text-overflow ellipsis
     &.merchant 
-      width 190px
+      width 200px
       padding-left 30px
       .whole
         position absolute
@@ -94,19 +104,17 @@ export default {
           border 1px solid #FFA21C
           border-radius 2px
     &.payment 
-      width 110px
+      width 120px
     &.order-volume 
-      width 100px
+      width 110px
     &.deal-volume 
-      width 110px
+      width 120px
     &.good-reputation 
-      width 100px
-    &.trust-amount 
-      width 100px
+      width 110px
     &.amount 
-      width 110px
+      width 120px
     &.limit-price 
-      width 110px
+      width 140px
     &.price 
       width 150px
       font-size 16px

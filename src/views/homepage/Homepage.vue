@@ -71,12 +71,12 @@
         <li class="operation">操作</li>
       </ul>
       <ReleaseListItem v-for="(item,i) in sales" :key="i" :data="item"></ReleaseListItem>
-      <Pagination :total="sales_num" :pageSize="sales_pgsize" emitValue='changeSalesPage'></Pagination>
+      <Pagination :total="sales_num" :pageSize="sales_pgsize" emitValue="changeSalesPage"></Pagination>
     </div>
     <!--评价列表-->
     <div class="evaluate-list" v-show="tab==1">
       <EvaluateListItem v-for="(item,i) in rates" :key="i" :data="item"></EvaluateListItem>
-      <Pagination :total="rates_num" :pageSize="rates_pgsize" emitValue='changeRatesPage' class="page-bar"></Pagination>
+      <Pagination :total="rates_num" :pageSize="rates_pgsize" emitValue="changeRatesPage" class="page-bar"></Pagination>
     </div>
   </div>
 </template>
@@ -98,33 +98,33 @@
       return {
         proxy: new WebSocketProxy(this.WebSocket),
 
-        login_uid: this.JsonBig.parse('197102307060486144'),
-        uid: this.JsonBig.parse('197113028456484864'),
+        login_uid: "",
+        uid: "",
 
         trade_info2:{},
 
         sales2:[],
-        sales_num:1,
+        sales_num:0,
         sales_pgsize:1,
 
         rates2:[],
-        rates_num:1,
+        rates_num:0,
         rates_pgsize:1,
 
         ft_types:[
-          {text:'全部广告',value:''},
-          {text:'购买',value:''},
-          {text:'出售',value:''},
+          {text:'全部广告',value:null},
+          {text:'购买',value:0},
+          {text:'出售',value:1},
         ],
         ft_type_sel:0,
         ft_type_show:false,  //下拉框-发布类型
 
         ft_coins:[
-          {text:'全部币种',value:''},
-          {text:'BTC',value:''},
-          {text:'ETH',value:''},
-          {text:'LTC',value:''},
-          {text:'其他',value:''},
+          {text:'全部币种',value:null},
+          {text:'BTC',value:'btc'},
+          {text:'ETH',value:'eth'},
+          {text:'LTC',value:'ltc'},
+          {text:'其他',value:'other'},
         ],
         ft_coin_sel:0,
         ft_coin_show:false,  //下拉框-币种
@@ -151,7 +151,7 @@
       },
       sales(){
         let arr=[];
-        this.sales2.forEach(function(item) {
+        this.sales2 && this.sales2.forEach(function(item) {
           arr.push({
             create: new Date(item.create).dateHandle("yyyy/MM/dd hh:mm:ss"),
             type: {1:"购买",2:"出售"}[item.type+""],
@@ -167,7 +167,7 @@
       },
       rates(){
         let arr=[];
-        this.rates2.forEach(function(item) {
+        this.rates2 && this.rates2.forEach(function(item) {
           arr.push({
             comment: item.comment,
             date: new Date(item.date).dateHandle("yyyy/MM/dd hh:mm:ss"),
@@ -180,35 +180,27 @@
         return arr;
       }
     },
+    watch:{
+      ft_coin_sel:function(){
+        this.loadSales();
+      },
+      ft_type_sel:function() {
+        this.loadSales();
+      }
+    },
     mounted() {
-      //this.login_uid=this.JsonBig.stringify(this.$store.state.userInfo.uid);
-      this.proxy.send('otc','trader_info',{uid:this.login_uid, id:this.uid}).then((data)=>{
-        this.trade_info2=data;
-      });
-      this.proxy.send('otc','his_sales',{id:this.login_uid, origin:0}).then((data)=>{
-        this.sales2=data.sales;
-        this.sales_num=1;
-        this.sales_pgsize=data.count;
-      });
-      this.proxy.send('otc','rates',{id:this.uid, origin:0}).then((data)=>{
-        this.rates2=data.rates;
-        this.rates_num=1;
-        this.rates_pgsize=data.count;
-      });
+      this.login_uid=this.JsonBig.stringify(this.$store.state.userInfo.uid);
+      this.uid=this.$route.query.uid;
+
+      this.loadTraderInfo();
+      this.loadSales();
+      this.loadRates();
       //翻页事件
       this.Bus.$on('changeSalesPage',(p) => {
-        this.proxy.send('otc','his_sales',{id:this.login_uid, origin:p}).then((data)=>{
-          this.sales2=data.sales;
-          this.sales_num=100;
-          this.sales_pgsize=data.count;
-        });
+        this.loadSales(p);
       });
       this.Bus.$on('changeRatesPage',(p) => {
-        this.proxy.send('otc','rates',{id:this.uid, origin:p}).then((data)=>{
-          this.rates2=data.rates;
-          this.rates_num=1;
-          this.rates_pgsize=data.count;
-        });
+        this.loadRates(p);
       });
     },
     methods: {
@@ -223,6 +215,42 @@
           this.trade_info2.is_trust=false;
         });
       },
+      loadTraderInfo(){
+        this.proxy.send('otc','trader_info',{
+          uid:this.login_uid,
+          id:this.uid
+        }).then((data)=>{
+          this.trade_info2=data;
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
+      loadSales(p=0){
+        this.proxy.send('otc','his_sales',{
+          id: this.login_uid,
+          origin: p,
+          type: this.ft_types[this.ft_type_sel].value,
+          currency: this.ft_coins[this.ft_coin_sel].value,
+        }).then((data)=>{
+          this.sales2=data.sales;
+          this.sales_num=1;
+          this.sales_pgsize=data.count;
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
+      loadRates(p=0){
+        this.proxy.send('otc','rates',{
+          id:this.uid,
+          origin:p
+        }).then((data)=>{
+          this.rates2=data.rates;
+          this.rates_num=1;
+          this.rates_pgsize=data.count;
+        }).catch((msg)=>{
+          console.log(msg);
+        });;
+      }
     }
   }
 </script>

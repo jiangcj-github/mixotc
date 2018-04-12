@@ -6,18 +6,22 @@ Vue.use(Vuex);
 
 const store = new Vuex.Store({
   state: {
+    showLoginForm: false,
     isLogin: false,
     userInfo: null,
     showChat: false
   },
   mutations: {
+    changeLoginForm(state, {data}) {
+      state.showLoginForm = data;
+    },
     changeLogin(state, {data}) {
       state.isLogin = data;
     },
     getUserInfo(state, {data}) {
       state.userInfo = data;
     },
-    changeChatBox(state, {data}) {
+    changeChatBox(state, {data}) { // 控制右下方消息框显示
       state.showChat = data;
     }
   },

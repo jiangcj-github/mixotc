@@ -1,60 +1,74 @@
 <template>
   <div class="my-order-wrap inner">
-    <h1>mixOTC-我的订单</h1>
+    <h1>
+      <router-link to="/transaction">mixOTC</router-link>-
+      <router-link to="/order">我的订单</router-link>
+    </h1>
     <div class="order-item">
       <span @click="selectStatus(1)" :class="contentTabIndex === 1 ? 'content-btn-active' : 'content-btn'">进行中(3)</span>
       <span @click="selectStatus(2)" :class="contentTabIndex === 2 ? 'content-btn-active' : 'content-btn'">完成(6)</span>
     </div>
-    <div class="order-select">
-      <div class="order-choice">
-        <div>
+    <div class="order-select clearfix">
+      <SearchInput :content="content"
+                   :title="title"
+                   :emitValue1="searchValue"
+                   color="#E1E1E1"
+                   class="order-choice-search">
+      </SearchInput>
+      <div class="order-choice-time clearfix" v-if="contentTabIndex === 2">
+        <img src="/static/images/calendar.png" alt="">
+        <ol class="clearfix">
+          <li><DatePicker></DatePicker></li>
+          <li>-</li>
+          <li><DatePicker></DatePicker></li>
+        </ol>
+        <ul class="clearfix">
+          <li v-for="(item, index) in timeList" :class="{'time-active': index == num}" @click="selectTime(index)">{{item}}</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="order-content">
+      <!-- 表格表头 -->
+      <ol class="clearfix">
+        <li>创建时间</li>
+        <li>
           <ChoiceBox :classify="orderType"
-                     title="订单类型"
-                     :emitValue="orderTypeValue">
+                       title="类型"
+                       :emitValue="orderTypeValue">
           </ChoiceBox>
+        </li>
+        <li>
           <ChoiceBox :classify="currency"
                      title="币种"
                      :emitValue="currencyValue">
           </ChoiceBox>
+        </li>
+        <li>对方</li>
+        <li class="sort"><span>单价(CNY)<i class="before"></i><i class="after"></i></span></li>
+        <li class="sort"><span>数量(手续费)<i class="before"></i><i class="after"></i></span></li>
+        <li class="sort"><span>金额(CNY)<i class="before"></i><i class="after"></i></span></li>
+        <li>资金码</li>
+        <li>
           <ChoiceBox :classify="allStatus"
-                      title="全部状态"
+                     title="状态"
                      :emitValue="allStatusValue">
           </ChoiceBox>
-        </div>
-        <div class="order-choice-time clearfix" v-if="contentTabIndex === 2">
-          <img src="/static/images/calendar.png" alt="">
-          <ol class="clearfix">
-            <li><DatePicker></DatePicker></li>
-            <li>-</li>
-            <li><DatePicker></DatePicker></li>
-          </ol>
-          <ul class="clearfix">
-            <li v-for="(item, index) in timeList" :class="{'time-active': index == num}" @click="selectTime(index)">{{item}}</li>
-          </ul>
-        </div>
-      </div>
-      <SearchInput :content="content"
-                   :title="title"
-                   :emitValue1="searchValue"
-                   color="#E1E1E1">
-      </SearchInput>
-    </div>
-
-    <div class="order-content">
-      <ol class="clearfix">
-        <li v-for="content in contentTitleList">{{content}}</li>
+        </li>
+        <li>操作</li>
       </ol>
-      <div class="order-content-info" v-for="content in contentList">
+      <!-- 表格内容 -->
+      <div class="order-content-info" v-for="(content,index) in contentList">
         <ul class="clearfix">
           <li>
-            <p>2016/03/09</p>
-            <p>13:43</p>
+            <p>{{content.create&&(Number(content.create) * 1000).toDate('yyyy/MM/dd')}}</p>
+            <p>{{content.create&&(Number(content.create) * 1000).toDate('HH:mm')}}</p>
           </li>
-          <li>{{content.type}}</li>
-          <li>{{content.currency}}</li>
+          <li :class="content.type == 1 ? 'text-g' : 'text-r'">{{content.type == 1 ? '购买' : '出售'}}</li>
+          <li>{{content.currency&&content.currency.toUpperCase()}}</li>
           <li>
             <p>{{content.name}}/130***123</p>
-            <p class="talk">联系他</p>
+            <p class="talk" @click="toContact">联系他</p>
           </li>
           <li>{{content.price}}</li>
           <li>
@@ -63,15 +77,17 @@
           </li>
           <li>{{content.amountc}}</li>
           <li>234abc</li>
+          <!-- 状态显示 -->
           <li>
             <p>{{content.state}}</p>
           </li>
+          <!-- 操作显示 -->
           <li>
             <p>
-              <router-link :to="{path: '/order/evaluate', query: {type: '0'}}" class="active-btn">去评价</router-link>
+              <router-link :to="{path: '/order/evaluate', query: {type: '0', data: contentList[index]}}" class="active-btn">去评价</router-link>
             </p>
             <p>
-              <router-link :to="{path: '/order/evaluate', query: {type: '1'}}">查看评价</router-link>
+              <router-link :to="{path: '/order/evaluate', query: {type: '1', data: contentList[index]}}">查看评价</router-link>
             </p>
             <p @click="remindCoin()">提醒放币</p>
             <p @click="explain">申诉</p>
@@ -80,16 +96,18 @@
           </li>
         </ul>
         <p class="order-content-extre">
-          <span>订单号：123456789098765432</span>
-          <span>备注：希望可以快速放币</span>
+          <span>订单号：{{JsonBig.stringify(content.id)}}</span>
+          <span>备注：{{content.info}}</span>
         </p>
       </div>
     </div>
+    <!-- 分页 -->
     <Pagination :total="70"
                 :pageSize="20"
                 emitValue="changePage">
     </Pagination>
 
+    <!-- 订单无内容 -->
     <!--<MyOrderNothing></MyOrderNothing>-->
 
     <!-- 提醒放币弹窗 -->
@@ -135,10 +153,11 @@
     </BasePopup>
     <!-- 输入短信验证码 -->
     <BasePopup class="info-layer"
-               :show="infoLayer"
+               :show="verifyLayer"
                :width=470
-               :height=250>
-      <img src="/static/images/close_btn.png" alt="" @click="closePopup">
+               :height=250
+               v-if="this.$store.state.userInfo.phone">
+      <img src="/static/images/close_btn.png" alt="" @click="closePopup" >
       <div class="buy-layer-content">
         <h1>请输入短信验证码</h1>
         <p>
@@ -152,9 +171,10 @@
     </BasePopup>
     <!-- 输入谷歌验证码 -->
     <BasePopup class="geogle-layer"
-               :show="geogleLayer"
+               :show="verifyLayer"
                :width=470
-               :height=250>
+               :height=250
+               v-if="this.$store.state.userInfo.email">
       <img src="/static/images/close_btn.png" alt="" @click="closePopup">
       <div class="buy-layer-content">
         <h1>请输入谷歌验证码</h1>
@@ -199,39 +219,34 @@
     },
     data() {
       return {
-        content: [{title: '搜索订单号', type: 'currency'}, {title: '搜索资金码', type: 'nickname'}, {title: '搜索商家昵称/账号', type: 'nickname'}],
-        title: '搜索订单号',
-        searchValue: 'changeTitle',
-        contentTabIndex: 1,
-        num: 0,
-        remindCoinLayer: false,
-        remindCoinContent: '提醒发送成功',
-        explainLayer: false,
-        cancelExplainLayer: false,
-        buyLayer: false,
-        infoLayer: false,
-        geogleLayer: false,
-        verifyCode: '发送验证码',
-        flag: true,
-        showOffBg: false,
-        count: 60,
-        geogleLayer: false,
+        content: [{title: '搜索订单号', type: 'currency'}, {title: '搜索资金码', type: 'nickname'}, {title: '搜索商家昵称/账号', type: 'nickname'}],  // 输入框下拉值
+        title: '搜索订单号', // 输入框默认
+        searchValue: 'changeTitle', //  输入框改变值
+        contentTabIndex: 1, // 控制tab切换
+        num: 0, // 控制时间选择Tab active类
+        remindCoinLayer: false, // 提醒弹窗
+        remindCoinContent: '提醒发送成功', // 提醒弹窗内容
+        explainLayer: false, // 申述弹窗
+        cancelExplainLayer: false, // 撤销申诉
+        buyLayer: false, // 释放币弹窗
+        verifyLayer: false, // 输入短信、邮箱密码
+        verifyCode: '发送验证码', // 改变倒计时状态
+        flag: true, // 开启倒计时后禁止点击
+        showOffBg: false, // 开启倒计时后状态
+        count: 60, // 记录倒计时时间
         // disInputs:[{value:''},{value:''},{value:''},{value:''},{value:''},{value:''}],
         // realInput:'',
-        inputContent: '',
-        inputGroup: [],
+        inputContent: '', // 聚焦谷歌输入框内容
+        inputGroup: [], // 记录输入框内容
 
-        timeList: ['今天', '三天', '七天'],
-        orderType: ['全部类型', '购买', '出售'],
-        orderTypeValue: 'orderTypeValue',
-        currency: ['BTC', 'ETH', 'LTC'],
-        currencyValue: 'currencyValue',
-        allStatus: ['全部状态', '待付款', '待放币', '申述中'],
-        allStatusValue: 'allStatusValue',
-        contentTitleList: ['创建时间', '类型', '币种', '对方', '单价(CNY)', '数量(手续费)', '金额(CNY)', '资金码', '状态', '操作'],
-        contentList:[
-          {date: '2016/03/09', time: ''}
-        ]
+        timeList: ['今天', '三天', '七天'], // 时间Tab切换title
+        orderType: ['全部类型', '购买', '出售'], // 类型下拉显示
+        orderTypeValue: 'orderTypeValue', // 传递给子组件
+        currency: ['BTC', 'ETH', 'LTC'], // 币种下拉显示
+        currencyValue: 'currencyValue', // 传递给子组件
+        allStatus: ['全部状态', '待付款', '待放币', '申诉中'], // 状体下拉显示
+        allStatusValue: 'allStatusValue', // 传递给子组件
+        contentList:[]
       }
     },
     created() {
@@ -277,7 +292,6 @@
             if(!data || data.body.ret !== 0) return;
             console.log('order', data.body.data.orders)
             this.contentList = data.body.data.orders
-            console.log('contentTitleList', this.contentTitleList)
           },
           date:new Date()
         };
@@ -287,8 +301,8 @@
           body:{
             "action": "orders",
             data: {
-              "type": 1, // 1 买; 2 卖; 3 全部  <-state=0
-              "state": 0, // 0进行中; 1 已完成   <- type=0
+              "type": 3, // 1 买; 2 卖; 3 全部  <-state=0
+              "state": 0, // 0进行中; 1 已完成   <- type=0 （？？？）
               "origin": 0
             }
 
@@ -319,8 +333,7 @@
       },
       buyNext() {
         this.buyLayer = false;
-        // this.infoLayer = true;
-        this.geogleLayer = true
+        this.verifyLayer = true;
       },
       sendVerify() {
         if (this.flag && this.infoLayer) {
@@ -370,8 +383,10 @@
         this.explainLayer = false;
         this.cancelExplainLayer = false;
         this.buyLayer = false;
-        this.infoLayer = false;
-        this.geogleLayer = false
+        this.verifyLayer = false;
+      },
+      toContact() { // 打开消息框
+        this.$store.commit({'type':'changeChatBox', data: true})
       }
     }
   }
@@ -416,43 +431,16 @@
         border-bottom 2px solid $col422
 
     .order-select
-      padding 0 0 10px 30px
+      height 50px
+      padding 0 30px
       background #FFF
-      .order-choice
-        display flex
-        align-items center
-        height 50px
-        margin-bottom 10px
-      .order-search
-        width 456px
-        border 1px solid #E1E1E1
-        border-radius 2px 2px 2px 0
-        input
-          float left
-          width 374px
-          height 30px
-          padding-left 10px
-        div
-          position relative
-          float right
-          width 72px
-          height 30px
-          line-height 30px
-          text-align center
-          background #E1E1E1
-          &:after
-            position absolute
-            top 13px
-            left -300px
-            width 11px
-            height 5px
-            content ''
-            background url(/static/images/triangle_yellow.png) no-repeat
-            background-size 11px 5px
-          img
-            vertical-align middle
+      .order-choice-search
+        float left
+        margin-right 0
+        margin-top 10px
       .order-choice-time
-        margin-left 370px
+        float right
+        margin-top 10px
         ol, ul, img
           float left
         li
@@ -488,15 +476,31 @@
       li:nth-child(1)
         width 130px
       li:nth-child(4)
-        width: 160px
-      li:nth-child(9)
-        width 70px
+        width: 140px
+      li:nth-child(8)
+        width 90px
       ol
         margin 20px 0
         padding 0 30px
         li
           float left
           color #999
+      .sort
+        cursor pointer
+        span
+          position relative
+          i.before
+            position absolute
+            top 3px
+            right -19px
+            triangle_up($col999)
+            cursor pointer
+          i.after
+            position absolute
+            top 10px
+            right -19px
+            triangle_down($col999)
+            cursor pointer
       .order-content-info
         padding 18px 30px
         border 1px solid #E1E1E1
@@ -533,8 +537,10 @@
               background: #FFB422
               border-radius: 2px
 
-          li:nth-child(2)
+          .text-g
             color $col100
+          .text-r
+            color #FF794C
         .order-content-extre
           padding-top 17px
           font-size 13px

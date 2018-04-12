@@ -27,7 +27,27 @@ const ROUTES = [
   {
     path: "/verify",
     name: "verify",
-    component: resolve => require(['@/views/verify/Verify'], resolve) // 审核中心
+    redirect: "/verify/identifyAuth"  // 审核中心
+  },
+  {
+    path: "/verify/identifyAuth",
+    name: "identifyAuth",
+    component: resolve => require(['@/views/verify/IdAud'], resolve) // 审核中心-身份审核
+  },
+  {
+    path: "/verify/largeTransaction",
+    name: "largeTransaction",
+    component: resolve => require(['@/views/verify/LgTran'], resolve) // 审核中心-大额交易审核
+  },
+  {
+    path: "/verify/sensitiveLexicon",
+    name: "sensitiveLexicon",
+    component: resolve => require(['@/views/verify/SensLex'], resolve) // 审核中心-敏感词汇
+  },
+  {
+    path: "/verify/arbitrationRecord",
+    name: "arbitrationRecord",
+    component: resolve => require(['@/views/verify/ArbiRec'], resolve) // 审核中心-仲裁记录
   },
   {
     path: "/order",

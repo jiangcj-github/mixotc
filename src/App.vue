@@ -13,7 +13,6 @@
   import News from '@/views/news/News'
   import sendConfig from '@/api/SendConfig.js'
 
-
   export default {
     name: 'App',
     components: {
@@ -22,17 +21,15 @@
       News
     },
     created: function () {
-      let token = this.Storage.otcToken.get();
-      // console.log('sdsad', token)
-      if (!token) return;
       let ws = this.WebSocket;
-      ws.start('ws://39.106.157.67:8090/sub');
+      //发送token登录后的处理
       !ws.onMessage['token'] && (ws.onMessage['token'] = {
         callback: (data) => {
           if (data.op !== 18) return;
           if (data.body.ret !== 0) {
-            this.Storage.otcToken.removeAll();
+            sessionStorage.removeItem('otcToken')
             ws.reConnectFlag = false;
+            return;
           }
           this.$store.commit({
             type: 'getUserInfo',
@@ -41,11 +38,77 @@
           this.$store.commit({type: 'changeLogin', data: true});
         }
       });
+      let token =  sessionStorage.getItem('otcToken');
+      //页面打开时时获取sessionStorage的token自动发送token登录
       ws.onOpen['token'] = () => {
+        let token = sessionStorage.getItem('otcToken');
+        if (!token){
+          ws.reConnectFlag = false;
+          this.$store.commit({type: 'changeLogin', data: false});
+          if (this.path !== '/' && this.path !== 'transaction') {
+            this.$router.push('transaction');
+          }
+          return;
+        }
         ws.send(sendConfig('login', {
           seq: ws.seq,
           body: token
         }))
+      }
+      if (!token) return;
+      ws.start('ws://39.106.157.67:8090/sub');
+    },
+    mounted() {
+      //websock发包接口需先判断登录状态
+      this.WebSocket.beforeSend = (txt) => {
+        let op =  this.JsonBig.parse(txt).op;
+        //发送验证码17 登录15 需放行
+        if (sessionStorage.getItem('otcToken') || op === 17 || op === 15) return true;
+        this.$store.commit({type: 'changeLoginForm', data: true})
+        return false;
+      }
+      
+    },
+    destroyed() {
+      let body = document.querySelector('body');
+      body.timer && (body.timer = clearTimeout(body.timer));
+      body.onmousedown = null
+    },
+    methods: {
+      logout() {
+        console.log('logout');
+        sessionStorage.removeItem('otcToken');
+        this.$store.commit({type: 'changeLogin', data: false});
+        this.WebSocket.reConnectFlag = false;
+        this.WebSocket.close();
+        if (this.path !== '/' && this.path !== 'transaction') {
+          this.$router.push('transaction')
+        }
+      }
+    },
+    computed: {
+      isLogin() {
+        return this.$store.state.isLogin;
+      }
+    },
+    watch: {
+      //监听登录状态
+      isLogin(curVal, oldVal) {
+        let body = document.querySelector('body');
+        //登录时设置定时器，绑定事件监听用户操作
+        if (curVal) {
+          body.timer && (body.timer = clearTimeout(body.timer));
+          body.timer = setTimeout(this.logout, 1800000);
+          body.onmousedown = (event) => {
+            //用户操作时重新计时
+            body.timer = clearTimeout(body.timer);
+            body.timer = setTimeout(this.logout, 1800000);
+          }
+          return;
+        }
+        //退出登录时清理定时器，移除监听
+         body.timer = clearTimeout(body.timer);
+         body.onmousedown = null
       }
     }
   }

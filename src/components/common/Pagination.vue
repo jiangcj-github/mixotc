@@ -4,10 +4,10 @@
       <p>共{{totalPage}}</p>
       <ul class="clearfix">
         <li class="prev" @click="changeCurPage(curPage - 1)"></li>
-        <li 
-          class="page" 
-          :class="{current: item === curPage}" 
-          v-for="(item, index) of pageArr" 
+        <li
+          class="page"
+          :class="{current: item === curPage}"
+          v-for="(item, index) of pageArr"
           :key="index"
           @click="changeCurPage(item)"
           >
@@ -127,7 +127,7 @@ export default {
         background #FFF
         border 1px solid #E1E1E1
         border-radius 2px
-      
+
       button
         width 65px
         height 40px
@@ -179,10 +179,10 @@ export default {
         &.next::after
           border-left 5px solid #FFA21C
           border-right 0
-        
-      
-    
-  
+
+
+
+
 
 </style>
 

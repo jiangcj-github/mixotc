@@ -1,5 +1,6 @@
 <template>
-    <div class="right">
+  <LeftLayout :leftBar="2">
+    <div class="right" slot="right">
       <ul class="tab">
         <li :class="{active:tab==1}" @click="tab=1">待审核(3)</li>
         <li :class="{active:tab==2}" @click="tab=2">已审核</li>
@@ -36,6 +37,8 @@
           <p class="inf-li"><label>提交时间</label><span>2018/03/09 23:30:42</span></p>
           <p class="inf-li"><label>姓名</label><span>李小蹦</span></p>
           <p class="inf-li"><label>身份证号</label><span>189099087656567890</span></p>
+          <p class="inf-li"><label>银行卡号</label><span>189099087656567890</span></p>
+          <p class="inf-li"><label>开户行</label><span>北京银行中关村支行</span></p>
           <p class="check-img">
             <img src="">
             <img src="">
@@ -105,11 +108,12 @@
           <div class="remark">备注：照片不清晰，模糊看不清</div>
         </div>
         <Pagination total="6" emitValue="changePage" style="width:100%;margin-top:20px"></Pagination>
+        <!--查看弹框-->
         <BasePopup :show="show_pop" :width="764" :height="382">
           <div class="pop">
             <p class="inf-li"><label>提交时间</label><span>2018/03/09 23:30:42</span></p>
-            <p class="inf-li"><label>姓名</label><span>李小蹦</span></p>
-            <p class="inf-li"><label>身份证号</label><span>189099087656567890</span></p>
+            <p class="inf-li"><label>银行卡号</label><span>189099087656567890</span></p>
+            <p class="inf-li"><label>开户行</label><span>北京银行中关村支行</span></p>
             <p class="check-img">
               <img src="">
               <img src="">
@@ -120,21 +124,23 @@
         </BasePopup>
       </div>
     </div>
+  </LeftLayout>
 </template>
 <script>
   import Pagination from "@/components/common/Pagination";
   import DatePicker from "@/components/common/DatePicker";
   import BasePopup from "@/components/common/BasePopup";
-
+  import LeftLayout from "./layout/LeftLayout";
   export default {
     components: {
-      BasePopup,
+      LeftLayout,
       Pagination,
       DatePicker,
+      BasePopup,
     },
     data() {
       return {
-        tab:1,  //审核，未审核
+        tab:1,    //审核，未审核
 
         srch_key:'',
 
@@ -145,7 +151,8 @@
         can_submit:false,
 
         flt_days:1,
-        show_pop:false,  //弹窗-查看
+
+        show_pop:false,  //弹框-查看
       }
     },
     methods: {
@@ -156,9 +163,6 @@
       checkFailed(){
         this.check_result=0;
         this.can_submit=this.check_remark.length>0;
-      },
-      toggleMali(){
-        this.is_malicious=!this.is_malicious;
       },
       isValidateReason(e){
         if(this.check_remark.length>50){
@@ -176,12 +180,12 @@
       showPop(){
         //
         this.show_pop=true;
-      },
+      }
     }
   }
 </script>
 <style scoped lang="stylus">
-  @import "../../../stylus/base.styl";
+  @import "../../stylus/base.styl";
   .right
     width 1000px
     margin-left 200px
@@ -379,55 +383,6 @@
         span
           display inline-block
           line-height 50px
-        .tjsj
-          width 160px
-        .yh
-          width 140px
-        .shr
-          width 140px
-        .cz
-          width 100px
-        .shsj
-          width 160px
-        .ys
-          width 100px
-        .zt
-          width 100px
-      .pop
-        padding 60px 80px
-        position relative
-        .inf-li
-          font-size 14px
-          letter-spacing 0.16px
-          line-height 20px
-          margin-bottom 10px
-          label
-            color #999
-            width 150px
-            display inline-block
-          span
-            color #333
-            display inline-block
-        .check-img
-          height 180px
-          display flex
-          align-items center
-          >img
-            width 180px
-            height 120px
-            border 1px solid #EEEEEE
-            border-radius 2px
-            margin-right 20px
-        .close
-          position absolute
-          top 10px
-          right 10px
-          font-size 20px
-          cursor pointer
-          display inline-block
-          line-height 24px
-          width 24px
-          text-align center
       .li
         padding 0 30px
         background #fff
@@ -471,6 +426,41 @@
         width 100px
       .zt
         width 100px
+      .pop
+        padding 60px 80px
+        position relative
+        .inf-li
+          font-size 14px
+          letter-spacing 0.16px
+          line-height 20px
+          margin-bottom 10px
+          label
+            color #999
+            width 150px
+            display inline-block
+          span
+            color #333
+            display inline-block
+        .check-img
+          height 180px
+          display flex
+          align-items center
+          >img
+            width 180px
+            height 120px
+            border 1px solid #EEEEEE
+            border-radius 2px
+            margin 0 10px
+        .close
+          position absolute
+          top 10px
+          right 10px
+          font-size 20px
+          cursor pointer
+          display inline-block
+          line-height 24px
+          width 24px
+          text-align center
   .textarea
     border 1px solid #E1E1E1
     border-radius 2px

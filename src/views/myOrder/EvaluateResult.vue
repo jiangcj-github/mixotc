@@ -17,12 +17,40 @@
 </template>
 
 <script>
+  import sendConfig from '@/api/SendConfig.js'// 引入websocket发送包
+
   export default {
     name: "evaluate-result",
     data() {
       return {
         imgList:['/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png']
       }
+    },
+    mounted() {
+      let ws = this.WebSocket; // 创建websocket连接
+      let seq = ws.seq;
+      ws.onMessage[seq] = { // 监听
+        callback: (data) => {
+          if(!data || data.body.ret !== 0) return;
+          console.log('rate', data.body.data)
+        },
+        date:new Date()
+      };
+
+      ws.send(sendConfig('otc', { // 发包
+        seq: seq,
+        body:{
+          "action": "new_rate",
+          data: {
+            "id": this.id,    // 出售ID
+            "receiver": this.receiver,  // 被评论者ID
+            "type": this.type,    // 1 交易; 2 担保
+            "credit": this.score,  // 信誉度 1,2,3 好评3 差评1
+            "transit": 2,  // 发货速度 1,2,3
+            "comment": this.comment // 文字说明
+          }
+        }
+      }))
     }
   }
 </script>

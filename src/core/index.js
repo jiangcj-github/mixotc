@@ -97,7 +97,7 @@ const RUN_APP = (App, config, plugin) => {
       next();
       return;
     }
-    if (!Storage.otcToken.get()) {
+    if (!sessionStorage.getItem("otcToken")) {
       next({ path: "/transaction" });
       return;
     }

@@ -1,92 +1,97 @@
 <template>
-  <div class="right">
-    <!--待审核-->
-    <div class="head">
-      <div class="filter">
-        <div class="f1">
-          <a class="drop-down" @click="ft_res_show=!ft_res_show" @blur="ft_res_show=false" href="javascript:void(0)">
-            {{ft_ress[ft_res_sel].text}}
-            <ul v-show="ft_res_show" class="drop">
-              <li @click="ft_res_sel=i" v-for="(e,i) in ft_ress" :key="i">{{e.text}}</li>
-            </ul>
-          </a>
+  <LeftLayout :leftBar="4">
+    <div class="right" slot="right">
+      <div class="head">
+        <div class="filter">
+          <div class="f1">
+            <a class="drop-down" @click="ft_res_show=!ft_res_show" @blur="ft_res_show=false" href="javascript:void(0)">
+              {{ft_ress[ft_res_sel].text}}
+              <ul v-show="ft_res_show" class="drop">
+                <li @click="ft_res_sel=i" v-for="(e,i) in ft_ress" :key="i">{{e.text}}</li>
+              </ul>
+            </a>
+          </div>
+          <div class="f2">
+            <img src="/static/images/date_icon.png" class="data-icon">
+            <DatePicker text="开始日期"></DatePicker>
+            <span class="to">-</span>
+            <DatePicker text="截止日期"></DatePicker>
+          </div>
+          <div class="f3">
+            <a href="javascript:void(0)" :class="{active:flt_days==1}" @click="flt_days=1">今天</a>
+            <a href="javascript:void(0)" :class="{active:flt_days==3}" @click="flt_days=3">三天</a>
+            <a href="javascript:void(0)" :class="{active:flt_days==7}" @click="flt_days=7">七天</a>
+          </div>
         </div>
-        <div class="f2">
-          <img src="/static/images/date_icon.png" class="data-icon">
-          <DatePicker text="开始日期"></DatePicker>
-          <span class="to">-</span>
-          <DatePicker text="截止日期"></DatePicker>
-        </div>
-        <div class="f3">
-          <a href="javascript:void(0)" :class="{active:flt_days==1}" @click="flt_days=1">今天</a>
-          <a href="javascript:void(0)" :class="{active:flt_days==3}" @click="flt_days=3">三天</a>
-          <a href="javascript:void(0)" :class="{active:flt_days==7}" @click="flt_days=7">七天</a>
+        <div class="search-wrap">
+          <div class="search">
+            <input type="text" placeholder="搜索商家昵称/账号">
+            <a href="javascript:void(0)"></a>
+          </div>
         </div>
       </div>
-      <div class="search-wrap">
-        <div class="search">
-          <input type="text" placeholder="搜索商家昵称/账号">
-          <a href="javascript:void(0)"></a>
-        </div>
+      <div class="tb-head">
+        <span class="tjsj sortable">提交时间<i class="sort"></i></span>
+        <span class="ddxx">订单信息</span>
+        <span class="sqr">申请人</span>
+        <span class="sqdx">申请对象</span>
+        <span class="zcr">仲裁人</span>
+        <span class="wcsj">完成时间</span>
+        <span class="ys sortable">用时<i class="sort"></i></span>
+        <span class="jg">结果</span>
+        <span class="zrr">责任人</span>
+        <span class="cz">操作</span>
       </div>
+      <div class="li" v-for="item of 4">
+        <div class="booth">
+          <div class="tjsj"><p>2016/03/09</p><p>13:43</p></div>
+          <div class="ddxx"><p>购买BTC</p></div>
+          <div class="sqr">
+            <p>lihh</p>
+            <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
+          </div>
+          <div class="sqdx">
+            <p>lihh</p>
+            <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
+          </div>
+          <div class="zcr"><p>李小蹦</p></div>
+          <div class="wcsj"><p>2016/03/09</p><p>13:43</p></div>
+          <div class="ys"><p>6min30s</p></div>
+          <div class="jg"><p>强制放币</p></div>
+          <div class="zrr"><p>lihh</p></div>
+          <div class="cz"><p><a href="javascript:void(0)" class="ck" @click="showPop">查看</a></p></div>
+        </div>
+        <div class="division"></div>
+        <div class="remark">备注：照片不清晰，模糊看不清</div>
+      </div>
+      <Pagination total="43" pageSize="2" emitValue="changeArbiPage" style="width:1000px;margin-top:20px"></Pagination>
+      <BasePopup :show="show_pop" :width="746" :height="500">
+        <div class="pop">
+          <h2>沟通记录：</h2>
+          <div class="p-ul">
+            <p class="p-li"><span class="xxsj">信息时间</span><span class="fjr">发件人</span><span class="xxnr">信息内容</span></p>
+            <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
+            <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
+            <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
+            <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
+            <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
+            <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
+          </div>
+          <i class="close" @click="show_pop=false">&times;</i>
+        </div>
+      </BasePopup>
     </div>
-    <div class="tb-head">
-      <span class="tjsj sortable">提交时间<i class="sort"></i></span>
-      <span class="ddxx">订单信息</span>
-      <span class="sqr">申请人</span>
-      <span class="sqdx">申请对象</span>
-      <span class="zcr">仲裁人</span>
-      <span class="wcsj">完成时间</span>
-      <span class="ys sortable">用时<i class="sort"></i></span>
-      <span class="jg">结果</span>
-      <span class="zrr">责任人</span>
-      <span class="cz">操作</span>
-    </div>
-    <div class="li" v-for="item of 4">
-      <div class="booth">
-        <div class="tjsj"><p>2016/03/09</p><p>13:43</p></div>
-        <div class="ddxx"><p>购买BTC</p></div>
-        <div class="sqr">
-          <p>lihh</p>
-          <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
-        </div>
-        <div class="sqdx">
-          <p>lihh</p>
-          <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
-        </div>
-        <div class="zcr"><p>李小蹦</p></div>
-        <div class="wcsj"><p>2016/03/09</p><p>13:43</p></div>
-        <div class="ys"><p>6min30s</p></div>
-        <div class="jg"><p>强制放币</p></div>
-        <div class="zrr"><p>lihh</p></div>
-        <div class="cz"><p><a href="javascript:void(0)" class="ck" @click="showPop">查看</a></p></div>
-      </div>
-      <div class="division"></div>
-      <div class="remark">备注：照片不清晰，模糊看不清</div>
-    </div>
-    <Pagination total="43" pageSize="2" emitValue="changeArbiPage" style="width:1000px;margin-top:20px"></Pagination>
-    <BasePopup :show="show_pop" :width="746" :height="500">
-      <div class="pop">
-        <p class="inf-li"><label>提交时间</label><span>2018/03/09 23:30:42</span></p>
-        <p class="inf-li"><label>姓名</label><span>李小蹦</span></p>
-        <p class="inf-li"><label>身份证号</label><span>189099087656567890</span></p>
-        <p class="check-img">
-          <img src="">
-          <img src="">
-          <img src="">
-        </p>
-        <i class="close" @click="show_pop=false">&times;</i>
-      </div>
-    </BasePopup>
-  </div>
+  </LeftLayout>
 </template>
 <script>
   import Pagination from "@/components/common/Pagination";
   import DatePicker from "@/components/common/DatePicker";
   import BasePopup from "@/components/common/BasePopup";
+  import LeftLayout from "./layout/LeftLayout";
 
   export default {
     components: {
+      LeftLayout,
       Pagination,
       DatePicker,
       BasePopup,
@@ -120,7 +125,7 @@
   }
 </script>
 <style scoped lang="stylus">
-  @import "../../../stylus/base.styl";
+  @import "../../stylus/base.styl";
   .right
     width 1000px
     margin-left 200px
@@ -366,4 +371,57 @@
       width 80px
     .cz
       width 90px
+    .pop
+      padding 40px 10px 40px 60px
+      position relative
+      width 746px
+      height 500px
+      box-sizing border-box
+      h2
+        height 30px
+        padding-left 5px
+        line-height 30px
+        font-size $fz20
+        font-weight bold
+        color $col333
+        letter-spacing 0.41px
+        margin-bottom 30px
+        &::before
+          display inline-block
+          position relative
+          top 2px
+          left 0
+          content ''
+          width 3px
+          height 20px
+          margin-right 10px
+          background-color $col422
+      .p-ul
+        overflow-y auto
+        height 360px
+        .p-li
+          font-size 14px
+          letter-spacing 0.16px
+          line-height 20px
+          margin-bottom 20px
+          padding-left 5px
+          span
+            color #333
+            display inline-block
+          .xxsj
+            width 180px
+          .xxnr
+            width 350px
+          .fjr
+            width 90px
+      .close
+        position absolute
+        top 10px
+        right 10px
+        font-size 20px
+        cursor pointer
+        display inline-block
+        line-height 24px
+        width 24px
+        text-align center
 </style>
