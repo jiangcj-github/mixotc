@@ -1,10 +1,14 @@
 import Vue from 'vue'
 
+import Vuex from "vuex";
+
 import "regenerator-runtime/runtime"//使用promise
 
 import Router from './router'
 
 import JsonBig from "json-bigint";
+
+import Store from "./store";
 
 Vue.prototype.JsonBig = JsonBig;
 
@@ -34,7 +38,7 @@ Vue.prototype.Bus = new Vue();
 
 //原型方法添加
 import Prototype from './libs/Prototype'
-import store from "../store";
+// import store from "../store";
 
 Vue.config.productionTip = false;
 // 点击外部区域消失
@@ -82,9 +86,9 @@ const RUN_APP = (App, config, plugin) => {
   Vue.use(Router)
   let router = Router.install(config.RouterConfig)
 
-  //引用vuex
-  // Vue.use(Vuex)
-  // let store = Store.install(Vue, config.StoreConfig)
+  // 引用vuex
+  Vue.use(Vuex)
+  let store = Store.install(Vue, config.StoreConfig)
 
   config.ServerConfig && config.HttpConfig && config.HttpConfig.useHttp && HttpProxy.install(Vue, config.ServerConfig, config.HttpConfig.httpList, config.HttpConfig.httpPreHandler, config.HttpConfig.httpAfterHandler);
   // config.ServerConfig && config.WebSocketConfig && config.WebSocketConfig.useWebSocket && WebSocket.install(Vue, config.ServerConfig, config.WebSocketConfig.webSocketList);

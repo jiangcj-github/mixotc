@@ -20,6 +20,11 @@
       Footer,
       News
     },
+    data() {
+      return {
+        timer: null
+      }
+    },
     created: function () {
       let ws = this.WebSocket;
       //发送token登录后的处理
@@ -39,6 +44,7 @@
         }
       });
       let token =  sessionStorage.getItem('otcToken');
+      console.log(token)
       //页面打开时时获取sessionStorage的token自动发送token登录
       ws.onOpen['token'] = () => {
         let token = sessionStorage.getItem('otcToken');
@@ -67,12 +73,10 @@
         this.$store.commit({type: 'changeLoginForm', data: true})
         return false;
       }
-      
     },
     destroyed() {
-      let body = document.querySelector('body');
-      body.timer && (body.timer = clearTimeout(body.timer));
-      body.onmousedown = null
+      this.timer && (this.timer = clearTimeout(this.timer));
+      window.onmousedown = null
     },
     methods: {
       logout() {
@@ -94,21 +98,20 @@
     watch: {
       //监听登录状态
       isLogin(curVal, oldVal) {
-        let body = document.querySelector('body');
         //登录时设置定时器，绑定事件监听用户操作
         if (curVal) {
-          body.timer && (body.timer = clearTimeout(body.timer));
-          body.timer = setTimeout(this.logout, 1800000);
-          body.onmousedown = (event) => {
+          this.timer && (this.timer = clearTimeout(this.timer));
+          this.timer = setTimeout(this.logout, 600000);
+          window.onmousedown = (event) => {
             //用户操作时重新计时
-            body.timer = clearTimeout(body.timer);
-            body.timer = setTimeout(this.logout, 1800000);
+            this.timer = clearTimeout(this.timer);
+            this.timer = setTimeout(this.logout, 600000);
           }
           return;
         }
         //退出登录时清理定时器，移除监听
-         body.timer = clearTimeout(body.timer);
-         body.onmousedown = null
+         this.timer = clearTimeout(this.timer);
+         window.onmousedown = null
       }
     }
   }

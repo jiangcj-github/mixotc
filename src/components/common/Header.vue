@@ -73,11 +73,8 @@
     },
     methods: {
       changeLoginForm(state) {
+        console.log(this.$store)
         this.$store.commit({type: 'changeLoginForm', data: state});
-      },
-      loginOut() {
-        this.storage.removeLocal('otcToken');
-        location.reload();
       },
       showQr() {
         this.isHover = true;

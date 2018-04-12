@@ -2,7 +2,6 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import App from './App';
-import store from './store';
 import jsonBig from 'json-bigint';
 import { DatePicker } from "element-ui";
 import EasyScroll from 'easyscroll'
@@ -11,6 +10,7 @@ import '@/stylus/rest.styl'
 import BaseFunction from '@/js/BaseFunction'//引入自定义插件
 import BasePrototype from '@/js/BasePrototype'//引入自定义原型方法
 
+import StoreConfig from "@/config/StoreConfig"//引入vuex设置
 import RouterConfig from "@/config/RouterConfig"//引入路由设置
 import ServerConfig from '@/config/ServerConfig' //引入服务器设置
 import HttpConfig from "@/config/HttpConfig";//引入HttpConfig设置
@@ -26,6 +26,7 @@ PrototypeConfig.base && BasePrototype.install(PrototypeConfig.base)
 RUN_APP(
   App,
   {
+    StoreConfig,
     RouterConfig,
     ServerConfig,
     StorageConfig,

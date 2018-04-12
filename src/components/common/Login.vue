@@ -100,7 +100,11 @@
         let seq = ws.seq;
         ws.onMessage[seq] = {
           callback: (data)=>{
-            if(!data || data.body.ret !== 0) return;
+            if(!data || data.body.ret !== 0 && data.body.ret !== 8) return;
+            if(data.body.ret === 8) {
+              this.captcha = false;
+              return;
+            }
             this.$store.commit({
               type: 'getUserInfo',
               data: data.body
