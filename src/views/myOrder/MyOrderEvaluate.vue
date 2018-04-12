@@ -7,7 +7,7 @@
     </h1>
     <div class="evaluate-content">
       <p>
-        <img src="" alt="">
+        <img :src="`http://192.168.113.26/image/${icon}`" alt="">
         <em>{{name}}</em>
         <router-link to="/homepage">访问TA的主页</router-link>
       </p>
@@ -58,7 +58,8 @@
         info: '',
         propsId: '',
         propsSid: '',
-        propsType: ''
+        propsType: '',
+        icon: ''
       }
     },
     components: {
@@ -66,9 +67,11 @@
       EvaluateResult
     },
     created() {
+
       this.showContent = Number(this.$route.query.type)
       this.orderList = this.$route.query.data
       console.log('orderList', this.orderList)
+      this.icon = this.orderList.icon
       this.name = this.orderList.name
       this.currency = `${this.orderList.type == 1 ? '购买' : '出售'}${this.orderList.currency.toUpperCase()}`
       this.price = `${this.orderList.price}CNY`
@@ -117,7 +120,6 @@
         img
           width 45px
           height 45px
-          background aquamarine
           margin 30px 20px 0 0
           border-radius 50%
         em

@@ -22,7 +22,7 @@
       </div>
       <span :class="{'hide-tips':agree,'yhxy-tips':!agree}"><img src="/static/images/hint.png" alt="">&nbsp;&nbsp;<b>请勾选用户协议</b></span>
     </div>
-    <BasePopup class="popup" :show="loginSuccess" :top="29.17"> 
+    <BasePopup class="popup" :show="loginSuccess" :top="29.17">
       <slot>
         <p v-clickoutside="hideLoginForm" @click="hideLoginForm">登录成功</p>
       </slot>
@@ -139,7 +139,7 @@
             data.body.msg && sessionStorage.setItem('otcToken', data.body.msg);
             this.Storage.otcAccount.set(this.account);
             this.$store.commit({ type: 'changeLogin', data: true });
-            
+
           },
           date:new Date()
         };
