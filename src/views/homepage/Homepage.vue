@@ -5,7 +5,9 @@
     <div class="info-sec">
       <div class="sec1 clearfix">
         <div class="info">
-          <div class="avatar"><img src="" alt=""><i class="is-online"></i></div>
+          <div class="avatar"><img :src="trade_info.headimg" alt="">
+            <i class="online" :class="{active:trade_info.is_online}"></i>
+          </div>
           <span class="nickname">{{trade_info.nickname}}</span>
           <span class="tran_num">和他交易过{{trade_info.trade_with_num}}次</span>
         </div>
@@ -42,7 +44,7 @@
     <!--菜单项tab-->
     <ul class="menu-tab">
         <li :class="{active:tab==0}" @click="tab=0">他的发布</li>
-        <li :class="{active:tab==1}" @click="tab=1">收到的评价<i>&nbsp;{{rates_num}}</i></li>
+        <li :class="{active:tab==1}" @click="tab=1">收到的评价<i v-if="rates_num>0">&nbsp;{{rates_num}}</i></li>
     </ul>
     <!--发布列表-->
     <div class="release-list" v-show="tab==0">
@@ -71,12 +73,12 @@
         <li class="operation">操作</li>
       </ul>
       <ReleaseListItem v-for="(item,i) in sales" :key="i" :data="item"></ReleaseListItem>
-      <Pagination :total="sales_num" :pageSize="sales_pgsize" emitValue="changeSalesPage"></Pagination>
+      <Pagination :total="sales_num" :pageSize="sales_pgsize" emitValue="changeSalesPage" v-if="sales_num>0"></Pagination>
     </div>
     <!--评价列表-->
     <div class="evaluate-list" v-show="tab==1">
       <EvaluateListItem v-for="(item,i) in rates" :key="i" :data="item"></EvaluateListItem>
-      <Pagination :total="rates_num" :pageSize="rates_pgsize" emitValue="changeRatesPage" class="page-bar"></Pagination>
+      <Pagination :total="rates_num" :pageSize="rates_pgsize" emitValue="changeRatesPage" class="page-bar" v-if="rates_num>0"></Pagination>
     </div>
   </div>
 </template>
@@ -139,13 +141,14 @@
         return {
           nickname: o.name || 'unknown',
           headimg: o.icon || '/static/images/default_avator.png',
+          is_online: o.isonline || false,
           trade_with_num: o.mytrade || 0,
           order_num: o.trade || 0,
-          volumn: "10+BTC" || "0+BTC",
+          volumn: o.volumn || "0+BTC",
           praise_rate: (o.rate || 0) +"%",
-          trusted_num: 100 || 0,
+          trusted_num: o.trusted || 0,
           trust_num: o.trust || 0,
-          secured_num: 100 || 0,
+          secured_num: o.secured || 0,
           is_trust: o.is_trust || false,
         }
       },
@@ -189,8 +192,8 @@
       }
     },
     mounted() {
-      this.login_uid=this.JsonBig.stringify(this.$store.state.userInfo.uid);
-      this.uid=this.$route.query.uid;
+      this.login_uid= this.JsonBig.stringify(this.$store.state.userInfo.uid) || "";
+      this.uid= this.$route.query.uid || "";
 
       this.loadTraderInfo();
       this.loadSales();
@@ -207,12 +210,16 @@
       joinTrust(){
         this.proxy.send('otc','new_trust',{uid:this.login_uid, id:this.uid}).then((data)=>{
           this.trade_info2.is_trust=true;
-        })
+        }).catch((msg)=>{
+          console.log(msg);
+        });
       },
       cancelTrust(){
         this.proxy.send('otc','new_trust',{uid:this.login_uid, id:this.uid}).then((data)=>{
           this.show_untrust_pop=true;
           this.trade_info2.is_trust=false;
+        }).catch((msg)=>{
+          console.log(msg);
         });
       },
       loadTraderInfo(){
@@ -249,7 +256,7 @@
           this.rates_pgsize=data.count;
         }).catch((msg)=>{
           console.log(msg);
-        });;
+        });
       }
     }
   }
@@ -288,6 +295,7 @@
         border-bottom 1px solid $col1E1
         .info
           flex-grow 1
+          display inline-flex
           height 45px
           line-height 45px
           font-size 14px
@@ -300,16 +308,18 @@
             border-radius 50%
             background-color skyblue
             position relative
-            .is-online
+            .online
               display inline-block
               width 11px
               height 11px
-              background: #FFB422;
+              background: #ccc;
               border: 1px solid #FFFFFF;
               border-radius 100%
               position absolute
               bottom 1px
               right 4px
+              &.active
+                background #ffb422
           .nickname
             color #333333
           .tran_num
@@ -400,6 +410,7 @@
       height 60px
       background-color #FFF
       padding-left 30px
+      border-bottom 1px solid #e1e1e1
       >li
         font-size 16px
         letter-spacing 0.33px
@@ -413,15 +424,15 @@
           color #FFB422
           border-bottom 2px solid #FFB422
     .release-list
-      .head
+      ul.head
         height 50px
         line-height 50px
         font-size 13px
-        color #999999
         letter-spacing 0.27px
         padding 0 30px
         >li
           display inline-block
+          color #999
       .filter
         margin-top 1px
         height 50px

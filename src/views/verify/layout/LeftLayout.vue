@@ -10,9 +10,11 @@
         <router-link tag="li" :class="{active:leftBar===2}" to="/verify/largeTransaction">
           <i>大额交易申请</i><img src="/static/images/verify/dejy.png" alt="">
         </router-link>
+        <!--
         <router-link tag="li" :class="{active:leftBar===3}" to="/verify/sensitiveLexicon">
           <i>敏感词库</i><img src="/static/images/verify/mgck.png" alt="">
         </router-link>
+        -->
         <router-link tag="li" :class="{active:leftBar===4}" to="/verify/arbitrationRecord">
           <i>仲裁记录</i><img src="/static/images/verify/zcjl.png" alt="">
         </router-link>
