@@ -355,7 +355,7 @@
             color: #FFFFFF;
             border 1px solid #FFB422
             &:hover
-              background #f1a45c
+              background #fea350
             i
               font-size: 13px;
               letter-spacing: 0.29px;

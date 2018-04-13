@@ -8,9 +8,12 @@
       <!--待审核-->
       <div class="uncheck" v-show="tab==1">
         <div class="search-bar">
-          <div class="search">
-            <input type="text" placeholder="查找昵称/帐号" @input="searchCheck" v-model="srch_key">
+          <div class="search" >
+            <input type="text" placeholder="查找昵称/帐号" v-model="srch_key" v-clickoutside="clickOutside">
             <img src="/static/images/search_gray.png">
+            <ul class="cand" :class="{show:srch_show_cand}">
+              <li v-for="item of 10" @click="srch_key=item" :key="item">{{item}}</li>
+            </ul>
           </div>
           <ul class="results">
             <li class="active">lihh / 130***123</li>
@@ -44,22 +47,22 @@
           </p>
           <div class="form">
             <p style="margin-bottom:12px">
-              <span class="checkbox" :class="{check:check_result==1}" @click="checkSuccess">审核通过</span>
-              <span class="checkbox" :class="{check:check_result==0}" @click="checkFailed" style="margin-left:20px">审核不通过</span>
+              <span class="checkbox" :class="{check:form_result==1}" @click="checkPass">审核通过</span>
+              <span class="checkbox" :class="{check:form_result==0}" @click="checkRefuse" style="margin-left:20px">审核不通过</span>
             </p>
             <div class="textarea">
-              <textarea placeholder="不通过原因：字数限制0～50个字符。" v-model="check_remark" @input="isValidateText" ref="textarea"></textarea>
-              <p class="indicator">{{check_remark.length}}/50</p>
+              <textarea placeholder="不通过原因：字数限制0～50个字符。" v-model="form_remark" @input="isValidateText" ref="textarea"></textarea>
+              <p class="indicator">{{form_remark.length}}/50</p>
             </div>
             <div class="mali">
-              <span class="radio" :class="{check:is_mali}" @click="is_mali=!is_mali">是否恶意上传认证</span>
+              <span class="radio" :class="{check:form_mali}" @click="form_mali=!form_mali">是否恶意上传认证</span>
               <ul>
                 <li>恶意认证提交后，封锁该用户3天认证功能</li>
                 <li>3次恶意认证后，永久封锁认证功能</li>
               </ul>
             </div>
             <div class="btn-wrap">
-              <button class="submit-btn" :class="{active:can_submit}">提交</button>
+              <button class="submit-btn" :class="{active:form_submit}">提交</button>
             </div>
           </div>
         </div>
@@ -68,14 +71,12 @@
       <div class="checked" v-show="tab==2">
         <div class="filter">
           <div class="f1">
-            <input type="text" placeholder="搜索商家昵称/账号">
-            <a href="javascript:void(0)"></a>
+            <input type="text" placeholder="搜索商家昵称/账号" v-model="flt_srch">
+            <img src="/static/images/cancel_icon.png" @click="flt_srch=''" :class="{show:flt_srch.length>0}">
+            <a href="javascript:void(0)" @click="search"></a>
           </div>
           <div class="f2">
-            <img src="/static/images/date_icon.png" class="data-icon">
-            <DatePicker text="开始日期"></DatePicker>
-            <span class="to">-</span>
-            <DatePicker text="截止日期"></DatePicker>
+            <DateInterval ref="di"></DateInterval>
           </div>
           <div class="f3">
             <a href="javascript:void(0)" :class="{active:flt_days==1}" @click="flt_days=1">今天</a>
@@ -106,7 +107,7 @@
           <div class="remark">备注：照片不清晰，模糊看不清</div>
         </div>
         <Pagination :total="6" :pageSize="3" emitValue="changePage" style="width:100%;margin-top:20px"></Pagination>
-        <BasePopup :show="show_pop" :width="764" :height="382">
+        <BasePopup :show="pop" :width="764" :height="382">
           <div class="pop">
             <p class="inf-li"><label>提交时间</label><span>2018/03/09 23:30:42</span></p>
             <p class="inf-li"><label>姓名</label><span>李小蹦</span></p>
@@ -116,7 +117,7 @@
               <img src="">
               <img src="">
             </p>
-            <i class="close" @click="show_pop=false">&times;</i>
+            <i class="close" @click="pop=false">&times;</i>
           </div>
         </BasePopup>
       </div>
@@ -125,42 +126,50 @@
 </template>
 <script>
   import Pagination from "@/components/common/Pagination";
-  import DatePicker from "@/components/common/DatePicker";
   import BasePopup from "@/components/common/BasePopup";
   import LeftLayout from "./layout/LeftLayout";
   import WebSocketProxy from '@/api/WebSocketProxy.js';
+  import DateInterval from "@/components/common/DateInterval";
   export default {
     components: {
+      DateInterval,
       LeftLayout,
       BasePopup,
       Pagination,
-      DatePicker,
     },
     data() {
       return {
         proxy: new WebSocketProxy(this.WebSocket),
         tab:1,  //审核，未审核
 
-        srch_key:'',
+        srch_key: '',
+        srch_show_cand: false,
 
-        check_result:-1,
-        is_mali:false,
-        check_remark:'',
-        check_remark_old:'',
-        can_submit:false,
+        form_result: -1,
+        form_mali: false,
+        form_remark: '',
+        form_remark_old: '',
+        form_submit: false,
 
-        flt_days:1,
-        show_pop:false,  //弹窗-查看
+        flt_srch: '',
+        flt_days: 1,
+
+        pop:false,  //弹窗-查看
+      }
+    },
+    watch:{
+      srch_key:function(){
+        this.srch_show_cand=true;
       }
     },
     methods: {
-      checkSuccess(){
-        this.check_result=1;
-        this.can_submit=true;
+      checkPass(){
+        this.form_result=1;
+        this.form_submit=true;
       },
-      checkFailed(){
-        this.check_result=0;
-        this.can_submit=this.check_remark.length>0;
+      checkRefuse(){
+        this.form_result=0;
+        this.form_submit=this.form_remark.length>0;
       },
       isValidateText(){
         if(this.check_remark.length>50){
@@ -178,7 +187,7 @@
       },
       showPop(){
         //
-        this.show_pop=true;
+        this.pop=true;
       },
       //
       loadUnchecks(){
@@ -188,8 +197,14 @@
 
         })
       },
-    },
+      clickOutside(){
+        this.srch_show_cand=false;
+      },
+      //
+      search(){
 
+      }
+    },
     mounted(){
       //
       //
@@ -239,6 +254,7 @@
           border-bottom 1px solid #E1E1E1
           display flex
           align-items center
+          position relative
           input
             background #F4F6FA
             border-radius 2px
@@ -248,9 +264,32 @@
             width 100%
             min-width 0
             box-sizing border-box
+            border 1px solid #e1e1e1
           img
             margin-left -24px
             cursor pointer
+          ul.cand
+            display none
+            position absolute
+            top 100%
+            margin-top -10px
+            width 170px
+            background #fff
+            z-index 1000
+            border 1px solid #e1e1e1
+            border-top none
+            box-sizing border-box
+            max-height 301px
+            overflow-y auto
+            &.show
+              display block
+            li
+              line-height 30px
+              padding 0 10px
+              cursor pointer
+              font-size 13px
+              &:hover
+                background #fff3eb
         .results
           margin-top 2px
           font-size 14px
@@ -350,6 +389,15 @@
           >input
             padding 0 10px
             flex-grow 1
+          >img
+            align-self center
+            margin-right 10px
+            display none
+            &:hover
+              cursor pointer
+              opacity 0.8
+            &.show
+              display inline-block
           >a
             display inline-block
             flex-shrink 0
@@ -359,14 +407,7 @@
             &:hover
               background-color #dcd5d5
         .f2
-          display inline-flex
-          align-items center
           margin-right 20px
-          .data-icon
-            margin-right 10px
-          .to
-            width 15px
-            text-align center
         .f3
           font-size 13px
           letter-spacing 0.27px
@@ -510,6 +551,8 @@
       letter-spacing 0
       line-height 24px
       padding 0 6px
+
+
   .checkbox
     font-size 13px
     color #333333
@@ -522,6 +565,7 @@
       background-image url(/static/images/rules_checked.png)
     &:hover
       color #666
+
   .radio
     font-size 13px
     color #333333
@@ -534,5 +578,5 @@
       background-image url(/static/images/selected.png)
     &:hover
       color #666
-
+  placeholder()
 </style>

@@ -58,7 +58,7 @@
         text-align center
         cursor pointer
         &:hover
-          background-color #f1a45c
+          background-color #fea350
     .division
       height 1px
       background: #E1E1E1;

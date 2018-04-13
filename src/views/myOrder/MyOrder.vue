@@ -18,9 +18,9 @@
       <div class="order-choice-time clearfix" v-if="contentTabIndex === 2">
         <img src="/static/images/calendar.png" alt="">
         <ol class="clearfix">
-          <li><DatePicker></DatePicker></li>
+          <li><DatePicker :emitValue="startValue"></DatePicker></li>
           <li>-</li>
-          <li><DatePicker></DatePicker></li>
+          <li><DatePicker :emitValue="endValue" :text="endP"></DatePicker></li>
         </ol>
         <ul class="clearfix">
           <li v-for="(item, index) in timeList" :class="{'time-active': index == num}" @click="selectTime(index)">{{item}}</li>
@@ -31,11 +31,12 @@
     <div class="order-content">
       <!-- 表格表头 -->
       <ol class="clearfix">
-        <li>创建时间</li>
+        <li class="sort" :class="{'sort-up': showTimeActive&&sortActive, 'sort-down': showTimeActive&&!sortActive}" @click="timeSort"><span>创建时间<i class="before"></i><i class="after"></i></span></li>
         <li>
           <ChoiceBox :classify="orderType"
-                       title="类型"
-                       :emitValue="orderTypeValue">
+                     title="类型"
+                     :emitValue="orderTypeValue"
+                     :selectValue="orderTypeValueData">
           </ChoiceBox>
         </li>
         <li>
@@ -45,9 +46,9 @@
           </ChoiceBox>
         </li>
         <li>对方</li>
-        <li class="sort"><span>单价(CNY)<i class="before"></i><i class="after"></i></span></li>
-        <li class="sort"><span>数量(手续费)<i class="before"></i><i class="after"></i></span></li>
-        <li class="sort"><span>金额(CNY)<i class="before"></i><i class="after"></i></span></li>
+        <li class="sort" :class="{'sort-up': showPriceActive&&sortActive, 'sort-down': showPriceActive&&!sortActive}" @click="priceSort"><span>单价(CNY)<i class="before"></i><i class="after"></i></span></li>
+        <li class="sort" :class="{'sort-up': showAmountActive&&sortActive, 'sort-down': showAmountActive&&!sortActive}" @click="amountSort"><span>数量(手续费)<i class="before"></i><i class="after"></i></span></li>
+        <li class="sort" :class="{'sort-up': showMoneyActive&&sortActive, 'sort-down': showMoneyActive&&!sortActive}" @click="moneySort"><span>金额(CNY)<i class="before"></i><i class="after"></i></span></li>
         <li>资金码</li>
         <li>
           <ChoiceBox :classify="allStatus"
@@ -67,37 +68,41 @@
           <li :class="content.type == 1 ? 'text-g' : 'text-r'">{{content.type == 1 ? '购买' : '出售'}}</li>
           <li>{{content.currency&&content.currency.toUpperCase()}}</li>
           <li>
-            <p>{{content.name}}/130***123</p>
+            <p>{{content.name || content.contact}}</p>
             <p class="talk" @click="toContact">联系他</p>
           </li>
           <li>{{content.price}}</li>
           <li>
-            <p>+1.12 BTC</p>
-            <p>0.00004</p>
+            <p :class="content.type == 1 ? 'text-g' : 'text-r'">{{content.type == 1 ? `+${content.amountc}${content.currency.toUpperCase()}` : `-${content.amountc}${content.currency.toUpperCase()}`}}</p>
+            <p>{{content.fee}}</p>
           </li>
-          <li>{{content.amountc}}</li>
-          <li>234abc</li>
+          <li>{{content.amountm}}</li>
+          <li>{{content.trade_code}}</li>
           <!-- 状态显示 -->
           <li>
-            <p>{{content.state}}</p>
+            <p v-for="state in stateList">{{state.name}}</p>
           </li>
           <!-- 操作显示 -->
           <li>
-            <p>
-              <router-link :to="{path: '/order/evaluate', query: {type: '0', data: contentList[index]}}" class="active-btn">去评价</router-link>
-            </p>
-            <p>
-              <router-link :to="{path: '/order/evaluate', query: {type: '1', data: contentList[index]}}">查看评价</router-link>
-            </p>
-            <p @click="remindCoin()">提醒放币</p>
-            <p @click="explain">申诉</p>
-            <p @click="cancelExplain">取消申诉</p>
-            <p @click="buy">购买</p>
+            <p @click="openPayment($event, index)" class="active-btn">标记已付款</p>
+            <!--<p @click="remindCoin()">提醒放币</p>-->
+            <!--<p @click="openExplain">申诉</p>-->
+            <!--<p @click="cancelExplain">取消申诉</p>-->
+            <!--<p @click="openReleaseCoin">释放币</p>-->
+            <!--<p>-->
+              <!--<router-link :to="{path: '/order/evaluate', query: {type: '0', data: contentList[index]}}" class="active-btn">去评价</router-link>-->
+            <!--</p>-->
+            <!--<p>-->
+              <!--<router-link :to="{path: '/order/evaluate', query: {type: '1', data: contentList[index]}}">查看评价</router-link>-->
+            <!--</p>-->
+
+
           </li>
         </ul>
-        <p class="order-content-extre">
+        <p class="order-content-extre clearfix">
           <span>订单号：{{JsonBig.stringify(content.id)}}</span>
           <span>备注：{{content.info}}</span>
+          <span v-show="showTime">倒计时</span>
         </p>
       </div>
     </div>
@@ -110,20 +115,18 @@
     <!-- 订单无内容 -->
     <!--<MyOrderNothing></MyOrderNothing>-->
 
+    <!-- 标记已付款弹窗 -->
+    <MarkedPaymentLayer :paymentShow="showPayment"
+                        :id="updateId"
+                        :info="updateInfo"
+                        @offPayment="openPayment">
+    </MarkedPaymentLayer>
+    <!-- 引入释放币弹窗 -->
+    <ReleaseCoinLayer :releaseCoinShow="showReleaseCoin" @offRelease="openReleaseCoin"></ReleaseCoinLayer>
     <!-- 提醒放币弹窗 -->
     <BasePopup :show="remindCoinLayer" class="remind-coin-layer">{{remindCoinContent}}</BasePopup>
     <!-- 申述弹窗 -->
-    <BasePopup class="explain-layer"
-               :show="explainLayer"
-               :width=470
-               :height=194>
-      <img src="/static/images/close_btn.png" alt="" @click="closePopup">
-      <p>请先与对方联系，核实对方是否放币</p>
-      <div>
-        <em>申诉</em>
-        <i>联系对方</i>
-      </div>
-    </BasePopup>
+    <ExplainLayer :explainShow="showExplain" @offExplain="openExplain"></ExplainLayer>
     <!-- 取消申述 -->
     <BasePopup class="explain-layer"
                :show="cancelExplainLayer"
@@ -134,65 +137,6 @@
       <div>
         <em @click="closePopup">取消</em>
         <i>确定</i>
-      </div>
-    </BasePopup>
-    <!-- 购买 -->
-    <BasePopup class="buy-layer"
-               :show="buyLayer"
-               :width=470
-               :height=250>
-      <img src="/static/images/close_btn.png" alt="" @click="closePopup">
-      <div class="buy-layer-content">
-        <h1>请输入支付密码</h1>
-        <input type="password"/>
-        <div>
-          <em @click="closePopup">取消</em>
-          <i @click="buyNext">下一步</i>
-        </div>
-      </div>
-    </BasePopup>
-    <!-- 输入短信验证码 -->
-    <BasePopup class="info-layer"
-               :show="verifyLayer"
-               :width=470
-               :height=250
-               v-if="this.$store.state.userInfo.phone">
-      <img src="/static/images/close_btn.png" alt="" @click="closePopup" >
-      <div class="buy-layer-content">
-        <h1>请输入短信验证码</h1>
-        <p>
-          <input type="text"/><span @click="sendVerify" :class="{offBg: showOffBg}">{{verifyCode}}</span>
-        </p>
-        <div>
-          <em @click="closePopup">取消</em>
-          <i>确定</i>
-        </div>
-      </div>
-    </BasePopup>
-    <!-- 输入谷歌验证码 -->
-    <BasePopup class="geogle-layer"
-               :show="verifyLayer"
-               :width=470
-               :height=250
-               v-if="this.$store.state.userInfo.email">
-      <img src="/static/images/close_btn.png" alt="" @click="closePopup">
-      <div class="buy-layer-content">
-        <h1>请输入谷歌验证码</h1>
-        <input type="text"
-               v-for="index in 6"
-               v-focus="index === inputContent"
-               v-model="inputGroup[index-1]"
-               maxlength="1"
-               @keyup="getNum(index)"
-               @keydown="delNum(index)"/>
-        <!--<input type="tel" maxlength="6" class="realInput" v-model="realInput"  @keyup="getNum()" @keydown="delNum()">-->
-        <!--<ul class="clearfix">-->
-          <!--<li v-for="(disInput, index) in disInputs"><input type="tel" maxlength="1"  v-model="disInput.value" v-focus="index"></li>-->
-        <!--</ul>-->
-        <div>
-          <em @click="closePopup">取消</em>
-          <i>确定</i>
-        </div>
       </div>
     </BasePopup>
   </div>
@@ -206,6 +150,9 @@
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
   import MyOrderNothing from '@/views/myOrder/MyOrderNothing' // 引入无订单页面
   import sendConfig from '@/api/SendConfig.js'// 引入websocket发送包
+  import MarkedPaymentLayer from '@/views/myOrder/orderLayer/MarkedPaymentLayer'
+  import ReleaseCoinLayer from '@/views/myOrder/orderLayer/ReleaseCoinLayer'
+  import ExplainLayer from '@/views/myOrder/orderLayer/ExplainLayer'
 
   export default {
     name: "my-order",
@@ -215,7 +162,10 @@
       DatePicker,
       SearchInput,
       BasePopup,
-      MyOrderNothing
+      MyOrderNothing,
+      MarkedPaymentLayer,
+      ReleaseCoinLayer,
+      ExplainLayer
     },
     data() {
       return {
@@ -224,38 +174,66 @@
         searchValue: 'changeTitle', //  输入框改变值
         contentTabIndex: 1, // 控制tab切换
         num: 0, // 控制时间选择Tab active类
+
+        showPayment: false, // 标记已付款弹窗
+        showReleaseCoin: false,
+        showExplain: false,
         remindCoinLayer: false, // 提醒弹窗
         remindCoinContent: '提醒发送成功', // 提醒弹窗内容
-        explainLayer: false, // 申述弹窗
         cancelExplainLayer: false, // 撤销申诉
-        buyLayer: false, // 释放币弹窗
-        verifyLayer: false, // 输入短信、邮箱密码
-        verifyCode: '发送验证码', // 改变倒计时状态
-        flag: true, // 开启倒计时后禁止点击
-        showOffBg: false, // 开启倒计时后状态
-        count: 60, // 记录倒计时时间
-        // disInputs:[{value:''},{value:''},{value:''},{value:''},{value:''},{value:''}],
-        // realInput:'',
-        inputContent: '', // 聚焦谷歌输入框内容
-        inputGroup: [], // 记录输入框内容
+        updateId: '', //标记已付款弹窗所用id
+        updateInfo: '', // 标记弹窗所用info
 
+        startValue: 'startValueDate',
+        endValue: 'endValueDate',
+        endP: '结束日期',
+        showTime: 'true',
+        showPriceActive: false, // 控制箭头显示active
+        showAmountActive: false, // 控制箭头显示active
+        showMoneyActive: false, // 控制箭头显示active
+        showTimeActive: false,
+        // showPriceActive: false, // 控制箭头显示active
+        sortActive: false, // 控制箭头开始无active
         timeList: ['今天', '三天', '七天'], // 时间Tab切换title
+
         orderType: ['全部类型', '购买', '出售'], // 类型下拉显示
         orderTypeValue: 'orderTypeValue', // 传递给子组件
-        currency: ['BTC', 'ETH', 'LTC'], // 币种下拉显示
+        orderTypeValueData: [3, 1, 2],
+        selectOrder: 3,
+        currency: ['全部币种', 'BTC', 'ETH', 'LTC'], // 币种下拉显示
         currencyValue: 'currencyValue', // 传递给子组件
         allStatus: ['全部状态', '待付款', '待放币', '申诉中'], // 状体下拉显示
         allStatusValue: 'allStatusValue', // 传递给子组件
-        contentList:[]
+
+        contentList: [], // 表格内容数组
+        dateSort: 0,// 时间排序 1降序 2升序
+        price: 0,// 单价排序 1降序 2升序
+        amount: 0,// 电子币数量排序 1降序 2升序
+        money: 0,// 法币金额排序 1降序 2升序
+        // coinType:
+        stateList: [ // 表格状态列表
+          {'name': '待付款', 'flag': 1},
+          // {'name': '待确认', 'flag': 2},
+          // {'name': '申诉中', 'flag': 3},
+          // {'name': '已取消', 'flag': 4},
+          // {'name': '超时', 'flag': 5},
+          // {'name': '交易完成', 'flag': 6},
+          // {'name': '买家评价', 'flag': 7},
+          // {'name': '卖家评价', 'flag': 8},
+          // {'name': '双方已评价', 'flag': 9}
+        ]
       }
     },
     created() {
       this.initData()
+      // this.showPayment = true
     },
     mounted() {
       // 监听下拉框值，将值传给子组件
       this.Bus.$on(this.orderTypeValue, (data) => {
-        console.log('orderTypeValue', data)
+        this.selectOrder = data
+        console.log('orderTypeValue', this.selectOrder)
+        this.initData()
       });
       this.Bus.$on(this.currencyValue, (data) => {
         console.log('currencyValue', data)
@@ -266,21 +244,27 @@
       // 监听搜索框值
       this.Bus.$on(this.searchValue,(data) => {
         this.title = data
-      })
+      });
+      this.Bus.$on('offTime', data => this.showTime = data);
+      // 时间框开始值
+      this.Bus.$on(this.startValue, (data) => {
+       this.startValueDate = (new Date(data).getTime()).toString()
+        console.log('startValue',  this.startValueDate)
+        // console.log('startValueData',  data)
+      });
+      // 时间框结束值
+      this.Bus.$on(this.endValue, (data) => {
+        this.endValueDate = new Date(data).getTime().toString()
+        console.log('endValue',  this.endValueDate)
+        // console.log('endValueData', data)
+      });
     },
     destroyed() {
       this.Bus.$off(this.orderTypeValue);
       this.Bus.$off(this.currencyValue);
       this.Bus.$off(this.allStatusValue);
       this.Bus.$off(this.searchValue);
-    },
-    watch: {
-      inputGroup(newValue, oldValue) {
-        console.log(newValue, oldValue, newValue[newValue.length - 1].length)
-        // if (newValue[newValue.length - 1].length) {
-        //   this.inputContent =  newValue.length + 1
-        // }
-      }
+      this.Bus.$off(this.startValue);
     },
     methods: {
       initData() {
@@ -292,6 +276,12 @@
             if(!data || data.body.ret !== 0) return;
             console.log('order', data.body.data.orders)
             this.contentList = data.body.data.orders
+            // this.contentList.forEach(v => {
+            //   console.log('v', v.state)
+            //   // if (v.state == 1) {
+            //   //   v.state == 'dafuguan'
+            //   // }
+            // })
           },
           date:new Date()
         };
@@ -301,17 +291,21 @@
           body:{
             "action": "orders",
             data: {
-              "type": 3, // 1 买; 2 卖; 3 全部  <-state=0
-              "state": 0, // 0进行中; 1 已完成   <- type=0 （？？？）
-              "origin": 0
+              "type": this.selectOrder, // 1 买; 2 卖; 3 全部  <-state=0
+              "state": this.contentTabIndex - 1, // 0进行中; 1 已完成   <- type=0 （？？？）
+              "origin": 0, // 分页
+              "date": this.dateSort,// 时间排序 1降序 2升序
+              "price": this.price,// 单价排序 1降序 2升序
+              "amount": this.amount,// 电子币数量排序 1降序 2升序
+              "money": this.money,// 法币金额排序 1降序 2升序
+              "currency": 'btc'// 币种筛选
             }
-
           }
         }))
-
       },
       selectStatus(type) { // Tab切换
         this.contentTabIndex = type;
+        this.initData()
       },
       selectTime(index) { // 时间切换
         this.num = index;
@@ -322,71 +316,79 @@
           this.remindCoinLayer = false
         }, 3000)
       },
-      explain() {
-        this.explainLayer = true
-      },
+
       cancelExplain() {
         this.cancelExplainLayer = true
       },
-      buy() {
-        this.buyLayer = true;
-      },
-      buyNext() {
-        this.buyLayer = false;
-        this.verifyLayer = true;
-      },
-      sendVerify() {
-        if (this.flag && this.infoLayer) {
-          this.flag = false;
-          this.count = 60;
-          let _this = this;
-          let verifyFn = function () {
-            _this.count--;
-            _this.verifyCode = `${_this.count}秒后重发`;
-            _this.showOffBg = true;
-            if (_this.count <= 0) {
-              _this.verifyCode = '发送验证码';
-              _this.flag = true;
-              _this.showOffBg = false;
-              clearInterval(timer)
-            }
-          };
-          verifyFn();
-          let timer = setInterval(verifyFn, 1000)
-        }
-      },
-      // getNum(){
-      //   for (var i = 0; i < this.realInput.length; i++) {
-      //     this.disInputs[i].value = this.realInput.charAt(i) // 表示字符串中某个位置的数字，即字符在字符串中的下标
-      //   }
-      // },
-      // delNum(){
-      //   let oEvent = window.event;
-      //   console.log(oEvent)
-      //   if (oEvent.keyCode === 8) {
-      //     if (this.realInput.length > 0) {
-      //       this.disInputs[this.realInput.length-1].value=''
-      //     }
-      //   }
-      getNum(index) {
-        console.log('keyup', this.inputContent, this.inputGroup, index)
-        this.inputContent = index + 1
-      },
-      delNum(index) {
-        let oEvent = window.event;
-        // console.log(oEvent)
-        if (oEvent.keyCode === 8) {
-          console.log('keyCode', 1111)
-        }
-      },
+
       closePopup() {
-        this.explainLayer = false;
         this.cancelExplainLayer = false;
-        this.buyLayer = false;
-        this.verifyLayer = false;
       },
       toContact() { // 打开消息框
         this.$store.commit({'type':'changeChatBox', data: true})
+      },
+      openPayment(st, index) { // 控制标记已付款弹窗
+        if (st === 'false') {
+          this.showPayment = false
+        } else {
+          this.showPayment = true
+          this.updateId = this.JsonBig.stringify(this.contentList[index].id)
+          this.updateInfo = this.contentList[index].info
+        }
+      },
+      openReleaseCoin(st) {
+        st === 'false' ? this.showReleaseCoin = false : this.showReleaseCoin = true
+      },
+      openExplain(st) {
+        st === 'false' ? this.showExplain = false : this.showExplain = true
+      },
+      priceSort() {
+        this.showPriceActive = true
+        this.showMoneyActive = false
+        this.showAmountActive = false
+        this.showTimeActive = false
+        this.money = 0
+        this.amount = 0
+        this.dateSort = 0
+        this.sortActive = !this.sortActive
+        this.sortActive ? this.price = 1 : this.price = 2
+        this.initData()
+      },
+      moneySort() {
+        this.showMoneyActive = true
+        this.showPriceActive = false
+        this.showAmountActive = false
+        this.showTimeActive = false
+        this.amount = 0
+        this.price = 0
+        this.dateSort = 0
+        this.sortActive = !this.sortActive
+        this.sortActive ? this.money = 1 : this.money = 2
+        this.initData()
+      },
+      amountSort() {
+        this.showAmountActive = true
+        this.showPriceActive = false
+        this.showMoneyActive = false
+        this.showTimeActive = false
+        this.price = 0
+        this.money = 0
+        this.dateSort = 0
+        this.sortActive = !this.sortActive
+        this.sortActive ? this.amount = 1 : this.amount = 2
+        this.initData()
+      },
+      timeSort() {
+        this.price = 0
+        this.money = 0
+        this.amount = 0
+        this.showTimeActive = true
+        this.showAmountActive = false
+        this.showPriceActive = false
+        this.showMoneyActive = false
+        this.sortActive = !this.sortActive
+        this.sortActive ? this.dateSort = 1 : this.dateSort = 2
+        this.initData()
       }
     }
   }
@@ -501,6 +503,14 @@
             right -19px
             triangle_down($col999)
             cursor pointer
+      .sort-up
+        span
+          i.before
+            border-bottom-color $col422
+      .sort-down
+        span
+          i.after
+            border-top-color $col422
       .order-content-info
         padding 18px 30px
         border 1px solid #E1E1E1
@@ -545,124 +555,21 @@
           padding-top 17px
           font-size 13px
           color #999
+          span
+            float left
+          span:nth-child(1)
+            margin-right 30px
+          span:last-child
+            float right
+
 
   /*弹窗部分*/
   .remind-coin-layer
     text-align center
     line-height 94px
 
-  .explain-layer
-    text-align center
-    img
-      width 12px
-      height 12px
-      margin-top 10.6px
-      margin-left 442.6px
-      cursor pointer
-    p
-      margin 32.4px 0 60px
-    div
-      em, i
-        display inline-block
-        width 160px
-        height 40px
-        text-align center
-        line-height 40px
-        cursor pointer
-      em
-        color #FFB422
-        background #FFF
-        border 1px solid #FFB422
-        border-radius 2px
-        margin-right 30px
-      i
-        color #FFF
-        background #FFB422
-        border-radius 2px
 
-  .buy-layer, .info-layer, .geogle-layer
-    img
-      width 12px
-      height 12px
-      margin-top 10.6px
-      margin-left 442.6px
-      cursor pointer
-    .buy-layer-content
-      margin-top 32.4px
-      margin-left 60px
-      input
-        width 340px
-        height 40px
-        padding-left 10px
-        margin-bottom 40px
-        background #F4F6FA
-        border-radius 2px
-      div
-        em, i
-          display inline-block
-          width 160px
-          height 40px
-          text-align center
-          line-height 40px
-          cursor pointer
-        em
-          color #FFB422
-          background #FFF
-          border 1px solid #FFB422
-          border-radius 2px
-          margin-right 30px
-        i
-          color #FFF
-          background #FFB422
-          border-radius 2px
 
-  .info-layer
-    .buy-layer-content
-      p
-        input
-          width 250px
-          vertical-align top
-        span
-          display inline-block
-          width 100px
-          height 40px
-          text-align center
-          line-height 40px
-          color #FFF
-          background #FFB422
-          border-radius 0 2px 2px 0
-          cursor pointer
-        .offBg
-          background #999
 
-  .geogle-layer
-    .buy-layer-content
-      input
-        width 40px
-        height 40px
-        margin-right 20px
-        padding 0
-        text-align center
-        line-height 40px
-      /*.realInput
-        position: absolute
-        padding 0
-        background: none
-        text-indent: -5em;
-      ul
-        margin-bottom 40px
-        li
-          float left
-          width 40px
-          height 40px
-          margin-right 20px
-          input
-            width 40px
-            height 40px
-            text-align center
-            line-height 40px
-            padding 0
-        li:last-child
-          margin-right 0*/
 
 </style>
