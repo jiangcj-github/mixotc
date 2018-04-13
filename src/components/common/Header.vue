@@ -1,5 +1,5 @@
 <template>
-  <article class="header">
+  <article class="header" style="{position: fixed, top: 0, left: 0}">
     <section class="upper">
       <div class="wrapper">
         <ul class="upper-left">
@@ -73,7 +73,6 @@
     },
     methods: {
       changeLoginForm(state) {
-        console.log(this.$store)
         this.$store.commit({type: 'changeLoginForm', data: state});
       },
       showQr() {

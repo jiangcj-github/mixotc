@@ -1,6 +1,6 @@
 <template>
   <div class="wrap">
-    <div class="login" v-mousedownOutside="hideLoginForm">
+    <div class="login" v-mousedownOutside="hideLoginForm" v-if="showForm">
       <h2 class="title">登录/注册</h2>
       <div :class="{'hide-tip1':type,'show-tip1':!type}">请输入正确的手机号/邮箱</div>
       <p class="account">
@@ -10,8 +10,9 @@
       <Slider :slideStatus="slideStatus"></Slider>
       <div :class="{'hide-tip2':captcha,'show-tip2':!captcha}">请输入正确的验证码</div>
       <p class="yzm">
+        <span v-if="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先将滑块拖拽到最右侧</b></span>
         <input type="text" placeholder="验证码" value="" v-model="code">
-        <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend}" @click="sendCode">{{isSend ? time + '秒后重发': sendText}}</button>
+        <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend}" @click="sendCode">{{isSend ? time + '秒后重发': '发送验证码'}}</button>
       </p>
       <button :class="{able: moveTrue && agree}" :disabled="!moveTrue || !agree" @click="login">登录</button>
       <div class="yhxy">
@@ -19,19 +20,26 @@
         <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
         <p>我已阅读并同意 <a href="">用户协议</a></p>
       </div>
-      <span :class="{'hide-tips':agree,'yhxy-tips':!agree}"><i>!</i>&nbsp;&nbsp;请勾选用户协议</span>
+      <span :class="{'hide-tips':agree,'yhxy-tips':!agree}"><img src="/static/images/hint.png" alt="">&nbsp;&nbsp;<b>请勾选用户协议</b></span>
     </div>
+    <BasePopup class="popup" :show="loginSuccess" :top="29.17"> 
+      <slot>
+        <p v-clickoutside="hideLoginForm" @click="hideLoginForm">登录成功</p>
+      </slot>
+    </BasePopup>
   </div>
 </template>
 
 <script>
-  import Slider from './Slider.vue'
+  import Slider from './Slider'
+  import BasePopup from './BasePopup'
   import sendConfig from '@/api/SendConfig.js'
 
   export default {
     name: "login",
     data() {
       return {
+        showForm: true,
         moveTrue: false,
         slideStatus: 'slideStatuss',
         agree: true,
@@ -41,16 +49,23 @@
         accType: '',
         captcha: true,
         isSend: false,
+        moveTip: false,
+        loginSuccess: false,
         time:'',
-        sendText: '发送验证码',
-        interval: null
+        interval: null,
+        timer: null
       }
 
     },
     components: {
-      Slider
+      Slider,
+      BasePopup
     },
     methods: {
+      hidePopup() {
+        this.loginSuccess = false
+        this.hideLoginForm();
+      },
       checkAccount(account) {
         return /^1[34578]\d{9}$/.test(account) ? 'phone' : (/^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(account) ? 'email' : false)
       },
@@ -62,6 +77,7 @@
         let accType = this.checkAccount(this.account);
         if (!this.type) return;
         if (!this.moveTrue) {
+          this.moveTip = true;
           return;
         }
         this.accType = this.type;
@@ -69,6 +85,7 @@
         if(!this.interval){
           this.time = $;
           this.isSend = true;
+          clearInterval(this.interval);
           this.interval = setInterval(() =>{
             if(this.time > 0 && this.time <= $){
               this.time--;
@@ -80,7 +97,7 @@
           },1000);
         }
         let ws = this.WebSocket;
-        ws.start('ws://39.106.157.67:8090/sub');
+        ws.start(this.HostUrl.ws);
         let seq = ws.seq;
         ws.onOpen[seq]= () =>{
           ws.send(sendConfig('send_code',{
@@ -100,7 +117,7 @@
         this.accType = this.type;
         if(!this.type || !this.captcha) return;
         let ws =this.WebSocket;
-        ws.start('ws://39.106.157.67:8090/sub');
+        ws.start(this.HostUrl.ws);
         let seq = ws.seq;
         ws.onMessage[seq] = {
           callback: (data)=>{
@@ -109,6 +126,12 @@
               this.captcha = false;
               return;
             }
+            this.showForm = false;
+            this.loginSuccess = true;
+            clearTimeout(this.timer);
+            this.timer = setTimeout(() => {
+              this.hidePopup();
+            },3000)
             this.$store.commit({
               type: 'getUserInfo',
               data: data.body
@@ -116,7 +139,7 @@
             data.body.msg && sessionStorage.setItem('otcToken', data.body.msg);
             this.Storage.otcAccount.set(this.account);
             this.$store.commit({ type: 'changeLogin', data: true });
-            this.hideLoginForm();
+            
           },
           date:new Date()
         };
@@ -147,12 +170,16 @@
         this.account = this.Storage.otcAccount.get()
       }
       this.Bus.$on(this.slideStatus, (status) => {
-        this.moveTrue = status
+        this.moveTrue = status;
+        this.moveTip = false;
+        console.log(this.moveTrue)
         this.sendCode()
       })
     },
     destroyed() {
       this.Bus.$off(this.slideStatus);
+      clearInterval(this.interval);
+      clearTimeout(this.timer);
     },
     directives: {
       mousedownOutside: {
@@ -270,8 +297,17 @@
           border-radius 2px
 
       .yzm
+        position relative
         margin 35px 40px 15px
-
+        span
+          position absolute
+          top -25px
+          left 0
+          b
+            display inline-block
+            color $col94C
+            text-align center
+            fz11()
         input
           width 210px
           height 40px
@@ -340,17 +376,16 @@
         color $col94C
         text-align center
         line-height 12px
-        fz11()
-        i
+        b
           display inline-block
-          width 12px
-          height 12px
-          background-color: $col94C
-          border 1px solid $col94C
-          border-radius 28px
-          text-align center
-          vertical-align middle
-          line-height 12px
-          color #fff
+          color $col94C
           fz11()
+    .popup
+      p
+        height 94px
+        line-height 94px
+        text-align center
+        font-size $fz14
+        color $col333
+        letter-spacing: 0.29px
 </style>

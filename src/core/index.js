@@ -6,11 +6,14 @@ import "regenerator-runtime/runtime"//使用promise
 
 import Router from './router'
 
-import JsonBig from "json-bigint";
 
 import Store from "./store";
 
+import JsonBig from "json-bigint";
 Vue.prototype.JsonBig = JsonBig;
+
+import HostUrl from "./hostUrl";
+Vue.prototype.HostUrl = HostUrl;
 
 import HttpProxy from './httpProxy' //fetch后台交互
 Vue.prototype.Proxy = HttpProxy;

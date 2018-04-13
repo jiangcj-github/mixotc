@@ -2,7 +2,7 @@
   <li class="item clearfix">
     <div class="title merchant">
       <!-- <img class="whole" src="/static/images/whole_icon2.png" alt="" > -->
-      <img class="avatar" @click="toHomePage(data.id)" :src="data.icon ? `http://192.168.113.26/image/${data.icon}` : `/static/images/default_avator.png`" alt="">
+      <img class="avatar" @click="toHomePage(data.id)" :src="data.icon ? `${HostUrl.http}image/${data.icon}` : `/static/images/default_avator.png`" alt="">
       <span class="nickname" @click="toHomePage(data.id)">{{data.trader}}</span>
       <span class="trust">信任</span>
     </div>

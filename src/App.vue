@@ -37,6 +37,7 @@
             ws.reConnectFlag = false;
             return;
           }
+          ws.reConnectFlag = true;
           this.$store.commit({
             type: 'getUserInfo',
             data: data.body
@@ -45,7 +46,7 @@
         }
       });
       let token =  sessionStorage.getItem('otcToken');
-      console.log(token)
+      // console.log(token)
       //页面打开时时获取sessionStorage的token自动发送token登录
       ws.onOpen['token'] = () => {
         let token = sessionStorage.getItem('otcToken');
@@ -63,7 +64,7 @@
         }))
       }
       if (!token) return;
-      ws.start('ws://39.106.157.67:8090/sub');
+      ws.start(this.HostUrl.ws);
     },
     mounted() {
       //websock发包接口需先判断登录状态
