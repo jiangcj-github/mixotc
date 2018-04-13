@@ -42,7 +42,7 @@
     <!--菜单项tab-->
     <ul class="menu-tab">
         <li :class="{active:tab==0}" @click="tab=0">他的发布</li>
-        <li :class="{active:tab==1}" @click="tab=1">收到的评价<i>&nbsp;{{rates_num}}</i></li>
+        <li :class="{active:tab==1}" @click="tab=1">收到的评价<i v-if="rates_num>0">&nbsp;{{rates_num}}</i></li>
     </ul>
     <!--发布列表-->
     <div class="release-list" v-show="tab==0">
@@ -71,12 +71,12 @@
         <li class="operation">操作</li>
       </ul>
       <ReleaseListItem v-for="(item,i) in sales" :key="i" :data="item"></ReleaseListItem>
-      <Pagination :total="sales_num" :pageSize="sales_pgsize" emitValue="changeSalesPage"></Pagination>
+      <Pagination :total="sales_num" :pageSize="sales_pgsize" emitValue="changeSalesPage" v-if="sales_num>0"></Pagination>
     </div>
     <!--评价列表-->
     <div class="evaluate-list" v-show="tab==1">
       <EvaluateListItem v-for="(item,i) in rates" :key="i" :data="item"></EvaluateListItem>
-      <Pagination :total="rates_num" :pageSize="rates_pgsize" emitValue="changeRatesPage" class="page-bar"></Pagination>
+      <Pagination :total="rates_num" :pageSize="rates_pgsize" emitValue="changeRatesPage" class="page-bar" v-if="rates_num>0"></Pagination>
     </div>
   </div>
 </template>
@@ -189,8 +189,8 @@
       }
     },
     mounted() {
-      this.login_uid=this.JsonBig.stringify(this.$store.state.userInfo.uid);
-      this.uid=this.$route.query.uid;
+      this.login_uid= this.JsonBig.stringify(this.$store.state.userInfo.uid) || "";
+      this.uid= this.$route.query.uid || "";
 
       this.loadTraderInfo();
       this.loadSales();
@@ -207,12 +207,16 @@
       joinTrust(){
         this.proxy.send('otc','new_trust',{uid:this.login_uid, id:this.uid}).then((data)=>{
           this.trade_info2.is_trust=true;
-        })
+        }).catch((msg)=>{
+          console.log(msg);
+        });
       },
       cancelTrust(){
         this.proxy.send('otc','new_trust',{uid:this.login_uid, id:this.uid}).then((data)=>{
           this.show_untrust_pop=true;
           this.trade_info2.is_trust=false;
+        }).catch((msg)=>{
+          console.log(msg);
         });
       },
       loadTraderInfo(){
@@ -400,6 +404,7 @@
       height 60px
       background-color #FFF
       padding-left 30px
+      border-bottom 1px solid #e1e1e1
       >li
         font-size 16px
         letter-spacing 0.33px
@@ -413,15 +418,15 @@
           color #FFB422
           border-bottom 2px solid #FFB422
     .release-list
-      .head
+      ul.head
         height 50px
         line-height 50px
         font-size 13px
-        color #999999
         letter-spacing 0.27px
         padding 0 30px
         >li
           display inline-block
+          color #999
       .filter
         margin-top 1px
         height 50px
