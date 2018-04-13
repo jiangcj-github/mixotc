@@ -100,7 +100,7 @@ const RUN_APP = (App, config, plugin) => {
   config.PrototypeConfig && Prototype.install(config.PrototypeConfig);
 
   router.beforeEach((to, from, next) => {
-    if (to.path === "/transaction" || to.path === "/") {
+    if (to.path === "/transaction" || to.path === "/" || to.path === "/homepage") {
       next();
       return;
     }

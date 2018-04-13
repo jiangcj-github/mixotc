@@ -139,7 +139,7 @@ button
   border-radius 0 2px 2px 0
   border 0
   cursor pointer
-  &:active 
+  &:hover 
     background $col350
   .search-icon 
     display block

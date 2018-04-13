@@ -1,6 +1,6 @@
 <template>
   <div class="header clearfix">
-    <h2>购买BTC</h2>
+    <h2>购买{{currency}}</h2>
     <SearchInput class="search" :content="content" :title="title" :emitValue1="emitValue1"></SearchInput>
     <ul class="top5 clearfix">
       <li v-for="(item, index) of topList"
@@ -32,6 +32,7 @@ export default {
   },
   data() {
     return {
+      currency: 'BTC',
       content: [{title: '币种', type: 'currency'},{title: '商家昵称/账号', type: 'nickname'}],
       title: '搜索更多币种',
       emitValue1: 'changeTitle',
@@ -41,6 +42,7 @@ export default {
   methods: {
     changeCurrency(currency) {
       this.Bus.$emit(this.emitValue, currency)
+      this.currency = currency
     }
   },
   mounted() {
@@ -60,8 +62,9 @@ export default {
       margin-bottom 50px
       h2
         float left
+        width 129px
         height 30px
-        margin-right 40px
+        // margin-right 40px
         line-height 30px
         letter-spacing 0.23px
         font-size $fz20
@@ -108,4 +111,6 @@ export default {
             width 6px
             height 9px
             background url('/static/images/recommend_.png') no-repeat
+          &:hover
+            box-shadow none
 </style>

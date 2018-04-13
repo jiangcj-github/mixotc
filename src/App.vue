@@ -67,6 +67,7 @@
       ws.start(this.HostUrl.ws);
     },
     mounted() {
+      console.log((this.Storage.otcAccount.get()))
       //websock发包接口需先判断登录状态
       this.WebSocket.beforeSend = (txt) => {
         let op =  this.JsonBig.parse(txt).op;
@@ -136,6 +137,7 @@
 <style>
   #app {
     height: 100%;
+    padding-top: 100px;
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

@@ -27,11 +27,7 @@
 export default {
   props: ['data'],
   methods: {
-    toHomePage(sid) {  
-      if (!this.$store.state.isLogin) {
-        this.$store.commit({type: 'changeLoginForm', data: true});
-        return;
-      }
+    toHomePage(sid) {
       this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})
     },
     toOrder(id) {
@@ -129,6 +125,6 @@ export default {
         background $col422
         border-radius 2px
         cursor pointer
-        &:active
+        &:hover
           background $col350
 </style>

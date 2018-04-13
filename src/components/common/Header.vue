@@ -1,5 +1,5 @@
 <template>
-  <article class="header" style="{position: fixed, top: 0, left: 0}">
+  <article class="header" :style="{position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 999}">
     <section class="upper">
       <div class="wrapper">
         <ul class="upper-left">
@@ -7,24 +7,20 @@
         </ul>
         <ul class="upper-right">
           <li><span>简体中文</span></li>
-          <li>帮助</li>
-          <li>大额交易申请</li>
-          <li>审核</li>
-          <li>仲裁</li>
+          <li><span class="line">帮助</span></li>
+          <li><span class="line">大额交易申请</span></li>
+          <li><span class="line">审核</span></li>
+          <li><span>仲裁</span></li>
         </ul>
       </div>
     </section>
-    <section class="down">
+    <section class="down" :style="{borderRight: 0}">
       <div class="wrapper">
         <ul class="down-tag">
           <li><a href="/"><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></a></li>
-          <li class="tag transaction">
-            <router-link to="/transaction">交易中心</router-link>
-          </li>
+          <router-link to="/transaction" tag="li" class="tag transaction" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
           <!--<li><a href="">广告</a></li>-->
-          <li class="tag order">
-            <router-link to="/order" v-if="this.$store.state.isLogin">订单</router-link>
-          </li>
+          <router-link to="/order"  tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">订单</router-link>
           <!--<li><a href="">钱包</a></li>-->
           <li class="itag" @mouseenter="showQr" @mouseleave="hideQr">
             <img class="top-logo" src="/static/images/phoneicon.png" alt="">
@@ -40,7 +36,8 @@
           <img class="avator" :src="icon ? `http://192.168.113.26/image/${icon}` : `/static/images/default_avator.png`" alt="">
           <div class="name" @click="showMenu = !showMenu" >
             <span class="login" >{{name}}</span>
-            <img class="select-icon" src='/static/images/triangle_black.png' alt="">
+            <img class="select-icon" src='/static/images/triangle_black.png' v-if="!showMenu" alt="">
+            <img class="select-icon" src='/static/images/triangle_black_up.png' v-else alt="">
             <ul v-if="showMenu" v-clickoutside="hideShowMenu">
               <!-- <li class="center">个人中心</li>
               <li class="safe">安全设置</li>
@@ -87,7 +84,7 @@
         this.$store.commit({type: 'changeLogin', data: false});
         this.WebSocket.reConnectFlag = false;
         this.WebSocket.close();
-        if (this.path !== '/' && this.path !== 'transaction') {
+        if (this.path !== '/' && this.path !== 'transaction' && this.path !== 'homepage') {
           this.$router.push('transaction')
         }
       },
@@ -171,13 +168,21 @@
           text-align center
           vertical-align middle
           line-height 30px
-          a, span
-            color #fff
-            .white
-              margin-left 3px
-              line-height 30px
-              border-top 5px solid #fff
-
+          span
+            display inline-block
+            position relative
+            font-size 13px
+            color #FFF
+            letter-spacing 0.15px
+            cursor pointer
+            &.line::after
+              position absolute
+              top 10px
+              right -15px
+              content ""
+              width 1px
+              height 10px
+              background #FFF
     .down
       height 70px
       border 1px solid #E1E1E1
@@ -194,15 +199,18 @@
           vertical-align middle
           line-height 71px
         .tag
+          cursor pointer 
           &.order
             width 70px
           &.transaction
             width 80px
+          &.selected
+            border-bottom 2px solid $col422
         .itag
           line-height 60px
           padding 0 41.5px
         .tag, .itag
-          &:hover,&.active
+          &:hover
             border-bottom 2px solid $col422
 
           .show-qr
