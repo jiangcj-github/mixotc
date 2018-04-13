@@ -5,22 +5,24 @@
       type="date"
       :clearable = "false"
       :picker-options="pickerOptions"
-      :placeholder="text">
-    </el-date-picker>
+      :placeholder="text"
+      @blur="blur">
+    </el-date-picker> -
   </div>
 </template>
 
 <script>
   export default {
     props:{
-      text:{
+      text:{ // 自定义Placeholder值
         type: String,
         default:'开始日期'
       },
-      dateUp:{
+      dateUp:{ // 时间上限
         type: String,
         default:'1969-12-31T16:00:00.000Z'
-      }
+      },
+      emitValue: String, // emit返回标识
     },
     data() {
       return {
@@ -28,10 +30,17 @@
         pickerOptions: {
           dateUp: this.dateUp,
           disabledDate: (time) => {
-            return time.getTime() > Date.now() || time.getTime() < new Date(this.dateUp) - 0;
+            // time.getTime() < new Date(this.limitValue).getTime();
+            return time.getTime() > Date.now() || time.getTime() < new Date(this.dateUp) - 0 || time.getTime() < new Date(this.startValueDate).getTime()
           }
         }
       };
+    },
+    methods: {
+      blur() {
+        this.Bus.$emit(this.emitValue, this.value);
+        console.log(this.emitValue, this.value)``
+      }
     }
   };
 </script>
@@ -55,11 +64,11 @@
         font-size 13px
         color #999
         letter-spacing 0.15px
-      &::-moz-placeholder   
+      &::-moz-placeholder
         font-size 13px
         color #999
         letter-spacing 0.15px
-      &:-moz-placeholder 
+      &:-moz-placeholder
         font-size 13px
         color #999
         letter-spacing 0.15px

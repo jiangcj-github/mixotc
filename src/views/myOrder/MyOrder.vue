@@ -18,9 +18,9 @@
       <div class="order-choice-time clearfix" v-if="contentTabIndex === 2">
         <img src="/static/images/calendar.png" alt="">
         <ol class="clearfix">
-          <li><DatePicker></DatePicker></li>
+          <li><DatePicker :emitValue="startValue"></DatePicker></li>
           <li>-</li>
-          <li><DatePicker></DatePicker></li>
+          <li><DatePicker :emitValue="endValue" :text="endP"></DatePicker></li>
         </ol>
         <ul class="clearfix">
           <li v-for="(item, index) in timeList" :class="{'time-active': index == num}" @click="selectTime(index)">{{item}}</li>
@@ -31,11 +31,12 @@
     <div class="order-content">
       <!-- 表格表头 -->
       <ol class="clearfix">
-        <li>创建时间</li>
+        <li class="sort" :class="{'sort-up': showTimeActive&&sortActive, 'sort-down': showTimeActive&&!sortActive}" @click="timeSort"><span>创建时间<i class="before"></i><i class="after"></i></span></li>
         <li>
           <ChoiceBox :classify="orderType"
-                       title="类型"
-                       :emitValue="orderTypeValue">
+                     title="类型"
+                     :emitValue="orderTypeValue"
+                     :selectValue="orderTypeValueData">
           </ChoiceBox>
         </li>
         <li>
@@ -45,9 +46,9 @@
           </ChoiceBox>
         </li>
         <li>对方</li>
-        <li class="sort"><span>单价(CNY)<i class="before"></i><i class="after"></i></span></li>
-        <li class="sort"><span>数量(手续费)<i class="before"></i><i class="after"></i></span></li>
-        <li class="sort"><span>金额(CNY)<i class="before"></i><i class="after"></i></span></li>
+        <li class="sort" :class="{'sort-up': showPriceActive&&sortActive, 'sort-down': showPriceActive&&!sortActive}" @click="priceSort"><span>单价(CNY)<i class="before"></i><i class="after"></i></span></li>
+        <li class="sort" :class="{'sort-up': showAmountActive&&sortActive, 'sort-down': showAmountActive&&!sortActive}" @click="amountSort"><span>数量(手续费)<i class="before"></i><i class="after"></i></span></li>
+        <li class="sort" :class="{'sort-up': showMoneyActive&&sortActive, 'sort-down': showMoneyActive&&!sortActive}" @click="moneySort"><span>金额(CNY)<i class="before"></i><i class="after"></i></span></li>
         <li>资金码</li>
         <li>
           <ChoiceBox :classify="allStatus"
@@ -67,16 +68,16 @@
           <li :class="content.type == 1 ? 'text-g' : 'text-r'">{{content.type == 1 ? '购买' : '出售'}}</li>
           <li>{{content.currency&&content.currency.toUpperCase()}}</li>
           <li>
-            <p>{{content.name}}/130***123</p>
+            <p>{{content.name || content.contact}}</p>
             <p class="talk" @click="toContact">联系他</p>
           </li>
           <li>{{content.price}}</li>
           <li>
-            <p>+1.12 BTC</p>
-            <p>0.00004</p>
+            <p :class="content.type == 1 ? 'text-g' : 'text-r'">{{content.type == 1 ? `+${content.amountc}${content.currency.toUpperCase()}` : `-${content.amountc}${content.currency.toUpperCase()}`}}</p>
+            <p>{{content.fee}}</p>
           </li>
-          <li>{{content.amountc}}</li>
-          <li>234abc</li>
+          <li>{{content.amountm}}</li>
+          <li>{{content.trade_code}}</li>
           <!-- 状态显示 -->
           <li>
             <p v-for="state in stateList">{{state.name}}</p>
@@ -183,15 +184,33 @@
         updateId: '', //标记已付款弹窗所用id
         updateInfo: '', // 标记弹窗所用info
 
+        startValue: 'startValueDate',
+        endValue: 'endValueDate',
+        endP: '结束日期',
         showTime: 'true',
+        showPriceActive: false, // 控制箭头显示active
+        showAmountActive: false, // 控制箭头显示active
+        showMoneyActive: false, // 控制箭头显示active
+        showTimeActive: false,
+        // showPriceActive: false, // 控制箭头显示active
+        sortActive: false, // 控制箭头开始无active
         timeList: ['今天', '三天', '七天'], // 时间Tab切换title
+
         orderType: ['全部类型', '购买', '出售'], // 类型下拉显示
         orderTypeValue: 'orderTypeValue', // 传递给子组件
-        currency: ['BTC', 'ETH', 'LTC'], // 币种下拉显示
+        orderTypeValueData: [3, 1, 2],
+        selectOrder: 3,
+        currency: ['全部币种', 'BTC', 'ETH', 'LTC'], // 币种下拉显示
         currencyValue: 'currencyValue', // 传递给子组件
         allStatus: ['全部状态', '待付款', '待放币', '申诉中'], // 状体下拉显示
         allStatusValue: 'allStatusValue', // 传递给子组件
+
         contentList: [], // 表格内容数组
+        dateSort: 0,// 时间排序 1降序 2升序
+        price: 0,// 单价排序 1降序 2升序
+        amount: 0,// 电子币数量排序 1降序 2升序
+        money: 0,// 法币金额排序 1降序 2升序
+        // coinType:
         stateList: [ // 表格状态列表
           {'name': '待付款', 'flag': 1},
           // {'name': '待确认', 'flag': 2},
@@ -207,12 +226,14 @@
     },
     created() {
       this.initData()
-      this.showPayment = true
+      // this.showPayment = true
     },
     mounted() {
       // 监听下拉框值，将值传给子组件
       this.Bus.$on(this.orderTypeValue, (data) => {
-        console.log('orderTypeValue', data)
+        this.selectOrder = data
+        console.log('orderTypeValue', this.selectOrder)
+        this.initData()
       });
       this.Bus.$on(this.currencyValue, (data) => {
         console.log('currencyValue', data)
@@ -224,13 +245,26 @@
       this.Bus.$on(this.searchValue,(data) => {
         this.title = data
       });
-      this.Bus.$on('offTime', data => this.showTime = data)
+      this.Bus.$on('offTime', data => this.showTime = data);
+      // 时间框开始值
+      this.Bus.$on(this.startValue, (data) => {
+       this.startValueDate = (new Date(data).getTime()).toString()
+        console.log('startValue',  this.startValueDate)
+        // console.log('startValueData',  data)
+      });
+      // 时间框结束值
+      this.Bus.$on(this.endValue, (data) => {
+        this.endValueDate = new Date(data).getTime().toString()
+        console.log('endValue',  this.endValueDate)
+        // console.log('endValueData', data)
+      });
     },
     destroyed() {
       this.Bus.$off(this.orderTypeValue);
       this.Bus.$off(this.currencyValue);
       this.Bus.$off(this.allStatusValue);
       this.Bus.$off(this.searchValue);
+      this.Bus.$off(this.startValue);
     },
     methods: {
       initData() {
@@ -242,12 +276,12 @@
             if(!data || data.body.ret !== 0) return;
             console.log('order', data.body.data.orders)
             this.contentList = data.body.data.orders
-            this.contentList.forEach(v => {
-              console.log('v', v.state)
-              // if (v.state == 1) {
-              //   v.state == 'dafuguan'
-              // }
-            })
+            // this.contentList.forEach(v => {
+            //   console.log('v', v.state)
+            //   // if (v.state == 1) {
+            //   //   v.state == 'dafuguan'
+            //   // }
+            // })
           },
           date:new Date()
         };
@@ -257,15 +291,21 @@
           body:{
             "action": "orders",
             data: {
-              "type": 3, // 1 买; 2 卖; 3 全部  <-state=0
-              "state": 0, // 0进行中; 1 已完成   <- type=0 （？？？）
-              "origin": 0
+              "type": this.selectOrder, // 1 买; 2 卖; 3 全部  <-state=0
+              "state": this.contentTabIndex - 1, // 0进行中; 1 已完成   <- type=0 （？？？）
+              "origin": 0, // 分页
+              "date": this.dateSort,// 时间排序 1降序 2升序
+              "price": this.price,// 单价排序 1降序 2升序
+              "amount": this.amount,// 电子币数量排序 1降序 2升序
+              "money": this.money,// 法币金额排序 1降序 2升序
+              "currency": 'btc'// 币种筛选
             }
           }
         }))
       },
       selectStatus(type) { // Tab切换
         this.contentTabIndex = type;
+        this.initData()
       },
       selectTime(index) { // 时间切换
         this.num = index;
@@ -302,6 +342,54 @@
       openExplain(st) {
         st === 'false' ? this.showExplain = false : this.showExplain = true
       },
+      priceSort() {
+        this.showPriceActive = true
+        this.showMoneyActive = false
+        this.showAmountActive = false
+        this.showTimeActive = false
+        this.money = 0
+        this.amount = 0
+        this.dateSort = 0
+        this.sortActive = !this.sortActive
+        this.sortActive ? this.price = 1 : this.price = 2
+        this.initData()
+      },
+      moneySort() {
+        this.showMoneyActive = true
+        this.showPriceActive = false
+        this.showAmountActive = false
+        this.showTimeActive = false
+        this.amount = 0
+        this.price = 0
+        this.dateSort = 0
+        this.sortActive = !this.sortActive
+        this.sortActive ? this.money = 1 : this.money = 2
+        this.initData()
+      },
+      amountSort() {
+        this.showAmountActive = true
+        this.showPriceActive = false
+        this.showMoneyActive = false
+        this.showTimeActive = false
+        this.price = 0
+        this.money = 0
+        this.dateSort = 0
+        this.sortActive = !this.sortActive
+        this.sortActive ? this.amount = 1 : this.amount = 2
+        this.initData()
+      },
+      timeSort() {
+        this.price = 0
+        this.money = 0
+        this.amount = 0
+        this.showTimeActive = true
+        this.showAmountActive = false
+        this.showPriceActive = false
+        this.showMoneyActive = false
+        this.sortActive = !this.sortActive
+        this.sortActive ? this.dateSort = 1 : this.dateSort = 2
+        this.initData()
+      }
     }
   }
 </script>
@@ -415,6 +503,14 @@
             right -19px
             triangle_down($col999)
             cursor pointer
+      .sort-up
+        span
+          i.before
+            border-bottom-color $col422
+      .sort-down
+        span
+          i.after
+            border-top-color $col422
       .order-content-info
         padding 18px 30px
         border 1px solid #E1E1E1
