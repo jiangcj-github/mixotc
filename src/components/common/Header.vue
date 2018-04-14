@@ -81,8 +81,9 @@
         this.isHover = false;
       },
       logout() {
-        sessionStorage.removeItem('otcToken');
+        // sessionStorage.removeItem('otcToken');
         localStorage.setItem("removeSessionStorage", Date.now());
+        this.$store.commit({type: 'changeToken', data: ''});
         this.$store.commit({type: 'changeLogin', data: false});
         this.WebSocket.reConnectFlag = false;
         this.WebSocket.close();

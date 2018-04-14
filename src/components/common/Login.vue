@@ -9,7 +9,7 @@
         手机号/邮箱
         <input type="text" value="" v-model="account" @focus="accountCancel = true"  v-clickoutside="accountBlur">
         <img src="/static/images/cancel_icon.png" alt="" v-if="accountCancel" @click="account = ''">
-        <ul class="account-history" v-if="accountCancel">
+        <ul class="account-history" v-if="accountCancel && accountHistory.length">
           <li v-for="(item, index) of accountHistory" :key="index" @click="changeAccount(item)">{{item}}</li>
         </ul>
       </div>
@@ -59,7 +59,7 @@
         agree: true,
         account: '',
         accountCancel: false,
-        accountHistory: ['15536363636','15536363637','15536363638','15536363639','15536363640'],
+        accountHistory: [],
         code: '',
         codeCancel: false,
         type: true,
@@ -181,9 +181,12 @@
               type: 'getUserInfo',
               data: data.body
             });
-            data.body.msg && sessionStorage.setItem('otcToken', data.body.msg);
+            // data.body.msg && sessionStorage.setItem('otcToken', data.body.msg);
             this.saveAccount(this.account)
+            data.body.msg && this.$store.commit({ type: 'changeToken', data: data.body.msg })
+            data.body.msg && localStorage.setItem('getToken', data.body.msg);
             this.$store.commit({ type: 'changeLogin', data: true });
+            localStorage.removeItem('getToken')
 
           },
           date:new Date()
