@@ -98,6 +98,12 @@
           return;
         }
         if (list) {
+          let index = list.indexOf(account);
+          if (index !== -1) {
+            list.splice(index,1) && list.unshift(account)
+            storage.set(list);
+            return;
+          }
           list.length < 5 && list.unshift(account)
           list.length > 5 && list.splice(4,1) && list.unshift(account)
           storage.set(list)

@@ -3,13 +3,6 @@
     <section class="upper">
       <div class="wrapper">
         <HeaderPrice class="upper-left"></HeaderPrice>
-        <ul class="upper-right">
-          <li><span>简体中文</span></li>
-          <li><span class="line">帮助</span></li>
-          <li><span class="line">大额交易申请</span></li>
-          <li><span class="line">审核</span></li>
-          <li><span>仲裁</span></li>
-        </ul>
       </div>
     </section>
     <section class="down" :style="{borderRight: 0}">
@@ -18,7 +11,7 @@
           <li><a href="/"><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></a></li>
           <router-link to="/transaction" tag="li" class="tag transaction" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
           <!--<li><a href="">广告</a></li>-->
-          <router-link to="/order"  tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">订单</router-link>
+          <router-link to="/order"  tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">订单<span v-if="newOrder"><i>{{newOrder}}</i></span></router-link>
           <!--<li><a href="">钱包</a></li>-->
           <li class="itag" @mouseenter="showQr" @mouseleave="hideQr">
             <img class="top-logo" src="/static/images/phoneicon.png" alt="">
@@ -59,6 +52,7 @@
       return {
         isHover: false,
         showMenu: false,
+        newOrder: 0,
         items: [
           {title: 'BitFunex', value: '$9.244.70↑'}, {title: 'Kraken', value: '€7.468.30↑'}, {title: 'Bithumb', value: '₩10.186.000.00↑'}, {title: 'Bitflyer', value: '￥995.759.00↑'}
         ]
@@ -67,6 +61,14 @@
     components: {
       Login,
       HeaderPrice
+    },
+    mounted() {
+      let ws = this.WebSocket;
+      ws.onMessage['rmd_ord_top'] = {
+        callback: (data) => {
+          data && data.body.type && data.body.type === 'rmd_ord' && this.path !== '/order' && this.newOrder++
+        }
+      }
     },
     methods: {
       changeLoginForm(state) {
@@ -106,6 +108,13 @@
       showLoginForm() {
         return this.$store.state.showLoginForm
       }
+    },
+    watch: {
+      path: {
+         handler(curVal, oldValue) {
+           curVal === '/order' && (this.newOrder = 0);
+         }
+      }
     }
   }
 </script>
@@ -138,51 +147,7 @@
     .upper
       height 30px
       background-color #333
-
-      .upper-left
-        flex 1
-
-        // li
-        //   margin-right 40px
-        //   float left
-        //   text-align center
-        //   vertical-align middle
-        //   line-height 30px
-
-        //   span
-        //     color #fff
-
-        //   span + span
-        //     color #57a100
-      /*.grean*/
-      /*color #57a100*/
-
-      /*.yellow*/
-      /*color #ff794c*/
-
-      .upper-right
-        float right
-        li
-          float right
-          margin-left 30px
-          text-align center
-          vertical-align middle
-          line-height 30px
-          span
-            display inline-block
-            position relative
-            font-size 13px
-            color #FFF
-            letter-spacing 0.15px
-            cursor pointer
-            &.line::after
-              position absolute
-              top 10px
-              right -15px
-              content ""
-              width 1px
-              height 10px
-              background #FFF
+      
     .down
       height 70px
       border 1px solid #E1E1E1
@@ -201,7 +166,26 @@
         .tag
           cursor pointer 
           &.order
+            position relative
             width 70px
+            span
+              position absolute
+              top 24px
+              right 3px
+              width 14px
+              height 14px
+              text-align left
+              line-height 14px
+              border-radius 50%
+              background $col94C
+              i
+                position absolute
+                top 0.6px
+                left 3.7px
+                display inline-block
+                fz11()
+                color #FFF
+                letter-spacing 0.12px
           &.transaction
             width 80px
           &.selected

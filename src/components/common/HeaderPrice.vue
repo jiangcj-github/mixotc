@@ -14,6 +14,13 @@
             </span>
       </div>
     </div>
+    <ul class="upper-right">
+      <li><span>简体中文</span></li>
+      <li><span class="line">帮助</span></li>
+      <li><span class="line">大额交易申请</span></li>
+      <li><span class="line">审核</span></li>
+      <li><span>仲裁</span></li>
+    </ul>
   </div>
 </template>
 
@@ -26,7 +33,7 @@
         exchangeCopy: [],
         midItemAllTop: 0,
         midItemTop: 0,
-        midItemCopyTop: 20,
+        midItemCopyTop: 30,
         flag: 1
       }
     },
@@ -50,20 +57,20 @@
           let res = await fetch('http://47.74.244.40:8081/v1/home/topCurrency').then(data => data.json())
           this.exchangeCopy = this.flag && res.data || this.exchangeCopy
           this.exchange = !this.flag && res.data || this.exchange
-          console.log(this.exchange)
+          // console.log(this.exchange)
           this.Loop.topCurrencyRoll.start()
         }, 10000)
         this.Loop.topCurrencyRoll.set(async () => {
           this.midItemTop = this.midItemTop - 5
           this.midItemCopyTop = this.midItemCopyTop - 5
-          if (this.midItemTop === -20 || this.midItemTop === 0) {
+          if (this.midItemTop === -30 || this.midItemTop === 0) {
             this.Loop.topCurrencyRoll.stop()
-            if (this.midItemTop === -20) {
-              this.midItemTop = 20
+            if (this.midItemTop === -30) {
+              this.midItemTop = 30
               this.flag = 0
               return
             }
-            this.midItemCopyTop = 20
+            this.midItemCopyTop = 30
             this.flag = 1
           }
         }, 100)
@@ -76,19 +83,19 @@
 <style scoped lang="stylus" type="text/stylus">
 
   .mid-container
-    height 20px
-    width 1000px
+    height 100%
+    width 1200px
     float left
     position relative
     overflow hidden
     .mid-item
-      height 20px
+      height 100%
       width 1000px
-      line-height 20px
+      line-height 30px
       .double
         color #FFF
         letter-spacing 0.12px
-        height 20px
+        height 30px
         margin-right 43px
         display block
         float left
@@ -122,4 +129,27 @@
             position absolute
             top 2px
             right -13px
+    .upper-right
+        float right
+        li
+          float right
+          margin-left 30px
+          text-align center
+          vertical-align middle
+          line-height 30px
+          span
+            display inline-block
+            position relative
+            font-size 13px
+            color #FFF
+            letter-spacing 0.15px
+            cursor pointer
+            &.line::after
+              position absolute
+              top 10px
+              right -15px
+              content ""
+              width 1px
+              height 10px
+              background #FFF
 </style>
