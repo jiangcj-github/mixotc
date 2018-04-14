@@ -9,6 +9,8 @@
 
 export default {
   symbolsRefresh: {},
+  topCurrency: {},
+  topCurrencyRoll: {}
   // testMoreTaskBegin: {
   //   start: true,
   //   delayTime: 1000,
@@ -33,4 +35,4 @@ export default {
   // testOneTask: {
   //   task: {func: () => console.log('testOneTaskBegin'), time: 1000}
   // }
-}
+};

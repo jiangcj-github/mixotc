@@ -2,9 +2,7 @@
   <article class="header" :style="{position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 999}">
     <section class="upper">
       <div class="wrapper">
-        <ul class="upper-left">
-          <li v-for="(item, index) of items" :key="index"><span>{{item.title}}:&nbsp;</span><span>{{item.value}}</span></li>
-        </ul>
+        <HeaderPrice class="upper-left"></HeaderPrice>
         <ul class="upper-right">
           <li><span>简体中文</span></li>
           <li><span class="line">帮助</span></li>
@@ -54,6 +52,7 @@
 
 <script>
   import Login from '@/components/common/Login'
+  import HeaderPrice from '@/components/common/HeaderPrice'
 
   export default {
     data() {
@@ -66,7 +65,8 @@
       }
     },
     components: {
-      Login
+      Login,
+      HeaderPrice
     },
     methods: {
       changeLoginForm(state) {
@@ -142,18 +142,18 @@
       .upper-left
         flex 1
 
-        li
-          margin-right 40px
-          float left
-          text-align center
-          vertical-align middle
-          line-height 30px
+        // li
+        //   margin-right 40px
+        //   float left
+        //   text-align center
+        //   vertical-align middle
+        //   line-height 30px
 
-          span
-            color #fff
+        //   span
+        //     color #fff
 
-          span + span
-            color #57a100
+        //   span + span
+        //     color #57a100
       /*.grean*/
       /*color #57a100*/
 
