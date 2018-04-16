@@ -7,7 +7,7 @@
       :picker-options="pickerOptions"
       :placeholder="text"
       @blur="blur">
-    </el-date-picker> -
+    </el-date-picker>
   </div>
 </template>
 
@@ -26,6 +26,7 @@
     },
     data() {
       return {
+
         value: '',
         pickerOptions: {
           dateUp: this.dateUp,
@@ -39,7 +40,7 @@
     methods: {
       blur() {
         this.Bus.$emit(this.emitValue, this.value);
-        console.log(this.emitValue, this.value)``
+        console.log(this.emitValue, this.value)
       }
     }
   };

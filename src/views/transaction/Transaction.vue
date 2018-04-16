@@ -73,7 +73,7 @@
 
       <Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>
     </div>
-    
+
     <div class="faq">
       <div class="inner clearfix">
         <h2>常见问题</h2>
