@@ -3,7 +3,7 @@
     <div>
       <img src="/static/images/no_order.png">
     </div>
-    <p>还没有订单，<router-link to="">去交易</router-link></p>
+    <p>还没有订单，<router-link to="/transaction">去交易</router-link></p>
   </div>
 </template>
 
@@ -18,7 +18,7 @@
   .nothing-wrap
     background #FFF
     height 509px
-    margin-top 10px
+    margin-top -10px
     text-align center
     overflow hidden
     div

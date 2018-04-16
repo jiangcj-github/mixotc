@@ -34,7 +34,7 @@
           <p class="limit-price"><span>限额(CNY)</span></p>
           <p class="payment"><span>付款方式</span></p>
           <p class="amount sort"><span>可交易量<i class="before"></i><i class="after"></i></span></p>
-          <p class="price sort" 
+          <p class="price sort"
             :class="{'sort-add': filte.sort === 5, 'sort-minus': filte.sort === 6}">
             <span>价格(CNY)
               <i class="before" @click="filte.sort = 5"></i>
@@ -49,7 +49,7 @@
 
       <Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>
     </div>
-    
+
     <div class="faq">
       <div class="inner clearfix">
         <h2>常见问题</h2>
