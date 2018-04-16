@@ -64,9 +64,9 @@
     },
     mounted() {
       let ws = this.WebSocket;
-      ws.onMessage['rmd_ord_top'] = {
+      ws.onMessage['upd_ord_top'] = {
         callback: (data) => {
-          data && data.body.type && data.body.type === 'rmd_ord' && this.path !== '/order' && this.newOrder++
+          data && data.body.type && data.body.type === 'upd_ord' && this.path !== '/order' && this.newOrder++
         }
       }
     },

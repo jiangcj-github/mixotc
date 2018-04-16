@@ -3,7 +3,6 @@
     <Header></Header>
     <router-view/>
     <Footer></Footer>
-    <div>{{token}}</div>
     <News></News>
   </div>
 </template>
@@ -116,29 +115,32 @@
     },
     watch: {
       //监听登录状态
-      isLogin(curVal, oldVal) {
-        if (curVal) {
-        //登录时设置定时器，绑定事件监听用户操作
-          this.timer1 && (this.timer1 = clearTimeout(this.timer1));
-          this.timer1 = setTimeout(this.logout, 600000);
-          window.onmousedown = (event) => {
-            //用户操作时重新计时
-            this.timer1 = clearTimeout(this.timer1);
+      isLogin: {
+        handler: function(curVal, oldVal) {
+          if (curVal) {
+          //登录时设置定时器，绑定事件监听用户操作
+            this.timer1 && (this.timer1 = clearTimeout(this.timer1));
             this.timer1 = setTimeout(this.logout, 600000);
+            window.onmousedown = (event) => {
+              //用户操作时重新计时
+              this.timer1 = clearTimeout(this.timer1);
+              this.timer1 = setTimeout(this.logout, 600000);
+            }
+            //定时查询token，token删除即退出登录
+            this.timer2 && (this.timer2 = clearInterval(this.timer2));
+            this.timer2 = setInterval(() => {
+              // if(sessionStorage.getItem('otcToken')) return;
+              if (this.token) return;
+              this.logout()
+            }, 1000);
+            return;
           }
-          //定时查询token，token删除即退出登录
-          this.timer2 && (this.timer2 = clearInterval(this.timer2));
-          this.timer2 = setInterval(() => {
-            // if(sessionStorage.getItem('otcToken')) return;
-            if (this.token) return;
-            this.logout()
-          }, 1000);
-          return;
-        }
-        //退出登录时清理定时器，移除监听
-         this.timer1 = clearTimeout(this.timer1);
-         this.timer2 = clearTimeout(this.timer2);
-         window.onmousedown = null
+          //退出登录时清理定时器，移除监听
+           this.timer1 = clearTimeout(this.timer1);
+           this.timer2 = clearTimeout(this.timer2);
+           window.onmousedown = null
+        },
+        immediate: true
       },
       token(curVal, oldVal) {
         if (curVal && this.watchTokenFlag) {

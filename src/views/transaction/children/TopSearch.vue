@@ -1,7 +1,7 @@
 <template>
   <div class="header clearfix">
     <h2>购买{{currency}}</h2>
-    <SearchInput class="search" :content="content" :title="title" :emitValue1="emitValue1"></SearchInput>
+    <SearchInput class="search" :content="content" :result="result" :title="title" :emitValue1="emitValue1" :emitValue3="emitValue3"></SearchInput>
     <ul class="top5 clearfix">
       <li v-for="(item, index) of topList"
           :key="index" :class="{tuijian: index < 3}"
@@ -33,10 +33,12 @@ export default {
   data() {
     return {
       currency: 'BTC',
-      content: [{title: '币种', type: 'currency'},{title: '商家昵称/账号', type: 'nickname'}],
+      content: [{title: '币种', type: 'currency'},{title: '商家昵称/账号', type: 'user'}],
       title: '搜索更多币种',
       emitValue1: 'changeTitle',
-      topListColor: ['#FF914C', '#FFB422', '#FFCE16', '#FFF', '#FFF']
+      emitValue3: 'searchValue',
+      topListColor: ['#FF914C', '#FFB422', '#FFCE16', '#FFF', '#FFF'],
+      result: ['99','26']
     }
   },
   methods: {
@@ -46,12 +48,22 @@ export default {
     }
   },
   mounted() {
-    this.Bus.$on(this.emitValue1,data => {
+    this.Bus.$on(this.emitValue1, data => {
       this.title = data
+    })
+    this.Bus.$on('changeInputContent', ({type, data}) => {
+      if (type === 'currency') {
+        data === '' && (data = 'btc')
+        this.currency = data.toUpperCase()
+      }
+    })
+    this.Bus.$on(this.emitValue3, data => {
+      // 输入时，根据输入内容拉取数据，结果替换result
     })
   },
   destroyed() {
     this.Bus.$off(this.emitValue1);
+    this.Bus.$off(this.emitValue3);
   }
 };
 </script>

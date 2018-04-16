@@ -3,13 +3,13 @@
     <div :style="{ 'position':'absolute',top:`${midItemAllTop}px` }">
       <div class="mid-item" :style="{ 'position':'absolute',top:`${midItemTop}px`,'left':0 }">
             <span v-for="(items, index) in exchange" class="double" :key="index">
-              <router-link :to="{path: `/currency/info/${items.id}`}">{{items.name}}</router-link> :
+              <i>{{items.name}}</i> :
               <em :class="(items.changePercent*100).toFixed(2)>=0?'is-green':'is-red'">{{items.price.cny.format('cny')}}&nbsp;{{items.changePercent >= 0 ? '↑' :' ↓'}}</em>
             </span>
       </div>
       <div class="mid-item" :style="{ 'position':'absolute',top:`${midItemCopyTop}px`,'left':0 }">
             <span v-for="(items, index) in exchangeCopy" class="double" :key="index">
-              <router-link :to="{path: `/currency/info/${items.id}`}">{{items.name}}</router-link> :
+              <i>{{items.name}}</i> :
               <em :class="(items.changePercent*100).toFixed(2)>=0?'is-green':'is-red'">{{items.price.cny.format('cny')}}&nbsp;{{items.changePercent >= 0 ? '↑' :' ↓'}}</em>
             </span>
       </div>
@@ -99,7 +99,7 @@
         margin-right 43px
         display block
         float left
-        a
+        i
           font-size 13px
           color #FFF
           letter-spacing 0.15px
