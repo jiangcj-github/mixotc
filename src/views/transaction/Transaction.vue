@@ -1,5 +1,5 @@
 <template>
-  <div class="wrap">
+  <div>
     <div class="transacation inner">
       <TopSearch :topList="['ETH', 'BTC', 'ADA', 'BAT', 'LTC']"></TopSearch>
 
@@ -277,11 +277,7 @@ import BasePopup from '@/components/common/BasePopup';
 
 <style scoped lang="stylus">
 @import "../../stylus/base.styl";
-  .wrap
-    display flex
-    flex-direction column
   .transacation
-    flex-grow 1
     margin-top 40px
     margin-bottom 40px
     .filtrate
