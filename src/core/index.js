@@ -21,6 +21,9 @@ Vue.prototype.Proxy = HttpProxy;
 import WebSocket from './webSocket' //websocket交互
 Vue.prototype.WebSocket = WebSocket;
 
+import WebSocketProxy from "../api/WebSocketProxy"; //websocket请求
+Vue.prototype.WsProxy = new WebSocketProxy(WebSocket);
+
 import Storage from './storage' //localStorage交互
 Vue.prototype.Storage = Storage;
 
@@ -93,19 +96,21 @@ const RUN_APP = (App, config, plugin) => {
   Vue.use(Vuex)
   let store = Store.install(Vue, config.StoreConfig)
 
-  config.ServerConfig && config.HttpConfig && config.HttpConfig.useHttp && HttpProxy.install(Vue, config.ServerConfig, config.HttpConfig.httpList, config.HttpConfig.httpPreHandler, config.HttpConfig.httpAfterHandler);
+  Vue.prototype.$store = store;
+
+  config.ServerConfig && config.HttpConfig && config.HttpConfig.useHttp && HttpProxy.install(Vue.prototype, config.ServerConfig, config.HttpConfig.httpList, config.HttpConfig.httpPreHandler, config.HttpConfig.httpAfterHandler);
   // config.ServerConfig && config.WebSocketConfig && config.WebSocketConfig.useWebSocket && WebSocket.install(Vue, config.ServerConfig, config.WebSocketConfig.webSocketList);
-  config.StorageConfig && config.StorageConfig.useStorage && Storage.install(config.StorageConfig.storageList);
-  config.LoopTaskConfig && Object.keys(config.LoopTaskConfig).length && Loop.install(config.LoopTaskConfig);
-  config.PrototypeConfig && Prototype.install(config.PrototypeConfig);
+  config.StorageConfig && config.StorageConfig.useStorage && Storage.install(Vue.prototype, config.StorageConfig.storageList);
+  config.LoopTaskConfig && Object.keys(config.LoopTaskConfig).length && Loop.install(Vue.prototype, config.LoopTaskConfig);
+  config.PrototypeConfig && Prototype.install(Vue.prototype, config.PrototypeConfig);
 
   /*
   router.beforeEach((to, from, next) => {
-    if (to.path === "/transaction" || to.path === "/") {
+    if (to.path === "/transaction" || to.path === "/" || to.path === "/homepage") {
       next();
       return;
     }
-    if (!sessionStorage.getItem("otcToken")) {
+    if (!store.state.isLogin) {
       next({ path: "/transaction" });
       return;
     }

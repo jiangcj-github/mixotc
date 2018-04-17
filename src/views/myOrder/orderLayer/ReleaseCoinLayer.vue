@@ -79,7 +79,7 @@
         // disInputs:[{value:''},{value:''},{value:''},{value:''},{value:''},{value:''}],
         // realInput:'',
         inputContent: '', // 聚焦谷歌输入框内容
-        inputGroup: [], // 记录输入框内容
+        inputGroup: [] // 记录输入框内容,
       }
     },
     components: {
@@ -90,7 +90,7 @@
         state === true ? this.buyLayer = true : this.buyLayer = false
       },
       inputGroup(newValue, oldValue) {
-        console.log(newValue, oldValue, newValue[newValue.length - 1].length)
+        // console.log(newValue, oldValue, newValue[newValue.length - 1].length)
         // if (newValue[newValue.length - 1].length) {
         //   this.inputContent =  newValue.length + 1
         // }
@@ -127,28 +127,17 @@
           let timer = setInterval(verifyFn, 1000)
         }
       },
-      // getNum(){
-      //   for (var i = 0; i < this.realInput.length; i++) {
-      //     this.disInputs[i].value = this.realInput.charAt(i) // 表示字符串中某个位置的数字，即字符在字符串中的下标
-      //   }
-      // },
-      // delNum(){
-      //   let oEvent = window.event;
-      //   console.log(oEvent)
-      //   if (oEvent.keyCode === 8) {
-      //     if (this.realInput.length > 0) {
-      //       this.disInputs[this.realInput.length-1].value=''
-      //     }
-      //   }
       getNum(index) {
-        console.log('keyup', this.inputContent, this.inputGroup, index)
+        let oEvent = window.event;
+        if (oEvent.keyCode === 8) return;
+        // console.log('canUp', this.canUp )
+        // console.log('keyup', this.inputContent, this.inputGroup)
         this.inputContent = index + 1
       },
       delNum(index) {
         let oEvent = window.event;
-        // console.log(oEvent)
         if (oEvent.keyCode === 8) {
-          console.log('keyCode', 1111)
+          this.inputContent = index - 1
         }
       }
     }

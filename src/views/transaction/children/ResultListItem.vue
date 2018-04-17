@@ -25,20 +25,23 @@
 
 <script>
 export default {
-  props: ['data'],
+  props: ['data','emitValue'],
   methods: {
-    toHomePage(sid) {  
+    toHomePage(sid) {
+      this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})
+    },
+    toOrder(id) {
+      //未登录
       if (!this.$store.state.isLogin) {
         this.$store.commit({type: 'changeLoginForm', data: true});
         return;
       }
-      this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})
-    },
-    toOrder(id) {
-       if (!this.$store.state.isLogin) {
-        this.$store.commit({type: 'changeLoginForm', data: true});
+      //未实名认证
+      if (!this.$store.state.userInfo.verify) {
+        this.Bus.$emit(this.emitValue, 1)
         return;
       }
+    //广告不存在
       this.$router.push({ name: 'order', query: { id: this.JsonBig.stringify(id) }})
     }
   }
@@ -90,7 +93,7 @@ export default {
           font-size 14px
           color $col333
           letter-spacing 0.16px
-          line-height 15px
+          line-height 16px
           cursor pointer
         &.trust
           bottom 22px
@@ -129,6 +132,6 @@ export default {
         background $col422
         border-radius 2px
         cursor pointer
-        &:active
+        &:hover
           background $col350
 </style>

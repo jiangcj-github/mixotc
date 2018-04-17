@@ -2,31 +2,45 @@
   <div class="wrap">
     <div class="login" v-mousedownOutside="hideLoginForm" v-if="showForm">
       <h2 class="title">登录/注册</h2>
+
       <div :class="{'hide-tip1':type,'show-tip1':!type}">请输入正确的手机号/邮箱</div>
-      <p class="account">
+
+      <div class="account">
         手机号/邮箱
-        <input type="text" value="" v-model="account" @blur="type = checkAccount(account)">
-      </p>
+        <input type="text" value="" v-model="account" @focus="accountCancel = true"  v-clickoutside="accountBlur">
+        <img src="/static/images/cancel_icon.png" alt="" v-if="accountCancel" @click="account = ''">
+        <ul class="account-history" v-if="accountCancel && accountHistory.length">
+          <li v-for="(item, index) of accountHistory" :key="index" @click="changeAccount(item)">{{item}}</li>
+        </ul>
+      </div>
+
       <Slider :slideStatus="slideStatus"></Slider>
+
       <div :class="{'hide-tip2':captcha,'show-tip2':!captcha}">请输入正确的验证码</div>
-      <p class="yzm">
-        <span v-if="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先将滑块拖拽到最右侧</b></span>
-        <input type="text" placeholder="验证码" value="" v-model="code">
-        <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend}" @click="sendCode">{{isSend ? time + '秒后重发': '发送验证码'}}</button>
-      </p>
+
+      <div class="yzm">
+        <span v-if="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先拖拽滑块</b></span>
+        <input type="text" @focus="codeCancel = true" @blur="codeCancel = false" placeholder="验证码" value="" v-model="code" :disabled="!moveTrue || !checkAccount(account)">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-if="codeCancel" @click="code = ''">
+        <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend, disable: !moveTrue || !checkAccount(account)}" @click="sendCode">{{isSend ? time + '秒后重发': sendCodeText}}</button>
+      </div>
+
       <button :class="{able: moveTrue && agree}" :disabled="!moveTrue || !agree" @click="login">登录</button>
+
       <div class="yhxy">
         <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
         <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
         <p>我已阅读并同意 <a href="">用户协议</a></p>
       </div>
+
       <span :class="{'hide-tips':agree,'yhxy-tips':!agree}"><img src="/static/images/hint.png" alt="">&nbsp;&nbsp;<b>请勾选用户协议</b></span>
     </div>
-    <BasePopup class="popup" :show="loginSuccess" :top="29.17">
+    <BasePopup class="popup" :show="loginSuccess" :top="29.17" v-on:click.native="hideLoginForm">
       <slot>
-        <p v-clickoutside="hideLoginForm" @click="hideLoginForm">登录成功</p>
+        <p>登录成功</p>
       </slot>
     </BasePopup>
+
   </div>
 </template>
 
@@ -44,7 +58,10 @@
         slideStatus: 'slideStatuss',
         agree: true,
         account: '',
+        accountCancel: false,
+        accountHistory: [],
         code: '',
+        codeCancel: false,
         type: true,
         accType: '',
         captcha: true,
@@ -53,7 +70,8 @@
         loginSuccess: false,
         time:'',
         interval: null,
-        timer: null
+        timer: null,
+        sendCodeText: '发送验证码'
       }
 
     },
@@ -68,6 +86,32 @@
       },
       checkAccount(account) {
         return /^1[34578]\d{9}$/.test(account) ? 'phone' : (/^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(account) ? 'email' : false)
+      },
+      changeAccount(account) {
+        this.account = account;
+      },
+      saveAccount(account) {
+        let storage = this.Storage.otcAccount;
+        let list = storage.get();
+        if (!list) {
+          storage.set([account])
+          return;
+        }
+        if (list) {
+          let index = list.indexOf(account);
+          if (index !== -1) {
+            list.splice(index,1) && list.unshift(account)
+            storage.set(list);
+            return;
+          }
+          list.length < 5 && list.unshift(account)
+          list.length > 5 && list.splice(4,1) && list.unshift(account)
+          storage.set(list)
+        }
+      },
+      accountBlur() {
+        this.accountCancel = false
+        this.type = this.checkAccount(this.account)
       },
       checkCaptcha(code) {
         return /^\d{6}$/.test(code);
@@ -89,10 +133,11 @@
           this.interval = setInterval(() =>{
             if(this.time > 0 && this.time <= $){
               this.time--;
-            }else{
+            } else {
               this.isSend = false;
               clearInterval(this.interval);
               this.interval = null;
+              this.sendCodeText = '重新发送验证码'
             }
           },1000);
         }
@@ -136,9 +181,12 @@
               type: 'getUserInfo',
               data: data.body
             });
-            data.body.msg && sessionStorage.setItem('otcToken', data.body.msg);
-            this.Storage.otcAccount.set(this.account);
+            // data.body.msg && sessionStorage.setItem('otcToken', data.body.msg);
+            this.saveAccount(this.account)
+            data.body.msg && this.$store.commit({ type: 'changeToken', data: data.body.msg })
+            data.body.msg && localStorage.setItem('getToken', data.body.msg);
             this.$store.commit({ type: 'changeLogin', data: true });
+            localStorage.removeItem('getToken')
 
           },
           date:new Date()
@@ -166,13 +214,15 @@
 
     },
     mounted() {
-      if (this.Storage.otcAccount.get()) {
-        this.account = this.Storage.otcAccount.get()
+      let otcAccount = this.Storage.otcAccount.get()
+      if (otcAccount) {
+        this.accountHistory = otcAccount;
+        this.account = otcAccount[0]
       }
       this.Bus.$on(this.slideStatus, (status) => {
         this.moveTrue = status;
         this.moveTip = false;
-        console.log(this.moveTrue)
+        // console.log(this.moveTrue)
         this.sendCode()
       })
     },
@@ -281,11 +331,16 @@
           background-color $col422
 
       .account
+        position relative
         margin-top 40px
         margin-left 40px
         font-size 14px
         color $col999
-
+        img
+          position absolute
+          right 55px
+          bottom 28px
+          cursor pointer
         input
           box-sizing()
           display inline-block
@@ -293,9 +348,29 @@
           height 40px
           padding-left 10px
           margin 10px 0 15px
+          font-size $fz14
+          color $col333
+          letter-spacing 0.16px
           background-color $col6FA
           border-radius 2px
-
+          &:focus
+            border 1px solid $col422
+        .account-history
+          position absolute
+          left 0
+          top 69px
+          width 318px
+          background #FFF
+          border 1px solid $col1E1
+          z-index 9
+          li
+            box-sizing()
+            padding-left 10px
+            height 30px
+            line-height 30px
+            cursor pointer
+            &:hover
+              background $col3EB;
       .yzm
         position relative
         margin 35px 40px 15px
@@ -308,33 +383,37 @@
             color $col94C
             text-align center
             fz11()
+        .cancel
+          position absolute
+          top 15px
+          right 124px
+          cursor pointer
         input
+          box-sizing()
           width 210px
           height 40px
           float left
           background-color: $col6FA
           placeholder()
           padding-left 10px
-
-        .sendCaptcha
+          &:focus
+            border 1px solid $col422
+        button
           width 100px
           height 40px
           margin 0
-          background-color: $col422
           text-align center
           line-height 40px
           color #fff
           cursor pointer
-        .sendedCaptcha
-          width 100px
-          height 40px
-          margin 0
-          background-color: $col999
-          text-align center
-          line-height 40px
-          color #fff
-          pointer-events none
-          cursor default
+          &.sendCaptcha
+            background-color $col422
+          &.sendedCaptcha
+            background-color $col999
+            cursor default
+          &.disable
+            background-color $col999
+            cursor default
 
       button
         width 350px

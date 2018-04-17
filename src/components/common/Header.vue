@@ -1,30 +1,17 @@
 <template>
-  <article class="header" style="{position: fixed, top: 0, left: 0}">
+  <article class="header" :style="{position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 999}">
     <section class="upper">
       <div class="wrapper">
-        <ul class="upper-left">
-          <li v-for="(item, index) of items" :key="index"><span>{{item.title}}:&nbsp;</span><span>{{item.value}}</span></li>
-        </ul>
-        <ul class="upper-right">
-          <li><span>简体中文</span></li>
-          <li>帮助</li>
-          <li>大额交易申请</li>
-          <li>审核</li>
-          <li>仲裁</li>
-        </ul>
+        <HeaderPrice class="upper-left"></HeaderPrice>
       </div>
     </section>
-    <section class="down">
+    <section class="down" :style="{borderRight: 0}">
       <div class="wrapper">
         <ul class="down-tag">
           <li><a href="/"><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></a></li>
-          <li class="tag transaction">
-            <router-link to="/transaction">交易中心</router-link>
-          </li>
+          <router-link to="/transaction" tag="li" class="tag transaction" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
           <!--<li><a href="">广告</a></li>-->
-          <li class="tag order">
-            <router-link to="/order" v-if="this.$store.state.isLogin">订单</router-link>
-          </li>
+          <router-link to="/order"  tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">订单<span v-if="newOrder"><i>{{newOrder}}</i></span></router-link>
           <!--<li><a href="">钱包</a></li>-->
           <li class="itag" @mouseenter="showQr" @mouseleave="hideQr">
             <img class="top-logo" src="/static/images/phoneicon.png" alt="">
@@ -40,7 +27,8 @@
           <img class="avator" :src="icon ? `http://192.168.113.26/image/${icon}` : `/static/images/default_avator.png`" alt="">
           <div class="name" @click="showMenu = !showMenu" >
             <span class="login" >{{name}}</span>
-            <img class="select-icon" src='/static/images/triangle_black.png' alt="">
+            <img class="select-icon" src='/static/images/triangle_black.png' v-if="!showMenu" alt="">
+            <img class="select-icon" src='/static/images/triangle_black_up.png' v-else alt="">
             <ul v-if="showMenu" v-clickoutside="hideShowMenu">
               <!-- <li class="center">个人中心</li>
               <li class="safe">安全设置</li>
@@ -57,19 +45,30 @@
 
 <script>
   import Login from '@/components/common/Login'
+  import HeaderPrice from '@/components/common/HeaderPrice'
 
   export default {
     data() {
       return {
         isHover: false,
         showMenu: false,
+        newOrder: 0,
         items: [
           {title: 'BitFunex', value: '$9.244.70↑'}, {title: 'Kraken', value: '€7.468.30↑'}, {title: 'Bithumb', value: '₩10.186.000.00↑'}, {title: 'Bitflyer', value: '￥995.759.00↑'}
         ]
       }
     },
     components: {
-      Login
+      Login,
+      HeaderPrice
+    },
+    mounted() {
+      let ws = this.WebSocket;
+      ws.onMessage['upd_ord_top'] = {
+        callback: (data) => {
+          data && data.body.type && data.body.type === 'upd_ord' && this.path !== '/order' && this.newOrder++
+        }
+      }
     },
     methods: {
       changeLoginForm(state) {
@@ -82,12 +81,13 @@
         this.isHover = false;
       },
       logout() {
-        sessionStorage.removeItem('otcToken');
+        // sessionStorage.removeItem('otcToken');
         localStorage.setItem("removeSessionStorage", Date.now());
+        this.$store.commit({type: 'changeToken', data: ''});
         this.$store.commit({type: 'changeLogin', data: false});
         this.WebSocket.reConnectFlag = false;
         this.WebSocket.close();
-        if (this.path !== '/' && this.path !== 'transaction') {
+        if (this.path !== '/' && this.path !== 'transaction' && this.path !== 'homepage') {
           this.$router.push('transaction')
         }
       },
@@ -108,6 +108,13 @@
       },
       showLoginForm() {
         return this.$store.state.showLoginForm
+      }
+    },
+    watch: {
+      path: {
+         handler(curVal, oldValue) {
+           curVal === '/order' && (this.newOrder = 0);
+         }
       }
     }
   }
@@ -141,43 +148,7 @@
     .upper
       height 30px
       background-color #333
-
-      .upper-left
-        flex 1
-
-        li
-          margin-right 40px
-          float left
-          text-align center
-          vertical-align middle
-          line-height 30px
-
-          span
-            color #fff
-
-          span + span
-            color #57a100
-      /*.grean*/
-      /*color #57a100*/
-
-      /*.yellow*/
-      /*color #ff794c*/
-
-      .upper-right
-        float right
-        li
-          float right
-          margin-left 30px
-          text-align center
-          vertical-align middle
-          line-height 30px
-          a, span
-            color #fff
-            .white
-              margin-left 3px
-              line-height 30px
-              border-top 5px solid #fff
-
+      
     .down
       height 70px
       border 1px solid #E1E1E1
@@ -194,15 +165,37 @@
           vertical-align middle
           line-height 71px
         .tag
+          cursor pointer 
           &.order
+            position relative
             width 70px
+            span
+              position absolute
+              top 24px
+              right 3px
+              width 14px
+              height 14px
+              text-align left
+              line-height 14px
+              border-radius 50%
+              background $col94C
+              i
+                position absolute
+                top 0.6px
+                left 3.7px
+                display inline-block
+                fz11()
+                color #FFF
+                letter-spacing 0.12px
           &.transaction
             width 80px
+          &.selected
+            border-bottom 2px solid $col422
         .itag
           line-height 60px
           padding 0 41.5px
         .tag, .itag
-          &:hover,&.active
+          &:hover
             border-bottom 2px solid $col422
 
           .show-qr

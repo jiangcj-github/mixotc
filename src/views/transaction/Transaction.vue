@@ -11,7 +11,7 @@
               <span>{{item.type}}</span>
             </li>
           </ul>
-          <img src="/static/images/cancel_icon.png" alt="" v-if="paymentScore !== 0" @click="clearPayment">
+          <img src="/static/images/cancel_icon.png" alt="" v-if="paymentScore !== 0" @click.stop="clearPayment">
         </div>
         <div class="price">
           <b :class="{tip}">!最大限额不能低于最小限额，且最小限额为200</b>
@@ -19,7 +19,7 @@
           <input type="number" class="max" @blur="filte.max = max" @keyup.enter="filte.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
         </div>
         <div class="wholesale">
-          <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="filte.isWhole">
+          <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="isWhole">
           <img src="/static/images/unselect.png" alt="" @click="changeIsWhole" v-else>
           <span>大额交易区</span>
         </div>
@@ -27,29 +27,53 @@
 
       <div class="result-list">
         <div class="thead clearfix">
-          <p class="merchant"><span>广告主</span></p>
-          <p class="deal-volume sort"><span>已成交量<i class="before"></i><i class="after"></i></span></p>
-          <p class="order-volume sort"><span>完成订单量<i class="before"></i><i class="after"></i></span></p>
-          <p class="good-reputation sort"><span>好评率<i class="before"></i><i class="after"></i></span></p>
-          <p class="limit-price"><span>限额(CNY)</span></p>
-          <p class="payment"><span>付款方式</span></p>
-          <p class="amount sort"><span>可交易量<i class="before"></i><i class="after"></i></span></p>
+          <p class="merchant" title="默认排序">
+            <span @click="sort()">广告主</span>
+          </p>
+          <p class="deal-volume sort" 
+             title="该币种已成交总量"
+             :class="{'sort-add': filte.volume === 2, 'sort-minus': filte.volume === 1}"
+          >
+            <span @click="sort('volume')">已成交量</span>
+          </p>
+          <p class="order-volume sort" 
+             title="该币种已成交的订单量"
+             :class="{'sort-add': filte.order === 2, 'sort-minus': filte.order === 1}"
+          >
+            <span @click="sort('order')">完成订单量</span>
+          </p>
+          <p class="good-reputation sort" 
+             title="该币种交易中获得的好评率"
+             :class="{'sort-add': filte.rate === 2, 'sort-minus': filte.rate === 1}"
+          >
+            <span @click="sort('rate')">好评率</span>
+          </p>
+          <p class="limit-price" title="单笔交易金额范围">
+            <span>限额(CNY)</span>
+          </p>
+          <p class="payment">
+            <span>付款方式</span>
+          </p>
+          <p class="amount sort" 
+             title="当前可交易的数量"
+          >
+            <span @click="sort()">可交易量</span>
+          </p>
           <p class="price sort" 
-            :class="{'sort-add': filte.sort === 5, 'sort-minus': filte.sort === 6}">
-            <span>价格(CNY)
-              <i class="before" @click="filte.sort = 5"></i>
-              <i class="after" @click="filte.sort = 6"></i>
-            </span>
+             title="单个数字币价格"
+             :class="{'sort-add': filte.price === 2, 'sort-minus': filte.price === 1}"
+          >
+            <span @click="sort('price')">价格(CNY)</span>
           </p>
         </div>
         <ul>
-          <li is='ResultListItem' v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
+          <li is='ResultListItem' :emitValue="emitValue" v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
         </ul>
       </div>
 
       <Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>
     </div>
-    
+
     <div class="faq">
       <div class="inner clearfix">
         <h2>常见问题</h2>
@@ -61,6 +85,11 @@
         <img src="/static/images/question.png" alt="">
       </div>
     </div>
+    <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="showPopup = false">
+      <slot>
+        <p>{{popupTip}}</p>
+      </slot>
+    </BasePopup>
   </div>
 </template>
 
@@ -68,12 +97,47 @@
 import TopSearch from './children/TopSearch';
 import ResultListItem from './children/ResultListItem';
 import Pagination from '@/components/common/Pagination';
+import BasePopup from '@/components/common/BasePopup';
   export default {
     components: {
       TopSearch,
       ResultListItem,
-      Pagination
+      Pagination,
+      BasePopup
     },
+    data() {
+      return {
+        tip: false,//限额错误文案提示
+        showPayment: false,
+        isWhole: false,
+        payment:[{type: '支付宝', score: 1, state: false}, {type: '微信', score: 2, state: false}, {type: '银行卡', score:4, state: false}],
+        min:'',
+        max:'',
+        filte:{
+          type: 1,// 1出售，2购买
+          payment: '',//1支付宝，2微信，4银行卡，可相加，共6种
+          currency: 'btc',//字符串
+          money: 'CNY',//货币类型CNY
+          min: 200,
+          max: 9007199254741,
+          count: 20,//每页广告条数
+          user: '',//用户名昵称模糊搜索
+          // mode: '',//是否可溢价，1可，2不可，暂无
+          price: '', //价格排序，1降序，2升序
+          date: '',//时间排序，1降序，2升序
+          order: '',//订单数排序，1降序，2升序
+          volume: '',//交易量排序，1降序，2升序
+          rate: '',//好评率排序，1降序，2升序
+          // trust: '',//信任人数排序，1降序，2升序
+          // isWhole: false,
+          page: 0
+        },
+        showPopup: false,
+        popupTip: '',
+        emitValue: 'popup',
+        result: []
+      }
+    },  
     created() {
       this.fetchData({type: 1, count: 20, page: 0 })
     },
@@ -83,46 +147,30 @@ import Pagination from '@/components/common/Pagination';
       });
       this.Bus.$on('changeCurrency', data => {
         this.filte.currency = data.toLowerCase()
-      })
+      });
       this.Bus.$on('changeInputContent', ({type, data}) => {
+        type === 'currency' && (this.filte.user = '')
         this.filte[type] = data;
-      })
+      });
+      this.Bus.$on(this.emitValue, data => {
+        this.popupTip = data;
+
+      });
     },
     destroyed() {
       this.Bus.$off('changePage');
       this.Bus.$off('changeCurrency');
       this.Bus.$off('changeInputContent');
-    },
-    data() {
-      return {
-        tip: false,
-        showPayment: false,
-        payment:[{type: '支付宝', score: 1, state: false}, {type: '微信', score: 2, state: false}, {type: '银行卡', score:4, state: false}],
-        min:'',
-        max:'',
-        filte:{
-          type: 1,// 1出售，2购买
-          sort: 2,//1智能排序，2最新，3成交最多，4信任数最多，5价格由高到低，6价格由低到高
-          payment: '',//1支付宝，2微信，4银行卡，可相加，共6种
-          currency: 'btc',//字符串
-          money: 'CNY',//货币类型CNY
-          min: 200,
-          max: '',
-          count: 20,//每页广告条数
-          nickname: '',
-          isWhole: false,
-          page: 0
-        },
-        result: []
-      }
+      this.Bus.$off(this.emitValue);
     },
     methods: {
+      //拉取广告数据
       fetchData(params) {
         this.Proxy.sales(params).then(res=>{
           this.result = res.data.sales;
-          console.log(this.result)
         })
       },
+      //最小限额输入处理
       inputDealMin(max) {
         let num = Number(this.min),
             str = this.min;
@@ -131,6 +179,7 @@ import Pagination from '@/components/common/Pagination';
           this.$refs.min.value = str.substring(0, str.length - 1);
         }
       },
+      //最大限额输入处理
       inputDealMax(min){
         let num = Number(this.max),
             str = this.max;
@@ -140,8 +189,9 @@ import Pagination from '@/components/common/Pagination';
         }
       },
       changeIsWhole() {
-        this.filte.isWhole = !this.filte.isWhole
+        this.isWhole = !this.isWhole
       },
+      //点击选择支付方式
       switchPayment() {
         if (!this.showPayment) {
           this.showPayment = true;
@@ -165,6 +215,18 @@ import Pagination from '@/components/common/Pagination';
           return;
         }
         this.filte.payment = this.paymentScore
+      },
+      sort(title) {
+        title !== 'price' && (this.filte.price = ''), 
+        title !== 'date' && (this.filte.date = ''),
+        title !== 'order' && (this.filte.order = ''),
+        title !== 'volume' && (this.filte.volume = ''),
+        title !== 'rate' && (this.filte.rate =  '');
+        if (title && (this.filte[title] === 1 || !this.filte[title])) {
+          this.filte[title] = 2;
+          return;
+        }
+        title && this.filte[title] === 2 && (this.filte[title] = 1)
       }
     },
     computed: {
@@ -185,21 +247,26 @@ import Pagination from '@/components/common/Pagination';
           score += item.score;
         })
         return score;
-      }
+      },
     },
     watch: {
       filte: {
         handler(curVal){
+          setTimeout(console.log('req' , curVal.price), 0)
           let min = Number(curVal.min),
               max = Number(curVal.max);
-          if (curVal.min === '') curVal.min = 200
+          curVal.min === '' && (curVal.min = 200);
+          curVal.min === '' && (curVal.min = 9007199254741);
           if ((min > max && curVal.min !== '' && curVal.max !== '') || curVal.min < 200) {
             console.log(this.tip)
             this.tip = true
             return;
           }
           this.tip && (this.tip = false)
-          let obj = JSON.parse(JSON.stringify(curVal))
+          let obj = {};
+          for (const key in curVal) {
+            curVal.hasOwnProperty(key) && curVal[key] !== '' &&  (obj[key] = curVal[key])
+          }
           this.fetchData(obj)
         },
         deep: true
@@ -372,6 +439,8 @@ import Pagination from '@/components/common/Pagination';
           &.merchant
             width 170px
             padding-left 30px
+            span
+              cursor pointer
           &.payment
             width 120px
           &.order-volume
@@ -389,25 +458,29 @@ import Pagination from '@/components/common/Pagination';
           &.sort
             span
               position relative
-              i.before
+              padding-right 19px
+              cursor pointer
+              &::before
                 position absolute
                 top 3px
-                right -19px
+                right 0px
+                content ''
                 triangle_up($col999)
                 cursor pointer
-              i.after
+              &::after
                 position absolute
                 top 10px
-                right -19px
+                right 0px
+                content ''
                 triangle_down($col999)
                 cursor pointer
             &.sort-add
               span
-                i.before
+                &::before
                   border-bottom-color $col422
             &.sort-minus
               span
-                i.after
+                &::after
                   border-top-color $col422
       ul
         li.even

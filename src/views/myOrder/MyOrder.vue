@@ -31,32 +31,44 @@
     <div class="order-content">
       <!-- 表格表头 -->
       <ol class="clearfix">
-        <li class="sort" :class="{'sort-up': showTimeActive&&sortActive, 'sort-down': showTimeActive&&!sortActive}" @click="timeSort"><span>创建时间<i class="before"></i><i class="after"></i></span></li>
-        <li>
-          <ChoiceBox :classify="orderType"
-                     title="类型"
-                     :emitValue="orderTypeValue"
-                     :selectValue="orderTypeValueData">
+        <li :data-zIndex="index" v-for="(title, index) in titleList" :class="{sort: title.canSort, 'sort-up': clickUp === index && sortActive, 'sort-down': clickUp === index && !sortActive}" @click="title.canSort && toSort(title, index,$event)">
+          <span >
+            {{title.content}}
+            <i class="before" v-if="title.sortTab"></i>
+            <i class="after" v-if="title.sortTab"></i>
+          </span>
+          <ChoiceBox
+            v-if="title.orderTypeShow"
+            :classify="orderType"
+            title="类型"
+            :emitValue="orderTypeValue"
+            :selectValue="orderTypeValueData">
           </ChoiceBox>
+          <CheckBox
+            v-if="title.currencyShow"
+            title="币种"
+            allName="全部币种"
+            :checkBoxList="currencyBox"
+            :emitValue="currencyValue"
+            :width=105>
+          </CheckBox>
+          <CheckBox
+            v-if="title.status && contentTabIndex === 1"
+            title="状态"
+            allName="全部状态"
+            :checkBoxList="allStatusPro"
+            :emitValue="allStatusValue"
+            :width=130>
+          </CheckBox>
+          <CheckBox
+            v-if="title.status && contentTabIndex === 2"
+            title="状态"
+            allName="全部状态"
+            :checkBoxList="allStatusCom"
+            :emitValue="allStatusValue"
+            :width=130>
+          </CheckBox>
         </li>
-        <li>
-          <ChoiceBox :classify="currency"
-                     title="币种"
-                     :emitValue="currencyValue">
-          </ChoiceBox>
-        </li>
-        <li>对方</li>
-        <li class="sort" :class="{'sort-up': showPriceActive&&sortActive, 'sort-down': showPriceActive&&!sortActive}" @click="priceSort"><span>单价(CNY)<i class="before"></i><i class="after"></i></span></li>
-        <li class="sort" :class="{'sort-up': showAmountActive&&sortActive, 'sort-down': showAmountActive&&!sortActive}" @click="amountSort"><span>数量(手续费)<i class="before"></i><i class="after"></i></span></li>
-        <li class="sort" :class="{'sort-up': showMoneyActive&&sortActive, 'sort-down': showMoneyActive&&!sortActive}" @click="moneySort"><span>金额(CNY)<i class="before"></i><i class="after"></i></span></li>
-        <li>资金码</li>
-        <li>
-          <ChoiceBox :classify="allStatus"
-                     title="状态"
-                     :emitValue="allStatusValue">
-          </ChoiceBox>
-        </li>
-        <li>操作</li>
       </ol>
       <!-- 表格内容 -->
       <div class="order-content-info" v-for="(content,index) in contentList">
@@ -65,38 +77,33 @@
             <p>{{content.create&&(Number(content.create) * 1000).toDate('yyyy/MM/dd')}}</p>
             <p>{{content.create&&(Number(content.create) * 1000).toDate('HH:mm')}}</p>
           </li>
-          <li :class="content.type == 1 ? 'text-g' : 'text-r'">{{content.type == 1 ? '购买' : '出售'}}</li>
+          <li :class="JsonBig.stringify(content.buyer) === userId ? 'text-g' : 'text-r'">{{JsonBig.stringify(content.buyer) == userId ? '购买' : '出售'}}</li>
           <li>{{content.currency&&content.currency.toUpperCase()}}</li>
           <li>
-            <p>{{content.name || content.contact}}</p>
+            <p><router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(content.id)}}">{{content.name || content.contact}}</router-link></p>
             <p class="talk" @click="toContact">联系他</p>
           </li>
           <li>{{content.price}}</li>
           <li>
-            <p :class="content.type == 1 ? 'text-g' : 'text-r'">{{content.type == 1 ? `+${content.amountc}${content.currency.toUpperCase()}` : `-${content.amountc}${content.currency.toUpperCase()}`}}</p>
+            <p :class="JsonBig.stringify(content.buyer) == userId ? 'text-g' : 'text-r'">{{JsonBig.stringify(content.buyer) == userId ? `+${content.amountc}${content.currency.toUpperCase()}` : `-${content.amountc}${content.currency.toUpperCase()}`}}</p>
             <p>{{content.fee}}</p>
           </li>
           <li>{{content.amountm}}</li>
           <li>{{content.trade_code}}</li>
           <!-- 状态显示 -->
-          <li>
-            <p v-for="state in stateList">{{state.name}}</p>
+          <li class="state-li">
+            <!--<p v-for="state in content.stateList" v-if="contentTabIndex === 1">{{state.name}}</p>-->
+            <!--已完成操作-->
+            <p v-for="state in content.stateList"
+               :class="{'text-r': state.flag == 1, 'text-g': state.flag === 2, 'text-b': state.flag === 3}">{{state.name}}</p>
           </li>
           <!-- 操作显示 -->
-          <li>
-            <p @click="openPayment($event, index)" class="active-btn">标记已付款</p>
-            <!--<p @click="remindCoin()">提醒放币</p>-->
-            <!--<p @click="openExplain">申诉</p>-->
-            <!--<p @click="cancelExplain">取消申诉</p>-->
-            <!--<p @click="openReleaseCoin">释放币</p>-->
-            <!--<p>-->
-              <!--<router-link :to="{path: '/order/evaluate', query: {type: '0', data: contentList[index]}}" class="active-btn">去评价</router-link>-->
-            <!--</p>-->
-            <!--<p>-->
-              <!--<router-link :to="{path: '/order/evaluate', query: {type: '1', data: contentList[index]}}">查看评价</router-link>-->
-            <!--</p>-->
-
-
+          <li class="operation-li">
+            <!--已完成操作-->
+            <p v-for="operation in content.operationList"
+               :class="{'active-btn': operation.flag == 1 || operation.flag == 3 || operation.flag == 8, 'text-b': operation.flag == 2}"
+               @click="operation.flag === 3 ? openPayment($event, index) : (operation.flag === 4 || 7 || 9 ? openSelect($event, operation, index) : (operation.flag === 8 ? openReleaseCoin : showOperation(index)))"
+            >{{operation.name}}</p>
           </li>
         </ul>
         <p class="order-content-extre clearfix">
@@ -107,13 +114,14 @@
       </div>
     </div>
     <!-- 分页 -->
-    <Pagination :total="70"
+    <Pagination  v-if="contentList !== null"
+                :total="70"
                 :pageSize="20"
                 emitValue="changePage">
-    </Pagination>
+    </Pagination >
 
     <!-- 订单无内容 -->
-    <!--<MyOrderNothing></MyOrderNothing>-->
+    <MyOrderNothing v-if="contentList === null"></MyOrderNothing>
 
     <!-- 标记已付款弹窗 -->
     <MarkedPaymentLayer :paymentShow="showPayment"
@@ -125,20 +133,16 @@
     <ReleaseCoinLayer :releaseCoinShow="showReleaseCoin" @offRelease="openReleaseCoin"></ReleaseCoinLayer>
     <!-- 提醒放币弹窗 -->
     <BasePopup :show="remindCoinLayer" class="remind-coin-layer">{{remindCoinContent}}</BasePopup>
-    <!-- 申述弹窗 -->
-    <ExplainLayer :explainShow="showExplain" @offExplain="openExplain"></ExplainLayer>
-    <!-- 取消申述 -->
-    <BasePopup class="explain-layer"
-               :show="cancelExplainLayer"
-               :width=470
-               :height=194>
-      <img src="/static/images/close_btn.png" alt="" @click="closePopup">
-      <p>请先与对方联系，核实对方是否放币</p>
-      <div>
-        <em @click="closePopup">取消</em>
-        <i>确定</i>
-      </div>
-    </BasePopup>
+    <!-- 取消订单 -->
+    <SelectLayer :selectShow="showSelect"
+                 @offSelet="openSelect"
+                 :type="showType"
+                 :id="updateId"
+                 :info="updateInfo"
+                 :contentInfo="selectContent"
+                 :leftContent="selectLeft"
+                 :rightContent="selectRight">
+    </SelectLayer>
   </div>
 </template>
 
@@ -150,9 +154,10 @@
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
   import MyOrderNothing from '@/views/myOrder/MyOrderNothing' // 引入无订单页面
   import sendConfig from '@/api/SendConfig.js'// 引入websocket发送包
-  import MarkedPaymentLayer from '@/views/myOrder/orderLayer/MarkedPaymentLayer'
-  import ReleaseCoinLayer from '@/views/myOrder/orderLayer/ReleaseCoinLayer'
-  import ExplainLayer from '@/views/myOrder/orderLayer/ExplainLayer'
+  import MarkedPaymentLayer from '@/views/myOrder/orderLayer/MarkedPaymentLayer' // 标记已付款弹窗
+  import ReleaseCoinLayer from '@/views/myOrder/orderLayer/ReleaseCoinLayer' // 释放币弹窗
+  import SelectLayer from '@/views/myOrder/orderLayer/SelectLayer' // 申诉弹窗
+  import CheckBox from '@/components/common/CheckBox' // 引入多选弹窗
 
   export default {
     name: "my-order",
@@ -165,11 +170,35 @@
       MyOrderNothing,
       MarkedPaymentLayer,
       ReleaseCoinLayer,
-      ExplainLayer
+      SelectLayer,
+      CheckBox
     },
     data() {
       return {
-        content: [{title: '搜索订单号', type: 'currency'}, {title: '搜索资金码', type: 'nickname'}, {title: '搜索商家昵称/账号', type: 'nickname'}],  // 输入框下拉值
+        sortFlag: "", // 控制排序箭头每次朝上
+        userId: '', // 用户id
+
+        titleList:[
+          {content: '创建时间', sortTab: true, canSort: true, flag: 0},
+          {orderTypeShow: true},
+          {currencyShow: true},
+          {content: '对方'},
+          {content: '单价(CNY)', sortTab: true, canSort: true, flag: 4},
+          {content: '数量(手续费)', sortTab: true, canSort: true, flag: 5},
+          {content: '金额(CNY)', sortTab: true, canSort: true, flag: 6},
+          {content: '资金码'},
+          {status: true},
+          {content: '操作'}
+        ], // 表格表头内容
+        clickUp: 20,
+        clickDown: 20,
+        sortActive: false, // 控制箭头开始无active
+
+        content: [
+          {title: '搜索订单号', type: 'currency'},
+          {title: '搜索资金码', type: 'nickname'},
+          {title: '搜索商家昵称/账号', type: 'nickname'}
+        ],  // 输入框下拉值
         title: '搜索订单号', // 输入框默认
         searchValue: 'changeTitle', //  输入框改变值
         contentTabIndex: 1, // 控制tab切换
@@ -177,10 +206,17 @@
 
         showPayment: false, // 标记已付款弹窗
         showReleaseCoin: false,
-        showExplain: false,
+
+        showSelect: false, // 双向选择公共弹窗
+        selectContent: 'selectContent', // 内容
+        selectLeft: 'selectLeftValue', // 左边内容
+        selectRight: 'selectRightValue', // 右边内容
+        showType: 0, // 确定弹窗类型
+
         remindCoinLayer: false, // 提醒弹窗
         remindCoinContent: '提醒发送成功', // 提醒弹窗内容
         cancelExplainLayer: false, // 撤销申诉
+
         updateId: '', //标记已付款弹窗所用id
         updateInfo: '', // 标记弹窗所用info
 
@@ -188,58 +224,69 @@
         endValue: 'endValueDate',
         endP: '结束日期',
         showTime: 'true',
-        showPriceActive: false, // 控制箭头显示active
-        showAmountActive: false, // 控制箭头显示active
-        showMoneyActive: false, // 控制箭头显示active
-        showTimeActive: false,
-        // showPriceActive: false, // 控制箭头显示active
-        sortActive: false, // 控制箭头开始无active
+
         timeList: ['今天', '三天', '七天'], // 时间Tab切换title
 
         orderType: ['全部类型', '购买', '出售'], // 类型下拉显示
         orderTypeValue: 'orderTypeValue', // 传递给子组件
         orderTypeValueData: [3, 1, 2],
-        selectOrder: 3,
-        currency: ['全部币种', 'BTC', 'ETH', 'LTC'], // 币种下拉显示
+        selectOrder: 3, // 订单类型筛选
+        selectCurrency: '', // 币种筛选
+        selectState: '', // 订单状态筛选
+        currencyBox:[ // 币种下拉显示
+          {type: 'BTC', state: false, code: 'btc'},
+          {type: 'ETH', state: false, code: 'eth'},
+          {type: 'LTC', state: false, code: 'ltc'}
+        ],
         currencyValue: 'currencyValue', // 传递给子组件
-        allStatus: ['全部状态', '待付款', '待放币', '申诉中'], // 状体下拉显示
+        allStatusPro: [
+          {type: '待付款', state: false, code: '1'},
+          {type: '待放币', state: false, code: '2'},
+          {type: '申诉中', state: false, code: '3'},
+        ], // 进行中状态下拉显示
+        allStatusCom: [ // (126) 12310 (12678) (126789) (124) 12311 (15)
+          {type: '成功', state: false, code: '6'},
+          {type: '成功-强制放币', state: false, code: '10'},
+          {type: '成功-未评价', state: false, code: '7,8'},
+          {type: '成功-已评价', state: false, code: '9'},
+          {type: '失败-取消', state: false, code: '4'},
+          {type: '失败-终止', state: false, code: '11'},
+          {type: '失败-超时', state: false, code: '5'},
+        ], // 完成状态下拉显示
         allStatusValue: 'allStatusValue', // 传递给子组件
-
         contentList: [], // 表格内容数组
         dateSort: 0,// 时间排序 1降序 2升序
         price: 0,// 单价排序 1降序 2升序
         amount: 0,// 电子币数量排序 1降序 2升序
         money: 0,// 法币金额排序 1降序 2升序
-        // coinType:
-        stateList: [ // 表格状态列表
-          {'name': '待付款', 'flag': 1},
-          // {'name': '待确认', 'flag': 2},
-          // {'name': '申诉中', 'flag': 3},
-          // {'name': '已取消', 'flag': 4},
-          // {'name': '超时', 'flag': 5},
-          // {'name': '交易完成', 'flag': 6},
-          // {'name': '买家评价', 'flag': 7},
-          // {'name': '卖家评价', 'flag': 8},
-          // {'name': '双方已评价', 'flag': 9}
-        ]
       }
     },
     created() {
+      this.selectState = "1,2,3"
       this.initData()
       // this.showPayment = true
+      // 获取用户id
+      this.userId = this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid)
+      // console.log(this.userId)
     },
     mounted() {
       // 监听下拉框值，将值传给子组件
-      this.Bus.$on(this.orderTypeValue, (data) => {
+      this.Bus.$on(this.orderTypeValue, (data) => { // 类型筛选
         this.selectOrder = data
         console.log('orderTypeValue', this.selectOrder)
         this.initData()
+        console.log('this.sortActive', this.sortActive)
       });
-      this.Bus.$on(this.currencyValue, (data) => {
+      this.Bus.$on(this.currencyValue, (data) => { // 币种筛选
+        data.length ? this.selectCurrency = data.join(',') : this.selectCurrency = data
+        this.initData()
         console.log('currencyValue', data)
+        console.log('selectCurrency', this.selectCurrency)
       });
-      this.Bus.$on(this.allStatusValue, (data) => {
-        console.log('allStatusValue', data)
+      this.Bus.$on(this.allStatusValue, (data) => { // 类型筛选
+        data.length ? this.selectState = data.join(',') : this.selectState = data
+        this.initData()
+        console.log('selectState', this.selectState)
       });
       // 监听搜索框值
       this.Bus.$on(this.searchValue,(data) => {
@@ -248,13 +295,15 @@
       this.Bus.$on('offTime', data => this.showTime = data);
       // 时间框开始值
       this.Bus.$on(this.startValue, (data) => {
-       this.startValueDate = (new Date(data).getTime()).toString()
+        this.startValueDate = (new Date(data).getTime()).toString()
+        this.initData()
         console.log('startValue',  this.startValueDate)
         // console.log('startValueData',  data)
       });
       // 时间框结束值
       this.Bus.$on(this.endValue, (data) => {
         this.endValueDate = new Date(data).getTime().toString()
+        this.initData()
         console.log('endValue',  this.endValueDate)
         // console.log('endValueData', data)
       });
@@ -276,12 +325,34 @@
             if(!data || data.body.ret !== 0) return;
             console.log('order', data.body.data.orders)
             this.contentList = data.body.data.orders
-            // this.contentList.forEach(v => {
-            //   console.log('v', v.state)
-            //   // if (v.state == 1) {
-            //   //   v.state == 'dafuguan'
-            //   // }
-            // })
+            // 根据状态进行判断
+            this.contentList && this.contentList.forEach(v => {
+              // 状态数组
+              let stateListObject = {
+                1: [{name: '待付款', flag: 3}],
+                7: [{name: '待付款'}, {name: '待放币', flag: 3}],
+                3: [{name: '待付款'}, {name: '待放币'}, {name: '申述中', flag: 1}],
+                4: [{name: '待付款'}, {name: '失败', flag: 1}, {name: '取消'}],
+                5: [{name: '待付款'}, {name: '失败', flag: 1}, {name: '超时'}],
+                6: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
+                // 7: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
+                8: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
+                9: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}, {name: '已评价'}],
+                10: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}, {name: '强制放币'}],
+                11: [{name: '待付款'}, {name: '待放币'}, {name: '失败', flag: 1}, {name: '终止'}]
+              }
+              v.stateList = stateListObject[v.state]
+              // 操作数组
+              let operationListObject = {
+                1: this.JsonBig.stringify(v.buyer) !== this.userId ? [{name: '标记已付款', flag: 3}, {name: '取消订单', flag: 4}] : [{name: '提醒付款', flag: 5}],
+                7: this.JsonBig.stringify(v.buyer) === this.userId ? [{name: '提醒放币', flag: 6}, {name: '申述', flag: 7}] : [{name: '释放币', flag: 8}, {name: '申述', flag: 9}],
+                6: [{name: '去评价', flag: 1}],
+                // 7: [{name: '去评价', flag: 1}],
+                8: [{name: '去评价', flag: 1}],
+                9: [{name: '查看评价', flag: 2}]
+              }
+              v.operationList = operationListObject[v.state]
+            })
           },
           date:new Date()
         };
@@ -292,23 +363,50 @@
             "action": "orders",
             data: {
               "type": this.selectOrder, // 1 买; 2 卖; 3 全部  <-state=0
-              "state": this.contentTabIndex - 1, // 0进行中; 1 已完成   <- type=0 （？？？）
+              "state": this.selectState, // 订单状态
               "origin": 0, // 分页
               "date": this.dateSort,// 时间排序 1降序 2升序
               "price": this.price,// 单价排序 1降序 2升序
               "amount": this.amount,// 电子币数量排序 1降序 2升序
               "money": this.money,// 法币金额排序 1降序 2升序
-              "currency": 'btc'// 币种筛选
+              "currency": this.selectCurrency,// 币种筛选
+              "start": Number(this.startValueDate), // 开始时间
+              "end": Number(this.endValueDate) // 结束时间
             }
           }
         }))
       },
       selectStatus(type) { // Tab切换
         this.contentTabIndex = type;
+        this.clickUp = 20;
+        this.clickDown = 20;
+        // 获取用户id
+        this.userId = this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid)
+        // console.log(this.userId)
+        if (this.contentTabIndex === 1) {
+          this.selectState = "1,2,3"
+        }
+        if (this.contentTabIndex === 2) {
+          this.selectState = "4,5,6,7,8,9,10,11"
+        }
         this.initData()
       },
       selectTime(index) { // 时间切换
         this.num = index;
+        if (index === 0) {
+          this.startValueDate = new Date().getTime()
+
+          this.endValueDate = this.startValueDate
+        }
+        if (index === 1) {
+          this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 3 * 1000)
+          this.endValueDate = new Date().getTime()
+          // console.log('this.startValueDate', this.startValueDate, this.endValueDate)
+        }
+        if (index === 2) {
+          this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 7 * 1000)
+          this.endValueDate = new Date().getTime()
+        }
       },
       remindCoin() {
         this.remindCoinLayer = true;
@@ -316,7 +414,15 @@
           this.remindCoinLayer = false
         }, 3000)
       },
-
+      showOperation(index) { // 点击操作按钮
+        console.log('this.contentList[index].operationList.flag', this.contentList[index].operationList.flag)
+        if (this.contentList[index].operationList[0].flag == 1) { // 去评价
+          this.$router.push({path: '/order/evaluate', query: {type: '0', data: this.contentList[index]}})
+        }
+        if (this.contentList[index].operationList[0].flag == 2) { // 查看评价
+          this.$router.push({path: '/order/evaluate', query: {type: '1', data: this.contentList[index]}})
+        }
+      },
       cancelExplain() {
         this.cancelExplainLayer = true
       },
@@ -332,62 +438,55 @@
           this.showPayment = false
         } else {
           this.showPayment = true
-          this.updateId = this.JsonBig.stringify(this.contentList[index].id)
+          this.updateId = this.contentList[index].id
           this.updateInfo = this.contentList[index].info
         }
       },
-      openReleaseCoin(st) {
-        st === 'false' ? this.showReleaseCoin = false : this.showReleaseCoin = true
+      openReleaseCoin(st) { // 释放币弹窗
+        this.showReleaseCoin = st === 'false' ?  false : true
       },
-      openExplain(st) {
-        st === 'false' ? this.showExplain = false : this.showExplain = true
+      openSelect(st, operation, index) { // 双选择公共弹窗
+        if (st === 'false') {
+          this.showSelect = false
+        } else {
+          this.showType = operation.flag;
+          console.log('this.showType', this.showType)
+          switch (operation.flag) {
+            case 4: // 取消订单弹窗
+              this.selectContent = '确定取消订单？' // 内容
+              this.selectLeft = '取消' // 左边内容
+              this.selectRight = '确定' // 右边内容
+              this.updateId = this.contentList[index].id
+              break;
+            case 7: // 买家申请弹窗
+              this.selectContent = '请先与对方联系，核实对方是否放币' // 内容
+              this.selectLeft = '取消' // 左边内容
+              this.selectRight = '确定' // 右边内容
+              this.updateId = this.contentList[index].id
+              this.updateInfo = this.contentList[index].info
+              break;
+            case 9: // 卖家申请弹窗
+              this.selectContent = '请先与对方联系，核实对方是否付款' // 内容
+              this.selectLeft = '取消' // 左边内容
+              this.selectRight = '确定' // 右边内容
+              this.updateId = this.contentList[index].id
+              this.updateInfo = this.contentList[index].info
+              break;
+
+          }
+          this.showSelect = true
+          // this.updateId = this.JsonBig.stringify(this.contentList[index].id)
+        }
       },
-      priceSort() {
-        this.showPriceActive = true
-        this.showMoneyActive = false
-        this.showAmountActive = false
-        this.showTimeActive = false
-        this.money = 0
-        this.amount = 0
-        this.dateSort = 0
-        this.sortActive = !this.sortActive
-        this.sortActive ? this.price = 1 : this.price = 2
-        this.initData()
-      },
-      moneySort() {
-        this.showMoneyActive = true
-        this.showPriceActive = false
-        this.showAmountActive = false
-        this.showTimeActive = false
-        this.amount = 0
-        this.price = 0
-        this.dateSort = 0
-        this.sortActive = !this.sortActive
-        this.sortActive ? this.money = 1 : this.money = 2
-        this.initData()
-      },
-      amountSort() {
-        this.showAmountActive = true
-        this.showPriceActive = false
-        this.showMoneyActive = false
-        this.showTimeActive = false
-        this.price = 0
-        this.money = 0
-        this.dateSort = 0
-        this.sortActive = !this.sortActive
-        this.sortActive ? this.amount = 1 : this.amount = 2
-        this.initData()
-      },
-      timeSort() {
-        this.price = 0
-        this.money = 0
-        this.amount = 0
-        this.showTimeActive = true
-        this.showAmountActive = false
-        this.showPriceActive = false
-        this.showMoneyActive = false
-        this.sortActive = !this.sortActive
-        this.sortActive ? this.dateSort = 1 : this.dateSort = 2
+      toSort(title, index,e) { // 排序操作
+        this.clickUp = index;
+        this.clickDown = index;
+        this.sortActive = this.sortFlag === index ? !this.sortActive : true;
+        this.dateSort = title.flag === 0 ? (this.sortActive ?  2 : 1) : 0;
+        this.price = title.flag === 4 ? (this.sortActive ? 2 : 1) : 0;
+        this.amount = title.flag === 5 ? (this.sortActive ? 2 : 1) : 0;
+        this.money = title.flag === 6 ? (this.sortActive ? 2 : 1) : 0;
+        this.sortFlag = title.flag;
         this.initData()
       }
     }
@@ -487,8 +586,10 @@
         li
           float left
           color #999
+
       .sort
         cursor pointer
+
         span
           position relative
           i.before
@@ -496,13 +597,13 @@
             top 3px
             right -19px
             triangle_up($col999)
-            cursor pointer
+
           i.after
             position absolute
             top 10px
             right -19px
             triangle_down($col999)
-            cursor pointer
+
       .sort-up
         span
           i.before
@@ -511,6 +612,7 @@
         span
           i.after
             border-top-color $col422
+
       .order-content-info
         padding 18px 30px
         border 1px solid #E1E1E1
@@ -519,11 +621,40 @@
         ul
           padding-bottom 10px
           border-bottom 1px solid #E1E1E1
+          .state-li
+            p
+              color #999
+            .text-r
+              color #ff794c
+            .text-g
+              color #57a100
+            .text-b
+              color #333
+              cursor pointer
+
+          .operation-li
+            p
+              color #FFB422
+              cursor pointer
+            .active-btn
+              display inline-block
+              width 100px
+              height 25px
+              text-align center
+              line-height 25px
+              color #FFF
+              background: #FFB422
+              border-radius: 2px
+              cursor pointer
+            .text-b
+              color #333
+              cursor pointer
+
+
           li
             float left
             p
               margin-bottom 10px
-              cursor pointer
             .talk
               position relative
               padding-left 30px
@@ -537,15 +668,8 @@
                 content ''
                 background url(/static/images/talk.png) no-repeat
                 background-size 18px 18px
-            .active-btn
-              display inline-block
-              width 100px
-              height 25px
-              text-align center
-              line-height 25px
-              color #FFF
-              background: #FFB422
-              border-radius: 2px
+
+
 
           .text-g
             color $col100

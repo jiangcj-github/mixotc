@@ -14,13 +14,17 @@ export default {
    * @param duration 持续时间（ms）
    */
   setStorage(key, value, duration = 0, expiryTime = 0) {
-    if (!value || !key) return false
+    if (!value || !key) return false;
     let data = {
       value,
-      expiryTime: expiryTime || (!duration || isNaN(duration) ? 0 : this.getCurrentTimeStamp() + parseInt(duration)),
+      expiryTime:
+        expiryTime ||
+        (!duration || isNaN(duration)
+          ? 0
+          : this.getCurrentTimeStamp() + parseInt(duration))
     };
     localStorage[key] = JSON.stringify(data);
-    return true
+    return true;
   },
 
   /**
@@ -31,8 +35,10 @@ export default {
    *    2.返回为存入的value+时间
    */
   getStorageAll(key) {
-    if (!key) return null
-    let data = localStorage[key], now = this.getCurrentTimeStamp(), obj
+    if (!key) return null;
+    let data = localStorage[key],
+      now = this.getCurrentTimeStamp(),
+      obj;
     if (!data || data === "null") return null;
     try {
       obj = JSON.parse(data);
@@ -40,7 +46,7 @@ export default {
       return null;
     }
     if (obj.expiryTime === 0 || obj.expiryTime > now) {
-      return obj
+      return obj;
     }
     return null;
   },
@@ -52,10 +58,10 @@ export default {
    *  注：若set时有duration，则超出这个时间返回null
    */
   getStorage(key) {
-    if (!key) return null
-    let data = this.getStorageAll(key)
+    if (!key) return null;
+    let data = this.getStorageAll(key);
     if (!data || data === "null") return null;
-    return this.getStorageAll(key).value
+    return this.getStorageAll(key).value;
   },
 
   /**
@@ -68,13 +74,18 @@ export default {
    *      对于属性嵌套数组，key为数组 [key, 嵌套属性1, ...]
    */
   addStorage(key, value, index = 0, arrPath = [], duration = 0) {
-    if (!value || !key) return false
-    let dataAll = this.getStorageAll(key), data = dataAll.value, tmpData = data, expiryTime = dataAll.expiryTime
-    arrPath instanceof Array && arrPath.length > 0 && arrPath.forEach(v => tmpData = tmpData[v])
-    tmpData instanceof Array && tmpData.splice(index, 0, value)
-    duration && (expiryTime = 0)
-    this.setStorage(key, data, duration, expiryTime)
-    return true
+    if (!value || !key) return false;
+    let dataAll = this.getStorageAll(key),
+      data = dataAll.value,
+      tmpData = data,
+      expiryTime = dataAll.expiryTime;
+    arrPath instanceof Array &&
+      arrPath.length > 0 &&
+      arrPath.forEach(v => (tmpData = tmpData[v]));
+    tmpData instanceof Array && tmpData.splice(index, 0, value);
+    duration && (expiryTime = 0);
+    this.setStorage(key, data, duration, expiryTime);
+    return true;
   },
 
   /**
@@ -87,23 +98,35 @@ export default {
    *      当删除的为对象时，value为对象，标识筛选条件
    */
   delStorage(key, value, arrPath = [], duration = 0) {
-    if (!value || !key) return false
+    if (!value || !key) return false;
     // console.log('delStorage', key, value, arrPath, duration)
-    let dataAll = this.getStorageAll(key), data = dataAll.value, tmpData = data, expiryTime = dataAll.expiryTime,
-      valueTmp = [value]
+    let dataAll = this.getStorageAll(key),
+      data = dataAll.value,
+      tmpData = data,
+      expiryTime = dataAll.expiryTime,
+      valueTmp = [value];
     // console.log('data', data, 'tmpData', tmpData)
-    arrPath instanceof Array && arrPath.length > 0 && arrPath.forEach(v => tmpData = tmpData[v])
-    tmpData instanceof Array && value instanceof Object && tmpData.forEach(v => {
-      let valueFlag = 0
-      Object.keys(value).forEach(vv => v[vv] === value[vv] && valueFlag++)
-      valueFlag >= Object.keys(value).length && valueTmp.push(v)
-    })
+    arrPath instanceof Array &&
+      arrPath.length > 0 &&
+      arrPath.forEach(v => (tmpData = tmpData[v]));
+    tmpData instanceof Array &&
+      value instanceof Object &&
+      tmpData.forEach(v => {
+        let valueFlag = 0;
+        Object.keys(value).forEach(vv => v[vv] === value[vv] && valueFlag++);
+        valueFlag >= Object.keys(value).length && valueTmp.push(v);
+      });
     // console.log('tmpData', tmpData, 'valueTmp[0]', valueTmp[0], 'tmpData.indexOf(valueTmp[0])', tmpData.indexOf(valueTmp[0]), tmpData.filter(vv => vv != valueTmp[0]), 'data', data)
-    tmpData instanceof Array && valueTmp.forEach(v => tmpData.indexOf(v) >= 0 && tmpData.splice(0, tmpData.length, ...tmpData.filter(vv => vv != v)))
+    tmpData instanceof Array &&
+      valueTmp.forEach(
+        v =>
+          tmpData.indexOf(v) >= 0 &&
+          tmpData.splice(0, tmpData.length, ...tmpData.filter(vv => vv != v))
+      );
     // console.log(tmpData, data)
-    duration && (expiryTime = 0)
-    this.setStorage(key, data, duration, expiryTime)
-    return true
+    duration && (expiryTime = 0);
+    this.setStorage(key, data, duration, expiryTime);
+    return true;
   },
 
   /**
@@ -111,9 +134,9 @@ export default {
    * @param key 键
    */
   removeStorage(key) {
-    if (!key) return false
+    if (!key) return false;
     localStorage.removeItem(key);
-    return true
+    return true;
   },
 
   /**
@@ -122,10 +145,10 @@ export default {
    * @param value 值
    */
   setSession(key, value) {
-    if (!value || !key) return false
-    let data = {value}
+    if (!value || !key) return false;
+    let data = { value };
     sessionStorage[key] = JSON.stringify(data);
-    return true
+    return true;
   },
 
   /**
@@ -134,10 +157,19 @@ export default {
    * @returns value 值
    */
   getSession(key) {
-    if(!key) return null
+    if (!key) return null;
     let data = sessionStorage[key];
     if (!data || data === "null") return null;
     return JSON.parse(data).value;
+  },
+
+  /**
+   * 删除某个sessionStorage
+   */
+  removeSession(key) {
+    if (!key) return false;
+    sessionStorage.removeItem(key);
+    return true;
   },
 
   /**

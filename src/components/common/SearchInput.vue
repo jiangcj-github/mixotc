@@ -1,12 +1,24 @@
 <template>
   <div class="clearfix">
-    <div class="search" v-clickoutside="hideSelect" >
-      <input type="text" :style="{borderColor: color}" ref='input' v-model="inputContent">
-      <span ref='title' @click="showSelect = true">{{title}}</span>
+    <div class="search" v-clickoutside="hideSelect" @click="$refs.input.focus()">
+      <input 
+        type="text" 
+        :style="{borderColor: color}" 
+        ref='input' 
+        v-model="inputContent" 
+        @keyup.enter="changeInputContent" 
+        @click="showResult = true"
+        @focus="showCancel = true"
+        @input="input"
+      >
+      <span ref='title' @click="showTitleItem">{{title}}</span>
       <ul class="clearfix" v-show="showSelect">
-        <li v-for="(item, index) of content" @click.stop="changeTitle(item)" :key="index" :class="{ active: item.title === title}">{{item.title}}</li>
+        <li v-for="(item, index) of content" @click="changeTitle(item)" :key="index" :class="{ active: item.title === title}">{{item.title}}</li>
       </ul>
-      <img src="/static/images/cancel_icon.png" alt="" v-show="inputContent" @click="inputContent = ''">
+      <ul class="search-result" v-if="result.length && showResult && inputContent">
+        <li v-for="item of result" :key="item" @click="selectInputContent(item)">{{item}}</li>
+      </ul>
+      <img src="/static/images/cancel_icon.png" alt="" v-show="showCancel" @click="inputContent = ''">
     </div>
     <button @click="changeInputContent" :style="{backgroundColor: color}">
       <img src="/static/images/search_icon.png" alt="" class="search-icon">
@@ -20,7 +32,15 @@ export default {
     //下拉框内容
     content: {
       type: Array,
-      default: []
+      default: function() {
+        return []
+      }
+    },
+    result: {
+      type: Array,
+      default:  function() {
+        return ['btc','ltc',59,"dd"]
+      }
     },
     //显示标题
     title: {
@@ -35,16 +55,29 @@ export default {
     emitValue2: {
       type:String,
       default: 'changeInputContent'
+    },
+    emitValue3: {
+      type:String,
+      default: 'input'
     }
   },
   data() {
     return {
       type: '',
       showSelect: false,
-      inputContent: ''
+      inputContent: '',
+      showResult: false,
+      showCancel: false
     }
   },
   methods: {
+    input() {
+      this.Bus.$emit(this.emitValue3, this.inputContent);
+    },
+    showTitleItem() {
+      this.showSelect = !this.showSelect;
+      this.showResult = false;
+    },
     changeTitle(item) {
       this.showSelect = false;
       this.Bus.$emit(this.emitValue1, item.title);
@@ -52,10 +85,16 @@ export default {
     },
     changeInputContent() {
       this.hideSelect();
-      if (this.type === '' ) this.type = this.content[0].type
+      this.type === '' && (this.type = this.content[0].type);
+      this.showResult = false;
       this.Bus.$emit(this.emitValue2, {type: this.type, data: this.inputContent});
     },
+    selectInputContent(item) {
+      this.inputContent = item;
+      this.changeInputContent();
+    },
     hideSelect() {
+      this.showCancel = false;
       if(!this.showSelect) return;
       this.showSelect = false;
     }
@@ -82,6 +121,7 @@ export default {
     width 384px
     height 30px
     padding-left 110px
+    padding-right 25px
     background $colFFF
     border 1px solid $col422
     border-radius 2px 0 0 0
@@ -107,7 +147,7 @@ export default {
     box-sizing()
     position absolute
     left 0px
-    top 30
+    top 30px
     width 456px
     font-size $fz13
     color $col333
@@ -139,7 +179,7 @@ button
   border-radius 0 2px 2px 0
   border 0
   cursor pointer
-  &:active 
+  &:hover 
     background $col350
   .search-icon 
     display block

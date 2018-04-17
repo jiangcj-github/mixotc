@@ -23,17 +23,19 @@
     data() {
       return {
         timer1: null,
-        timer2: null
+        timer2: null,
+        watchTokenFlag: true
       }
     },
-    created: function () {
+    created() {
       let ws = this.WebSocket;
       //发送token登录后的处理
       !ws.onMessage['token'] && (ws.onMessage['token'] = {
         callback: (data) => {
           if (data.op !== 18) return;
           if (data.body.ret !== 0) {
-            sessionStorage.removeItem('otcToken')
+            // sessionStorage.removeItem('otcToken')
+            this.$store.commit({ type: 'changeToken', data: '' })
             ws.reConnectFlag = false;
             return;
           }
@@ -43,14 +45,15 @@
             data: data.body
           });
           this.$store.commit({type: 'changeLogin', data: true});
+          this.watchTokenFlag = false
         }
       });
-      let token =  sessionStorage.getItem('otcToken');
+      // let token =  sessionStorage.getItem('otcToken');
       // console.log(token)
       //页面打开时时获取sessionStorage的token自动发送token登录
       ws.onOpen['token'] = () => {
-        let token = sessionStorage.getItem('otcToken');
-        if (!token){
+        // let token = sessionStorage.getItem('otcToken');
+        if (!this.token){
           ws.reConnectFlag = false;
           this.$store.commit({type: 'changeLogin', data: false});
           if (this.path !== '/' && this.path !== 'transaction') {
@@ -60,18 +63,20 @@
         }
         ws.send(sendConfig('login', {
           seq: ws.seq,
-          body: token
+          body: this.token
         }))
       }
-      if (!token) return;
+      
+      if (!this.token) return;
       ws.start(this.HostUrl.ws);
     },
     mounted() {
+      console.log((this.Storage.otcAccount.get()))
       //websock发包接口需先判断登录状态
       this.WebSocket.beforeSend = (txt) => {
         let op =  this.JsonBig.parse(txt).op;
         //发送验证码17 登录15 需放行
-        if (sessionStorage.getItem('otcToken') || op === 17 || op === 15) return true;
+        if (this.token || op === 17 || op === 15) return true;
         this.$store.commit({type: 'changeLoginForm', data: true})
         return false;
       }
@@ -86,7 +91,8 @@
       logout() {
         // console.log('logout');
         // 移除token
-        sessionStorage.removeItem('otcToken');
+        // sessionStorage.removeItem('otcToken');
+        this.$store.commit({type: 'changeToken', data: ''});
         //改变vuex登录状态
         this.$store.commit({type: 'changeLogin', data: false});
         //重连置否
@@ -102,32 +108,46 @@
     computed: {
       isLogin() {
         return this.$store.state.isLogin;
+      },
+      token() {
+        return this.$store.state.token;
       }
     },
     watch: {
       //监听登录状态
-      isLogin(curVal, oldVal) {
-        if (curVal) {
-        //登录时设置定时器，绑定事件监听用户操作
-          this.timer1 && (this.timer1 = clearTimeout(this.timer1));
-          this.timer1 = setTimeout(this.logout, 600000);
-          window.onmousedown = (event) => {
-            //用户操作时重新计时
-            this.timer1 = clearTimeout(this.timer1);
+      isLogin: {
+        handler: function(curVal, oldVal) {
+          if (curVal) {
+          //登录时设置定时器，绑定事件监听用户操作
+            this.timer1 && (this.timer1 = clearTimeout(this.timer1));
             this.timer1 = setTimeout(this.logout, 600000);
+            window.onmousedown = (event) => {
+              //用户操作时重新计时
+              this.timer1 = clearTimeout(this.timer1);
+              this.timer1 = setTimeout(this.logout, 600000);
+            }
+            //定时查询token，token删除即退出登录
+            this.timer2 && (this.timer2 = clearInterval(this.timer2));
+            this.timer2 = setInterval(() => {
+              // if(sessionStorage.getItem('otcToken')) return;
+              if (this.token) return;
+              this.logout()
+            }, 1000);
+            return;
           }
-          //定时查询token，token删除即退出登录
-          this.timer2 && (this.timer2 = clearInterval(this.timer2));
-          this.timer2 = setInterval(() => {
-            if(sessionStorage.getItem('otcToken')) return;
-            this.logout()
-          }, 1000);
-          return;
+          //退出登录时清理定时器，移除监听
+           this.timer1 = clearTimeout(this.timer1);
+           this.timer2 = clearTimeout(this.timer2);
+           window.onmousedown = null
+        },
+        immediate: true
+      },
+      token(curVal, oldVal) {
+        if (curVal && this.watchTokenFlag) {
+          this.watchTokenFlag = false
+          this.WebSocket.start(this.HostUrl.ws);
+          console.log(9999999)
         }
-        //退出登录时清理定时器，移除监听
-         this.timer1 = clearTimeout(this.timer1);
-         this.timer2 = clearTimeout(this.timer2);
-         window.onmousedown = null
       }
     }
   }
@@ -136,6 +156,7 @@
 <style>
   #app {
     height: 100%;
+    padding-top: 100px;
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

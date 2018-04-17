@@ -14,5 +14,9 @@ export default {
   [types.changeChatBox](state, { data }) {
     // 控制右下方消息框显示
     state.showChat = data;
+  },
+  [types.changeToken](state, { data }) {
+    // 控制右下方消息框显示
+    state.token = data;
   }
 };
