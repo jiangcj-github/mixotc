@@ -1,5 +1,5 @@
 <template>
-  <LeftLayout :leftBar="4">
+  <Left :leftBar="4">
     <div class="right" slot="right">
       <div class="head">
         <div class="filter">
@@ -81,17 +81,17 @@
         </div>
       </BasePopup>
     </div>
-  </LeftLayout>
+  </Left>
 </template>
 <script>
   import Pagination from "@/components/common/Pagination";
   import DatePicker from "@/components/common/DatePicker";
   import BasePopup from "@/components/common/BasePopup";
-  import LeftLayout from "./layout/LeftLayout";
+  import Left from "./layout/Left";
 
   export default {
     components: {
-      LeftLayout,
+      Left,
       Pagination,
       DatePicker,
       BasePopup,

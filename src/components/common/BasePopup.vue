@@ -23,7 +23,7 @@
       },
       top: {
         type: Number,
-        default: 50
+        default: 29.4
       },
       wrapStyleObject: {
         type: Object,

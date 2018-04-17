@@ -4,8 +4,8 @@
              :width=396
              :height=234>
     <img src="/static/images/close_btn.png" alt="" @click="closePopup">
-    <h2>123abc</h2>
-    <p>付款的时候请备注“资金码”,以便对方收款</p>
+    <h2>{{id}}</h2>
+    <p>{{info}}</p>
     <button @click="markPay">标记已付款</button>
   </BasePopup>
 </template>
@@ -45,10 +45,6 @@
           callback: (data) => {
             if(!data || data.body.ret !== 0) return;
             console.log('payment', data.body.data)
-            // this.contentList = data.body.data.orders
-            // this.contentList.forEach(value => {
-            //   value.state
-            // })
           },
           date:new Date()
         };
@@ -58,12 +54,13 @@
           body:{
             "action": "update_order",
             data: {
-              "id": Number(this.id), // 1 买; 2 卖; 3 全部  <-state=0
+              "id": this.id, // 1 买; 2 卖; 3 全部  <-state=0
               "state": 2, // 1 等待买家付款; 2 卖家确认收款／等待卖家发货; 3申诉中; 4 已取消; 5 已超时; 6交易完成; 7 买家评价; 8 卖家评价; 9 双方已评
               "info": this.info
             }
           }
         }))
+        // window.location.reload()
         this.$emit('offPayment', 'false')
         this.Bus.$emit('offTime', false)
       }
@@ -93,4 +90,5 @@
       height 40px
       background #FFB422
       color #FFF
+      cursor pointer
 </style>

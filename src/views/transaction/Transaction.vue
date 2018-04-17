@@ -30,19 +30,19 @@
           <p class="merchant" title="默认排序">
             <span @click="sort()">广告主</span>
           </p>
-          <p class="deal-volume sort" 
+          <p class="deal-volume sort"
              title="该币种已成交总量"
              :class="{'sort-add': filte.volume === 2, 'sort-minus': filte.volume === 1}"
           >
             <span @click="sort('volume')">已成交量</span>
           </p>
-          <p class="order-volume sort" 
+          <p class="order-volume sort"
              title="该币种已成交的订单量"
              :class="{'sort-add': filte.order === 2, 'sort-minus': filte.order === 1}"
           >
             <span @click="sort('order')">完成订单量</span>
           </p>
-          <p class="good-reputation sort" 
+          <p class="good-reputation sort"
              title="该币种交易中获得的好评率"
              :class="{'sort-add': filte.rate === 2, 'sort-minus': filte.rate === 1}"
           >
@@ -54,12 +54,12 @@
           <p class="payment">
             <span>付款方式</span>
           </p>
-          <p class="amount sort" 
+          <p class="amount sort"
              title="当前可交易的数量"
           >
             <span @click="sort()">可交易量</span>
           </p>
-          <p class="price sort" 
+          <p class="price sort"
              title="单个数字币价格"
              :class="{'sort-add': filte.price === 2, 'sort-minus': filte.price === 1}"
           >
@@ -139,7 +139,7 @@ import BasePopup from '@/components/common/BasePopup';
         emitValue: 'popup',
         result: []
       }
-    },  
+    },
     created() {
       this.fetchData({type: 1, count: 20, page: 0 })
     },
@@ -218,7 +218,7 @@ import BasePopup from '@/components/common/BasePopup';
         this.filte.payment = this.paymentScore
       },
       sort(title) {
-        title !== 'price' && (this.filte.price = ''), 
+        title !== 'price' && (this.filte.price = ''),
         title !== 'date' && (this.filte.date = ''),
         title !== 'order' && (this.filte.order = ''),
         title !== 'volume' && (this.filte.volume = ''),

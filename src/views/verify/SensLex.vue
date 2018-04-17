@@ -1,18 +1,18 @@
 <template>
-  <LeftLayout :leftBar="3">
+  <Left :leftBar="3">
     <div class="right" slot="right">
 
     </div>
-  </LeftLayout>
+  </Left>
 </template>
 <script>
   import Pagination from "@/components/common/Pagination";
   import DatePicker from "@/components/common/DatePicker";
   import BasePopup from "@/components/common/BasePopup";
-  import LeftLayout from "./layout/LeftLayout";
+  import Left from "./layout/Left";
   export default {
     components: {
-      LeftLayout,
+      Left,
       BasePopup,
       Pagination,
       DatePicker,

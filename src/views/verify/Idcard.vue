@@ -1,5 +1,5 @@
 <template>
-  <Left :leftBar="2">
+  <Left :leftBar="1">
     <div class="right" slot="right">
       <ul class="tab">
         <li :class="{active:tab==1}" @click="tab=1">待审核<i v-if="uncheckNum>0">({{uncheckNum}})</i></li>
@@ -11,9 +11,10 @@
   </Left>
 </template>
 <script>
+
   import Left from "./layout/Left";
-  import Uncheck from "./lgtran/Uncheck";
-  import Check from "./lgtran/Check";
+  import Uncheck from "./idcard/Uncheck";
+  import Check from "./idcard/Check";
   export default {
     components: {
       Left,

@@ -27,6 +27,14 @@
           }
         },
       };
+    },
+    watch:{
+      date1:()=>{
+        this.Bus.$emit("change",this.date1,this.date2);
+      },
+      date2:()=>{
+        this.Bus.$emit("change",this.date1,this.date2);
+      }
     }
   };
 </script>

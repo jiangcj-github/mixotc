@@ -22,7 +22,7 @@ const ROUTES = [
   {
     path: "/homepage",
     name: "homepage",
-    component: resolve => require(['@/views/homepage/Homepage'], resolve) // 买卖家个人中心-他的发布
+    component: resolve => require(['@/views/homepage/Home'], resolve) // 买卖家个人中心-他的发布
   },
   {
     path: "/verify",
@@ -32,7 +32,7 @@ const ROUTES = [
   {
     path: "/verify/identifyAuth",
     name: "identifyAuth",
-    component: resolve => require(['@/views/verify/IdAud'], resolve) // 审核中心-身份审核
+    component: resolve => require(['@/views/verify/Idcard'], resolve) // 审核中心-身份审核
   },
   {
     path: "/verify/largeTransaction",
