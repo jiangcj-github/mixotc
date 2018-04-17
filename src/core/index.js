@@ -21,6 +21,9 @@ Vue.prototype.Proxy = HttpProxy;
 import WebSocket from './webSocket' //websocket交互
 Vue.prototype.WebSocket = WebSocket;
 
+import WebSocketProxy from "../api/WebSocketProxy"; //websocket请求
+Vue.prototype.WsProxy = new WebSocketProxy(WebSocket);
+
 import Storage from './storage' //localStorage交互
 Vue.prototype.Storage = Storage;
 

@@ -436,11 +436,11 @@ import BasePopup from '@/components/common/BasePopup';
           font-size $fz13
           color $col999
           letter-spacing 0.27px
-          span
-             cursor pointer
           &.merchant
             width 170px
             padding-left 30px
+            span
+              cursor pointer
           &.payment
             width 120px
           &.order-volume
@@ -459,6 +459,7 @@ import BasePopup from '@/components/common/BasePopup';
             span
               position relative
               padding-right 19px
+              cursor pointer
               &::before
                 position absolute
                 top 3px
