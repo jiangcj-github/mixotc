@@ -1,5 +1,5 @@
 <template>
-  <LeftLayout :leftBar="2">
+  <Left :leftBar="2">
     <div class="right" slot="right">
       <ul class="tab">
         <li :class="{active:tab==1}" @click="tab=1">待审核(3)</li>
@@ -124,16 +124,16 @@
         </BasePopup>
       </div>
     </div>
-  </LeftLayout>
+  </Left>
 </template>
 <script>
   import Pagination from "@/components/common/Pagination";
   import DatePicker from "@/components/common/DatePicker";
   import BasePopup from "@/components/common/BasePopup";
-  import LeftLayout from "./layout/LeftLayout";
+  import Left from "./layout/Left";
   export default {
     components: {
-      LeftLayout,
+      Left,
       Pagination,
       DatePicker,
       BasePopup,

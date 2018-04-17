@@ -99,6 +99,7 @@ const RUN_APP = (App, config, plugin) => {
   config.LoopTaskConfig && Object.keys(config.LoopTaskConfig).length && Loop.install(config.LoopTaskConfig);
   config.PrototypeConfig && Prototype.install(config.PrototypeConfig);
 
+  /*
   router.beforeEach((to, from, next) => {
     if (to.path === "/transaction" || to.path === "/") {
       next();
@@ -110,6 +111,7 @@ const RUN_APP = (App, config, plugin) => {
     }
     next()
   })
+  */
 
   new Vue({
     el: '#app',
