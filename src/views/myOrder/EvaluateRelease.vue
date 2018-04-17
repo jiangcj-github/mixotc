@@ -103,7 +103,7 @@
           body:{
             "action": "new_rate",
             data: {
-              "id": this.id,    // 出售ID
+              "id": this.id,    // 订单ID
               "receiver": this.receiver,  // 被评论者ID
               "type": this.type,    // 1 交易; 2 担保
               "credit": this.score,  // 信誉度 1,2,3 好评3 差评1

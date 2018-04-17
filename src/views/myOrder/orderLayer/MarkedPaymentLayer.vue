@@ -60,8 +60,8 @@
             }
           }
         }))
-        // window.location.reload()
-        this.$emit('offPayment', 'false')
+        window.location.reload()
+        // this.$emit('offPayment', 'false')
         this.Bus.$emit('offTime', false)
       }
     }

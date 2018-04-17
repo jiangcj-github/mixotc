@@ -14,7 +14,6 @@
 
 <script>
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
-  import WebSocketProxy from '@/api/WebSocketProxy.js' // 引入websocket发送包
 
   export default {
     name: "explain-layer",
@@ -22,7 +21,6 @@
     data() {
       return {
         selectLayer: this.selectShow,
-        proxy: new WebSocketProxy(this.WebSocket),
       }
     },
     components: {
@@ -45,30 +43,51 @@
         console.log('this.id', this.id)
         switch(this.type) {
           case 4: // 取消订单
-            this.proxy.send('otc','cancel_order',{
+            this.WsProxy.send('otc','cancel_order',{
               id:this.id
             }).then((data)=>{
               console.log('cancel', data)
             }).catch((msg)=>{
               console.log(msg);
             });
-            this.$emit('offSelet', 'false')
+            window.location.reload()
+            // this.$emit('offSelet', 'false')
             break;
-          default: // 申述
-            this.proxy.send('otc','update_order',{
+          case 7:  // 申述
+            this.$emit('offSelet', 'false')
+            this.$store.commit({'type':'changeChatBox', data: true})
+            break;
+          case 9:  // 撤销申述
+            this.WsProxy.send('otc','update_order',{
               "id": this.id,
-              "state": 3, // 1 等待买家付款; 2 卖家确认收款／等待卖家发货; 3申诉中; 4 已取消; 5 已超时; 6交易完成; 7 买家评价; 8 卖家评价; 9 双方已评
+              "state": 2, // 1 等待买家付款; 2 卖家确认收款／等待卖家发货; 3申诉中; 4 已取消; 5 已超时; 6交易完成; 7 买家评价; 8 卖家评价; 9 双方已评
               "info": this.info
             }).then((data)=>{
-              console.log('申述', data)
+              console.log('撤销申述', data)
             }).catch((msg)=>{
               console.log(msg);
             });
-            this.$emit('offSelet', 'false')
+            // window.location.reload()
+            //this.$emit('offSelet', 'false')
+            break;
         }
       },
       leftOperate() {
-        this.$emit('offSelet', 'false')
+        if (this.type == 7) {
+          this.WsProxy.send('otc','update_order',{
+            "id": this.id,
+            "state": 3, // 1 等待买家付款; 2 卖家确认收款／等待卖家发货; 3申诉中; 4 已取消; 5 已超时; 6交易完成; 7 买家评价; 8 卖家评价; 9 双方已评
+            "info": this.info
+          }).then((data)=>{
+            console.log('申述', data)
+          }).catch((msg)=>{
+            console.log(msg);
+          });
+          window.location.reload()
+          // this.$emit('offSelet', 'false')
+        } else {
+          this.$emit('offSelet', 'false')
+        }
       }
     }
   }

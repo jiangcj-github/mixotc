@@ -16,12 +16,13 @@
                    class="order-choice-search">
       </SearchInput>
       <div class="order-choice-time clearfix" v-if="contentTabIndex === 2">
-        <img src="/static/images/calendar.png" alt="">
-        <ol class="clearfix">
-          <li><DatePicker :emitValue="startValue"></DatePicker></li>
-          <li>-</li>
-          <li><DatePicker :emitValue="endValue" :text="endP"></DatePicker></li>
-        </ol>
+        <!--<img src="/static/images/calendar.png" alt="">-->
+        <!--<ol class="clearfix">-->
+          <!--<li><DatePicker :emitValue="startValue"></DatePicker></li>-->
+          <!--<li>-</li>-->
+          <!--<li><DatePicker :emitValue="endValue" :text="endP"></DatePicker></li>-->
+        <!--</ol>-->
+        <DateInterval class="date-group"></DateInterval>
         <ul class="clearfix">
           <li v-for="(item, index) in timeList" :class="{'time-active': index == num}" @click="selectTime(index)">{{item}}</li>
         </ul>
@@ -31,7 +32,7 @@
     <div class="order-content">
       <!-- 表格表头 -->
       <ol class="clearfix">
-        <li :data-zIndex="index" v-for="(title, index) in titleList" :class="{sort: title.canSort, 'sort-up': clickUp === index && sortActive, 'sort-down': clickUp === index && !sortActive}" @click="title.canSort && toSort(title, index,$event)">
+        <li :data-zIndex="index" v-for="(title, index) in titleList" :class="{sort: title.canSort, 'sort-up': clickUp === index && sortActive, 'sort-down': clickUp === index && !sortActive}" @click="title.canSort && toSort(title, index)">
           <span >
             {{title.content}}
             <i class="before" v-if="title.sortTab"></i>
@@ -74,13 +75,13 @@
       <div class="order-content-info" v-for="(content,index) in contentList">
         <ul class="clearfix">
           <li>
-            <p>{{content.create&&(Number(content.create) * 1000).toDate('yyyy/MM/dd')}}</p>
-            <p>{{content.create&&(Number(content.create) * 1000).toDate('HH:mm')}}</p>
+            <p>{{content.create && Number(content.create).toDate('yyyy/MM/dd')}}</p>
+            <p>{{content.create && Number(content.create).toDate('HH:mm')}}</p>
           </li>
           <li :class="JsonBig.stringify(content.buyer) === userId ? 'text-g' : 'text-r'">{{JsonBig.stringify(content.buyer) == userId ? '购买' : '出售'}}</li>
           <li>{{content.currency&&content.currency.toUpperCase()}}</li>
           <li>
-            <p><router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(content.id)}}">{{content.name || content.contact}}</router-link></p>
+            <p><router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(content.sid)}}">{{content.name || content.contact}}</router-link></p>
             <p class="talk" @click="toContact">联系他</p>
           </li>
           <li>{{content.price}}</li>
@@ -102,14 +103,14 @@
             <!--已完成操作-->
             <p v-for="operation in content.operationList"
                :class="{'active-btn': operation.flag == 1 || operation.flag == 3 || operation.flag == 8, 'text-b': operation.flag == 2}"
-               @click="operation.flag === 3 ? openPayment($event, index) : (operation.flag === 4 || 7 || 9 ? openSelect($event, operation, index) : (operation.flag === 8 ? openReleaseCoin : showOperation(index)))"
+               @click="operation.flag == 3 ? openPayment($event, index) : (operation.flag == 4 || operation.flag == 7 || operation.flag == 9 ? openSelect($event, operation, index, content) : (operation.flag == 8 ? openReleaseCoin($event, content, index) : (operation.flag == 5 || operation.flag == 6 ? remindCoin(content) : showOperation(index))))"
             >{{operation.name}}</p>
           </li>
         </ul>
         <p class="order-content-extre clearfix">
           <span>订单号：{{JsonBig.stringify(content.id)}}</span>
           <span>备注：{{content.info}}</span>
-          <span v-show="showTime">倒计时</span>
+          <span v-if="content.state == 1" class="reset-time">还剩{{minute}}分钟{{second}}秒</span>
         </p>
       </div>
     </div>
@@ -130,7 +131,12 @@
                         @offPayment="openPayment">
     </MarkedPaymentLayer>
     <!-- 引入释放币弹窗 -->
-    <ReleaseCoinLayer :releaseCoinShow="showReleaseCoin" @offRelease="openReleaseCoin"></ReleaseCoinLayer>
+    <ReleaseCoinLayer
+      :releaseCoinShow="showReleaseCoin"
+      :id="updateId"
+      :uid="updateUid"
+      @offRelease="openReleaseCoin">
+    </ReleaseCoinLayer>
     <!-- 提醒放币弹窗 -->
     <BasePopup :show="remindCoinLayer" class="remind-coin-layer">{{remindCoinContent}}</BasePopup>
     <!-- 取消订单 -->
@@ -149,7 +155,8 @@
 <script>
   import ChoiceBox from '@/components/common/ChoiceBox' // 引入下拉选择框
   import Pagination from '@/components/common/Pagination' // 引入分页
-  import DatePicker from '@/components/common/DatePicker' // 引入日历
+  // import DatePicker from '@/components/common/DatePicker' // 引入日历
+  import DateInterval from '@/components/common/DateInterval' // 引入日历
   import SearchInput from '@/components/common/SearchInput' // 引入搜索下拉框
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
   import MyOrderNothing from '@/views/myOrder/MyOrderNothing' // 引入无订单页面
@@ -164,7 +171,7 @@
     components: {
       ChoiceBox,
       Pagination,
-      DatePicker,
+      DateInterval,
       SearchInput,
       BasePopup,
       MyOrderNothing,
@@ -215,15 +222,15 @@
 
         remindCoinLayer: false, // 提醒弹窗
         remindCoinContent: '提醒发送成功', // 提醒弹窗内容
-        cancelExplainLayer: false, // 撤销申诉
+
 
         updateId: '', //标记已付款弹窗所用id
         updateInfo: '', // 标记弹窗所用info
+        updateUid: '',
 
         startValue: 'startValueDate',
         endValue: 'endValueDate',
         endP: '结束日期',
-        showTime: 'true',
 
         timeList: ['今天', '三天', '七天'], // 时间Tab切换title
 
@@ -259,15 +266,21 @@
         price: 0,// 单价排序 1降序 2升序
         amount: 0,// 电子币数量排序 1降序 2升序
         money: 0,// 法币金额排序 1降序 2升序
+
+        minutes: 0, // 定时器用
+        seconds: 0,
+        showResetTimeFlag: true
       }
     },
     created() {
+      // 获取用户id
+      this.userId = this.JsonBig.stringify(this.$store.state.userInfo.uid)
+      console.log(this.userId)
+      // 获取进行状态
       this.selectState = "1,2,3"
       this.initData()
       // this.showPayment = true
-      // 获取用户id
-      this.userId = this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid)
-      // console.log(this.userId)
+
     },
     mounted() {
       // 监听下拉框值，将值传给子组件
@@ -292,7 +305,7 @@
       this.Bus.$on(this.searchValue,(data) => {
         this.title = data
       });
-      this.Bus.$on('offTime', data => this.showTime = data);
+      // this.Bus.$on('offTime', data => this.showTime = data);
       // 时间框开始值
       this.Bus.$on(this.startValue, (data) => {
         this.startValueDate = (new Date(data).getTime()).toString()
@@ -315,6 +328,25 @@
       this.Bus.$off(this.searchValue);
       this.Bus.$off(this.startValue);
     },
+    watch: {
+      minutes: {
+        handler (newVal) { // 第一次变化开始定时器
+          // 定时器
+          if (this.showResetTimeFlag) {
+            this.showResetTime()
+            this.showResetTimeFlag = false
+          }
+        }
+      }
+    },
+    computed: {
+      second: function () {
+        return this.toZero(this.seconds)
+      },
+      minute: function () {
+        return this.minutes
+      }
+    },
     methods: {
       initData() {
         let ws = this.WebSocket; // 创建websocket连接
@@ -327,15 +359,19 @@
             this.contentList = data.body.data.orders
             // 根据状态进行判断
             this.contentList && this.contentList.forEach(v => {
+              // 倒计时数据
+              if (v.state == 1) {
+                this.minutes = v.limit
+              }
               // 状态数组
               let stateListObject = {
                 1: [{name: '待付款', flag: 3}],
-                7: [{name: '待付款'}, {name: '待放币', flag: 3}],
+                2: [{name: '待付款'}, {name: '待放币', flag: 3}],
                 3: [{name: '待付款'}, {name: '待放币'}, {name: '申述中', flag: 1}],
                 4: [{name: '待付款'}, {name: '失败', flag: 1}, {name: '取消'}],
                 5: [{name: '待付款'}, {name: '失败', flag: 1}, {name: '超时'}],
                 6: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
-                // 7: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
+                7: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
                 8: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
                 9: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}, {name: '已评价'}],
                 10: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}, {name: '强制放币'}],
@@ -344,10 +380,11 @@
               v.stateList = stateListObject[v.state]
               // 操作数组
               let operationListObject = {
-                1: this.JsonBig.stringify(v.buyer) !== this.userId ? [{name: '标记已付款', flag: 3}, {name: '取消订单', flag: 4}] : [{name: '提醒付款', flag: 5}],
-                7: this.JsonBig.stringify(v.buyer) === this.userId ? [{name: '提醒放币', flag: 6}, {name: '申述', flag: 7}] : [{name: '释放币', flag: 8}, {name: '申述', flag: 9}],
+                1: v.buyer && this.JsonBig.stringify(v.buyer) === this.userId ? [{name: '标记已付款', flag: 3}, {name: '取消订单', flag: 4}] : [{name: '提醒付款', flag: 5}],
+                2: v.buyer && this.JsonBig.stringify(v.buyer) === this.userId ? [{name: '提醒放币', flag: 6}, {name: '申述', flag: 7}] : [{name: '释放币', flag: 8}, {name: '申述', flag: 7}],
+                3: v.buyer && this.JsonBig.stringify(v.buyer) === this.userId ? [{name: '提醒放币', flag: 6}, {name: '撤销申述', flag: 9}] : [{name: '释放币', flag: 8}, {name: '撤销申述', flag: 9}],
                 6: [{name: '去评价', flag: 1}],
-                // 7: [{name: '去评价', flag: 1}],
+                7: [{name: '去评价', flag: 1}],
                 8: [{name: '去评价', flag: 1}],
                 9: [{name: '查看评价', flag: 2}]
               }
@@ -375,6 +412,14 @@
             }
           }
         }))
+        // 获取进行中和已完成数量
+        this.WsProxy.send('otc','get_orders_num',{
+          type: 2 // 1: 进行中, 2: 已完成
+        }).then((data)=>{
+          console.log('num', data)
+        }).catch((msg)=>{
+          console.log(msg);
+        });
       },
       selectStatus(type) { // Tab切换
         this.contentTabIndex = type;
@@ -408,30 +453,17 @@
           this.endValueDate = new Date().getTime()
         }
       },
-      remindCoin() {
-        this.remindCoinLayer = true;
-        setTimeout(() => {
-          this.remindCoinLayer = false
-        }, 3000)
+      toContact() { // 打开消息框
+        this.$store.commit({'type':'changeChatBox', data: true})
       },
-      showOperation(index) { // 点击操作按钮
-        console.log('this.contentList[index].operationList.flag', this.contentList[index].operationList.flag)
+      showOperation(index) { // 去评价
+        // console.log('this.contentList[index].operationList.flag', this.contentList[index].operationList.flag)
         if (this.contentList[index].operationList[0].flag == 1) { // 去评价
           this.$router.push({path: '/order/evaluate', query: {type: '0', data: this.contentList[index]}})
         }
         if (this.contentList[index].operationList[0].flag == 2) { // 查看评价
           this.$router.push({path: '/order/evaluate', query: {type: '1', data: this.contentList[index]}})
         }
-      },
-      cancelExplain() {
-        this.cancelExplainLayer = true
-      },
-
-      closePopup() {
-        this.cancelExplainLayer = false;
-      },
-      toContact() { // 打开消息框
-        this.$store.commit({'type':'changeChatBox', data: true})
       },
       openPayment(st, index) { // 控制标记已付款弹窗
         if (st === 'false') {
@@ -442,10 +474,35 @@
           this.updateInfo = this.contentList[index].info
         }
       },
-      openReleaseCoin(st) { // 释放币弹窗
-        this.showReleaseCoin = st === 'false' ?  false : true
+      remindCoin(content) { // 提醒弹窗
+        console.log('content', content)
+        this.remindCoinLayer = true;
+        this.WsProxy.send('otc','remind_order',{
+          uid: content.sid,
+          id: content.id,
+          state: content.state,
+          info: content.info
+        }).then((data)=>{
+          console.log('remind_order', data)
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+        setTimeout(() => {
+          this.remindCoinLayer = false
+        }, 3000)
       },
-      openSelect(st, operation, index) { // 双选择公共弹窗
+      openReleaseCoin(st, content) { // 释放币弹窗
+        console.log('content', content)
+        // console.log(1111)
+        if (st === 'false') {
+          this.showReleaseCoin = false
+        } else {
+          this.showReleaseCoin = true
+          this.updateId = content.id
+          this.updateUid = content.sid
+        }
+      },
+      openSelect(st, operation, index, content) { // 双选择公共弹窗
         if (st === 'false') {
           this.showSelect = false
         } else {
@@ -453,32 +510,29 @@
           console.log('this.showType', this.showType)
           switch (operation.flag) {
             case 4: // 取消订单弹窗
-              this.selectContent = '确定取消订单？' // 内容
-              this.selectLeft = '取消' // 左边内容
-              this.selectRight = '确定' // 右边内容
-              this.updateId = this.contentList[index].id
+              this.selectContent = '确定取消订单？'; // 内容
+              this.selectLeft = '取消'; // 左边内容
+              this.selectRight = '确定'; // 右边内容
+              this.updateId = this.contentList[index].id;
               break;
             case 7: // 买家申请弹窗
-              this.selectContent = '请先与对方联系，核实对方是否放币' // 内容
-              this.selectLeft = '取消' // 左边内容
-              this.selectRight = '确定' // 右边内容
-              this.updateId = this.contentList[index].id
-              this.updateInfo = this.contentList[index].info
+              this.selectContent = this.JsonBig.stringify(content.buyer) === this.userId ? '请先与对方联系，核实对方是否放币' : '请先与对方联系，核实对方是否付款'; // 内容
+              this.selectLeft = '申述'; // 左边内容
+              this.selectRight = '联系对方'; // 右边内容
+              this.updateId = this.contentList[index].id;
+              this.updateInfo = this.contentList[index].info;
               break;
-            case 9: // 卖家申请弹窗
-              this.selectContent = '请先与对方联系，核实对方是否付款' // 内容
-              this.selectLeft = '取消' // 左边内容
-              this.selectRight = '确定' // 右边内容
-              this.updateId = this.contentList[index].id
-              this.updateInfo = this.contentList[index].info
-              break;
-
+            case 9: // 撤销订单弹窗
+              this.selectContent = '确定撤销申述？'
+              this.selectLeft = '取消'; // 左边内容
+              this.selectRight = '确定'; // 右边内容
+              this.updateId = this.contentList[index].id;
+              this.updateInfo = this.contentList[index].info;
           }
           this.showSelect = true
-          // this.updateId = this.JsonBig.stringify(this.contentList[index].id)
         }
       },
-      toSort(title, index,e) { // 排序操作
+      toSort(title, index) { // 排序操作
         this.clickUp = index;
         this.clickDown = index;
         this.sortActive = this.sortFlag === index ? !this.sortActive : true;
@@ -488,6 +542,23 @@
         this.money = title.flag === 6 ? (this.sortActive ? 2 : 1) : 0;
         this.sortFlag = title.flag;
         this.initData()
+      },
+      toZero: function (n) {
+        return n < 10 ? '0' + n : '' + n
+      },
+      showResetTime: function () {
+        var _this = this
+        var time = setInterval(function () {
+          if (_this.seconds === 0 && _this.minutes !== 0) {
+            _this.seconds = 59
+            _this.minutes -= 1
+          } else if (_this.minutes === 0 && _this.seconds === 0) {
+            _this.seconds = 0
+            clearInterval(time)
+          } else {
+            _this.seconds -= 1
+          }
+        }, 1000)
       }
     }
   }
@@ -542,8 +613,9 @@
       .order-choice-time
         float right
         margin-top 10px
-        ol, ul, img
+        .date-group
           float left
+          margin-right 20px
         li
           float left
         ol
@@ -552,6 +624,7 @@
           li:nth-child(2)
             margin 0 10px
         ul
+          float left
           line-height 30px
           border 1px solid #FFF3EB
           border-radius 0 2px 2px 0
@@ -564,10 +637,10 @@
           .time-active
             background #FFF
             color #FFB422
-        img
-          width 16px
-          height 16px
-          margin 8px 10px 0 0
+        /*img*/
+          /*width 16px*/
+          /*height 16px*/
+          /*margin 8px 10px 0 0*/
 
     .order-content
       margin-bottom 44px
@@ -683,7 +756,7 @@
             float left
           span:nth-child(1)
             margin-right 30px
-          span:last-child
+          .reset-time
             float right
 
 
