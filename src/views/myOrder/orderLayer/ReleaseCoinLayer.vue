@@ -8,7 +8,7 @@
       <img src="/static/images/close_btn.png" alt="" @click="closePopup">
       <div class="buy-layer-content">
         <h1>请输入支付密码</h1>
-        <input type="password"/>
+        <input type="password" v-model="PaymentValue"/>
         <div>
           <em @click="closePopup">取消</em>
           <i @click="buyNext">下一步</i>
@@ -25,11 +25,12 @@
       <div class="buy-layer-content">
         <h1>请输入短信验证码</h1>
         <p>
-          <input type="text"/><span @click="sendVerify" :class="{offBg: showOffBg}">{{verifyCode}}</span>
+          <input type="text" v-model="messageVerify"/><span @click="sendVerify" :class="{offBg: showOffBg}">{{verifyCode}}</span>
+          <b class="errortext" v-show="errorShow">请输入正确的验证码</b>
         </p>
         <div>
           <em @click="closePopup">取消</em>
-          <i>确定</i>
+          <i @click="succPopup">确定</i>
         </div>
       </div>
     </BasePopup>
@@ -49,13 +50,10 @@
                maxlength="1"
                @keyup="getNum(index)"
                @keydown="delNum(index)"/>
-        <!--<input type="tel" maxlength="6" class="realInput" v-model="realInput"  @keyup="getNum()" @keydown="delNum()">-->
-        <!--<ul class="clearfix">-->
-        <!--<li v-for="(disInput, index) in disInputs"><input type="tel" maxlength="1"  v-model="disInput.value" v-focus="index"></li>-->
-        <!--</ul>-->
+        <b class="errortext"  v-show="errorShow">请输入正确的验证码</b>
         <div>
           <em @click="closePopup">取消</em>
-          <i>确定</i>
+          <i @click="succPopup">确定</i>
         </div>
       </div>
     </BasePopup>
@@ -67,19 +65,22 @@
 
   export default {
     name: "release-coin-layer",
-    props: ['releaseCoinShow'],
+    props: ['releaseCoinShow', 'uid', 'id'],
     data() {
       return {
         buyLayer: this.releaseCoinShow,
+        PaymentValue: '', // 支付密码
         verifyLayer: false, // 输入短信、邮箱密码
         verifyCode: '发送验证码', // 改变倒计时状态
+        messageVerify: '', // 短信验证码
         flag: true, // 开启倒计时后禁止点击
         showOffBg: false, // 开启倒计时后状态
         count: 60, // 记录倒计时时间
         // disInputs:[{value:''},{value:''},{value:''},{value:''},{value:''},{value:''}],
         // realInput:'',
         inputContent: '', // 聚焦谷歌输入框内容
-        inputGroup: [] // 记录输入框内容,
+        inputGroup: [], // 记录输入框内容,
+        errorShow: false
       }
     },
     components: {
@@ -101,6 +102,7 @@
         this.$emit('offRelease', 'false')
       },
       buyNext() {
+        if (this.PaymentValue === '') return
         this.$emit('offRelease', 'false');
         this.verifyLayer = true;
       },
@@ -125,6 +127,14 @@
           };
           verifyFn();
           let timer = setInterval(verifyFn, 1000)
+          this.WsProxy.send('otc','update_order',{ // 获取验证码
+            type: 2, // 0 登录; 1 修改密码; 2 支付
+            uid: this.id,
+          }).then((data)=>{
+            console.log('获取验证码', data)
+          }).catch((msg)=>{
+            console.log(msg);
+          });
         }
       },
       getNum(index) {
@@ -139,6 +149,19 @@
         if (oEvent.keyCode === 8) {
           this.inputContent = index - 1
         }
+      },
+      succPopup() { // 点击确定
+        console.log('uid', this.uid, this.id)
+        this.WsProxy.send('otc','send_order',{
+          uid: this.uid,
+          id: this.id,
+          pass: this.PaymentValue,
+          code: this.messageVerify
+        }).then((data)=>{
+          console.log('cancel', data)
+        }).catch((msg)=>{
+          console.log(msg);
+        })
       }
     }
   }
@@ -147,6 +170,11 @@
 <style scoped lang="stylus">
   @import "../../../stylus/base.styl"
   .buy-layer, .info-layer, .geogle-layer
+    .errortext
+      display block
+      font-size 12px
+      color #ff794c
+
     h1
       font-size $fz20
       font-weight bold
@@ -175,10 +203,10 @@
         width 340px
         height 40px
         padding-left 10px
-        margin-bottom 40px
         background #F4F6FA
         border-radius 2px
       div
+        margin-top 25px
         em, i
           display inline-block
           width 160px
@@ -225,26 +253,6 @@
         padding 0
         text-align center
         line-height 40px
-  /*.realInput
-    position: absolute
-    padding 0
-    background: none
-    text-indent: -5em;
-  ul
-    margin-bottom 40px
-    li
-      float left
-      width 40px
-      height 40px
-      margin-right 20px
-      input
-        width 40px
-        height 40px
-        text-align center
-        line-height 40px
-        padding 0
-    li:last-child
-      margin-right 0*/
 
 
 </style>
