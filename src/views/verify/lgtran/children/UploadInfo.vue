@@ -5,6 +5,8 @@
     <p class="inf-li"><label>提交时间</label><span>{{info.submit_time}}</span></p>
     <p class="inf-li"><label>姓名</label><span>{{info.name}}</span></p>
     <p class="inf-li"><label>身份证号</label><span>{{info.idcard}}</span></p>
+    <p class="inf-li"><label>银行卡号</label><span>{{info.bankcard}}</span></p>
+    <p class="inf-li"><label>开户行</label><span>{{info.bank}}</span></p>
     <p class="check-img">
       <img :src="info.img1">
       <img :src="info.img2">

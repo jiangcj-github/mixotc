@@ -6,7 +6,7 @@
       <div class="sec1 clearfix">
         <div class="info">
           <div class="avatar"><img :src="info.headimg" alt="">
-            <i class="online" :class="{active:info.isOnline}"></i>
+            <i class="online" :class="{active:isOnline}"></i>
           </div>
           <span class="nickname">{{info.nickname}}</span>
           <span class="tran_num">和他交易过{{info.tradeWidthNum}}次</span>
@@ -39,7 +39,7 @@
     </div>
     <!--取消信任弹框-->
     <BasePopup :show="showUntrustPop">
-      <div class="pop">取消信任成功<i class="close" @click="showUntrustPop=false">&times;</i></div>
+      <div class="pop">取消信任成功</div>
     </BasePopup>
     <!--菜单项tab-->
     <ul class="menu-tab">
@@ -56,7 +56,6 @@
   import Sales from './children/Sales';
   import Rates from './children/Rates';
   import BasePopup from '@/components/common/BasePopup';
-  import WebSocketProxy from '@/api/WebSocketProxy.js';
 
   export default {
     components: {
@@ -66,11 +65,10 @@
     },
     data() {
       return {
-        proxy: new WebSocketProxy(this.WebSocket),
-
         loginUid: "",
         uid: "",
 
+        isOnline: true,
         infoOrg:{},
         ratesNum: 0,
 
@@ -84,10 +82,9 @@
         return {
           nickname: o.name || 'unknown',
           headimg: o.icon || '/static/images/default_avator.png',
-          isOnline: o.isonline || false,
           tradeWidthNum: o.mytrade || 0,
           orderNum: o.trade || 0,
-          volumn: o.volumn || "0+BTC",
+          volumn: (o.volumns || 0)+"+BTC",
           praiseRate: (o.rate || 0) +"%",
           trustedNum: o.trusted || 0,
           trustNum: o.trust || 0,
@@ -106,22 +103,25 @@
     },
     methods: {
       joinTrust(){
-        this.proxy.send('otc','new_trust',{uid:this.loginUid, id:this.uid}).then((data)=>{
+        this.WsProxy.send('otc','new_trust',{uid:this.loginUid, id:this.uid, trust:1}).then((data)=>{
           this.infoOrg.is_trust=true;
         }).catch((msg)=>{
           console.log(msg);
         });
       },
       cancelTrust(){
-        this.proxy.send('otc','new_trust',{uid:this.loginUid, id:this.uid}).then((data)=>{
+        this.WsProxy.send('otc','new_trust',{uid:this.loginUid, id:this.uid, trust:0}).then((data)=>{
           this.showUntrustPop=true;
+          setInterval(()=>{
+            this.showUntrustPop=false;
+          },1000);
           this.infoOrg.is_trust=false;
         }).catch((msg)=>{
           console.log(msg);
         });
       },
-      loadTraderInfo(){
-        this.proxy.send('otc','trader_info',{
+      loadTraderInfo(){console.log(this.loginUid)
+        this.WsProxy.send('otc','trader_info',{
           uid:this.loginUid,
           id:this.uid
         }).then((data)=>{

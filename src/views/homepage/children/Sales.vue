@@ -51,14 +51,12 @@
 </template>
 <script>
   import Pagination from '@/components/common/Pagination';
-  import WebSocketProxy from '@/api/WebSocketProxy.js';
   export default {
     components: {
       Pagination,
     },
     data() {
       return {
-        proxy: new WebSocketProxy(this.WebSocket),
         uid: "",
 
         salesOrg:[],
@@ -125,7 +123,7 @@
     },
     methods: {
       loadSales(p=0){
-        this.proxy.send('otc','his_sales',{
+        this.WsProxy.send('otc','his_sales',{
           id: this.uid,origin: 0,type: this.fltType,currency: this.fltCoin
         }).then((data)=>{
           this.salesOrg=data.sales;

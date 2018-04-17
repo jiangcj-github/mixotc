@@ -21,7 +21,6 @@
 </template>
 <script>
   import Pagination from '@/components/common/Pagination';
-  import WebSocketProxy from '@/api/WebSocketProxy.js';
   export default {
     props:["totalChange"],
     components: {
@@ -29,7 +28,6 @@
     },
     data() {
       return {
-        proxy: new WebSocketProxy(this.WebSocket),
         uid: "",
 
         ratesOrg:[],
@@ -67,7 +65,7 @@
     },
     methods: {
       loadRates(p=0){
-        this.proxy.send('otc','rates',{
+        this.WsProxy.send('otc','rates',{
           id:this.uid,
           origin:p
         }).then((data)=>{

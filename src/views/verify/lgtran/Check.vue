@@ -1,84 +1,84 @@
 <template>
-    <!--已审核-->
-    <div class="check">
-      <div class="filter">
-        <div class="f1">
-          <input type="text" placeholder="搜索商家昵称/账号" v-model="srchText" v-clickoutside="clickOutside" @input="fuzzyInput">
-          <img src="/static/images/cancel_icon.png" @click="srchText=''" :class="{show:srchText.length>0}">
-          <a href="javascript:void(0)" @click="search"></a>
-          <ul v-show="srchShowTip" class="ft-cand">
-            <li v-for="(o,i) in tips" :key="i" @click="srchText=o.nickname+'/'+o.phone;search">{{o.nickname+'/'+o.phone}}</li>
-          </ul>
-        </div>
-        <div class="f2">
-          <DateInterval change="dateChange"></DateInterval>
-        </div>
-        <div class="f3">
-          <a href="javascript:void(0)" :class="{active:days===1}" @click="days=1">今天</a>
-          <a href="javascript:void(0)" :class="{active:days===3}" @click="days=3">三天</a>
-          <a href="javascript:void(0)" :class="{active:days===7}" @click="days=7">七天</a>
-        </div>
+  <!--已审核-->
+  <div class="check">
+    <div class="filter">
+      <div class="f1">
+        <input type="text" placeholder="搜索商家昵称/账号" v-model="srchText" v-clickoutside="clickOutside" @input="fuzzyInput">
+        <img src="/static/images/cancel_icon.png" @click="srchText=''" :class="{show:srchText.length>0}">
+        <a href="javascript:void(0)" @click="search"></a>
+        <ul v-show="srchShowTip" class="ft-cand">
+          <li v-for="(o,i) in tips" :key="i" @click="srchText=o.nickname+'/'+o.phone;search">{{o.nickname+'/'+o.phone}}</li>
+        </ul>
       </div>
-      <div class="tb-head">
-        <span class="tjsj">提交时间</span>
-        <span class="yh">用户</span>
-        <span class="shr">审批人</span>
-        <span class="shsj sortable" @click="sortField=0;sortType=!sortType">
+      <div class="f2">
+        <DateInterval change="dateChange"></DateInterval>
+      </div>
+      <div class="f3">
+        <a href="javascript:void(0)" :class="{active:days===1}" @click="days=1">今天</a>
+        <a href="javascript:void(0)" :class="{active:days===3}" @click="days=3">三天</a>
+        <a href="javascript:void(0)" :class="{active:days===7}" @click="days=7">七天</a>
+      </div>
+    </div>
+    <div class="tb-head">
+      <span class="tjsj">提交时间</span>
+      <span class="yh">用户</span>
+      <span class="shr">审批人</span>
+      <span class="shsj sortable" @click="sortField=0;sortType=!sortType">
           审核时间<i class="sort" :class="{up:sortType,down:!sortType,field:sortField===0}"></i>
         </span>
-        <span class="ys sortable" @click="sortField=1;sortType=!sortType">
+      <span class="ys sortable" @click="sortField=1;sortType=!sortType">
           用时<i class="sort" :class="{up:sortType,down:!sortType,field:sortField===1}"></i>
         </span>
-        <span class="zt drop">
+      <span class="zt drop">
           <a href="javascript:void(0)" v-clickoutside="clickStatusOutside" @click="statusDropShow=!statusDropShow">{{status[statusDropSel].text}}</a>
           <ul v-show="statusDropShow">
             <li @click="statusDropSel=i" v-for="(e,i) in status" :key="i">{{e.text}}</li>
           </ul>
         </span>
-        <span class="cz">操作</span>
-      </div>
-      <div v-if="err===0">
-        <div class="li" v-for="(e,i) in list" :key="i">
-          <div class="booth">
-            <span class="tjsj">{{e.submit_time}}</span>
-            <span class="yh">{{e.nickname}}/{{e.phone}}</span>
-            <span class="shr">{{e.nickname_sh}}/{{e.phone_sh}}</span>
-            <span class="shsj">{{e.check_time}}</span>
-            <span class="ys">{{e.spend}}</span>
-            <span class="zt">{{e.check_result}}</span>
-            <span class="cz"><a href="javascript:void(0)" class="ck" @click="showPop(e.id)">查看</a></span>
-          </div>
-          <div class="division"></div>
-          <div class="remark">备注：{{e.check_remark}}</div>
-        </div>
-        <Pagination :total="total" :pageSize="15" emitValue="changePage" style="width:100%;margin-top:20px" v-show="total>15"></Pagination>
-        <BasePopup :show="pop" :width="764" :height="382" :top="50">
-          <div class="pop">
-            <p class="inf-li"><label>提交时间</label><span>2018/03/09 23:30:42</span></p>
-            <p class="inf-li"><label>姓名</label><span>李小蹦</span></p>
-            <p class="inf-li"><label>身份证号</label><span>189099087656567890</span></p>
-            <p class="check-img">
-              <img src="">
-              <img src="">
-              <img src="">
-            </p>
-            <i class="close" @click="pop=false">&times;</i>
-          </div>
-        </BasePopup>
-      </div>
-      <div v-else-if="err===1">
-        <div class="err no-result">无相应的用户，请重新搜索</div>
-      </div>
-      <div v-else-if="err===2">
-        <div class="err load-failed">网络异常，请重新搜索</div>
-      </div>
-      <div v-else-if="err===3">
-        <div class="err net-error">加载失败，请重新搜索</div>
-      </div>
-      <div v-else>
-        <div class="err no-result">无已审核数据</div>
-      </div>
+      <span class="cz">操作</span>
     </div>
+    <div v-if="err===0">
+      <div class="li" v-for="(e,i) in list" :key="i">
+        <div class="booth">
+          <span class="tjsj">{{e.submit_time}}</span>
+          <span class="yh">{{e.nickname}}/{{e.phone}}</span>
+          <span class="shr">{{e.nickname_sh}}/{{e.phone_sh}}</span>
+          <span class="shsj">{{e.check_time}}</span>
+          <span class="ys">{{e.spend}}</span>
+          <span class="zt">{{e.check_result}}</span>
+          <span class="cz"><a href="javascript:void(0)" class="ck" @click="showPop(e.id)">查看</a></span>
+        </div>
+        <div class="division"></div>
+        <div class="remark">备注：{{e.check_remark}}</div>
+      </div>
+      <Pagination :total="total" :pageSize="15" emitValue="changePage" style="width:100%;margin-top:20px" v-show="total>15"></Pagination>
+      <BasePopup :show="pop" :width="764" :height="382" :top="50">
+        <div class="pop">
+          <p class="inf-li"><label>提交时间</label><span>2018/03/09 23:30:42</span></p>
+          <p class="inf-li"><label>姓名</label><span>李小蹦</span></p>
+          <p class="inf-li"><label>身份证号</label><span>189099087656567890</span></p>
+          <p class="check-img">
+            <img src="">
+            <img src="">
+            <img src="">
+          </p>
+          <i class="close" @click="pop=false">&times;</i>
+        </div>
+      </BasePopup>
+    </div>
+    <div v-else-if="err===1">
+      <div class="err no-result">无相应的用户，请重新搜索</div>
+    </div>
+    <div v-else-if="err===2">
+      <div class="err load-failed">网络异常，请重新搜索</div>
+    </div>
+    <div v-else-if="err===3">
+      <div class="err net-error">加载失败，请重新搜索</div>
+    </div>
+    <div v-else>
+      <div class="err no-result">无已审核数据</div>
+    </div>
+  </div>
 </template>
 <script>
   import DateInterval from "@/components/common/DateInterval";

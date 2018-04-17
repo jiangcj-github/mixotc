@@ -2,10 +2,10 @@
   <Left :leftBar="1">
     <div class="right" slot="right">
       <ul class="tab">
-        <li :class="{active:tab==1}" @click="tab=1">待审核(3)</li>
+        <li :class="{active:tab==1}" @click="tab=1">待审核<i v-if="uncheckNum>0">({{uncheckNum}})</i></li>
         <li :class="{active:tab==2}" @click="tab=2">已审核</li>
       </ul>
-      <Uncheck v-if="tab==1"></Uncheck>
+      <Uncheck v-if="tab==1" numChange="uncheckNumChange"></Uncheck>
       <Check v-else-if="tab==2"></Check>
     </div>
   </Left>
@@ -15,7 +15,6 @@
   import Left from "./layout/Left";
   import Uncheck from "./idcard/Uncheck";
   import Check from "./idcard/Check";
-  import WebSocketProxy from '@/api/WebSocketProxy.js';
   export default {
     components: {
       Left,
@@ -24,10 +23,15 @@
     },
     data() {
       return {
-        proxy: new WebSocketProxy(this.WebSocket),
-        tab:1,  //审核，未审核
+        uncheckNum: 0,
+        tab:1,  //1-待审核，2-已审核
       }
     },
+    mounted(){
+      this.Bus.$on("uncheckNumChange",(num)=>{
+        this.uncheckNum=num;
+      });
+    }
   }
 </script>
 <style scoped lang="stylus">
@@ -35,7 +39,6 @@
   .right
     width 1000px
     margin-left 200px
-    min-height 500px
     .tab
       background #fff
       height 60px

@@ -1,21 +1,21 @@
 <template>
-    <!--待审核-->
-    <div class="uncheck">
-      <div class="search-bar">
-        <div class="search" >
-          <input type="text" placeholder="查找昵称/帐号" v-model="srchText" v-clickoutside="clickSrchOutside" @input="fuzzyInput">
-          <img src="/static/images/search_gray.png" @click="search">
-          <ul class="cand" v-show="srchShowTip">
-            <li v-for="(o,i) in tips" @click="srchText=o.nickname+'/'+o.phone" :key="i">{{o.nickname+"/"+o.phone}}</li>
-          </ul>
-        </div>
-        <ul class="results">
-          <li :class="{active:candSel==i}" v-for="(o,i) in cands" :key="i" @click="clickCand">{{o.nickname+"/"+o.phone}}</li>
+  <!--待审核-->
+  <div class="uncheck">
+    <div class="search-bar">
+      <div class="search" >
+        <input type="text" placeholder="查找昵称/帐号" v-model="srchText" v-clickoutside="clickSrchOutside" @input="fuzzyInput">
+        <img src="/static/images/search_gray.png" @click="search">
+        <ul class="cand" v-show="srchShowTip">
+          <li v-for="(o,i) in tips" @click="srchText=o.nickname+'/'+o.phone" :key="i">{{o.nickname+"/"+o.phone}}</li>
         </ul>
-        <SimplePagination :total="candNum" :pageSize="20" style="width:100%" emitValue="changePage" v-if="candNum>20"></SimplePagination>
       </div>
-      <UploadInfo info="info"></UploadInfo>
+      <ul class="results">
+        <li :class="{active:candSel==i}" v-for="(o,i) in cands" :key="i" @click="clickCand">{{o.nickname+"/"+o.phone}}</li>
+      </ul>
+      <SimplePagination :total="candNum" :pageSize="20" style="width:100%" emitValue="changePage" v-if="candNum>20"></SimplePagination>
     </div>
+    <UploadInfo info="info"></UploadInfo>
+  </div>
 </template>
 <script>
   import SimplePagination from "../component/SimplePagination";
@@ -74,6 +74,8 @@
           submit_time: "2018/03/09 23:30:42   ",
           name: "李小蹦",
           idcard: "189099087656567890",
+          bankcard: "",
+          bank: "",
           img1: "",
           img2: "",
           img3: "",
