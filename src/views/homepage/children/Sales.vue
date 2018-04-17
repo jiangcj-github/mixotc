@@ -46,6 +46,7 @@
       <div class="division"></div>
       <div class="remark">备注：{{e.info}}</div>
     </div>
+    <div class="empty" v-if="sales.length<=0">没有发布信息</div>
     <Pagination :total="total" :pageSize="pageSize" emitValue="changePage" v-show="total>pageSize"></Pagination>
   </div>
 </template>
@@ -246,4 +247,15 @@
         font-size 13px
         color #999999
         letter-spacing 0.23px
+    .empty
+      background-color #fff
+      box-sizing border-box
+      background-repeat no-repeat
+      background-image url(/static/images/rectangle.png)
+      background-size 140px 140px
+      background-position center 30px
+      padding-top 170px
+      height 250px
+      text-align center
+      color #999
 </style>

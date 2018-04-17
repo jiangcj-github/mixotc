@@ -16,6 +16,7 @@
         <span>{{e.name}}</span>
       </div>
     </div>
+    <div class="empty" v-if="rates.length<=0">没有评价信息</div>
     <Pagination :total="total" :pageSize="pageSize" emitValue="changePage" style="margin-top:20px" v-if="total>0"></Pagination>
   </div>
 </template>
@@ -132,4 +133,15 @@
         line-height 20px
         margin-top 5px
         display inline-block
+  .empty
+    background-color #fff
+    box-sizing border-box
+    background-repeat no-repeat
+    background-image url(/static/images/rectangle.png)
+    background-size 140px 140px
+    background-position center 30px
+    padding-top 170px
+    height 250px
+    text-align center
+    color #999
 </style>
