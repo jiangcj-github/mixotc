@@ -62,5 +62,6 @@ const ROUTES = [
 ]
 
 export default {
-  routes:ROUTES
-}
+  routes: ROUTES
+};
+

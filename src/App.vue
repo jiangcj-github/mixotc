@@ -45,7 +45,7 @@
             data: data.body
           });
           //获取信任人员列表
-          this.WsProxy.send('otc', 'get_trust_ids', {type: 2}).then(data => {
+          this.WsProxy.send('otc', 'get_trust_ids', { type: 2}).then(data => {
             console.log(data)
           })
           this.$store.commit({type: 'changeLogin', data: true});
@@ -68,7 +68,6 @@
           body: this.token
         }))
       }
-
       if (!this.token) return;
       ws.start(this.HostUrl.ws);
     },
@@ -143,13 +142,6 @@
            window.onmousedown = null
         },
         immediate: true
-      },
-      token(curVal, oldVal) {
-        if (curVal && this.watchTokenFlag) {
-          this.watchTokenFlag = false
-          this.WebSocket.start(this.HostUrl.ws);
-          console.log(9999999)
-        }
       }
     }
   }

@@ -55,9 +55,10 @@ export default {
       // }
 
     // 广告不存在  
-    //   flag = await this.WsProxy.send('xxx', 'xxx', {}).then(data => {
-       
+    //   await this.WsProxy.send('otc', 'sale_detail', {id}).then(data => {
+    //    console.log(data)
     //   })
+    //   return
     // //广告不存在
     //   if (flag === 3) {
     //     this.Bus.$emit(this.emitValue, 3)

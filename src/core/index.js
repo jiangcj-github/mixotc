@@ -1,10 +1,10 @@
 import Vue from 'vue'
-
+import Router from "vue-router";
 import Vuex from "vuex";
 
 import "regenerator-runtime/runtime"//使用promise
 
-import Router from './router'
+import Route from './router'
 
 
 import Store from "./store";
@@ -81,6 +81,44 @@ Vue.directive('focus', {
     para.value && el.focus()
   }
 });
+
+let _beforeUnloadTime = 0,
+  _gapTime = 0,
+  tabIndex = 0,
+  isNewTab = false,
+  isFireFox = navigator.userAgent.indexOf("Firefox") > -1; //是否是火狐浏览器
+window.onunload = function() {
+  _gapTime = Date.now() - _beforeUnloadTime;
+  if (_gapTime <= 5) {
+    localStorage.setItem("getSessionStorage", Date.now());
+    localStorage.removeItem("tabIndex");
+  }
+
+  // else
+  //   localStorage['test'] = 'refresh  '+_beforeUnload_time
+};
+window.onbeforeunload = function() {
+  _beforeUnloadTime = Date.now();
+  if (isFireFox)
+    //火狐关闭执行
+    localStorage["test"] = "end";
+};
+/**
+ * 分辨第一次打开，还是在已经打开的情况下，再次打开一个页面
+ * 现在已经做到了，在已经打开一个页面的前提下，再次打开新的页面会在已经打开的页面中触发某个事件
+ * 每次打开都会执行相同的js，除了上述情况
+ * 新打开的页面都没有sessionStorage，但是都有localStorage
+ * 刷新不会删除sessionStorage
+ * 监听浏览器关闭事件，可以在标签关闭的时候做一些事情
+ */
+// 为了简单明了删除了对IE的支持
+if (!sessionStorage.length) {
+  // 这个调用能触发目标事件，从而达到共享数据的目的
+  // console.log(1, 'sessionStorage.length')
+  isNewTab = true;
+  localStorage.setItem("getSessionStorage", Date.now());
+}
+
 const RUN_APP = (App, config, plugin) => {
   // console.log(config)
   /* eslint-disable no-new */
@@ -90,11 +128,11 @@ const RUN_APP = (App, config, plugin) => {
 
   //引用vue-router
   Vue.use(Router)
-  let router = Router.install(config.RouterConfig)
+  let router = Route.install(Vue.prototype, config.RouterConfig);
 
   // 引用vuex
   Vue.use(Vuex)
-  let store = Store.install(Vue, config.StoreConfig)
+  let store = Store.install(Vue.prototype, config.StoreConfig);
 
   Vue.prototype.$store = store;
 
@@ -116,14 +154,78 @@ const RUN_APP = (App, config, plugin) => {
     next()
   })
 
-  new Vue({
-    el: '#app',
+  let vm = new Vue({
+    el: "#app",
     router,
+    components: { App },
+    template: '<App v-if="isReload" />',
     store,
-    components: {App},
-    template: '<App/>',
+    data() {
+      return {
+        isReload: !isNewTab
+      };
+    },
+    methods: {
+      reload() {
+        // console.log('this.isReload', this.isReload)
+        this.isReload = false;
+        this.$nextTick(() => (this.isReload = true));
+      }
+    }
   });
+
+  let changeTabIndex = function() {
+    if (localStorage["tabIndex"]) {
+      tabIndex = Number(localStorage["tabIndex"]) + 1;
+      localStorage["tabIndex"] = tabIndex;
+    }
+
+    if (!localStorage["tabIndex"]) {
+      localStorage["tabIndex"] = 0;
+    }
+  };
+
+  changeTabIndex();
+
+  // console.log('vm.reload',Number(localStorage['tabIndex']),!Number(localStorage['tabIndex']))
+  if (!Number(localStorage["tabIndex"])) {
+    vm.reload();
+  }
+
+  window.addEventListener("storage", function(event) {
+    if (event.key == "getSessionStorage") {
+      // console.log(2, 'getSessionStorage',tabIndex)
+      // 已存在的标签页会收到这个事件
+      changeTabIndex();
+      localStorage.setItem("sessionStorage", JsonBig.stringify(sessionStorage));
+      localStorage.removeItem("sessionStorage");
+    } else if (event.key == "removeSessionStorage") {
+      // 已存在的标签页会收到这个事件
+      // 一个页面退出其他页面删除token
+      store.commit({ type: "changeToken", data: "" });
+    } else if (event.key == "sessionStorage" && !sessionStorage.length) {
+      // 新开启的标签页会收到这个事件
+
+      let data = JsonBig.parse(event.newValue);
+      // console.log(3, 'sessionStorage 0', event.newValue, data)
+      for (let key in data) {
+        // console.log(3, 'sessionStorage 1', key, data[key])
+        // console.log('开始赋值', vm)
+        sessionStorage[key] = data[key];
+        store.replaceState(JsonBig.parse(sessionStorage[key]));
+        vm.reload();
+      }
+    } else if (event.key == "getToken") {
+      // 已存在的标签页会收到这个事件;
+      // 一个页面登录，让其他页面获取token
+      if (!event.newValue) return;
+      store.commit({ type: "changeToken", data: event.newValue });
+    }
+  });
+
 };
+
+
 
 export {
   RUN_APP

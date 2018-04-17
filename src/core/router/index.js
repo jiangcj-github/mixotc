@@ -1,10 +1,7 @@
-import Vue from 'vue'
 import Router from 'vue-router'
 
-Vue.use(Router)
-
 const ROUTE = {
-  install(config) {
+  install(app, config) {
     let router = new Router({
       routes: config.routes
     })
