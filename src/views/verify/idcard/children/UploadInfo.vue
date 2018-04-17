@@ -38,7 +38,7 @@
   <div class="err no-result" v-else-if="info.type===1">无相应的用户，请重新搜索</div>
   <div class="err load-failed" v-else-if="info.type===2">网络异常，请重新搜索</div>
   <div class="err net-error" v-else-if="info.type===3">加载失败，请重新搜索</div>
-  <div class="err no-result" v-else>无待审核数据</div>
+  <div class="err empty" v-else>没有待审核数据</div>
 </template>
 <script>
   export default {
@@ -228,9 +228,11 @@
     letter-spacing 0.36px
     box-sizing border-box
     &.no-result
-      background-image url(/static/images/verify/err_no_result.png);
+      background-image url(/static/images/verify/err_no_result.png)
     &.load-failed
-      background-image url(/static/images/verify/err_load_failed.png);
+      background-image url(/static/images/verify/err_load_failed.png)
     &.net-error
-      background-image url(/static/images/verify/err_net_error.png);
+      background-image url(/static/images/verify/err_net_error.png)
+    &.empty
+      background-image url(/static/images/rectangle.png)
 </style>

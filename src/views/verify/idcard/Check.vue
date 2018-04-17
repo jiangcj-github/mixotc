@@ -76,7 +76,7 @@
         <div class="err net-error">加载失败，请重新搜索</div>
       </div>
       <div v-else>
-        <div class="err no-result">无已审核数据</div>
+        <div class="err empty">没有已审核数据</div>
       </div>
     </div>
 </template>
@@ -432,10 +432,12 @@
       letter-spacing 0.36px
       box-sizing border-box
       &.no-result
-        background-image url(/static/images/verify/err_no_result.png);
+        background-image url(/static/images/verify/err_no_result.png)
       &.load-failed
-        background-image url(/static/images/verify/err_load_failed.png);
+        background-image url(/static/images/verify/err_load_failed.png)
       &.net-error
-        background-image url(/static/images/verify/err_net_error.png);
+        background-image url(/static/images/verify/err_net_error.png)
+      &.empty
+        background-image url(/static/images/rectangle.png)
   placeholder()
 </style>
