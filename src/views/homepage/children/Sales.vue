@@ -46,7 +46,7 @@
       <div class="division"></div>
       <div class="remark">备注：{{e.info}}</div>
     </div>
-    <Pagination :total="total" :pageSize="pageSize" emitValue="changePage"></Pagination>
+    <Pagination :total="total" :pageSize="pageSize" emitValue="changePage" v-show="total>pageSize"></Pagination>
   </div>
 </template>
 <script>

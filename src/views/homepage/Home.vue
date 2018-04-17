@@ -284,6 +284,7 @@
       padding-left 30px
       border-bottom 1px solid #e1e1e1
       >li
+        text-align center
         font-size 16px
         letter-spacing 0.33px
         color #999999

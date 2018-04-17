@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Header></Header>
-    <router-view/>
+    <router-view class="main-container"/>
     <Footer></Footer>
     <News></News>
   </div>
@@ -66,7 +66,7 @@
           body: this.token
         }))
       }
-      
+
       if (!this.token) return;
       ws.start(this.HostUrl.ws);
     },
@@ -153,12 +153,19 @@
   }
 </script>
 
-<style>
+<style lang="stylus">
+  @import "stylus/base.styl";
   #app {
     height: 100%;
+    box-sizing()
+    display: flex;
+    flex-direction: column;
     padding-top: 100px;
     font-family: 'Avenir', Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+  .main-container{
+    flex-grow: 1;
   }
 </style>
