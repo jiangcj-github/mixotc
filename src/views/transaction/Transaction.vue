@@ -85,9 +85,9 @@
         <img src="/static/images/question.png" alt="">
       </div>
     </div>
-    <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="showPopup = false">
+    <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="popupClick(toPath)">
       <slot>
-        <p>{{popupTip}}</p>
+        <p><span>{{popupTip}}</span></p>
       </slot>
     </BasePopup>
   </div>
@@ -134,6 +134,8 @@ import BasePopup from '@/components/common/BasePopup';
         },
         showPopup: false,
         popupTip: '',
+        toPath: '',
+        timer: null,
         emitValue: 'popup',
         result: []
       }
@@ -153,8 +155,7 @@ import BasePopup from '@/components/common/BasePopup';
         this.filte[type] = data;
       });
       this.Bus.$on(this.emitValue, data => {
-        this.popupTip = data;
-
+        this.verifyState(data)
       });
     },
     destroyed() {
@@ -227,6 +228,44 @@ import BasePopup from '@/components/common/BasePopup';
           return;
         }
         title && this.filte[title] === 2 && (this.filte[title] = 1)
+      },
+      popupClick(path) {
+        clearTimeout(this.timer)
+        this.showPopup = false;
+        this.$router.push({ name: path})
+      },
+      verifyState(state) {
+        if (state === 1) {
+          this.popupTip = '请先进行实名认证';
+          // this.toPath = 'order';
+          
+        } 
+        if (state === 2) {
+          this.popupTip = '不能购买自己的广告';
+          this.toPath = 'index';
+        }
+        if (state === 3) {
+          this.popupTip = '广告已下架';
+          this.toPath = 'index';
+        }
+        if (state === 4) {
+          this.popupTip = '创建钱包失败';
+          this.toPath = 'index';
+        }
+        if (state === 6) {
+          confirm('您的交易上限为10万，是否申请大额交易？')
+          return;
+        }
+        if (state === 7) {
+          this.popupTip = '有未完成购买订单，请完成后再下单';
+          this.toPath = 'index';
+        }
+        this.showPopup = true;
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+          this.showPopup = false;
+          this.$router.push({ name: this.toPath})
+        }, 3000);
       }
     },
     computed: {
@@ -551,6 +590,20 @@ import BasePopup from '@/components/common/BasePopup';
       position absolute
       left 650px
       top 35px
-
+  .popup
+    text-align center
+    p
+      display flex
+      width 100%
+      height 100%
+      justify-content center
+      align-items center
+      box-sizing()
+      padding 0 40px 0 40px
+      font-size 14px
+      color #333333
+      letter-spacing 0.29px
+      span
+        display block
 
 </style>

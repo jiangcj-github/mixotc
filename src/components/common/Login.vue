@@ -117,6 +117,10 @@
         return /^\d{6}$/.test(code);
       },
       sendCode(){
+        if (this.isSend) {
+        console.log(9999999999);
+        return
+      };
        this.type = this.checkAccount(this.account);
         let accType = this.checkAccount(this.account);
         if (!this.type) return;
@@ -171,6 +175,9 @@
               this.captcha = false;
               return;
             }
+            this.WsProxy.send('otc', 'get_trust_ids', {type: 2}).then(data => {
+              console.log(data)
+            })
             this.showForm = false;
             this.loginSuccess = true;
             clearTimeout(this.timer);
@@ -181,7 +188,6 @@
               type: 'getUserInfo',
               data: data.body
             });
-            // data.body.msg && sessionStorage.setItem('otcToken', data.body.msg);
             this.saveAccount(this.account)
             data.body.msg && this.$store.commit({ type: 'changeToken', data: data.body.msg })
             data.body.msg && localStorage.setItem('getToken', data.body.msg);

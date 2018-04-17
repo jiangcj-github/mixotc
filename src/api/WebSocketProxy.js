@@ -7,7 +7,7 @@ function WebSocketProxy(ws) {
 
 WebSocketProxy.prototype.seq=0;
 
-WebSocketProxy.prototype.send=function(op, action, sendData){
+WebSocketProxy.prototype.send = function (op, action, sendData){
   return new Promise((resolve,reject) => {
     this.seq=this.ws.seq;
     this.ws.onMessage[this.seq]= {

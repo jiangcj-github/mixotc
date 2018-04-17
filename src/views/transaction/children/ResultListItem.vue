@@ -2,8 +2,8 @@
   <li class="item clearfix">
     <div class="title merchant">
       <!-- <img class="whole" src="/static/images/whole_icon2.png" alt="" > -->
-      <img class="avatar" @click="toHomePage(data.id)" :src="data.icon ? `${HostUrl.http}image/${data.icon}` : `/static/images/default_avator.png`" alt="">
-      <span class="nickname" @click="toHomePage(data.id)">{{data.trader}}</span>
+      <img class="avatar" @click="toHomePage(data.sid)" :src="data.icon ? `${HostUrl.http}image/${data.icon}` : `/static/images/default_avator.png`" alt="">
+      <span class="nickname" @click="toHomePage(data.sid)">{{data.trader}}</span>
       <span class="trust">信任</span>
     </div>
     <div class="title deal-volume">1+BTC</div>
@@ -18,7 +18,7 @@
     <div class="title amount">123.45</div>
     <div class="title price">{{data.price}}</div>
     <div class="title button">
-      <button @click="toOrder(data.id)">购买</button>
+      <button @click="_toOrder(data)">购买</button>
     </div>
   </li>
 </template>
@@ -26,22 +26,78 @@
 <script>
 export default {
   props: ['data','emitValue'],
+  mounted() {
+    console.log(this.data);
+  },
   methods: {
     toHomePage(sid) {
       this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})
     },
-    toOrder(id) {
+    async _toOrder({id, sid, btverify, currency}) {
       //未登录
+      let flag = 0;
       if (!this.$store.state.isLogin) {
         this.$store.commit({type: 'changeLoginForm', data: true});
         return;
       }
-      //未实名认证
-      if (!this.$store.state.userInfo.verify) {
-        this.Bus.$emit(this.emitValue, 1)
-        return;
-      }
-    //广告不存在
+      // // 未实名认证
+      // if (!this.$store.state.userInfo.verify) {
+      //   //未实名认证
+      //   this.Bus.$emit(this.emitValue, 1)
+      //   return;
+      // }
+
+      // // 是否是自己的广告
+      // if (this.JsonBig.stringify(this.$store.state.userInfo.uid) === this.JsonBig.stringify(sid)) {
+      //  //自己的广告
+      //   this.Bus.$emit(this.emitValue, 2)
+      //   return;
+      // }
+
+    // 广告不存在  
+    //   flag = await this.WsProxy.send('xxx', 'xxx', {}).then(data => {
+       
+    //   })
+    // //广告不存在
+    //   if (flag === 3) {
+    //     this.Bus.$emit(this.emitValue, 3)
+    //     return
+    //   };
+
+    // // 是否有钱包(创建成功5，创建失败4)
+    //   await this.WsProxy.send('wallet', 'wallets', {}).then(data => {
+    //     data.wallets.filter(item => {
+    //       return currency === item.currency
+    //     }).length > 0 ? (flag = 5) : (flag = 4)
+    //   })
+      // if (flag === 4) {
+      //   // 创建钱包
+      //   await this.WsProxy.send('wallet', 'new_wallet', {currency}).then(data => {
+      //     flag = 5
+      //   }).catch(error => {
+      //     console.log(error)
+      //   })
+      // }
+      // //创建钱包失败
+      // if (flag === 4) {
+      //   this.Bus.$emit(this.emitValue, 4)
+      //   return
+      // }
+
+      // if (this.$store.state.userInfo.btverify < btverify) {
+      // //  大额交易权限判断（权限不符6）
+      //   this.Bus.$emit(this.emitValue, 6)
+      //   return
+      // }
+      
+      // // 是否有未完成订单（有7）
+      // await this.WsProxy.send('otc', 'orders', {type:1, state: '1,2,3', origin: 0}).then(data => {
+      //   if(data.orders) flag = 7;
+      // })
+      // if (flag === 7) {
+      //   this.Bus.$emit(this.emitValue, 7)
+      //   return
+      // }
       this.$router.push({ name: 'order', query: { id: this.JsonBig.stringify(id) }})
     }
   }

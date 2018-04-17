@@ -3,5 +3,6 @@ export default {
   isLogin: false,
   userInfo: null,
   showChat: false,
+  trustList: [],
   token: ''
 };

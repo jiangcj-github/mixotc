@@ -18,8 +18,8 @@
       <li><span>简体中文</span></li>
       <li><span class="line">帮助</span></li>
       <li><span class="line">大额交易申请</span></li>
-      <li><span class="line">审核</span></li>
-      <li><span>仲裁</span></li>
+      <li><router-link :to="{name: 'identifyAuth'}" class="line" tag="span">审核</router-link></li>
+      <li><router-link :to="{name: 'arbitrationRecord'}" tag="span">仲裁</router-link></li>
     </ul>
   </div>
 </template>
@@ -41,7 +41,7 @@
 
     },
     mounted() {
-      this._initGetdata()
+      // this._initGetdata()
     },
     methods: {
       async _initGetdata() {
