@@ -44,12 +44,12 @@
     <!--菜单项tab-->
     <ul class="menu-tab">
         <li :class="{active:tab==0}" @click="tab=0">他的发布</li>
-        <li :class="{active:tab==1}" @click="tab=1">收到的评价<i v-if="ratesNum>0">&nbsp;{{ratesNum}}</i></li>
+        <li :class="{active:tab==1}" @click="tab=1">收到的评价<i v-if="ratesNum>0">({{ratesNum}})</i></li>
     </ul>
     <!--发布列表-->
-    <Sales :uid="uid" v-if="tab==0"></Sales>
+    <Sales :uid="uid" v-show="tab==0"></Sales>
     <!--评价列表-->
-    <Rates :uid="uid" v-else-if="tab==1" totalChange="ratesNumChange"></Rates>
+    <Rates :uid="uid" v-show="tab==1" totalChange="ratesNumChange"></Rates>
   </div>
 </template>
 <script>
@@ -83,8 +83,8 @@
           nickname: o.name || 'unknown',
           headimg: o.icon || '/static/images/default_avator.png',
           tradeWidthNum: o.mytrade || 0,
-          orderNum: o.trade || 0,
-          volumn: (o.volumns || 0)+"+BTC",
+          orderNum: o.order || 0,
+          volumn: (o.volumes || 0)+"+BTC",
           praiseRate: (o.rate || 0) +"%",
           trustedNum: o.trusted || 0,
           trustNum: o.trust || 0,
@@ -120,7 +120,7 @@
           console.log(msg);
         });
       },
-      loadTraderInfo(){console.log(this.loginUid)
+      loadTraderInfo(){
         this.WsProxy.send('otc','trader_info',{
           uid:this.loginUid,
           id:this.uid

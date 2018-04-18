@@ -4,29 +4,23 @@
       <div class="head">
         <div class="filter">
           <div class="f1">
-            <a class="drop-down" @click="ft_res_show=!ft_res_show" @blur="ft_res_show=false" href="javascript:void(0)">
-              {{ft_ress[ft_res_sel].text}}
-              <ul v-show="ft_res_show" class="drop">
-                <li @click="ft_res_sel=i" v-for="(e,i) in ft_ress" :key="i">{{e.text}}</li>
-              </ul>
-            </a>
+              <div class="search">
+                <span @click="srchUlShow=!srchUlShow" @blur="srchUlShow=false" tabindex="0">搜索{{srchUls[srchUlSel].text}}</span>
+                <ul v-show="srchUlShow">
+                  <li v-for="(e,i) in srchUls" :key="i" @mousedown="srchUlSel=i">{{e.text}}</li>
+                </ul>
+                <input type="text" v-model="srchInput" title="">
+                <img src="/static/images/cancel_icon.png" @click="srchInput=''" v-show="srchInput.length>0">
+                <a href="javascript:void(0)"></a>
+              </div>
           </div>
           <div class="f2">
-            <img src="/static/images/date_icon.png" class="data-icon">
-            <DatePicker text="开始日期"></DatePicker>
-            <span class="to">-</span>
-            <DatePicker text="截止日期"></DatePicker>
+            <DateInterval onChange="onDateChange"></DateInterval>
           </div>
           <div class="f3">
             <a href="javascript:void(0)" :class="{active:flt_days==1}" @click="flt_days=1">今天</a>
             <a href="javascript:void(0)" :class="{active:flt_days==3}" @click="flt_days=3">三天</a>
             <a href="javascript:void(0)" :class="{active:flt_days==7}" @click="flt_days=7">七天</a>
-          </div>
-        </div>
-        <div class="search-wrap">
-          <div class="search">
-            <input type="text" placeholder="搜索商家昵称/账号">
-            <a href="javascript:void(0)"></a>
           </div>
         </div>
       </div>
@@ -64,7 +58,7 @@
         <div class="division"></div>
         <div class="remark">备注：照片不清晰，模糊看不清</div>
       </div>
-      <Pagination total="43" pageSize="2" emitValue="changeArbiPage" style="width:1000px;margin-top:20px"></Pagination>
+      <Pagination :total="43" :pageSize="2" emitValue="changeArbiPage" style="width:1000px;margin-top:20px"></Pagination>
       <BasePopup :show="show_pop" :width="746" :height="500">
         <div class="pop">
           <h2>沟通记录：</h2>
@@ -85,19 +79,38 @@
 </template>
 <script>
   import Pagination from "@/components/common/Pagination";
-  import DatePicker from "@/components/common/DatePicker";
+  import DateInterval from "@/components/common/DateInterval";
   import BasePopup from "@/components/common/BasePopup";
+  import SearchInput from "@/components/common/SearchInput";
   import Left from "./layout/Left";
 
   export default {
     components: {
       Left,
       Pagination,
-      DatePicker,
+      DateInterval,
       BasePopup,
+      SearchInput,
     },
     data() {
       return {
+
+        srchUls: [
+          {text: "申诉人", key: ""},
+          {text: "申诉对象", key: ""},
+          {text: "处理人", key: ""},
+          {text: "责任人", key: ""},
+          {text: "订单号", key: ""},
+        ],
+        srchUlSel: 0,
+        srchUlShow: false,
+        srchInput: "",
+
+        fltDate1: "",
+        fltDate2: "",
+
+        fltDays: 0,
+
 
         ft_res_show: false, //结果过滤
         ft_res_sel: 0,
@@ -113,8 +126,13 @@
       }
     },
     mounted(){
-      this.Bus.$on('changeArbiPage',(p) => {
+      this.Bus.$on("onPageChange",(p) => {
 
+      });
+      this.Bus.$on("onDateChange",(date1,date2)=>{
+        this.fltDate1=date1;
+        this.fltDate2=date2;
+        console.log(date1+"--"+date2);
       });
     },
     methods: {
@@ -139,76 +157,65 @@
         align-items center
         .f1
           flex-grow 1
-          >a
-            display inline-block
-            line-height 50px
-            font-size 13px
-            letter-spacing 0.27px
-            width 65px
-            text-align center
-            &.drop-down
+          height 30px
+          .search
+            width 456px
+            height 30px
+            box-sizing border-box
+            border 1px solid #E1E1E1
+            border-radius 2px
+            display inline-flex
+            position relative
+            >span
+              font-size 13px
+              color #999
+              letter-spacing 0
+              line-height 28px
+              padding 0 15px 0 10px
+              display inline-block
               position relative
               cursor pointer
-              &::after
-                content ''
-                display block
-                width 0
-                height 0
-                border-top 5px solid #333333
-                border-left 5px solid transparent
-                border-right 5px solid transparent
+              outline none
+              &:after
+                content ""
+                border 5px solid transparent
+                border-top-color #ffb422
                 position absolute
-                right -15px
-                top 50%
-                margin-top -3px
-              &:hover .drop
-                display block
-              .drop
-                position absolute
-                top 40px
-                left 0
-                background #FFFFFF
-                border 1px solid #E1E1E1
-                width 80px
-                z-index 1000
-                >li
-                  float none
-                  text-align center
-                  height 30px
-                  line-height 30px
-                  &:hover
-                    background #FFF3EB
-                  .f2
-                    display inline-flex
-                    align-items center
-                    margin-right 20px
-                    .data-icon
-                      margin-right 10px
-                    .to
-                      width 15px
-                      text-align center
-                  .f3
-                    font-size 13px
-                    letter-spacing 0.27px
-                    background #FFF3EB
-                    border 1px solid #FFF3EB
-                    border-radius 2px
-                    display inline-flex
-                    align-items center
-                    height 30px
-                    box-sizing border-box
-                    padding 0 1px
-                    >a
-                      width 50px
-                      line-height 26px
-                      display inline-block
-                      text-align center
-                      color #999
-                      &.active
-                        background #FFFFFF
-                        border-radius 2px
-                        color #FFB422
-
+                top 13px
+                right 0
+            >ul
+              position absolute
+              left -1px
+              right -1px
+              top 29px
+              background #fff
+              border 1px solid #e1e1e1
+              z-index 100
+              >li
+                padding 0 10px
+                line-height 30px
+                cursor pointer
+                color #333
+                font-size 13px
+                &:hover
+                  background #fff3eb
+            >img
+              align-self center
+              margin-right 10px
+              &:hover
+                cursor pointer
+                opacity 0.8
+            >input
+              padding 0 10px
+              flex-grow 1
+            >a
+              display inline-block
+              flex-shrink 0
+              width 72px
+              background url(/static/images/search.png) no-repeat center center
+              background-color #e1e1e1
+              &:hover
+                background-color #dcd5d5
         .f2
           display inline-flex
           align-items center
@@ -239,29 +246,6 @@
               background #FFFFFF
               border-radius 2px
               color #FFB422
-
-
-      .search-wrap
-        height 50px
-        padding 10px 30px
-        box-sizing border-box
-        .search
-          width 456px
-          height 30px
-          border 1px solid #E1E1E1
-          border-radius 2px 2px 2px 0
-          display inline-flex
-          >input
-            padding 0 10px
-            flex-grow 1
-          >a
-            display inline-block
-            flex-shrink 0
-            width 72px
-            background url(/static/images/search.png) no-repeat center center
-            background-color #e1e1e1
-            &:hover
-              background-color #dcd5d5
     .tb-head
       height 50px
       padding 0 30px
