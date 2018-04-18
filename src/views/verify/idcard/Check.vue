@@ -4,10 +4,10 @@
       <div class="filter">
         <div class="f1">
           <input type="text" placeholder="搜索商家昵称/账号" v-model="srchText" v-clickoutside="clickOutside" @input="fuzzyInput">
-          <img src="/static/images/cancel_icon.png" @click="srchText=''" :class="{show:srchText.length>0}">
+          <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
           <a href="javascript:void(0)" @click="search"></a>
           <ul v-show="srchShowTip" class="ft-cand">
-            <li v-for="(o,i) in tips" :key="i" @click="srchText=o.nickname+'/'+o.phone;search">{{o.nickname+'/'+o.phone}}</li>
+            <li v-for="(o,i) in tips" :key="i" @mousedown="srchText=o.nickname+'/'+o.phone" @click="search">{{o.nickname+'/'+o.phone}}</li>
           </ul>
         </div>
         <div class="f2">
@@ -208,8 +208,6 @@
           &:hover
             cursor pointer
             opacity 0.8
-          &.show
-            display inline-block
         >a
           display inline-block
           flex-shrink 0

@@ -91,7 +91,7 @@
     <!-- 引入购买弹窗 -->
     <OrderLayer :orderLayerShow="showOrderLayer" @offOrderLayer="openOrderLayer"></OrderLayer>
     <!-- 引入勾选购买规则弹窗 -->
-    <BasePopup :show="remindLayer" class="remind-layer"><span  v-clickoutside="closeLayer">请勾选购买规则</span></BasePopup>
+    <BasePopup :show="remindLayer" class="remind-layer"><span v-clickoutside="closeLayer">请勾选购买规则</span></BasePopup>
   </div>
 </template>
 <script>

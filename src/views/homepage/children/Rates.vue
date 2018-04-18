@@ -17,7 +17,7 @@
       </div>
     </div>
     <div class="empty" v-if="rates.length<=0">没有评价信息</div>
-    <Pagination :total="total" :pageSize="pageSize" emitValue="changePage" style="margin-top:20px" v-if="total>0"></Pagination>
+    <Pagination :total="total" :pageSize="pageSize" emitValue="changePage" style="margin-top:20px" v-if="total>pageSize"></Pagination>
   </div>
 </template>
 <script>
@@ -133,6 +133,8 @@
         line-height 20px
         margin-top 5px
         display inline-block
+    &:first-of-type
+      border-top none
   .empty
     background-color #fff
     box-sizing border-box

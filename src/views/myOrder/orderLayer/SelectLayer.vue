@@ -58,16 +58,16 @@
             this.$store.commit({'type':'changeChatBox', data: true})
             break;
           case 9:  // 撤销申述
-            this.WsProxy.send('otc','update_order',{
-              "id": this.id,
-              "state": 2, // 1 等待买家付款; 2 卖家确认收款／等待卖家发货; 3申诉中; 4 已取消; 5 已超时; 6交易完成; 7 买家评价; 8 卖家评价; 9 双方已评
-              "info": this.info
+            this.WsProxy.send('control','cancel_appeal',{
+              "id": this.id, // 交易id
+              "uid": this.$store.state.userInfo.uid,
+              "type": 1, // 1 交易 ; 2 担保
             }).then((data)=>{
               console.log('撤销申述', data)
             }).catch((msg)=>{
               console.log(msg);
             });
-            // window.location.reload()
+            window.location.reload()
             //this.$emit('offSelet', 'false')
             break;
         }
