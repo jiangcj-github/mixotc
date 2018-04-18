@@ -27,7 +27,7 @@
     },
     watch: {
       paymentShow(state) {
-        state === true ? this.codeLayer = true : this.codeLayer = false
+        this.codeLayer = state === true ?  true : false
       }
     },
     mounted() {

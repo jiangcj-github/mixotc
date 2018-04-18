@@ -26,7 +26,6 @@
     },
     data() {
       return {
-
         value: '',
         pickerOptions: {
           dateUp: this.dateUp,

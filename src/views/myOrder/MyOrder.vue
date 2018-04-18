@@ -5,8 +5,8 @@
       <router-link to="/order">我的订单</router-link>
     </h1>
     <div class="order-item">
-      <span @click="selectStatus(1)" :class="contentTabIndex === 1 ? 'content-btn-active' : 'content-btn'">进行中(3)</span>
-      <span @click="selectStatus(2)" :class="contentTabIndex === 2 ? 'content-btn-active' : 'content-btn'">完成(6)</span>
+      <span @click="selectStatus(1)" :class="contentTabIndex === 1 ? 'content-btn-active' : 'content-btn'">进行中({{conductNum}})</span>
+      <span @click="selectStatus(2)" :class="contentTabIndex === 2 ? 'content-btn-active' : 'content-btn'">完成({{completeNum}})</span>
     </div>
     <div class="order-select clearfix">
       <SearchInput :content="content"
@@ -22,7 +22,7 @@
           <!--<li>-</li>-->
           <!--<li><DatePicker :emitValue="endValue" :text="endP"></DatePicker></li>-->
         <!--</ol>-->
-        <DateInterval class="date-group"></DateInterval>
+        <DateInterval class="date-group" :endEmitValue="endValue"  :startEmitValue="startValue"></DateInterval>
         <ul class="clearfix">
           <li v-for="(item, index) in timeList" :class="{'time-active': index == num}" @click="selectTime(index)">{{item}}</li>
         </ul>
@@ -78,10 +78,10 @@
             <p>{{content.create && Number(content.create).toDate('yyyy/MM/dd')}}</p>
             <p>{{content.create && Number(content.create).toDate('HH:mm')}}</p>
           </li>
-          <li :class="JsonBig.stringify(content.buyer) === userId ? 'text-g' : 'text-r'">{{JsonBig.stringify(content.buyer) == userId ? '购买' : '出售'}}</li>
+          <li :class="JsonBig.stringify(content.buyer) == userId ? 'text-g' : 'text-r'">{{JsonBig.stringify(content.buyer) == userId ? '购买' : '出售'}}</li>
           <li>{{content.currency&&content.currency.toUpperCase()}}</li>
           <li>
-            <p><router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(content.sid)}}">{{content.name || content.contact}}</router-link></p>
+            <p><router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(content.buyer) == userId ? content.seller : content.buyer}}">{{content.name || content.contact}}</router-link></p>
             <p class="talk" @click="toContact">联系他</p>
           </li>
           <li>{{content.price}}</li>
@@ -230,7 +230,6 @@
 
         startValue: 'startValueDate',
         endValue: 'endValueDate',
-        endP: '结束日期',
 
         timeList: ['今天', '三天', '七天'], // 时间Tab切换title
 
@@ -269,13 +268,16 @@
 
         minutes: 0, // 定时器用
         seconds: 0,
-        showResetTimeFlag: true
+        showResetTimeFlag: true,
+
+        conductNum: 0, // 进行数量
+        completeNum: 0 // 完成数量
       }
     },
     created() {
       // 获取用户id
       this.userId = this.JsonBig.stringify(this.$store.state.userInfo.uid)
-      console.log(this.userId)
+      console.log('1111', typeof this.userId, this.userId)
       // 获取进行状态
       this.selectState = "1,2,3"
       this.initData()
@@ -308,17 +310,15 @@
       // this.Bus.$on('offTime', data => this.showTime = data);
       // 时间框开始值
       this.Bus.$on(this.startValue, (data) => {
-        this.startValueDate = (new Date(data).getTime()).toString()
+        this.startValueDate = new Date(data).getTime()
+        console.log('this.startValue', this.startValueDate)
         this.initData()
-        console.log('startValue',  this.startValueDate)
-        // console.log('startValueData',  data)
       });
       // 时间框结束值
       this.Bus.$on(this.endValue, (data) => {
-        this.endValueDate = new Date(data).getTime().toString()
+        this.endValueDate = new Date(data).getTime()
+        console.log('this.endValue', this.endValueDate)
         this.initData()
-        console.log('endValue',  this.endValueDate)
-        // console.log('endValueData', data)
       });
     },
     destroyed() {
@@ -380,9 +380,9 @@
               v.stateList = stateListObject[v.state]
               // 操作数组
               let operationListObject = {
-                1: v.buyer && this.JsonBig.stringify(v.buyer) === this.userId ? [{name: '标记已付款', flag: 3}, {name: '取消订单', flag: 4}] : [{name: '提醒付款', flag: 5}],
-                2: v.buyer && this.JsonBig.stringify(v.buyer) === this.userId ? [{name: '提醒放币', flag: 6}, {name: '申述', flag: 7}] : [{name: '释放币', flag: 8}, {name: '申述', flag: 7}],
-                3: v.buyer && this.JsonBig.stringify(v.buyer) === this.userId ? [{name: '提醒放币', flag: 6}, {name: '撤销申述', flag: 9}] : [{name: '释放币', flag: 8}, {name: '撤销申述', flag: 9}],
+                1: v.buyer && this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '标记已付款', flag: 3}, {name: '取消订单', flag: 4}] : [{name: '提醒付款', flag: 5}],
+                2: v.buyer && this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '申述', flag: 7}] : [{name: '释放币', flag: 8}, {name: '申述', flag: 7}],
+                3: v.buyer && this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '撤销申述', flag: 9}] : [{name: '释放币', flag: 8}, {name: '撤销申述', flag: 9}],
                 6: [{name: '去评价', flag: 1}],
                 7: [{name: '去评价', flag: 1}],
                 8: [{name: '去评价', flag: 1}],
@@ -407,16 +407,25 @@
               "amount": this.amount,// 电子币数量排序 1降序 2升序
               "money": this.money,// 法币金额排序 1降序 2升序
               "currency": this.selectCurrency,// 币种筛选
-              "start": Number(this.startValueDate), // 开始时间
-              "end": Number(this.endValueDate) // 结束时间
+              "start": Math.floor(Number(this.startValueDate) / 1000), // 开始时间
+              "end": Math.floor(Number(this.endValueDate) / 1000)// 结束时间
             }
           }
         }))
         // 获取进行中和已完成数量
         this.WsProxy.send('otc','get_orders_num',{
+          type: 1 // 1: 进行中, 2: 已完成
+        }).then((data)=>{
+          console.log('num', data)
+          this.conductNum = data.amount
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+        this.WsProxy.send('otc','get_orders_num',{
           type: 2 // 1: 进行中, 2: 已完成
         }).then((data)=>{
           console.log('num', data)
+          this.completeNum = data.amount
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -426,7 +435,7 @@
         this.clickUp = 20;
         this.clickDown = 20;
         // 获取用户id
-        this.userId = this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid)
+        this.userId = this.JsonBig.stringify(this.$store.state.userInfo.uid)
         // console.log(this.userId)
         if (this.contentTabIndex === 1) {
           this.selectState = "1,2,3"
@@ -439,19 +448,22 @@
       selectTime(index) { // 时间切换
         this.num = index;
         if (index === 0) {
-          this.startValueDate = new Date().getTime()
+          this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 1000)
+          this.endValueDate = new Date().getTime()
 
-          this.endValueDate = this.startValueDate
         }
         if (index === 1) {
           this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 3 * 1000)
           this.endValueDate = new Date().getTime()
+
+          console.log()
           // console.log('this.startValueDate', this.startValueDate, this.endValueDate)
         }
         if (index === 2) {
           this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 7 * 1000)
           this.endValueDate = new Date().getTime()
         }
+        this.initData()
       },
       toContact() { // 打开消息框
         this.$store.commit({'type':'changeChatBox', data: true})
