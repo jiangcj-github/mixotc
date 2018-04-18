@@ -1,31 +1,23 @@
 <template>
-  <div class="di">
+  <div class="di" ref="di">
     <img src="/static/images/date_icon.png" class="di-icon">
     <el-date-picker
       class="di-input"
       v-model="date1"
       :picker-options="opt1"
-      placeholder="开始日期"
-      @blur="startBlur">
+      placeholder="开始日期">
     </el-date-picker>
     <span class="di-to">-</span>
     <el-date-picker
       class="di-input"
       v-model="date2"
       :picker-options="opt2"
-      placeholder="截止日期"
-      @blur="endBlur">
+      placeholder="截止日期">
     </el-date-picker>
   </div>
 </template>
 <script>
   export default {
-    props:{
-      // min:{type: Number ,default: 0},
-      // max:{type: Number ,default: Date.now()},
-      startEmitValue: String,
-      endEmitValue: String
-    },
     data() {
       return {
         date1: "",
@@ -41,24 +33,6 @@
           }
         },
       };
-    },
-    // watch:{
-    //   date1:()=>{
-    //     this.Bus.$emit("change",this.date1,this.date2);
-    //   },
-    //   date2:()=>{
-    //     this.Bus.$emit("change",this.date1,this.date2);
-    //   }
-    // }
-    methods: {
-      startBlur() {
-        this.Bus.$emit(this.startEmitValue, this.date1);
-        console.log(this.startEmitValue, this.date1)
-      },
-      endBlur() {
-        this.Bus.$emit(this.endEmitValue, this.date2);
-        console.log(this.endEmitValue, this.date2)
-      },
     }
   };
 </script>
