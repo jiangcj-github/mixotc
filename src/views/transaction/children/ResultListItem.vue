@@ -25,7 +25,7 @@
 
 <script>
 export default {
-  props: ['data','emitValue','trustList'],
+  props: ['data','emitValue','trustArray'],
   mounted() {
     // console.log(this.trustArray);
   },
@@ -100,13 +100,6 @@ export default {
       }
       this.$router.push({ name: 'order', query: { id: this.JsonBig.stringify(id) }})
     },
-  },
-  computed: {
-    trustArray() {
-      return this.trustList.map(item=>{
-        return this.JsonBig.stringify(item.Id)
-      })
-    }
   }
 };
 </script>

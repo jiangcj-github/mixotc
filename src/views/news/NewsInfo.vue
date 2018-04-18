@@ -1,5 +1,5 @@
 <template>
-  <div class="news-info-wrap clearfix" v-show="this.$store.state.showChat">
+  <div class="news-info-wrap clearfix" v-if="$store.state.isLogin" v-show="$store.state.showChat">
     <NewsInfoLeft></NewsInfoLeft>
     <NewsInfoRight></NewsInfoRight>
   </div>

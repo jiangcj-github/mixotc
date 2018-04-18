@@ -5,7 +5,6 @@
         <img src="/static/images/talk_icon.png" alt="">
         <i></i>
       </div>
-      <!--<img src="/static/images/news.png">-->
       <p v-show="haveNews">您有<span>1</span>条新消息</p>
     </div>
     <NewsInfo :talkBoxShow="showTalkBox" @click="openBox"></NewsInfo>
@@ -32,6 +31,10 @@
     },
     methods: {
       openBox() {
+        if(!this.$store.state.isLogin) {
+          this.$store.commit({'type':'changeLoginForm', data: true})
+          return;
+        };
         this.$store.commit({'type':'changeChatBox', data: true})
       }
     }

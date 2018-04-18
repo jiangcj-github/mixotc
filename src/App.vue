@@ -68,7 +68,6 @@
       ws.start(this.HostUrl.ws);
     },
     mounted() {
-      console.log((this.Storage.otcAccount.get()))
       //websock发包接口需先判断登录状态
       this.WebSocket.beforeSend = (txt) => {
         let op =  this.JsonBig.parse(txt).op;

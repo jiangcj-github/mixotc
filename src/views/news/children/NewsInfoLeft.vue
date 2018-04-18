@@ -5,19 +5,18 @@
       <img src="/static/images/search_gray.png"/>
     </div>
 
-    <!--<EasyScrollbar :barOption="changeBar">-->
+    <!-- <EasyScrollbar :barOption="changeBar"> -->
       <ul class="firend-list">
-        <li v-for="(content, index) in userList">
-          <img src="" alt="" class="head-portrait" @click="openCheckGroup">
+        <li v-for="(content, index) in userList" :key="index">
+          <img src="/static/images/default_avator.png" alt="" class="head-portrait" @click="openCheckGroup">
           <span>{{content.name}}/130***123</span>
           <img src="/static/images/close_btn.png" alt="" class="close-head" @click="delUser(index)">
         </li>
       </ul>
-    <!--</EasyScrollbar>-->
+    <!-- </EasyScrollbar> -->
 
     <p class="other-item">
       <img src="/static/images/notice_icon.png">
-      <img src="/static/images/service_icon.png" class="service-img">
       <img src="/static/images/phoneicon.png" class="phone-img">
     </p>
     <!-- 查看群 -->
@@ -69,6 +68,11 @@
     },
     components: {
       GroupInfo
+    },
+    mounted() {
+      this.WsProxy.send('control', 'group_list', {}).then(data => {
+        console.log(data)
+      })
     },
     methods: {
       openCheckGroup(st) {
