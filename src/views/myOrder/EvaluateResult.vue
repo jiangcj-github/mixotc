@@ -2,15 +2,15 @@
   <div class="evaluate-result-wrap">
     <ul>
       <li>
-        <p>速度一般～～～～其实有点慢，价钱也不是很低！！！！</p>
-        <p>2016/03/08 23:57:03</p>
+        <p>{{content}}</p>
+        <p>{{date}}</p>
       </li>
       <li>
-        <span>中评</span>
+        <span>{{rate}}</span>
         <img :src="src" alt="" v-for="src in imgList">
       </li>
       <li>
-        <button>删除评价</button>
+        <button @click="delOrder">删除评价</button>
       </li>
     </ul>
   </div>
@@ -19,21 +19,40 @@
 <script>
   export default {
     name: "evaluate-result",
-    props:['receiver'],
+    props:['id'],
     data() {
       return {
-        imgList:['/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png']
+        //arr.slice(0,3)
+        imgList:['/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png'],
+        content: '', // 评价内容
+        date: '', // 日期
+        rate: '' // 评分
       }
     },
     mounted() {
-      this.WsProxy.send('otc','rates',{
-        id: this.receiver, // 对方id
-        origin: 0
+      this.WsProxy.send('otc', 'get_order_rate', {
+        id: this.id, // 广告id
       }).then((data)=>{
+        let rateArr = ['差评', '差评', '中评', '好评', '好评']
         console.log('评价结果', data)
+        this.content = data.comment
+        this.rate = rateArr[data.credit - 1]
+        this.imgList = this.imgList.slice(0, data.credit)
+        this.date = data.date
       }).catch((msg)=>{
         console.log(msg);
       });
+    },
+    methods: {
+      delOrder() { // 删除评价
+        this.WsProxy.send('otc', 'del_order_rate', {
+          id: this.id, // 广告id
+        }).then((data)=>{
+          console.log('删除评价', data)
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      }
     }
   }
 </script>

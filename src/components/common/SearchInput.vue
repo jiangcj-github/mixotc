@@ -1,12 +1,12 @@
 <template>
   <div class="clearfix">
     <div class="search" v-clickoutside="hideSelect" @click="$refs.input.focus()">
-      <input 
-        type="text" 
-        :style="{borderColor: color}" 
-        ref='input' 
-        v-model="inputContent" 
-        @keyup.enter="changeInputContent" 
+      <input
+        type="text"
+        :style="{borderColor: color}"
+        ref='input'
+        v-model="inputContent"
+        @keyup.enter="changeInputContent"
         @click="showResult = true"
         @focus="showCancel = true"
         @input="input"
@@ -72,7 +72,8 @@ export default {
   },
   methods: {
     input() {
-      this.Bus.$emit(this.emitValue3, this.inputContent);
+      this.type === '' && (this.type = this.content[0].type);
+      this.Bus.$emit(this.emitValue3, {type:this.type, data: this.inputContent});
     },
     showTitleItem() {
       this.showSelect = !this.showSelect;
@@ -111,11 +112,11 @@ export default {
 
 <style scoped lang="stylus">
 @import '../../stylus/base.styl'
-.search 
+.search
   float left
   position relative
   height 30px
-  input 
+  input
     box-sizing()
     position relative
     width 384px
@@ -125,7 +126,7 @@ export default {
     background $colFFF
     border 1px solid $col422
     border-radius 2px 0 0 0
-    &:focus 
+    &:focus
       outline 0
   span
     position absolute
@@ -137,13 +138,13 @@ export default {
     color #999
     letter-spacing 0
     cursor pointer
-    &::after 
+    &::after
       position absolute
       top 13px
       right 0
       content ''
       triangle_down($col422)
-  ul 
+  ul
     box-sizing()
     position absolute
     left 0px
@@ -154,7 +155,7 @@ export default {
     letter-spacing 0.27px
     border 1px solid #E1E1E1
     z-index 9
-    li 
+    li
       box-sizing()
       float left
       width 100%
@@ -165,12 +166,12 @@ export default {
       cursor pointer
       &:hover, &.active
         background-color $col3EB
-  img 
+  img
     position absolute
     top 10px
     right 10px
     cursor pointer
-button 
+button
   position relative
   width 72px
   height 30px
@@ -179,9 +180,9 @@ button
   border-radius 0 2px 2px 0
   border 0
   cursor pointer
-  &:hover 
+  &:hover
     background $col350
-  .search-icon 
+  .search-icon
     display block
     position absolute
     top 50%

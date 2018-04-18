@@ -33,7 +33,7 @@
                        :type="propsType">
       </EvaluateRelease>
       <EvaluateResult v-if="showContent === 1"
-                      :receiver="propsReceiver">
+                      :id="propsId">
       </EvaluateResult>
     </div>
   </div>

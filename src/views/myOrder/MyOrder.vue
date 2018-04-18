@@ -12,6 +12,8 @@
       <SearchInput :content="content"
                    :title="title"
                    :emitValue1="searchValue"
+                   :emitValue3="searchResult"
+                   :result="result"
                    color="#E1E1E1"
                    class="order-choice-search">
       </SearchInput>
@@ -202,12 +204,17 @@
         sortActive: false, // 控制箭头开始无active
 
         content: [
-          {title: '搜索订单号', type: 'currency'},
-          {title: '搜索资金码', type: 'nickname'},
-          {title: '搜索商家昵称/账号', type: 'nickname'}
+          {title: '搜索订单号', type: 'order_id'},
+          {title: '搜索资金码', type: 'order_tradecode'},
+          {title: '搜索商家昵称/账号', type: 'order_trader'}
         ],  // 输入框下拉值
         title: '搜索订单号', // 输入框默认
-        searchValue: 'changeTitle', //  输入框改变值
+        searchValue: 'searchValue', // 输入框title改变值
+        searchResult: 'searchResult',  // 输入框内容
+        result: [], // 模糊搜索结果
+        orderId: '',
+        tradeCode: '',
+        trader: '',
         contentTabIndex: 1, // 控制tab切换
         num: 0, // 控制时间选择Tab active类
 
@@ -303,16 +310,50 @@
         this.initData()
         console.log('selectState', this.selectState)
       });
-      // 监听搜索框值
+      // 监听搜索框title值
       this.Bus.$on(this.searchValue,(data) => {
         this.title = data
+        console.log('searchValue', data)
+      });
+      // 监听搜索框值
+      this.Bus.$on('changeInputContent', ({type, data}) => {
+        // this.WsProxy.send('otc',`fuzzy_search_${type}`,{ // 请求数据
+        //   keyword: data
+        // }).then((data)=>{
+        //   console.log('keyword', data)
+        // }).catch((msg)=>{
+        //   console.log(msg);
+        // });
+        // console.log('changeInputContent', type, data)
+        console.log(this.type, type)
+        if (type == 'order_id') {
+          this.orderId = data
+        } else if (type == 'order_tradecode') {
+          this.tradeCode = data
+        } else{
+          this.trader = data
+        }
+        this.initData()
+      })
+      // 模糊搜索
+      this.Bus.$on(this.searchResult,({type, data}) => {
+        this.result = []
+        this.WsProxy.send('otc',`fuzzy_search_${type}`,{ // 请求数据
+          keyword: data
+        }).then((data)=>{
+          data.results.forEach(v => {
+            this.result.push(v.Result)
+          })
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+        console.log('searchResult', data)
       });
       // this.Bus.$on('offTime', data => this.showTime = data);
       // 时间框开始值
       this.Bus.$on(this.startValue, (data) => {
         this.startValueDate = new Date(data).getTime()
         console.log('this.startValue', this.startValueDate)
-        this.initData()
       });
       // 时间框结束值
       this.Bus.$on(this.endValue, (data) => {
@@ -327,6 +368,7 @@
       this.Bus.$off(this.allStatusValue);
       this.Bus.$off(this.searchValue);
       this.Bus.$off(this.startValue);
+      this.Bus.$off(this.endValue);
     },
     watch: {
       minutes: {
@@ -408,7 +450,10 @@
               "money": this.money,// 法币金额排序 1降序 2升序
               "currency": this.selectCurrency,// 币种筛选
               "start": Math.floor(Number(this.startValueDate) / 1000), // 开始时间
-              "end": Math.floor(Number(this.endValueDate) / 1000)// 结束时间
+              "end": Math.floor(Number(this.endValueDate) / 1000),// 结束时间
+              "order_id": this.orderId,
+              "trade_code": this.tradeCode,
+              "trader": this.trader
             }
           }
         }))
