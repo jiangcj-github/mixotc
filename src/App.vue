@@ -44,16 +44,12 @@
             type: 'getUserInfo',
             data: data.body
           });
-          //获取信任人员列表
-          this.WsProxy.send('otc', 'get_trust_ids', { type: 2}).then(data => {
-            console.log(data)
-          })
+          
           this.$store.commit({type: 'changeLogin', data: true});
           this.watchTokenFlag = false
         }
       });
 
-      //页面打开时时获取sessionStorage的token自动发送token登录
       ws.onOpen['token'] = () => {
         if (!this.token){
           ws.reConnectFlag = false;

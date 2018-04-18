@@ -175,9 +175,7 @@
               this.captcha = false;
               return;
             }
-            this.WsProxy.send('otc', 'get_trust_ids', {type: 2}).then(data => {
-              console.log(data)
-            })
+            
             this.showForm = false;
             this.loginSuccess = true;
             clearTimeout(this.timer);

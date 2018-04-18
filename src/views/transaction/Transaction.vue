@@ -67,7 +67,7 @@
           </p>
         </div>
         <ul>
-          <li is='ResultListItem' :emitValue="emitValue" v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
+          <li is='ResultListItem' :trustList="$store.state.trustList" :emitValue="emitValue" v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
         </ul>
       </div>
 
@@ -141,6 +141,13 @@ import BasePopup from '@/components/common/BasePopup';
       }
     },
     created() {
+      //获取信任人员列表
+      if (this.isLogin) {
+        this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
+          data && this.$store.commit('changeTrustList', {data: data.ids})
+          !data && this.$store.commit('changeTrustList', {data: []})
+        })
+      }
       this.fetchData({type: 1, count: 20, page: 0 })
     },
     mounted() {
@@ -269,6 +276,9 @@ import BasePopup from '@/components/common/BasePopup';
       }
     },
     computed: {
+      isLogin() {
+        return this.$store.state.isLogin
+      },
       payTitle() {
         let title = this.payment.filter(item => {
             return item.state;
@@ -290,8 +300,7 @@ import BasePopup from '@/components/common/BasePopup';
     },
     watch: {
       filte: {
-        handler(curVal){
-          setTimeout(console.log('req' , curVal.price), 0)
+        handler(curVal) {
           let min = Number(curVal.min),
               max = Number(curVal.max);
           curVal.min === '' && (curVal.min = 200);
@@ -309,6 +318,16 @@ import BasePopup from '@/components/common/BasePopup';
           this.fetchData(obj)
         },
         deep: true
+      },
+      isLogin(curVal) {
+        if (curVal) {
+          this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
+            data && this.$store.commit('changeTrustList', {data: data.ids})
+            !data && this.$store.commit('changeTrustList', {data: []})
+          })
+          return
+        }
+        this.$store.commit('changeTrustList', {data: []})
       }
     }
   }

@@ -59,7 +59,7 @@ function createConnect(url) {
 
   function message(pool, event) {
     let data = jsonBig.parse(event.data);
-    console.log(data);
+    // console.log(data);
     // console.log('webSocket接收信息', JSON.parse(event.data))
     if (!heartBeatInterval) {
       heartBeatInterval = setInterval(heartBeat, 5000);
