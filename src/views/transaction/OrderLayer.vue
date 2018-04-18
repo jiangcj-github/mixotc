@@ -1,0 +1,87 @@
+<template>
+  <BasePopup :show="orderLayer"
+
+             :width=470
+             :height=282>
+    <div class="order-layer">
+      <ul>
+        <li class="clearfix"><span>购买单价</span><b>12345.00 CNY</b></li>
+        <li class="clearfix"><span>购买数量</span><b>0.2926 BTC</b></li>
+        <li class="clearfix"><span>购买金额</span><b>12345.00 CNY</b></li>
+      </ul>
+      <p>提醒：请确认价格后立即下单</p>
+      <p>下单后此订单的比特币将托管锁定，请放心购买</p>
+      <div class="btn-group clearfix">
+        <em @click="closeOrderLayer">取消</em>
+        <i>确认订单</i>
+      </div>
+    </div>
+  </BasePopup>
+</template>
+
+<script>
+  import BasePopup from '@/components/common/BasePopup' // 引入弹窗
+
+  export default {
+    name: "order-layer",
+    props: ['orderLayerShow'],
+    data() {
+      return {
+        orderLayer: this.orderLayerShow
+      }
+    },
+    components: {
+      BasePopup
+    },
+    watch: {
+      orderLayerShow(state) {
+        this.orderLayer = state === true ?  true : false
+      }
+    },
+    methods: {
+      closeOrderLayer() {
+        this.$emit('offOrderLayer', false)
+      }
+    }
+  }
+</script>
+
+<style scoped lang="stylus">
+  @import "../../stylus/base.styl"
+  .order-layer
+    padding 35px 60px 0 60px
+    ul
+      li
+        margin-bottom 15px
+        span
+          float left
+          font-size 20px
+          color #333
+          letter-spacing 0.41px
+        b
+          float right
+    p
+      margin-bottom 10px
+      font-size 12px
+      color #FF794C
+      letter-spacing 0.23px
+    .btn-group
+      margin-top 20px
+      em, i
+        display inline-block
+        width 160px
+        height 40px
+        text-align center
+        line-height 40px
+      em
+        float left
+        border 1px solid #FFB422
+        border-radius 2px
+        color #FFB422
+      i
+        float right
+        background #FFB422
+        border-radius 2px
+        color #FFF
+</style>
+

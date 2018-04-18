@@ -1,16 +1,30 @@
 <template>
   <div class="di">
     <img src="/static/images/date_icon.png" class="di-icon">
-    <el-date-picker v-model="date1" :picker-options="opt1" placeholder="开始日期" class="di-input"></el-date-picker>
+    <el-date-picker
+      class="di-input"
+      v-model="date1"
+      :picker-options="opt1"
+      placeholder="开始日期"
+      @blur="startBlur">
+    </el-date-picker>
     <span class="di-to">-</span>
-    <el-date-picker v-model="date2" :picker-options="opt2" placeholder="截止日期" class="di-input"></el-date-picker>
+    <el-date-picker
+      class="di-input"
+      v-model="date2"
+      :picker-options="opt2"
+      placeholder="截止日期"
+      @blur="endBlur">
+    </el-date-picker>
   </div>
 </template>
 <script>
   export default {
     props:{
-      min:{type: Number ,default: 0},
-      max:{type: Number ,default: Date.now()},
+      // min:{type: Number ,default: 0},
+      // max:{type: Number ,default: Date.now()},
+      startEmitValue: String,
+      endEmitValue: String
     },
     data() {
       return {
@@ -28,13 +42,23 @@
         },
       };
     },
-    watch:{
-      date1:()=>{
-        this.Bus.$emit("change",this.date1,this.date2);
+    // watch:{
+    //   date1:()=>{
+    //     this.Bus.$emit("change",this.date1,this.date2);
+    //   },
+    //   date2:()=>{
+    //     this.Bus.$emit("change",this.date1,this.date2);
+    //   }
+    // }
+    methods: {
+      startBlur() {
+        this.Bus.$emit(this.startEmitValue, this.date1);
+        console.log(this.startEmitValue, this.date1)
       },
-      date2:()=>{
-        this.Bus.$emit("change",this.date1,this.date2);
-      }
+      endBlur() {
+        this.Bus.$emit(this.endEmitValue, this.date2);
+        console.log(this.endEmitValue, this.date2)
+      },
     }
   };
 </script>

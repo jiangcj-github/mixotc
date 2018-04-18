@@ -82,15 +82,22 @@
           <router-link to="" tag="span">我已阅读《OTC购买流程规则》</router-link>
         </div>
       </div>
-      <button :class="{able:agree}" :disabled="agree">{{copy.type[type]}}</button>
+      <button :class="{able:agree}" :disabled="agree" @click="agree == true ? openOrderLayer($event) : openRuleLayer()">{{copy.type[type]}}</button>
       <p class="tishi">
         <img src="/static/images/hint.png" alt="">
         <span>新用户首次交易前请务必查阅本平台交易流程及规则，如交易出现问题请及时与客服人员沟通</span>
       </p>
     </div>
+    <!-- 引入购买弹窗 -->
+    <OrderLayer :orderLayerShow="showOrderLayer" @offOrderLayer="openOrderLayer"></OrderLayer>
+    <!-- 引入勾选购买规则弹窗 -->
+    <BasePopup :show="remindLayer" class="remind-layer"><span  v-clickoutside="closeLayer">请勾选购买规则</span></BasePopup>
   </div>
 </template>
 <script>
+  import OrderLayer from '@/views/transaction/OrderLayer' // 购买弹窗
+  import BasePopup from '@/components/common/BasePopup' // 引入弹窗
+
   export default {
     data() {
       return {
@@ -107,7 +114,13 @@
           type: ['出售', '购买'],
           rate: [`可用余额1.242342BTC`, `57525 CNY = 1 BTC` ]
         },
+        showOrderLayer: false, // 控制购买弹窗显示隐藏
+        remindLayer: false // 控制勾选弹窗
       }
+    },
+    components: {
+      OrderLayer,
+      BasePopup
     },
     mounted() {
       console.log(this.$route.query.id)
@@ -120,6 +133,17 @@
       changeAmount() {
         this.money = this.amount*this.rate;
         this.amount === '' && (this.money = '');
+      },
+      openOrderLayer(st) { // 点击购买
+        console.log('agree', this.agree)
+        this.showOrderLayer = st == false ? false : true
+      },
+      openRuleLayer() { // 提示勾选
+        console.log('agree', this.agree)
+        this.remindLayer = true
+      },
+      closeLayer() { // 关闭提示勾选弹窗
+        this.remindLayer = false
       }
     }
   }
@@ -318,4 +342,7 @@
       span
         display inline-block
         fz11()
+  .remind-layer
+    text-align center
+    line-height 94px
 </style>

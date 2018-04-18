@@ -9,7 +9,7 @@
       <p>
         <img :src="`http://192.168.113.26/image/${icon}`" alt="">
         <em>{{name}}</em>
-        <router-link to="/homepage">访问TA的主页</router-link>
+        <router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(orderList.buyer) == userId ? orderList.seller : orderList.buyer}}">访问TA的主页</router-link>
       </p>
       <div class="content-info clearfix">
         <h2>评价对方</h2>
@@ -33,7 +33,7 @@
                        :type="propsType">
       </EvaluateRelease>
       <EvaluateResult v-if="showContent === 1"
-                      :sid="propsSid">
+                      :receiver="propsReceiver">
       </EvaluateResult>
     </div>
   </div>
@@ -62,7 +62,9 @@
         propsReceiver: '',
         propsSid: '',
         propsType: '',
-        icon: ''
+        icon: '',
+        userId: '',
+        orderList: ''
       }
     },
     components: {
@@ -70,13 +72,13 @@
       EvaluateResult
     },
     mounted() {
-      let userId = this.JsonBig.stringify(this.$store.state.userInfo.uid)
+      this.userId = this.JsonBig.stringify(this.$store.state.userInfo.uid)
       this.showContent = Number(this.$route.query.type)
       this.orderList = this.$route.query.data
       console.log('orderList', this.orderList)
       this.icon = this.orderList.icon
       this.name = this.orderList.name
-      this.currency = `${this.JsonBig.stringify(this.orderList.buyer) == userId ? '购买' : '出售'}${this.orderList.currency.toUpperCase()}`
+      this.currency = `${this.JsonBig.stringify(this.orderList.buyer) == this.userId ? '购买' : '出售'}${this.orderList.currency.toUpperCase()}`
       this.price = `${this.orderList.price} CNY`
       this.num = `${this.orderList.amountc} ${this.orderList.currency.toUpperCase()}`
       this.amountc = `${this.orderList.amountm} CNY`
@@ -87,7 +89,7 @@
       this.propsId = this.orderList.id
       this.propsType = this.orderList.type
       this.propsSid = this.orderList.sid
-      this.propsReceiver = this.JsonBig.stringify(this.orderList.buyer) == userId ? this.orderList.seller : this.orderList.buyer
+      this.propsReceiver = this.JsonBig.stringify(this.orderList.buyer) == this.userId ? this.orderList.seller : this.orderList.buyer
       this.Bus.$on('showReult', data => { // 接收订单完成后的变量提示，变为订单结果
         this.showContent = data
       })

@@ -19,7 +19,7 @@
 <script>
   export default {
     name: "evaluate-result",
-    props:['sid'],
+    props:['receiver'],
     data() {
       return {
         imgList:['/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png']
@@ -27,7 +27,7 @@
     },
     mounted() {
       this.WsProxy.send('otc','rates',{
-        id: this.sid, // 广告id sid
+        id: this.receiver, // 对方id
         origin: 0
       }).then((data)=>{
         console.log('评价结果', data)
