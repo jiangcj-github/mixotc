@@ -5,6 +5,8 @@
       class="di-input"
       v-model="date1"
       :picker-options="opt1"
+      @input="onInput1"
+      @blur="onBlur1"
       placeholder="开始日期">
     </el-date-picker>
     <span class="di-to">-</span>
@@ -12,12 +14,41 @@
       class="di-input"
       v-model="date2"
       :picker-options="opt2"
+      @input="onInput2"
+      @blur="onBlur2"
       placeholder="截止日期">
     </el-date-picker>
   </div>
 </template>
 <script>
   export default {
+    props:{
+
+      //时间改变时触发(包括起始时间或结束时间)
+      onDiChange:{type:String,default:"onDiDateChange"},
+      //起始时间改变时触发
+      onDiStartChange:{type:String,default:"onDiStartChange"},
+      //结束时间改变时触发
+      onDiEndChange:{type:String,defalut:"onDiEndChange"},
+      //输入时间时触发(包括起始时间和结束时间)
+      onDiInput:{type:String,default:"onDiInput"},
+      //输入起始时间时触发(包括起始时间和结束时间)
+      onDiStartInput:{type:String,default:"onDiStartInput"},
+      //输入结束时间时触发
+      onDiEndInput:{type:String,default:"onDiEndInput"},
+      //失去焦点时触发(包括起始时间框和结束时间框)
+      onDiBlur:{type:String,default:"onDiBlur"},
+      //起始时间失去焦点时触发
+      onDiStartBlur:{type:String,default:"onDiStartBlur"},
+      //结束时间失去焦点时触发
+      onDiEndBlur:{type:String,default:"onDiEndBlur"},
+
+      //时间区间的最小值(毫秒)
+      min:{type:Number,default:Date.parse("1960/01/01")},
+      //时间区间的最大值(毫秒)
+      max:{type:Number,default:Date.parse("2050/01/01")}
+
+    },
     data() {
       return {
         date1: "",
@@ -33,6 +64,34 @@
           }
         },
       };
+    },
+    watch:{
+      date1:function(){
+        this.Bus.$emit("onDiStartChange",this.date1);
+        this.Bus.$emit("onDiChange",this.date1,this.date2);
+      },
+      date2:function(){
+        this.Bus.$emit("onDiEndChange",this.date2);
+        this.Bus.$emit("onDiChange",this.date1,this.date2);
+      }
+    },
+    methods:{
+      onInput1(){
+        this.Bus.$emit("onDiStartInput",this.date1);
+        this.Bus.$emit("onDiInput",this.date1,this.date2);
+      },
+      onInput2(){
+        this.Bus.$emit("onDiEndInput",this.date2);
+        this.Bus.$emit("onDiInput",this.date1,this.date2);
+      },
+      onBlur1(){
+        this.Bus.$emit("onDiStartBlur",this.date1);
+        this.Bus.$emit("onDiBlur",this.date1,this.date2);
+      },
+      onBlur2(){
+        this.Bus.$emit("onDiEndBlur",this.date2);
+        this.Bus.$emit("onDiBlur",this.date1,this.date2);
+      }
     }
   };
 </script>

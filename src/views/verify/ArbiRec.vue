@@ -95,7 +95,6 @@
       <div v-else>
         <div class="err empty">没有仲裁记录</div>
       </div>
-
     </div>
   </Left>
 </template>
@@ -178,13 +177,16 @@
     },
     watch:{
       fltDays:function(){
-        this.$refs.di.date1=new Date(Date.now()-24*60*60*1000*this.fltDays);
+        this.$refs.di.date1=new Date(Date.now()+24*60*60*1000*this.fltDays);
         this.$refs.di.date2=new Date();
       }
     },
     mounted(){
       this.Bus.$on("onPageChange",(p) => {
 
+      });
+      this.Bus.$on("onDiInput",()=>{
+        this.fltDays=-1;
       });
     },
     methods: {
