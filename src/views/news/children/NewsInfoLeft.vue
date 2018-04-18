@@ -16,7 +16,7 @@
     <!-- </EasyScrollbar> -->
 
     <p class="other-item">
-      <img src="/static/images/notice_icon.png">
+      <img src="/static/images/notice_icon.png" class="system">
       <img src="/static/images/phoneicon.png" class="phone-img">
     </p>
     <!-- 查看群 -->
@@ -70,8 +70,8 @@
       GroupInfo
     },
     mounted() {
-      this.WsProxy.send('control', 'group_list', {}).then(data => {
-        console.log(data)
+      this.WsProxy.send('control', 'friend_list', {}).then(data => {
+        console.log(88888,data)
       })
     },
     methods: {
@@ -124,6 +124,11 @@
           position relative
           height 42px
           line-height 42px
+          cursor pointer
+          &:hover
+            background-color $col6FA
+            .close-head
+              display block
           img
             vertical-align middle
           .head-portrait
@@ -133,6 +138,7 @@
             border-radius 50%
             margin 0 10px 0 5px
           .close-head
+            display none
             position absolute
             top 18px
             right 8px
@@ -149,15 +155,17 @@
             text-overflow ellipsis
             vertical-align middle
       .other-item
-        width 140px
+        width 123px
         padding 8px 0 6px
-        padding-left 20px
+        padding-left 36px
         -webkit-box-shadow: 0 -3px 3px 0 rgba(0,0,0,0.1)
         box-shadow:  0 -3px 3px 0 rgba(0,0,0,0.1)
         img
           width 30px
           height 30px
           vertical-align middle
+          &.system
+            margin-right 37px
         .service-img
           margin 0 20px
         .phone-img

@@ -4,6 +4,7 @@ const getUserInfo = "getUserInfo";
 const changeChatBox = "changeChatBox";
 const changeToken = "changeToken";
 const changeTrustList = "changeTrustList";
+const changeUnread = "changeUnread";
 
 export {
   changeLoginForm,
@@ -11,5 +12,6 @@ export {
   getUserInfo,
   changeChatBox,
   changeToken,
-  changeTrustList
+  changeTrustList,
+  changeUnread
 };

@@ -4,6 +4,7 @@ export default {
   userInfo: null,
   showChat: false,
   trustList: [],
+  unreadNumber: 1,
   chat: [
     {
       id: 1321313131414,

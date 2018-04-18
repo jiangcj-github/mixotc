@@ -22,5 +22,9 @@ export default {
   [types.changeTrustList](state, { data }) {
     // 用户信任人员列表
     state.trustList = data;
+  },
+  [types.changeUnread](state, { data }) {
+    // 用户信任人员列表
+    state.unreadNumber = data;
   }
 };
