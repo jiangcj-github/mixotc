@@ -1,4 +1,4 @@
-import Vue from 'vue'
+ import Vue from 'vue'
 import Router from "vue-router";
 import Vuex from "vuex";
 
@@ -134,6 +134,8 @@ const RUN_APP = (App, config, plugin) => {
   Vue.use(Vuex)
   let store = Store.install(Vue.prototype, config.StoreConfig);
 
+  store.state.isLogin = false
+
   Vue.prototype.$store = store;
 
   config.ServerConfig && config.HttpConfig && config.HttpConfig.useHttp && HttpProxy.install(Vue.prototype, config.ServerConfig, config.HttpConfig.httpList, config.HttpConfig.httpPreHandler, config.HttpConfig.httpAfterHandler);
@@ -147,7 +149,7 @@ const RUN_APP = (App, config, plugin) => {
       next();
       return;
     }
-    if (!store.state.isLogin) {
+    if (!store.state.token) {
       next({ path: "/transaction" });
       return;
     }

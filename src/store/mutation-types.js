@@ -5,6 +5,9 @@ const changeChatBox = "changeChatBox";
 const changeToken = "changeToken";
 const changeTrustList = "changeTrustList";
 const changeUnread = "changeUnread";
+const changeCurChat = "changeCurChat";
+const changeChat = "changeChat";
+const delChat = "delChat";
 
 export {
   changeLoginForm,
@@ -13,5 +16,8 @@ export {
   changeChatBox,
   changeToken,
   changeTrustList,
-  changeUnread
+  changeUnread,
+  changeCurChat,
+  changeChat,
+  delChat
 };

@@ -2,20 +2,18 @@
   <div class="add-group-wrap" v-show="groupShow">
     <p class="wrap-title">
       <span>添加群成员</span>
-      <i>确定</i>
+      <i @click="createGroup">确定</i>
       <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeGroup">
     </p>
     <div class="contacts">
-      <img :src="item.src" alt="" v-for="item in addList">
-      <input type="text" placeholder="查找联系人"/>
+      <img :src="item.src" alt="" v-for="(item, index) in addList" :key="index">
+      <input type="text" placeholder="查找联系人">
     </div>
     <ul>
-      <li v-for="(content, index) in groupList">
+      <li v-for="(content, index) in groupList" :key="index">
         <img class="user-portrait" :src="content.src" alt="">
         <span>{{content.name}}/130***123</span>
-        <i @click="checkContact($event, index)">
-          <b class="no-select"></b>
-        </i>
+        <b class="no-select" @click="checkContact($event, index)"></b>
       </li>
     </ul>
   </div>
@@ -50,6 +48,16 @@
       }
     },
     methods: {
+      createGroup() {
+        this.WsProxy.send('control', 'create_group',{
+          name: '',
+          intro: '',
+          ids:[],
+          uid: this.$store.state.userInfo.uid
+        }).then(data=>{
+          console.log(id)
+        })
+      },
       closeGroup() {
         this.$emit('offAddGroup', 'false')
       },
@@ -90,6 +98,7 @@
         margin-right 144px
       i
         color #FFB422
+        cursor pointer
       img
         position absolute
         right 12px

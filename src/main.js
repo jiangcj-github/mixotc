@@ -4,8 +4,8 @@ import Vue from 'vue';
 import App from './App';
 import jsonBig from 'json-bigint';
 import { DatePicker } from "element-ui";
-import EasyScroll from 'easyscroll'
 import '@/stylus/rest.styl'
+import "vue-happy-scroll/docs/happy-scroll.css";
 
 import BaseFunction from '@/js/BaseFunction'//引入自定义插件
 import BasePrototype from '@/js/BasePrototype'//引入自定义原型方法
@@ -34,7 +34,7 @@ RUN_APP(
     PrototypeConfig: PrototypeConfig.core,
     LoopTaskConfig
   },
-  [DatePicker, EasyScroll]
+  [DatePicker]
 );
 
 

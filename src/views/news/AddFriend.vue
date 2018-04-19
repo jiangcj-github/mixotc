@@ -7,7 +7,7 @@
       <img src="" alt="">
       <span>lihh / 130***123</span>
     </div>
-    <textarea placeholder="请填写认证信息"></textarea>
+    <textarea placeholder="请填写认证信息" v-model="text" maxlength="20"></textarea>
     <button @click="openFirendLayer">添加好友</button>
     <!-- 添加好友弹窗 -->
     <BasePopup class="firend-layer"
@@ -27,6 +27,7 @@
     props: ['addFriendShow'],
     data() {
       return {
+        text: '',
         friendShow: this.addFriendShow,
         firendLayer: false,
         firendWrap: {
@@ -35,6 +36,11 @@
           right: 0,
           bottom: '100px'
         }
+      }
+    },
+    conputed: {
+      userInfo() {
+        return this.$store.state.userInfo
       }
     },
     components: {
@@ -54,10 +60,17 @@
         this.$emit('offAddFriend', 'false')
       },
       openFirendLayer() {
-        this.firendLayer = true
-        setTimeout(() => {
-          this.firendLayer = false
-        }, 3000)
+        // this.WsProxy.send('control', 'request_friend', {
+        //   uid: this.userInfo.uid,
+        //   id: ,
+        //   icon: '',
+        //   info: this.text
+        // }).then(data => {
+          this.firendLayer = true
+          setTimeout(() => {
+            this.firendLayer = false
+          }, 3000)
+        // })
       }
     }
   }

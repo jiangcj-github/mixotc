@@ -4,15 +4,10 @@ export default {
   userInfo: null,
   showChat: false,
   trustList: [],
-  unreadNumber: 1,
-  chat: [
-    {
-      id: 1321313131414,
-      icon: '',
-      nickName: 'dsfadsf',
-      unread: 0,
-      messages: [],
-    }
-  ],
-  token: ''
+  friendList: [],
+  unreadNumber: 0,
+  curChat: 1, //当前聊天
+  systemMessage: 3, //未读系统消息
+  token: "",
+  chat: []
 };

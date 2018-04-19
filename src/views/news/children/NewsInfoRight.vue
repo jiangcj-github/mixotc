@@ -1,8 +1,8 @@
 <template>
   <div class="news-info-right">
     <ul class="title-info clearfix">
-      <li class="title-info-name">lihh/130***123</li>
-      <li class="title-info-select" v-clickoutside="closeSelect">
+      <li class="title-info-name" v-if="curChat">{{curChat === 'system' ? '系统消息' : title}}</li>
+      <li class="title-info-select" v-clickoutside="closeSelect" v-if="title">
         <img src="/static/images/add_talk.png" class="add-talk-img" @click="showSeletAdd">
         <div v-show="seletAdd">
           <i></i>
@@ -17,7 +17,8 @@
         <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeTalk">
       </li>
     </ul>
-    <div class="news-info-talk clearfix">
+    <div class="blank" v-if="!title && curChat !== 'system'"></div>
+    <div class="news-info-talk clearfix" v-if="title && curChat !== 'system'">
       <p class="more-info">查看更多消息</p>
       <p class="time-info">12月19日 12:12</p>
       <div class="left-people">
@@ -35,7 +36,7 @@
         <img src="" alt="">
       </div>
     </div>
-    <div class="system-info">
+    <div class="system-info" v-if="curChat === 'system'">
       <div>
         <img src="" alt="">
         <ul>
@@ -48,7 +49,7 @@
 
     <ol class="input-text clearfix">
       <li>
-        <input type="text">
+        <input type="text" :disabled="title === '' ? true : false">
       </li>
       <li>
         <img src="/static/images/picture_icon.png">
@@ -60,9 +61,9 @@
       </li>
     </ol>
     <!-- 添加好友弹窗 -->
-    <AddFriend :addFriendShow="showAddFriend" @offAddFriend="openAddFriend"></AddFriend>
+    <AddFriend v-if="showAddFriend" :addFriendShow="showAddFriend" @offAddFriend="openAddFriend"></AddFriend>
     <!-- 添加群聊弹窗 -->
-    <AddGroup :addGroupShow="showAddGroup" @offAddGroup="openAddGroup"></AddGroup>
+    <AddGroup v-if="showAddGroup" :addGroupShow="showAddGroup" @offAddGroup="openAddGroup"></AddGroup>
     <!-- 添加信任弹窗 -->
     <BasePopup class="belive-layer"
                :show="beliveLayer"
@@ -92,6 +93,23 @@
           right: 0,
           bottom: '100px'
         }
+      }
+    },
+    computed: {
+      title() {
+        let result = '';
+        this.$store.state.chat.forEach(item=> {
+          if (item.id === this.$store.state.curChat) {
+            item.group && item.nickName === '' && (result = `群聊(${item.length})`)
+            item.group && item.nickName !== '' && (result = `${item.nickName}(${item.length})`)
+            item.orderId && (result = `订单号：${item.orderId}`)
+            !item.group && !item.orderId && (result = item.nickName)
+          }
+        })
+        return result
+      },
+      curChat() {
+        return this.$store.state.curChat
       }
     },
     components: {
@@ -148,9 +166,14 @@
       >li
         float left
       .title-info-name
+        width 304px
+        height 40px
         margin-left 20px
+        font-size 14px
+        color $col333
+        font-weight bold
+        letter-spacing 0.16px
       .title-info-select
-        margin-left 205px
         img
           width 15px
           height 15px
@@ -212,15 +235,15 @@
               background-size 13px 14px
               content ''
       .close-btn
+        float right
+        margin-right 24px
         img
           width 10px
           height 10px
-          margin-left 22px
           vertical-align middle
 
 
     .news-info-talk
-
       width 399px
       height 320px
       padding-top 10px
@@ -287,9 +310,12 @@
         i
           right -16px
           border-color transparent transparent transparent #FFB422
-
+    .blank
+      width 399px
+      height 320px
+      padding-top 10px
+      text-align center
     .system-info
-      display none
       width 399px
       height 320px
       padding-top 10px

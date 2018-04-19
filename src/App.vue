@@ -28,6 +28,7 @@
       }
     },
     created() {
+      // console.log(this.token)
       let ws = this.WebSocket;
       //发送token登录后的处理
       !ws.onMessage['token'] && (ws.onMessage['token'] = {

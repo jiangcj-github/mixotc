@@ -1,7 +1,5 @@
 <template>
   <div>
-    <button @click="addunread">+++</button>
-    <button @click="minunread">---</button>
     <div class="news-wrap clearfix" @click="openBox">
       <span v-if="!newMessage && unread" class="tip"><b>{{unread > 10 ? '...' : unread }}</b></span>
       <div class="chat">
@@ -10,7 +8,7 @@
       </div>
       <p :class="{new: newMessage}">您有<span>{{unread}}</span>条新消息</p>
     </div>
-    <NewsInfo :talkBoxShow="showTalkBox" @click="openBox"></NewsInfo>
+    <NewsInfo v-if="$store.state.isLogin" :talkBoxShow="showTalkBox" @click="openBox"></NewsInfo>
   </div>
 
 </template>
