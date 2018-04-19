@@ -1,6 +1,7 @@
 <template>
   <div class="evaluate-result-wrap">
-    <ul>
+    <p v-if="flag ===1 ">该评价已被删除</p>
+    <ul v-if="flag !==1 ">
       <li>
         <p>{{content}}</p>
         <p>{{date}}</p>
@@ -26,7 +27,8 @@
         imgList:['/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png', '/static/images/evaluate_red.png'],
         content: '', // 评价内容
         date: '', // 日期
-        rate: '' // 评分
+        rate: '', // 评分
+        flag: 0 // 判断是否删除
       }
     },
     mounted() {
@@ -38,7 +40,8 @@
         this.content = data.comment
         this.rate = rateArr[data.credit - 1]
         this.imgList = this.imgList.slice(0, data.credit)
-        this.date = data.date
+        this.date = data.date.toDate('yyyy/MM/dd HH:mm:ss')
+        this.flag = data.state
       }).catch((msg)=>{
         console.log(msg);
       });
@@ -52,6 +55,7 @@
         }).catch((msg)=>{
           console.log(msg);
         });
+        location.reload()
       }
     }
   }
@@ -87,4 +91,5 @@
           border 1px solid #FFB422
           border-radius 2px
           color #FFB422
+          cursor pointer
 </style>

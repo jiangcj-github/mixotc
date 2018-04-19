@@ -18,13 +18,7 @@
                    class="order-choice-search">
       </SearchInput>
       <div class="order-choice-time clearfix" v-if="contentTabIndex === 2">
-        <!--<img src="/static/images/calendar.png" alt="">-->
-        <!--<ol class="clearfix">-->
-          <!--<li><DatePicker :emitValue="startValue"></DatePicker></li>-->
-          <!--<li>-</li>-->
-          <!--<li><DatePicker :emitValue="endValue" :text="endP"></DatePicker></li>-->
-        <!--</ol>-->
-        <DateInterval class="date-group" :endEmitValue="endValue"  :startEmitValue="startValue"></DateInterval>
+        <DateInterval class="date-group" :endEmitValue="endValue" :startEmitValue="startValue"></DateInterval>
         <ul class="clearfix">
           <li v-for="(item, index) in timeList" :class="{'time-active': index == num}" @click="selectTime(index)">{{item}}</li>
         </ul>
@@ -56,18 +50,10 @@
             :width=105>
           </CheckBox>
           <CheckBox
-            v-if="title.status && contentTabIndex === 1"
+            v-if="title.status"
             title="状态"
             allName="全部状态"
-            :checkBoxList="allStatusPro"
-            :emitValue="allStatusValue"
-            :width=130>
-          </CheckBox>
-          <CheckBox
-            v-if="title.status && contentTabIndex === 2"
-            title="状态"
-            allName="全部状态"
-            :checkBoxList="allStatusCom"
+            :checkBoxList="contentTabIndex === 1 ? allStatusPro : allStatusCom"
             :emitValue="allStatusValue"
             :width=130>
           </CheckBox>
@@ -84,7 +70,7 @@
           <li>{{content.currency&&content.currency.toUpperCase()}}</li>
           <li>
             <p><router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(content.buyer) == userId ? content.seller : content.buyer}}">{{content.name || content.contact}}</router-link></p>
-            <p class="talk" @click="toContact">联系他</p>
+            <p class="talk" @click="$store.commit({'type':'changeChatBox', data: true})">联系他</p>
           </li>
           <li>{{content.price}}</li>
           <li>
@@ -95,14 +81,11 @@
           <li>{{content.trade_code}}</li>
           <!-- 状态显示 -->
           <li class="state-li">
-            <!--<p v-for="state in content.stateList" v-if="contentTabIndex === 1">{{state.name}}</p>-->
-            <!--已完成操作-->
             <p v-for="state in content.stateList"
                :class="{'text-r': state.flag == 1, 'text-g': state.flag === 2, 'text-b': state.flag === 3}">{{state.name}}</p>
           </li>
           <!-- 操作显示 -->
           <li class="operation-li">
-            <!--已完成操作-->
             <p v-for="operation in content.operationList"
                :class="{'active-btn': operation.flag == 1 || operation.flag == 3 || operation.flag == 8, 'text-b': operation.flag == 2}"
                @click="operation.flag == 3 ? openPayment($event, index) : (operation.flag == 4 || operation.flag == 7 || operation.flag == 9 ? openSelect($event, operation, index, content) : (operation.flag == 8 ? openReleaseCoin($event, content, index) : (operation.flag == 5 || operation.flag == 6 ? remindCoin(content) : showOperation(index))))"
@@ -116,15 +99,19 @@
         </p>
       </div>
     </div>
-    <!-- 分页 -->
-    <Pagination  v-if="contentList !== null"
-                :total="70"
-                :pageSize="20"
-                emitValue="changePage">
-    </Pagination >
-
     <!-- 订单无内容 -->
-    <MyOrderNothing v-if="contentList === null"></MyOrderNothing>
+    <MyOrderNothing v-if="!contentList"></MyOrderNothing>
+    <!-- 分页 -->
+    <!--<Pagination  v-if="contentList !== null"-->
+                <!--:total="70"-->
+                <!--:pageSize="20"-->
+                <!--emitValue="changePage">-->
+    <!--</Pagination >-->
+    <div class="page-btn">
+      <button @click="clickPre">上一页</button>
+      <button @click="clickNext">下一页</button>
+    </div>
+
 
     <!-- 标记已付款弹窗 -->
     <MarkedPaymentLayer :paymentShow="showPayment"
@@ -278,18 +265,23 @@
         showResetTimeFlag: true,
 
         conductNum: 0, // 进行数量
-        completeNum: 0 // 完成数量
+        completeNum: 0, // 完成数量
+
+        page: 0 // 分页数量
       }
     },
     created() {
       // 获取用户id
-      this.userId = this.JsonBig.stringify(this.$store.state.userInfo.uid)
-      console.log('1111', typeof this.userId, this.userId)
+      this.userId = typeof this.$store.state.userInfo.uid  === 'string' ? this.$store.state.userInfo.uid : this.JsonBig.stringify(this.$store.state.userInfo.uid);
+      //console.log('去你妹的这是个字符串', this.$store.state.userInfo.uid,  typeof this.$store.state.userInfo.uid)
+      //console.log('1111', typeof this.userId, this.userId, typeof this.$store.state.userInfo.uid, this.$store.state.userInfo.uid)
       // 获取进行状态
-      this.selectState = "1,2,3"
-      this.initData()
-      // this.showPayment = true
-
+      this.selectState = "1,2,3";
+      this.initData();
+      this.getInitNum();
+      if (this.$route.query.flag == 1) { // 购买成功的订单显示弹窗
+        this.showPayment = true
+      }
     },
     mounted() {
       // 监听下拉框值，将值传给子组件
@@ -317,14 +309,6 @@
       });
       // 监听搜索框值
       this.Bus.$on('changeInputContent', ({type, data}) => {
-        // this.WsProxy.send('otc',`fuzzy_search_${type}`,{ // 请求数据
-        //   keyword: data
-        // }).then((data)=>{
-        //   console.log('keyword', data)
-        // }).catch((msg)=>{
-        //   console.log(msg);
-        // });
-        // console.log('changeInputContent', type, data)
         console.log(this.type, type)
         if (type == 'order_id') {
           this.orderId = data
@@ -394,7 +378,7 @@
         let ws = this.WebSocket; // 创建websocket连接
         let seq = ws.seq;
 
-        ws.onMessage[seq] = { // 监听
+        !ws.onMessage[seq] && (ws.onMessage[seq] = { // 监听
           callback: (data) => {
             if(!data || data.body.ret !== 0) return;
             console.log('order', data.body.data.orders)
@@ -434,7 +418,7 @@
             })
           },
           date:new Date()
-        };
+        });
 
         ws.send(sendConfig('otc', { // 发包
           seq: seq,
@@ -443,7 +427,7 @@
             data: {
               "type": this.selectOrder, // 1 买; 2 卖; 3 全部  <-state=0
               "state": this.selectState, // 订单状态
-              "origin": 0, // 分页
+              "origin": this.page, // 分页
               "date": this.dateSort,// 时间排序 1降序 2升序
               "price": this.price,// 单价排序 1降序 2升序
               "amount": this.amount,// 电子币数量排序 1降序 2升序
@@ -457,12 +441,16 @@
             }
           }
         }))
+
+
+      },
+      getInitNum() {
         // 获取进行中和已完成数量
         this.WsProxy.send('otc','get_orders_num',{
           type: 1 // 1: 进行中, 2: 已完成
         }).then((data)=>{
           console.log('num', data)
-          this.conductNum = data.amount
+          this.conductNum = data.amount ? data.amount : 0
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -470,7 +458,7 @@
           type: 2 // 1: 进行中, 2: 已完成
         }).then((data)=>{
           console.log('num', data)
-          this.completeNum = data.amount
+          this.completeNum = data.amount ? data.amount : 0
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -509,9 +497,6 @@
           this.endValueDate = new Date().getTime()
         }
         this.initData()
-      },
-      toContact() { // 打开消息框
-        this.$store.commit({'type':'changeChatBox', data: true})
       },
       showOperation(index) { // 去评价
         // console.log('this.contentList[index].operationList.flag', this.contentList[index].operationList.flag)
@@ -616,6 +601,17 @@
             _this.seconds -= 1
           }
         }, 1000)
+      },
+      // 分页操作
+      clickPre() {
+        this.page <= 0 ? this.page = 0 : this.page--;
+        this.initData()
+        console.log(111, this.page)
+      },
+      clickNext() {
+        this.page++;
+        this.initData()
+        console.log(222, this.page)
       }
     }
   }
@@ -821,6 +817,20 @@
   .remind-coin-layer
     text-align center
     line-height 94px
+
+  /*分页部分*/
+  .page-btn
+    width 300px
+    margin 0 auto
+    text-align center
+    button
+      width 80px
+      height 40px
+      background #FFB422
+      color #FFF
+      cursor pointer
+    button:first-child
+      margin-right 100px
 
 
 

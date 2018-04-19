@@ -22,7 +22,8 @@ export default {
   // httpAfterHandler,
   httpList: [
     //test
-    { name: "sales", data: { url: "/otc/sales/:page", method: "get" } }
+    { name: "sales", data: { url: "/otc/sales/:page", method: "get" }},
+    { name: "getPrice", data: { url: "/otc/prices/", method: "get"}}
     // {name: 'test', data: {url: '/v1/home/searchCurrency/:page', method: 'get'}},
 
     // //轮循数据接口

@@ -41,11 +41,11 @@ export default {
         return;
       }
       // 未实名认证
-      if (!this.$store.state.userInfo.verify) {
-        //未实名认证
-        this.Bus.$emit(this.emitValue, 1)
-        return;
-      }
+      // if (!this.$store.state.userInfo.verify) {
+      //   //未实名认证
+      //   this.Bus.$emit(this.emitValue, 1)
+      //   return;
+      // }
 
       // 是否是自己的广告
       if (this.JsonBig.stringify(this.$store.state.userInfo.uid) === this.JsonBig.stringify(sid)) {
@@ -54,9 +54,12 @@ export default {
         return;
       }
 
-    // 广告不存在  
+    // 广告是否存在
       await this.WsProxy.send('otc', 'sale_detail', {id}).then(data => {
-       console.log(data)
+       // console.log('1111',data)
+        if (data.state === 2 ) { // 广告不存在
+          flag = 3
+        }
       })
     //广告不存在
       if (flag === 3) {
@@ -89,7 +92,7 @@ export default {
         this.Bus.$emit(this.emitValue, 6)
         return
       }
-      
+
       // 是否有未完成订单（有7）
       await this.WsProxy.send('otc', 'orders', {type:1, state: '1,2,3', origin: 0}).then(data => {
         if(data.orders) flag = 7;
@@ -98,7 +101,8 @@ export default {
         this.Bus.$emit(this.emitValue, 7)
         return
       }
-      this.$router.push({ name: 'order', query: { id: this.JsonBig.stringify(id) }})
+
+      this.$router.push({ name: 'order', query: { id: id }})
     },
   }
 };
@@ -121,7 +125,7 @@ export default {
       padding-right 10px
       white-space nowrap
       text-overflow ellipsis
-    &.merchant 
+    &.merchant
       width 200px
       padding-left 30px
       .whole
@@ -162,19 +166,19 @@ export default {
           line-height 14px
           border 1px solid #FFA21C
           border-radius 2px
-    &.payment 
+    &.payment
       width 120px
-    &.order-volume 
+    &.order-volume
       width 110px
-    &.deal-volume 
+    &.deal-volume
       width 120px
-    &.good-reputation 
+    &.good-reputation
       width 110px
-    &.amount 
+    &.amount
       width 120px
-    &.limit-price 
+    &.limit-price
       width 140px
-    &.price 
+    &.price
       width 150px
       font-size 16px
       color $col100

@@ -6,8 +6,7 @@
       <li v-for="(item, index) of topList"
           :key="index" :class="{tuijian: index < 3}"
           :style="{backgroundColor: topListColor[index]}"
-          @click="changeCurrency(item)"
-      >
+          @click="changeCurrency(item)">
       {{item}}
       </li>
     </ul>
