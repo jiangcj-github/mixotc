@@ -25,11 +25,11 @@
     props:{
 
       //时间改变时触发(包括起始时间或结束时间)
-      onDiChange:{type:String,default:"onDiDateChange"},
+      onDiChange:{type:String,default:"onDiChange"},
       //起始时间改变时触发
       onDiStartChange:{type:String,default:"onDiStartChange"},
       //结束时间改变时触发
-      onDiEndChange:{type:String,defalut:"onDiEndChange"},
+      onDiEndChange:{type:String,default:"onDiEndChange"},
       //输入时间时触发(包括起始时间和结束时间)
       onDiInput:{type:String,default:"onDiInput"},
       //输入起始时间时触发(包括起始时间和结束时间)
@@ -67,30 +67,30 @@
     },
     watch:{
       date1:function(){
-        this.Bus.$emit("onDiStartChange",this.date1);
-        this.Bus.$emit("onDiChange",this.date1,this.date2);
+        this.Bus.$emit(this.onDiStartChange,this.date1);
+        this.Bus.$emit(this.onDiChange,this.date1,this.date2);
       },
       date2:function(){
-        this.Bus.$emit("onDiEndChange",this.date2);
-        this.Bus.$emit("onDiChange",this.date1,this.date2);
+        this.Bus.$emit(this.onDiEndChange,this.date2);
+        this.Bus.$emit(this.onDiChange,this.date1,this.date2);
       }
     },
     methods:{
       onInput1(){
-        this.Bus.$emit("onDiStartInput",this.date1);
-        this.Bus.$emit("onDiInput",this.date1,this.date2);
+        this.Bus.$emit(this.onDiStartInput,this.date1);
+        this.Bus.$emit(this.onDiInput,this.date1,this.date2);
       },
       onInput2(){
-        this.Bus.$emit("onDiEndInput",this.date2);
-        this.Bus.$emit("onDiInput",this.date1,this.date2);
+        this.Bus.$emit(this.onDiEndInput,this.date2);
+        this.Bus.$emit(this.onDiInput,this.date1,this.date2);
       },
       onBlur1(){
-        this.Bus.$emit("onDiStartBlur",this.date1);
-        this.Bus.$emit("onDiBlur",this.date1,this.date2);
+        this.Bus.$emit(this.onDiStartBlur,this.date1);
+        this.Bus.$emit(this.onDiBlur,this.date1,this.date2);
       },
       onBlur2(){
-        this.Bus.$emit("onDiEndBlur",this.date2);
-        this.Bus.$emit("onDiBlur",this.date1,this.date2);
+        this.Bus.$emit(this.onDiEndBlur,this.date2);
+        this.Bus.$emit(this.onDiBlur,this.date1,this.date2);
       }
     }
   };

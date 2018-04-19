@@ -1,19 +1,18 @@
 <template>
   <BasePopup :show="orderLayer"
-
              :width=470
              :height=282>
     <div class="order-layer">
       <ul>
-        <li class="clearfix"><span>购买单价</span><b>12345.00 CNY</b></li>
-        <li class="clearfix"><span>购买数量</span><b>0.2926 BTC</b></li>
-        <li class="clearfix"><span>购买金额</span><b>12345.00 CNY</b></li>
+        <li class="clearfix"><span>购买单价</span><b>{{price}} CNY</b></li>
+        <li class="clearfix"><span>购买数量</span><b>{{currency}} BTC</b></li>
+        <li class="clearfix"><span>购买金额</span><b>{{money}} CNY</b></li>
       </ul>
       <p>提醒：请确认价格后立即下单</p>
       <p>下单后此订单的比特币将托管锁定，请放心购买</p>
       <div class="btn-group clearfix">
         <em @click="closeOrderLayer">取消</em>
-        <i>确认订单</i>
+        <i @click="firmOrder">确认订单</i>
       </div>
     </div>
   </BasePopup>
@@ -24,7 +23,7 @@
 
   export default {
     name: "order-layer",
-    props: ['orderLayerShow'],
+    props: ['orderLayerShow', 'id', 'price', 'currency', 'money'],
     data() {
       return {
         orderLayer: this.orderLayerShow
@@ -35,12 +34,26 @@
     },
     watch: {
       orderLayerShow(state) {
-        this.orderLayer = state === true ?  true : false
+        this.orderLayer = state === true ? true : false
       }
     },
     methods: {
       closeOrderLayer() {
         this.$emit('offOrderLayer', false)
+      },
+      firmOrder() {
+        this.WsProxy.send('otc','new_order',{
+          id: this.id,
+          price: this.price,
+          currency: this.currency * 1,
+          money: this.money * 1,
+          update_time:  String(Math.floor(new Date().getTime() / 1000))
+        }).then((data)=>{
+          console.log('确认订单', data)
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+        this.$router.push({ path: '/order', query: {flag: 1}})
       }
     }
   }
@@ -73,6 +86,7 @@
         height 40px
         text-align center
         line-height 40px
+        cursor pointer
       em
         float left
         border 1px solid #FFB422

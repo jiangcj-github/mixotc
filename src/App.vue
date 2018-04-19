@@ -41,11 +41,12 @@
             return;
           }
           ws.reConnectFlag = true;
+          // console.log('setUserInfo',data.body.uid);
           this.$store.commit({
             type: 'getUserInfo',
             data: data.body
           });
-          
+
           this.$store.commit({type: 'changeLogin', data: true});
           this.watchTokenFlag = false
         }

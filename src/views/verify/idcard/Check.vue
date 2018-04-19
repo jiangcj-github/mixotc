@@ -11,7 +11,7 @@
           </ul>
         </div>
         <div class="f2">
-          <DateInterval change="dateChange"></DateInterval>
+          <DateInterval ref="di"></DateInterval>
         </div>
         <div class="f3">
           <a href="javascript:void(0)" :class="{active:days===1}" @click="days=1">今天</a>
@@ -40,27 +40,28 @@
       <div v-if="err===0">
         <div class="li" v-for="(e,i) in list" :key="i">
           <div class="booth">
-            <span class="tjsj">{{e.submit_time}}</span>
-            <span class="yh">{{e.nickname}}/{{e.phone}}</span>
-            <span class="shr">{{e.nickname_sh}}/{{e.phone_sh}}</span>
-            <span class="shsj">{{e.check_time}}</span>
+            <span class="tjsj">{{e.submitTime}}</span>
+            <span class="yh">{{e.nickname}}/{{e.account}}</span>
+            <span class="shr">{{e.nicknameCk}}/{{e.accountCk}}</span>
+            <span class="shsj">{{e.checkTime}}</span>
             <span class="ys">{{e.spend}}</span>
-            <span class="zt">{{e.check_result}}</span>
+            <span class="zt">{{e.checkResult}}</span>
             <span class="cz"><a href="javascript:void(0)" class="ck" @click="showPop(e.id)">查看</a></span>
           </div>
           <div class="division"></div>
-          <div class="remark">备注：{{e.check_remark}}</div>
+          <div class="remark">备注：{{e.checkRemark}}</div>
         </div>
-        <Pagination :total="total" :pageSize="15" emitValue="changePage" style="width:100%;margin-top:20px" v-show="total>15"></Pagination>
+        <Pagination :total="total" :pageSize="pageSize" emitValue="changePage"
+                    style="width:100%;margin-top:20px" v-show="total>pageSize"></Pagination>
         <BasePopup :show="pop" :width="764" :height="382" :top="50">
           <div class="pop">
-            <p class="inf-li"><label>提交时间</label><span>2018/03/09 23:30:42</span></p>
-            <p class="inf-li"><label>姓名</label><span>李小蹦</span></p>
-            <p class="inf-li"><label>身份证号</label><span>189099087656567890</span></p>
+            <p class="inf-li"><label>提交时间</label><span>{{list[popSel].submitTime}}</span></p>
+            <p class="inf-li"><label>姓名</label><span>{{list[popSel].name}}</span></p>
+            <p class="inf-li"><label>身份证号</label><span>{{list[popSel].idcard}}</span></p>
             <p class="check-img">
-              <img src="">
-              <img src="">
-              <img src="">
+              <img :src="list[popSel].img1">
+              <img :src="list[popSel].img2">
+              <img :src="list[popSel].img3">
             </p>
             <i class="close" @click="pop=false">&times;</i>
           </div>
@@ -92,15 +93,12 @@
       return {
         srchText: "",
         srchShowTip: false,
-        tipsOrg: [],
+        tips: [],
 
         days: 1,
 
         sortField: -1, //0-审核时间,1-用时
         sortType: false, //true-升序,false-降序
-
-        date1: "",
-        date2: "",
 
         statusDropShow: false,
         statusDropSel: 0,
@@ -111,33 +109,13 @@
         ],
 
         err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败
-        listOrg: [],
+        list: [],
         total: 0,
+        pageSize:15,
 
+        popSel: 0,
         pop: false,  //弹窗-查看
       }
-    },
-    computed:{
-      tips(){
-        let arr=[];
-        this.tipsOrg && this.tipsOrg.forEach(function (e) {
-          arr.push({
-            id: e.id || 0,
-            nickname: e.name || "-",
-            phone: e.phone || "-"
-          });
-          return arr;
-        });
-      },
-      list(){
-        let arr=[];
-        this.listOrg && this.listOrg.forEach(function (e) {
-          arr.push({
-
-          });
-          return arr;
-        });
-      },
     },
     watch:{
       statusDropSel:()=>{
@@ -149,8 +127,9 @@
       sortType:()=>{
         //ws-排序
       },
-      days:()=>{
-        //ws-过滤
+      days:function(){
+        this.$refs.di.date1=new Date(Date.now()-24*60*60*1000*this.days);
+        this.$refs.di.date2=new Date();
       },
     },
     methods: {
@@ -167,15 +146,58 @@
 
       },
       showPop(id){
+        this.popSel=id;
         this.pop=true;
-        //ws-请求数据
       },
+      loadCheckList(srchKey,start,end,result,sort,p){
+        this.WsProxy.send("control","a_get_identity_list",{
+          type:1,
+          result: result,
+          sort: sort,
+          keyword:srchKey,
+          start: start,
+          end: end,
+          page:p,
+          count:this.candPageSize
+        }).then((data)=>{
+          if(!data||!data.identities||data.identities.length<=0){
+            this.err=1; //无相应的用户
+          }else{
+            this.total=data.amount;
+            this.parseList(data.identities);
+          }
+        }).catch((msg)=>{
+          if(!msg){
+            this.err=2; //网络异常
+          }else if(msg.ret!==0){
+            this.err=3; //加载异常
+          }
+        });
+      },
+      parseList(data){
+        this.list=[];
+        data && data.forEach((e,i)=>{
+          this.list.push({
+            id: i,
+            submitTime: new Date(e.create*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
+            nickname: e.nick || "-",
+            acount:e.phone || e.email || "-",
+            nicknameCk: e.verify_name || "-",
+            accountCk: e.verify_phone || e.verify_email || "-",
+            checkTime: new Date(e.update*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
+            spend: (e.used && e.used.formatSecord()) || "-",
+            checkResult: (e.state && ["待审核","通过","未通过","恶意上传"][e.state-1]) || "-",
+            checkRemark: e.info || "-",
+            name: e.name || "-",
+            idcard: e.number || "-",
+            img1: e.image1 || "",
+            img2: e.image2 || "",
+            img3: e.image3 || "",
+          });
+        });
+      }
     },
     mounted(){
-      this.Bus.$on("dateChange",(date1,date2)=>{
-        this.date1=date1;
-        this.date2=date2;
-      });
       this.Bus.$on("changePage",(p)=>{
 
       });

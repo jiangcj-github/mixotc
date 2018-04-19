@@ -1,50 +1,59 @@
 <template>
-  <div class="upload-info" v-if="info.type===0">
-    <h3>{{info.nickname}}/{{info.phone}}</h3>
-    <sup>第3次认证</sup>
-    <p class="inf-li"><label>提交时间</label><span>{{info.submit_time}}</span></p>
-    <p class="inf-li"><label>姓名</label><span>{{info.name}}</span></p>
-    <p class="inf-li"><label>身份证号</label><span>{{info.idcard}}</span></p>
-    <p class="inf-li"><label>银行卡号</label><span>{{info.bankcard}}</span></p>
-    <p class="inf-li"><label>开户行</label><span>{{info.bank}}</span></p>
-    <p class="check-img">
-      <img :src="info.img1">
-      <img :src="info.img2">
-      <img :src="info.img3">
-    </p>
-    <div class="form" v-if="info.can_check">
-      <p style="margin-bottom:12px">
-        <span class="checkbox" :class="{check:formResult==1}" @click="checkPass">审核通过</span>
-        <span class="checkbox" :class="{check:formResult==0}" @click="checkRefuse" style="margin-left:20px">审核不通过</span>
-      </p>
-      <div class="textarea">
-        <textarea placeholder="不通过原因：字数限制0～50个字符。" v-model="formRemark" @input="inputRemark" ref="textarea"></textarea>
-        <p class="indicator">{{formRemark.length}}/50</p>
+  <div class="upload-info" v-if="infoErr===0">
+    <h3>{{infos.nickname}}/{{infos.account}}</h3>
+    <div v-for="(e,i) in infos.his" :key="i">
+      <sup>第{{i}}次认证</sup>
+      <div v-if="e.flag===1">
+        <p class="inf-li"><label>提交时间</label><span>{{e.submitTime}}</span></p>
+        <p class="inf-li"><label>姓名</label><span>{{e.name}}</span></p>
+        <p class="inf-li"><label>身份证号</label><span>{{e.idcard}}</span></p>
+        <p class="inf-li"><label>银行卡号</label><span>{{e.bankcard}}</span></p>
+        <p class="inf-li"><label>开户行</label><span>{{e.bank}}</span></p>
+        <p class="check-img">
+          <img :src="e.img1">
+          <img :src="e.img2">
+          <img :src="e.img3">
+        </p>
+        <div class="form">
+          <p style="margin-bottom:12px">
+            <span class="checkbox" :class="{check:formResult===1}" @click="checkPass">审核通过</span>
+            <span class="checkbox" :class="{check:formResult===0}" @click="checkRefuse" style="margin-left:20px">审核不通过</span>
+          </p>
+          <div class="textarea">
+            <textarea placeholder="不通过原因：字数限制0～50个字符。" v-model="formRemark" @input="inputRemark" ref="textarea"></textarea>
+            <p class="indicator">{{formRemark.length}}/50</p>
+          </div>
+          <div class="mali">
+            <span class="radio" :class="{check:formMali}" @click="checkMali">是否恶意上传认证</span>
+            <ul>
+              <li>恶意认证提交后，封锁该用户3天认证功能</li>
+              <li>3次恶意认证后，永久封锁认证功能</li>
+            </ul>
+          </div>
+          <div class="btn-wrap">
+            <button class="submit-btn" :class="{active:canSubmit}" @click="submit">提交</button>
+          </div>
+        </div>
       </div>
-      <div class="mali">
-        <span class="radio" :class="{check:formMali}" @click="checkMali">是否恶意上传认证</span>
-        <ul>
-          <li>恶意认证提交后，封锁该用户3天认证功能</li>
-          <li>3次恶意认证后，永久封锁认证功能</li>
-        </ul>
+      <div v-else-if="e.flag===2">
+        <p class="inf-li"><span>已通过审核</span></p>
       </div>
-      <div class="btn-wrap">
-        <button class="submit-btn" :class="{active:canSubmit}" @click="submit">提交</button>
+      <div v-else-if="e.flag===3">
+        <p class="inf-li"><span>拒绝理由：&nbsp;{{e.remark}}</span></p>
+      </div>
+      <div v-else-if="e.flag===4">
+        <p class="inf-li"><span>拒绝理由：&nbsp;恶意上传</span></p>
       </div>
     </div>
-    <sup>第2次认证</sup>
-    <p class="inf-li"><span>恶意上传认证</span></p>
-    <sup>第1次认证</sup>
-    <p class="inf-li"><span>照片不清楚</span></p>
   </div>
-  <div class="err no-result" v-else-if="info.type===1">无相应的用户，请重新搜索</div>
-  <div class="err load-failed" v-else-if="info.type===2">网络异常，请重新搜索</div>
-  <div class="err net-error" v-else-if="info.type===3">加载失败，请重新搜索</div>
-  <div class="err no-result" v-else>没有待审核数据</div>
+  <div class="err no-result" v-else-if="infoErr===1">无相应的用户，请重新搜索</div>
+  <div class="err load-failed" v-else-if="infoErr===2">网络异常，请重新搜索</div>
+  <div class="err net-error" v-else-if="infoErr===3">加载失败，请重新搜索</div>
+  <div class="err empty" v-else>没有待审核数据</div>
 </template>
 <script>
   export default {
-    props:["info"],
+    props:["infos","infoErr"],
     data(){
       return{
         formResult: -1,
@@ -91,9 +100,21 @@
       },
       submit(){
         if(!this.canSubmit) return;
+        //
+        let id=this.infos.his[0].id;
+        let uid=this.infos.his[0].uid;
+        let type=2;
+        let result=this.formResult;
+        let spite=this.formMali;
+        let info=this.formRemark;
         //ws-提交审核
+        this.WsProxy.send("control","a_identify",{
+          id:id,uid:uid,type:type,result:result,spite:spite,info:info
+        }).catch((msg)=>{
+          console.log(msg);
+        });
       }
-    }
+    },
   }
 </script>
 <style scoped lang="stylus">
@@ -238,3 +259,4 @@
     &.empty
       background-image url(/static/images/rectangle.png)
 </style>
+

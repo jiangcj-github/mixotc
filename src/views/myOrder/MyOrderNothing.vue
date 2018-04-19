@@ -18,7 +18,7 @@
   .nothing-wrap
     background #FFF
     height 509px
-    margin-top -10px
+    margin -10px 0 44px
     text-align center
     overflow hidden
     div
