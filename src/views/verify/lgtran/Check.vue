@@ -129,8 +129,9 @@
       sortType:()=>{
         //ws-排序
       },
-      days:()=>{
-        //ws-过滤
+      days:function(){
+        this.$refs.di.date1=new Date(Date.now()-24*60*60*1000*this.days);
+        this.$refs.di.date2=new Date();
       },
     },
     methods: {

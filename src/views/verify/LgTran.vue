@@ -1,5 +1,5 @@
 <template>
-  <Left :leftBar="1">
+  <Left :leftBar="2">
     <div class="right" slot="right">
       <ul class="tab">
         <li :class="{active:tab==1}" @click="tab=1">待审核<i v-if="uncheckNum>0">({{uncheckNum}})</i></li>

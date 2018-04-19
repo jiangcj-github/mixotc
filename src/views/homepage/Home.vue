@@ -92,6 +92,11 @@
           isTrust: o.is_trust || false,
         }
       },
+      trustList(){
+        return this.$store.state.trustList.map((item)=>{
+          return this.JsonBig.stringify(item);
+        });
+      }
     },
     mounted() {
       this.loginUid= this.$store.state.userInfo.uid || "";
