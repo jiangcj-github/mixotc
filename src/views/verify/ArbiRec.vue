@@ -49,11 +49,11 @@
             <div class="tjsj"><p>{{e.createTime1}}</p><p>{{e.createTime2}}</p></div>
             <div class="ddxx"><p>{{e.orderType}}</p><p>{{e.orderCoin}}</p></div>
             <div class="sqr">
-              <router-link to="" target="_blank" tag="p">{{e.applyUser}}</router-link>
+              <router-link to="" target="_blank" tag="p" class="link">{{e.applyUser}}</router-link>
               <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
             </div>
             <div class="sqdx">
-              <router-link to="" target="_blank" tag="p">{{e.appliedUser}}</router-link>
+              <router-link to="" target="_blank" tag="p" class="link">{{e.appliedUser}}</router-link>
               <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
             </div>
             <div class="zcr"><p>{{e.dealUser}}</p></div>
@@ -135,14 +135,14 @@
         resUlShow: false,
         resUlSel: 0,
         resUls:[
-          {text:"申诉结果",key:""},
+          {text:"全部结果",key:""},
           {text:"撤销申诉",key:""},
           {text:"终止交易",key:""},
           {text:"强制放币",key:""},
           {text:"驳回申诉",key:""},
         ],
 
-        err: 0, //0-正常,1-无相应的用户，2-网络异常，3-加载失败
+        err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败
         arbisOrg: [1,2,3],
         total: 0,
         pageSize: 20,
@@ -177,7 +177,7 @@
     },
     watch:{
       fltDays:function(){
-        this.$refs.di.date1=new Date(Date.now()+24*60*60*1000*this.fltDays);
+        this.$refs.di.date1=new Date(Date.now()-24*60*60*1000*this.fltDays);
         this.$refs.di.date2=new Date();
       }
     },
@@ -187,6 +187,9 @@
       });
       this.Bus.$on("onDiInput",()=>{
         this.fltDays=-1;
+      });
+      this.Bus.$on("onDiChange",()=>{
+        console.log("d");
       });
     },
     methods: {
@@ -408,6 +411,10 @@
                 vertical-align -4px
               &:hover
                 color #dca02a
+        p.link
+          cursor pointer
+          &:hover
+            color #fea350
         .ddxx p
           color #57A100
         .jg p

@@ -12,7 +12,7 @@
         <ul class="results">
           <li :class="{active:candSel==i}" v-for="(o,i) in cands" :key="i" @click="clickCand">{{o.nickname+"/"+o.phone}}</li>
         </ul>
-        <SimplePagination :total="candNum" :pageSize="20" style="width:100%" emitValue="changePage" v-if="candNum>20"></SimplePagination>
+        <SimplePagination :total="candTotal" :pageSize="pageSize" style="width:100%" emitValue="changePage" v-if="candTotal>20"></SimplePagination>
       </div>
       <UploadInfo info="info"></UploadInfo>
     </div>
@@ -21,7 +21,9 @@
   import SimplePagination from "../component/SimplePagination";
   import UploadInfo from "./children/UploadInfo";
   export default {
-    props:["numChange"],
+    props:{
+      uncheckTotalChange:{type:String,default:""}
+    },
     components: {
       UploadInfo,
       SimplePagination,
@@ -34,8 +36,9 @@
 
         tipsOrg: [],
 
-        candNum: 0,
+        candTotal: 0,
         candsOrg: [],
+        candPageSize: 20,
         candSel: 0,
 
         infoOrg: {},
@@ -82,8 +85,8 @@
       },
     },
     watch:{
-      candNum:function(){
-        this.Bus.$emit(this.numChange, this.candNum);
+      candTotal:function(){
+        this.Bus.$emit("", this.candTotal);
       },
       candSel:function () {
         //ws-获取审核信息
@@ -106,10 +109,20 @@
         //ws-搜索-获取审核信息
         this.candSel=-1;
 
+      },
+      loadUncheckList(p){
+
       }
     },
     mounted(){
       //ws-获取待审核列表
+      this.WsProxy.send("control","a_get_identity_list",{
+        type:1,count:10,page:0
+      }).then((data)=>{
+
+      }).catch((msg)=>{
+        console.log(msg);
+      });
       this.Bus.$on("changePage",(p)=>{
 
       });
