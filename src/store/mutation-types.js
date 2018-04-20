@@ -8,6 +8,11 @@ const changeUnread = "changeUnread";
 const changeCurChat = "changeCurChat";
 const changeChat = "changeChat";
 const delChat = "delChat";
+const getFriendList = "getFriendList";
+const getGroupList = "getGroupList";
+const newChat = "newChat";
+const newTrust = "newTrust";
+const delTrust = "delTrust";
 
 export {
   changeLoginForm,
@@ -19,5 +24,10 @@ export {
   changeUnread,
   changeCurChat,
   changeChat,
-  delChat
+  delChat,
+  getFriendList,
+  getGroupList,
+  newChat,
+  newTrust,
+  delTrust
 };

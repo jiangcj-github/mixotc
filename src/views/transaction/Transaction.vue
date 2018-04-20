@@ -142,12 +142,12 @@ import BasePopup from '@/components/common/BasePopup';
     },
     created() {
       //获取信任人员列表
-     if (this.isLogin) {
-        this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
-          data && this.$store.commit('changeTrustList', {data: data.ids})
-          !data && this.$store.commit('changeTrustList', {data: []})
-        })
-      } 
+    //  if (this.isLogin) {
+    //     this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
+    //       data && this.$store.commit('changeTrustList', {data: data.ids})
+    //       !data && this.$store.commit('changeTrustList', {data: []})
+    //     })
+    //   } 
       this.fetchData({type: 1, count: 20, page: 0 })
     },
     mounted() {
@@ -298,10 +298,7 @@ import BasePopup from '@/components/common/BasePopup';
         return score;
       },
       trustArray() {
-        if(!this.$store.state.trustList) return this.$store.state.trustList;
-        return this.$store.state.trustList.map(item=>{
-          return this.JsonBig.stringify(item.Id)
-        })
+        return this.$store.state.trustList;
       }
     },
     watch: {
@@ -325,15 +322,20 @@ import BasePopup from '@/components/common/BasePopup';
         },
         deep: true
       },
-      isLogin(curVal) {
-        if (curVal) {
-          this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
-            data && this.$store.commit('changeTrustList', {data: data.ids})
-            !data && this.$store.commit('changeTrustList', {data: []})
-          })
-          return
-        }
-        this.$store.commit('changeTrustList', {data: []})
+      isLogin: {
+        handler(curVal) {
+          if (curVal) {
+            this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
+              data && this.$store.commit('changeTrustList', {data: data.ids.map(item => {
+                return this.JsonBig.stringify(item.Id);
+              })})
+              !data && this.$store.commit('changeTrustList', {data: []})
+            })
+            return
+          }
+          this.$store.commit('changeTrustList', {data: []})
+        },
+        immediate: true
       }
     }
   }

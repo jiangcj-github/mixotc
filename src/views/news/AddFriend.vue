@@ -4,8 +4,8 @@
       <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeFriend">
     </p>
     <div class="user-name">
-      <img src="" alt="">
-      <span>lihh / 130***123</span>
+      <img :src="addIcon" alt="">
+      <span>{{addName}}</span>
     </div>
     <textarea placeholder="请填写认证信息" v-model="text" maxlength="20"></textarea>
     <button @click="openFirendLayer">添加好友</button>
@@ -15,7 +15,9 @@
                :width=135
                :height=50
                :top=50
-               :wrapStyleObject="firendWrap">已发送，等待对方同意</BasePopup>
+               :wrapStyleObject="firendWrap"
+               @click.native="closeFriend"
+    >已发送，等待对方同意</BasePopup>
   </div>
 </template>
 
@@ -24,10 +26,13 @@
 
   export default {
     name: "add-friend",
-    props: ['addFriendShow'],
+    props: ['addFriendShow', 'id', 'name', 'icon'],
     data() {
       return {
-        text: '',
+        addId: this.id,
+        addIcon: this.icon,
+        addName: this.name,
+        text: `我是${this.$store.state.userInfo.name}`,
         friendShow: this.addFriendShow,
         firendLayer: false,
         firendWrap: {
@@ -35,10 +40,11 @@
           height: '420px',
           right: 0,
           bottom: '100px'
-        }
+        },
+        timer: null
       }
     },
-    conputed: {
+    computed: {
       userInfo() {
         return this.$store.state.userInfo
       }
@@ -57,20 +63,25 @@
     },
     methods: {
       closeFriend() {
+        clearTimeout(this.timer);
         this.$emit('offAddFriend', 'false')
       },
       openFirendLayer() {
-        // this.WsProxy.send('control', 'request_friend', {
-        //   uid: this.userInfo.uid,
-        //   id: ,
-        //   icon: '',
-        //   info: this.text
-        // }).then(data => {
+        this.WsProxy.send('control', 'request_friend', {
+          uid: this.userInfo.uid,
+          id: this.JsonBig.parse(this.addId),
+          icon: '',
+          info: this.text
+        }).then(data => {
           this.firendLayer = true
-          setTimeout(() => {
+          clearTimeout(this.timer);
+          this.timer = setTimeout(() => {
             this.firendLayer = false
+            this.$emit('offAddFriend', 'false')
           }, 3000)
-        // })
+        }).catch(error => {
+          console.log(error)
+        })
       }
     }
   }

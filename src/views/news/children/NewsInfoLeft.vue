@@ -1,19 +1,23 @@
 <template>
   <div class="news-info-left">
     <div class="search-box">
-      <input type="text" placeholder="查找昵称／账号"/>
+      <input type="text" placeholder="查找昵称／账号" v-model="searchText" @blur="doSearch" @input="input" @keyup.enter="doSearch"/>
       <img src="/static/images/search_gray.png"/>
     </div>
       <happy-scroll style="width:159px;height:325px" resize bigger-move-h="start">
         <div class="wrap">
-          <ul class="firend-list">
-            <li v-for="(content, index) in userList" :key="content.id" :class="{cur: content.id === $store.state.curChat}" @click="selectChat(content.id, index)">
-              <img v-if="!content.group && !content.orderId" :src="content.icon ? `${HostUrl.http}image/${content.icon}` : `/static/images/default_avator.png`" alt="" class="head-portrait">
-              <img v-if="content.group" src="/static/images/groupChat_icon.png" alt="" class="head-portrait" @click.stop="openCheckGroup">
-              <img v-if="content.orderId" src="/static/images/appeal_icon.png" alt="" class="head-portrait">
+          <ul class="firend-list" v-if="!search">
+            <li v-for="(content, index) in userList" :key="content.id" :class="{cur: content.id === $store.state.curChat}" @click="selectChat(content.id)">
+              <img :src="content.icon" alt="" class="head-portrait">
               <b v-if="content.unread"></b>
-              <span>{{content.length ? (content.nickName ? `${content.nickName}(${content.length})` : `群聊(${content.length})`) : (content.nickName ? content.nickName : `订单号:${content.orderId}`)}}</span>
+              <span>{{content.nickName}}</span>
               <img src="/static/images/close_btn.png" alt="" class="close-head" @click.stop="delUser(index, content.id)">
+            </li>
+          </ul>
+          <ul class="firend-list" v-else>
+            <li v-for="(content) in searchRange" :key="content.id" :class="{cur: content.id === $store.state.curChat}" @click="newChat(content)">
+              <img :src="content.icon" alt="" class="head-portrait">
+              <span>{{content.nickName}}</span>
             </li>
           </ul>
         </div>
@@ -32,197 +36,188 @@
       </div>
     </div>
     <!-- 查看群 -->
-    <GroupInfo :checkGroupShow="showCheckGroup" @offCheckGroup="openCheckGroup"></GroupInfo>
+    
   </div>
 </template>
 
 <script>
-  import GroupInfo from '@/views/news/GroupInfo' // 查看群
   import { HappyScroll } from 'vue-happy-scroll'
   export default {
     name: "new-info-left",
     data() {
       return {
-        showCheckGroup: false,
-        friendList: [],
-        groupList: [],
+        search: false,
+        searchText: '',
+        searchRange: []
       }
     },
     mounted() {
-      console.log(document.querySelector('.news-info-left'))
-      this.$store.commit({type: 'changeChat', data:  [
-        {
-          id: 1,
-          group: false,
-          orderId: "",
-          icon: "",
-          nickName: "qwert1111",
-          phone: 1561321153,
-          email: "1561321153@163.com",
-          unread: 0,
-          messages: []
-        },
-        {
-          id: 2,
-          group: true,
-          length: 7,
-          orderId: "",
-          icon: "",
-          nickName: "悦跑",
-          phone: 1561321154,
-          email: "1561321154@163.com",
-          unread: 0,
-          messages: []
-        },
-        {
-          id: 3,
-          group: false,
-          orderId: "313213213215615321312",
-          icon: "",
-          nickName: "",
-          phone: 1561321155,
-          email: "1561321155@163.com",
-          unread: 6,
-          messages: []
-        },
-        {
-          id: 4,
-          group: false,
-          orderId: "",
-          icon: "",
-          nickName: "qwert1666",
-          phone: 1561321153,
-          email: "1561321153@163.com",
-          unread: 0,
-          messages: []
-        },
-        {
-          id: 5,
-          group: false,
-          orderId: "",
-          icon: "",
-          nickName: "qwert11777",
-          phone: 1561321153,
-          email: "1561321153@163.com",
-          unread: 3,
-          messages: []
-        },
-        {
-          id: 6,
-          group: true,
-          length: 5,
-          orderId: "",
-          icon: "",
-          nickName: "",
-          phone: 1561321153,
-          email: "1561321153@163.com",
-          unread: 5,
-          messages: []
-        },
-        {
-          id: 7,
-          group: false,
-          orderId: "",
-          icon: "",
-          nickName: "qwert6573",
-          phone: 1561321153,
-          email: "1561321153@163.com",
-          unread: 0,
-          messages: []
-        },
-        {
-          id: 8,
-          group: false,
-          orderId: "54654645646456456467677",
-          icon: "",
-          nickName: "",
-          phone: 1561321153,
-          email: "1561321153@163.com",
-          unread: 0,
-          messages: []
-        },
-        {
-          id: 9,
-          group: false,
-          orderId: "",
-          icon: "",
-          nickName: "qwert6987456",
-          phone: 1561321153,
-          email: "1561321153@163.com",
-          unread: 0,
-          messages: []
-        },
-        {
-          id: 10,
-          group: false,
-          orderId: "",
-          icon: "",
-          nickName: "sefdgsdfrt1111",
-          phone: 1561321153,
-          email: "1561321153@163.com",
-          unread: 0,
-          messages: []
-        },
-        {
-          id: 11,
-          group: false,
-          orderId: "",
-          icon: "",
-          nickName: "4675785t1111",
-          phone: 1561321153,
-          email: "1561321153@163.com",
-          unread: 0,
-          messages: []
-        },
-        {
-          id: 12,
-          group: false,
-          orderId: "",
-          icon: "",
-          nickName: "4365wfsg111",
-          phone: 1561321153,
-          email: "1561321153@163.com",
-          unread: 0,
-          messages: []
-        }
-      ]})
+      this.initData()
       document.querySelector('.news-info-left .happy-scroll-container').className = 'happy-scroll-container import';
-      this.WsProxy.send('control', 'recent_contact', {uid: this.$store.state.userInfo.uid}).then(data => {
-        console.log(88888,data)
-      }).catch(error=>{
-        console.log(error)
-      })
     },
     computed: {
       userList() {
         return this.$store.state.chat
-      } 
+      },
+      chatIds() {
+        return this.$store.state.chat.map(item => {
+          return item.id
+        })
+      }
     },
     components: {
-      GroupInfo,
       HappyScroll
     },
     methods: {
+      //初始化拉取加工数据
+      async initData() {
+        let result = [];
+        //拉取好友列表
+        await this.WsProxy.send('control', 'friend_list', {uid: this.$store.state.userInfo.uid}).then(data => {
+          this.$store.commit({type: 'getFriendList', data})
+        }).catch(error=>{
+          console.log(error)
+        })
+        //拉取群組列表
+        await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
+          this.$store.commit({type: 'getGroupList', data})
+        }).catch(error=>{
+          console.log(error)
+        })
+        //拉取近十天对话列表
+        let linkman = await this.WsProxy.send('control', 'recent_contact', {uid: this.$store.state.userInfo.uid}).then(data => {
+          console.log(data)
+          return data
+        }).catch(error=>{
+          console.log(error)
+        })
+        //加工数据
+        linkman.contacts && linkman.contacts.forEach(item => {
+          let length = 0;
+          if (item.gid) {
+            this.$store.state.groupList.forEach(group => {
+              if (this.JsonBig.stringify(item.gid) === this.JsonBig.stringify(group.id)) {
+                length = group.members.length
+              }
+            })
+            result.push({
+              id: this.JsonBig.stringify(item.gid),
+              group: true,
+              length: length,
+              service: false,
+              icon: "/static/images/groupChat_icon.png",
+              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `群聊(${length})` : `${item.name}((${length}))`,
+              phone: false,
+              email: false,
+              unread: 0,
+              messages: []
+            });
+          }else if (item.is_peer_admin){
+            result.push({
+              id: this.JsonBig.stringify(item.uid),
+              group: false,
+              service: true,
+              icon: "/static/images/service_icon.png",
+              nickName: '客服',
+              phone: false,
+              email: false,
+              unread: 0,
+              messages: []
+            }); 
+          }else {
+            result.push({
+              id: this.JsonBig.stringify(item.uid),
+              group: false,
+              service: false,
+              icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
+              nickName: item.name,
+              phone: item.phone,
+              email: item.email,
+              unread: 0,
+              messages: []
+            }); 
+          }
+        })
+        this.$store.commit({type: 'changeChat', data: result});
+      },
+      //搜索框
+      input() {
+        this.searchText === '' && (this.search = false)
+      },
+      doSearch() {
+        if(this.searchText === '') return;
+        this.search = true;
+        this.searchLinkman()
+      },
+      //切换至系统消息界面
       toSystem() {
         this.$store.commit({type: 'changeCurChat', data: {id: 'system'}})
       },
       selectChat(id, index) {
-        this.$store.commit({type: 'changeCurChat', data: {id, index}})
+        this.$store.commit({type: 'changeCurChat', data: {id}})
       },
-      openCheckGroup(st) {
-        if (st === 'false') {
-          this.showCheckGroup = false
-        } else {
-          this.showCheckGroup = true
-        }
+      //处理搜索范围，联系人列表，好友，群组
+      searchLinkman() {
+        let result = [];
+        //联系人列表
+        this.$store.state.chat.forEach(item => {
+          if (item.nickName.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText)) {
+            result.push(item);
+          }
+        })
+        //好友
+        this.$store.state.friendList.forEach(item => {
+          if (this.chatIds.includes(this.JsonBig.stringify(item.id))) return;
+          if (item.name.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText)) {
+            result.push({
+              id: this.JsonBig.stringify(item.id),
+              group: false,
+              service: false,
+              icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
+              nickName: item.name,
+              phone: item.phone,
+              email: item.email,
+              unread: 0,
+              messages: []
+            });
+          }
+        })
+        //群组
+        this.$store.state.groupList.forEach(item => {
+          if (this.chatIds.includes(this.JsonBig.stringify(item.id))) return;
+          if (item.name.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText)) {
+            result.push({
+              id: this.JsonBig.stringify(item.id),
+              group: true,
+              service: false,
+              length: item.members.length,
+              icon: "/static/images/groupChat_icon.png",
+              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `群聊(${item.members.length})` : `${item.name}((${item.members.length}))`,
+              phone: false,
+              email: false,
+              unread: 0,
+              messages: []
+            });
+          }
+        })
+      this.searchRange = result
       },
       delUser(index, id) {
-        this.WsProxy.send('control', 'delete_group', {uid:this.$store.state.userInfo.uid, id: this.JsonBig.parse(id)}).then(data => {
-          console.log(88888,data)
-        }).catch(error=>{
-          console.log(error)
-        })
+        // 删除联系人列表项接口尚未完成
+        // this.WsProxy.send('control', 'delete_group', {uid:this.$store.state.userInfo.uid, id: this.JsonBig.parse(id)}).then(data => {
+        //   console.log('deletgroup',data)
+        // }).catch(error=>{
+        //   console.log(error)
+        // })
         this.$store.commit({type: 'delChat', data: index})
+      },
+      newChat(chat) {
+        this.search = false
+        if (this.chatIds.includes(chat.id)) {
+          this.$store.commit({type: 'changeCurChat', data: {id:chat.id}})
+          return;
+        }
+        this.$store.commit({type: 'newChat', data: chat})
       }
     }
   }

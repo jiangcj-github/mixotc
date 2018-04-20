@@ -30,4 +30,29 @@ WebSocketProxy.prototype.send = function (op, action, sendData){
   });
 };
 
+WebSocketProxy.prototype.sendBase = function(op, body) {
+  return new Promise((resolve, reject) => {
+    this.seq = this.ws.seq;
+    this.ws.onMessage[this.seq] = {
+      callback: data => {
+        if (!data) {
+          reject(data); //catch超时处理data为false
+          return;
+        } else if (data.body.ret !== 0) {
+          reject(data.body); //catch结果错误，返回body
+          return;
+        }
+        resolve(data.body); //正常处理
+      },
+      date: new Date()
+    };
+    this.ws.send(
+      sendConfig(op, {
+        seq: this.seq,
+        body: body
+      })
+    );
+  });
+};
+
 export default WebSocketProxy;

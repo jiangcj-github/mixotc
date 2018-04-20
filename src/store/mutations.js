@@ -30,19 +30,49 @@ export default {
     // 未读信息条数
     state.unreadNumber = data;
   },
+
   [types.changeCurChat](state, { data }) {
     // 改变当前聊天
     state.curChat = data.id;
-    data.id === "system" && (state.systemMessage = 0)
-    data.index && (state.chat[data.index].unread = 0);
+    data.id === "system" && (state.systemMessage = 0);
+    data.id !== "system" &&
+      state.chat.forEach(item => {
+        item.id === data.id && (item.unread = 0);
+      });
   },
+
   [types.changeChat](state, { data }) {
     // 初始化聊天部分数据
     state.chat = data;
   },
   [types.delChat](state, { data }) {
-    state.curChat =''
-      // 删除聊天
+    state.curChat = "";
+    // 删除聊天
     state.chat.splice(data, 1);
+  },
+  [types.getFriendList](state, { data }) {
+    //好友列表
+    state.friendList = data;
+  },
+  [types.getGroupList](state, { data }) {
+    //群組列表
+    state.groupList = data;
+  },
+
+  [types.newChat](state, { data }) {
+    // 新建聊天窗口
+    state.chat.unshift(data);
+    state.curChat = data.id;
+  },
+
+  [types.newTrust](state, { data }) {
+    // 加信任
+    !state.trustList.includes(data) && state.trustList.push(data);
+  },
+
+  [types.delTrust](state, { data }) {
+    // 取消信任
+    let index = state.trustList.indexOf(data);
+    index !== -1 && state.trustList.splice(index, 1);
   }
 };

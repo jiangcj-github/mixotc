@@ -2,13 +2,14 @@
   <div class="news-info-right">
     <ul class="title-info clearfix">
       <li class="title-info-name" v-if="curChat">{{curChat === 'system' ? '系统消息' : title}}</li>
-      <li class="title-info-select" v-clickoutside="closeSelect" v-if="title">
-        <img src="/static/images/add_talk.png" class="add-talk-img" @click="showSeletAdd">
+      <li class="title-info-select" v-clickoutside="closeSelect" v-if="title && !chat[index].service">
+        <img v-if="!chat[index].group" src="/static/images/add_talk.png" class="add-talk-img" @click="showSeletAdd">
+        <img v-else src="/static/images/groupchat.png" class="add-talk-img" @click="showCheckGroup = true">
         <div v-show="seletAdd">
           <i></i>
           <ul>
-            <li @click="openAddFriend">+好友</li>
-            <li @click="openBeliveLayer">+信任</li>
+            <li @click="openAddFriend" v-if="!isFriend">+好友</li>
+            <li @click="openBeliveLayer(chat[index].id)" v-if="!isTrust">+信任</li>
             <li @click="openAddGroup">+建群</li>
           </ul>
         </div>
@@ -61,7 +62,15 @@
       </li>
     </ol>
     <!-- 添加好友弹窗 -->
-    <AddFriend v-if="showAddFriend" :addFriendShow="showAddFriend" @offAddFriend="openAddFriend"></AddFriend>
+    <AddFriend 
+      v-if="showAddFriend" 
+      :addFriendShow="showAddFriend" 
+      @offAddFriend="openAddFriend"
+      :id="curChat"
+      :name="chat[index].nickName"
+      :icon="chat[index].icon"
+      >
+    </AddFriend>
     <!-- 添加群聊弹窗 -->
     <AddGroup v-if="showAddGroup" :addGroupShow="showAddGroup" @offAddGroup="openAddGroup"></AddGroup>
     <!-- 添加信任弹窗 -->
@@ -71,6 +80,7 @@
                :height=50
                :top=50
                :wrapStyleObject="beliveWrap">已加信任</BasePopup>
+    <GroupInfo :checkGroupShow="showCheckGroup" @offCheckGroup="openCheckGroup"></GroupInfo>
   </div>
 </template>
 
@@ -78,11 +88,13 @@
   import AddFriend from '@/views/news/AddFriend' // 添加好友
   import AddGroup from '@/views/news/AddGroup' // 添加群
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
+  import GroupInfo from '@/views/news/GroupInfo' // 查看群
 
   export default {
     name: "news-info-right",
     data() {
       return {
+        showCheckGroup: false,
         seletAdd: false,
         showAddFriend: false,
         showAddGroup: false,
@@ -92,32 +104,71 @@
           height: '420px',
           right: 0,
           bottom: '100px'
-        }
+        },
+        timer: null
       }
+    },
+    mounted() {
+      // this.WsProxy.sendBase('send_sms', {
+      //     action: "send_sms",
+      //     type: 'text',
+      //     gid: 0,
+      //     tid: this.JsonBig.parse('197154964416499712'),
+      //     data: {
+      //       msg: 'adsfsadafdsafsaf'
+      //     }
+      //   }).then(data => {
+      //     consoel.log(data)
+      //   })
     },
     computed: {
       title() {
         let result = '';
         this.$store.state.chat.forEach(item=> {
           if (item.id === this.$store.state.curChat) {
-            item.group && item.nickName === '' && (result = `群聊(${item.length})`)
-            item.group && item.nickName !== '' && (result = `${item.nickName}(${item.length})`)
-            item.orderId && (result = `订单号：${item.orderId}`)
-            !item.group && !item.orderId && (result = item.nickName)
+            result = item.nickName
           }
         })
         return result
       },
       curChat() {
         return this.$store.state.curChat
+      },
+      chat() {
+        return this.$store.state.chat
+      },
+      index() {
+        let idx = '';
+        this.chat.forEach((item, index)=>{
+          if (item.id === this.curChat) idx = index;
+        })
+        return idx
+      },
+      isFriend() {
+        let result = false;
+        this.$store.state.friendList.forEach(item => {
+          this.JsonBig.stringify(item.id) === this.curChat && (result = true)
+        })
+        return result
+      },
+      isTrust() {
+        return this.$store.state.trustList.includes(this.curChat)
       }
     },
     components: {
       AddFriend,
       AddGroup,
-      BasePopup
+      BasePopup,
+      GroupInfo
     },
     methods: {
+      openCheckGroup(st) {
+        if (st === 'false') {
+          this.showCheckGroup = false
+        } else {
+          this.showCheckGroup = true
+        }
+      },
       closeTalk() {
         this.$store.commit({'type':'changeChatBox', data: false})
       },
@@ -141,11 +192,21 @@
           this.showAddGroup = true
         }
       },
-      openBeliveLayer() {
-        this.beliveLayer = true
-        setTimeout(() => {
-          this.beliveLayer = false
-        }, 3000)
+      openBeliveLayer(id) {
+        this.WsProxy.send('otc','new_trust',{
+            uid:this.$store.state.userInfo.uid, 
+            id: this.JsonBig.parse(id), 
+            trust:1
+          }).then((data)=>{
+          this.beliveLayer = true
+          clearTimeout(this.timer)
+          this.$store.commit({'type':'newTrust', data: id})
+          this.timer = setTimeout(() => {
+            this.beliveLayer = false
+          }, 3000)
+        }).catch((msg)=>{
+          console.log(msg);
+        });
       }
     }
   }
@@ -175,8 +236,6 @@
         letter-spacing 0.16px
       .title-info-select
         img
-          width 15px
-          height 15px
           vertical-align middle
           cursor pointer
         div
