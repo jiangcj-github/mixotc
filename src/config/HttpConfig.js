@@ -22,8 +22,11 @@ export default {
   // httpAfterHandler,
   httpList: [
     //test
-    { name: "sales", data: { url: "/otc/sales/:page", method: "get" }},
-    { name: "getPrice", data: { url: "/otc/prices/", method: "get"}}
+    {name: "sales", data: {url: "/otc/sales/:page", method: "get"}}, // 获取交易中心广告列表内容
+    {name: "getPrice", data: {url: "/otc/prices/", method: "get"}},  // 获取购买下单cny和数字货币价格
+    {name: "userSearch", data: {url: "/otc/search/user/", method: "get"}},  // 获取交易中心用户模糊筛选下拉框
+    {name: "coinSearch", data: {url: "/otc/search/coin/", method: "get"}},  // 获取交易中心币种模糊筛选下拉框
+
     // {name: 'test', data: {url: '/v1/home/searchCurrency/:page', method: 'get'}},
 
     // //轮循数据接口

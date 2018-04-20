@@ -6,10 +6,10 @@
       </section>
       <section class="foot-mid">
         <ul class="mid-up">
-          <li>关于我们</li>
-          <li>用户协议</li>
-          <li>隐私政策</li>
-          <li>币种资料</li>
+          <!--<li>关于我们</li>-->
+          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 4}}">用户协议</router-link></li>
+          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 5}}">隐私政策</router-link></li>
+          <li><router-link :to="{path: '/coinData'}">币种资料</router-link></li>
         </ul>
         <ul class="mid-down">
           <li class="down-left">市场有风险，投资需谨慎</li>
@@ -40,6 +40,8 @@
         float left
         margin-right 40px
         color $col999
+        a
+          color $col999
 
   .footer
     height: 100px
@@ -64,7 +66,7 @@
 
         .mid-up
           margin-bottom 41px
-
+          margin-left 45px //后期可删
           li
             font-size 14px
             letter-spacing 0.5px

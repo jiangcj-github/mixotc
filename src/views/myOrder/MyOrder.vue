@@ -1,7 +1,7 @@
 <template>
   <div class="my-order-wrap inner">
     <h1>
-      <router-link to="/transaction">mixOTC</router-link>-
+      <router-link to="/transaction">mixOTC</router-link> -
       <router-link to="/order">我的订单</router-link>
     </h1>
     <div class="order-item">
@@ -107,9 +107,9 @@
                 <!--:pageSize="20"-->
                 <!--emitValue="changePage">-->
     <!--</Pagination >-->
-    <div class="page-btn">
-      <button @click="clickPre">上一页</button>
-      <button @click="clickNext">下一页</button>
+    <div class="page-btn" v-if="contentList">
+      <button @click="clickPre" :class="{'unable-btn': page === 0}" :disabled="page === 0">上一页</button>
+      <button @click="clickNext" :class="{'unable-btn': contentList && contentList.length < 10}" :disabled="contentList && contentList.length < 10">下一页</button>
     </div>
 
 
@@ -273,12 +273,14 @@
     created() {
       // 获取用户id
       this.userId = typeof this.$store.state.userInfo.uid  === 'string' ? this.$store.state.userInfo.uid : this.JsonBig.stringify(this.$store.state.userInfo.uid);
+      console.log( this.JsonBig.stringify(this.$store.state.userInfo.uid))
       //console.log('去你妹的这是个字符串', this.$store.state.userInfo.uid,  typeof this.$store.state.userInfo.uid)
       //console.log('1111', typeof this.userId, this.userId, typeof this.$store.state.userInfo.uid, this.$store.state.userInfo.uid)
       // 获取进行状态
       this.selectState = "1,2,3";
       this.initData();
       this.getInitNum();
+      this.getCompleteData(); // 获取完成数据
       if (this.$route.query.flag == 1) { // 购买成功的订单显示弹窗
         this.showPayment = true
       }
@@ -378,7 +380,7 @@
         let ws = this.WebSocket; // 创建websocket连接
         let seq = ws.seq;
 
-        !ws.onMessage[seq] && (ws.onMessage[seq] = { // 监听
+        ws.onMessage[seq] = { // 监听
           callback: (data) => {
             if(!data || data.body.ret !== 0) return;
             console.log('order', data.body.data.orders)
@@ -418,7 +420,7 @@
             })
           },
           date:new Date()
-        });
+        };
 
         ws.send(sendConfig('otc', { // 发包
           seq: seq,
@@ -441,8 +443,15 @@
             }
           }
         }))
-
-
+      },
+      getCompleteData() {
+        let ws = this.WebSocket; // 创建websocket连接
+        ws.onMessage['111'] = { // 完成状态的action
+          callback: (data) => {
+            if(!data || data.body.ret !== 0) return;
+            console.log('我完成了', data.body.data.orders)
+          },
+        };
       },
       getInitNum() {
         // 获取进行中和已完成数量
@@ -831,6 +840,8 @@
       cursor pointer
     button:first-child
       margin-right 100px
+    .unable-btn
+      background #999
 
 
 

@@ -71,7 +71,15 @@
         </ul>
       </div>
 
-      <Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>
+      <NothingContent v-show="!result"></NothingContent>
+
+      <!--<Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>-->
+      <div class="page-btn" v-if="result">
+        <button @click="clickPre" :class="{'unable-btn': filte.page === 0}" :disabled="filte.page === 0">上一页</button>
+        <button @click="clickNext" :class="{'unable-btn': result && result.length < 20}" :disabled="result && result.length < 20">下一页</button>
+      </div>
+
+
     </div>
 
     <div class="faq">
@@ -98,12 +106,15 @@ import TopSearch from './children/TopSearch';
 import ResultListItem from './children/ResultListItem';
 import Pagination from '@/components/common/Pagination';
 import BasePopup from '@/components/common/BasePopup';
+import NothingContent from '@/components/common/NothingContent';
+
   export default {
     components: {
       TopSearch,
       ResultListItem,
       Pagination,
-      BasePopup
+      BasePopup,
+      NothingContent
     },
     data() {
       return {
@@ -151,9 +162,9 @@ import BasePopup from '@/components/common/BasePopup';
       this.fetchData({type: 1, count: 20, page: 0 })
     },
     mounted() {
-      this.Bus.$on('changePage',data => {
-        this.filte.page = data - 1 ;
-      });
+      // this.Bus.$on('changePage',data => {
+      //   this.filte.page = data - 1 ;
+      // });
       this.Bus.$on('changeCurrency', data => {
         this.filte.currency = data.toLowerCase()
       });
@@ -166,7 +177,7 @@ import BasePopup from '@/components/common/BasePopup';
       });
     },
     destroyed() {
-      this.Bus.$off('changePage');
+      // this.Bus.$off('changePage');
       this.Bus.$off('changeCurrency');
       this.Bus.$off('changeInputContent');
       this.Bus.$off(this.emitValue);
@@ -176,6 +187,7 @@ import BasePopup from '@/components/common/BasePopup';
       fetchData(params) {
         this.Proxy.sales(params).then(res=>{
           this.result = res.data.sales;
+          console.log('广告', res)
         })
       },
       //最小限额输入处理
@@ -245,8 +257,8 @@ import BasePopup from '@/components/common/BasePopup';
         if (state === 1) {
           this.popupTip = '请先进行实名认证';
           // this.toPath = 'order';
-          
-        } 
+
+        }
         if (state === 2) {
           this.popupTip = '不能购买自己的广告';
           this.toPath = 'index';
@@ -273,6 +285,12 @@ import BasePopup from '@/components/common/BasePopup';
           this.showPopup = false;
           this.$router.push({ name: this.toPath})
         }, 3000);
+      },
+      clickPre() {
+        this.filte.page <= 0 ? this.filte.page = 0 : this.filte.page--;
+      },
+      clickNext() {
+        this.filte.page++;
       }
     },
     computed: {
@@ -632,5 +650,21 @@ import BasePopup from '@/components/common/BasePopup';
       letter-spacing 0.29px
       span
         display block
+
+  /*分页部分*/
+  .page-btn
+    width 300px
+    margin 0 auto
+    text-align center
+    button
+      width 80px
+      height 40px
+      background #FFB422
+      color #FFF
+      cursor pointer
+    button:last-child
+      margin-left 100px
+    .unable-btn
+      background #999
 
 </style>

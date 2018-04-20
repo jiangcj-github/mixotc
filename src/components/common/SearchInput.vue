@@ -15,7 +15,8 @@
       <ul class="clearfix" v-show="showSelect">
         <li v-for="(item, index) of content" @click="changeTitle(item)" :key="index" :class="{ active: item.title === title}">{{item.title}}</li>
       </ul>
-      <ul class="search-result" v-if="result.length && showResult && inputContent">
+      <ul class="search-result" v-if="showResult && inputContent">
+        <li v-if="!result.length">暂无搜索结果</li>
         <li v-for="item of result" :key="item" @click="selectInputContent(item)">{{item}}</li>
       </ul>
       <img src="/static/images/cancel_icon.png" alt="" v-show="showCancel" @click="inputContent = ''">
