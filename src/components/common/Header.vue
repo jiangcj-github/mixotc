@@ -8,10 +8,10 @@
     <section class="down" :style="{borderRight: 0}">
       <div class="wrapper">
         <ul class="down-tag">
-          <li><a href="/"><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></a></li>
+          <li><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></li>
           <router-link to="/transaction" tag="li" class="tag transaction" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
           <!--<li><a href="">广告</a></li>-->
-          <router-link to="/order"  tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">订单<span v-if="newOrder"><i>{{newOrder}}</i></span></router-link>
+          <router-link to="/order" tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">订单<span v-if="newOrder"><i>{{newOrder}}</i></span></router-link>
           <!--<li><a href="">钱包</a></li>-->
           <li class="itag" @mouseenter="showQr" @mouseleave="hideQr">
             <img class="top-logo" src="/static/images/phoneicon.png" alt="">
@@ -20,7 +20,7 @@
               <span>APP安卓端下载</span>
             </div>
           </li>
-          
+
         </ul>
         <span class="log" @click="changeLoginForm(true)" v-if="!this.$store.state.isLogin">登录/注册</span>
         <div class="info" v-else>
@@ -149,7 +149,7 @@
     .upper
       height 30px
       background-color #333
-      
+
     .down
       height 70px
       border 1px solid #E1E1E1
@@ -166,7 +166,7 @@
           vertical-align middle
           line-height 71px
         .tag
-          cursor pointer 
+          cursor pointer
           &.order
             position relative
             width 70px
@@ -241,7 +241,7 @@
             content ''
             width 100%
             height 2px
-            background $col422 
+            background $col422
           .login
             float left
             position relative
@@ -255,7 +255,7 @@
           .select-icon
             position absolute
             top 50%
-            right 0 
+            right 0
             margin-top -2.5px
           ul
             position absolute

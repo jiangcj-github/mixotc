@@ -37,7 +37,7 @@ export default {
       emitValue1: 'changeTitle',
       emitValue3: 'searchValue',
       topListColor: ['#FF914C', '#FFB422', '#FFCE16', '#FFF', '#FFF'],
-      result: ['99','26']
+      result: []
     }
   },
   methods: {
@@ -56,13 +56,38 @@ export default {
         this.currency = data.toUpperCase()
       }
     })
-    this.Bus.$on(this.emitValue3, data => {
+    this.Bus.$on(this.emitValue3, ({type, data}) => {
       // 输入时，根据输入内容拉取数据，结果替换result
+      type === 'currency' && (type = 'coin')
+      console.log('111', type, data)
+      this.result = []
+      this.Proxy[`${type}Search`]({keyword: data}).then(res => {
+        console.log(res)
+        res.data.coins && res.data.coins.forEach(v => {
+          this.result.push(v.currency)
+          console.log(v.currency)
+        })
+        res.data.users && res.data.users.forEach(v => {
+          this.result.push(v.name)
+          console.log(v.currency)
+        })
+      })
     })
   },
   destroyed() {
     this.Bus.$off(this.emitValue1);
     this.Bus.$off(this.emitValue3);
+  },
+  methods: {
+    async getUserSearch() {
+      await this.Proxy.getPrice().then(res => {
+        this.priceList = res.data.prices
+        console.log('this.priceList', this.priceList)
+        this.selectPrice = this.priceList.filter(item => {
+          return item.currency == this.contentData.currency
+        })
+      })
+    }
   }
 };
 </script>
