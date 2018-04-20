@@ -134,6 +134,8 @@ const RUN_APP = (App, config, plugin) => {
   Vue.use(Vuex)
   let store = Store.install(Vue.prototype, config.StoreConfig);
 
+
+
   store.state.isLogin = false
 
   Vue.prototype.$store = store;
