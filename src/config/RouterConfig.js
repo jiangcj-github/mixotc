@@ -17,7 +17,12 @@ const ROUTES = [
   {
     path: "/transaction/tradeRules",
     name: "tradeRules",
-    component: resolve => require(['@/views/transaction/tradeRules'], resolve) // 交易中心
+    component: resolve => require(['@/views/transaction/tradeRules'], resolve) // 交易中心帮助中心
+  },
+  {
+    path: "/coinData",
+    name: "coinData",
+    component: resolve => require(['@/views/transaction/CoinData'], resolve) // 币种资料
   },
   {
     path: "/homepage",
