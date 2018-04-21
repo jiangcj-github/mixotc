@@ -2,40 +2,47 @@
   <div class="group-info-wrap" v-show="groupInfoShow">
     <p class="wrap-title">
       <span>群信息</span>
-      <i>退出该群</i>
+      <i @click="quit">退出该群</i>
       <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeGroup">
     </p>
     <ol>
       <li>
         <span>群名称</span>
-        <input type="text" placeholder="编辑群名称"/>
+        <input 
+          type="text" 
+          v-model="groupName" 
+          :placeholder="(!groupInfo.name || groupInfo.name === $store.state.userInfo.name) ? '编辑群名称' : groupInfo.name"
+          @blur="updateGroup"
+        />
       </li>
       <li>
         <span>群主</span>
-        <img src="" alt="">
-        <b>lihh / 130***123</b>
+        <img :src="owner.icon ? `${HostUrl.http}image/${owner.icon}` : `/static/images/default_avator.png`" alt="">
+        <b>{{owner.name}}</b>
       </li>
     </ol>
-    <h1>群成员(10)</h1>
+    <h1>群成员({{members.length}})</h1>
     <div class="operation">
       <img src="/static/images/add_user.png" alt="" @click="openAddGroup">
       <img src="/static/images/del_user.png" alt="" @click="openDelGroup">
     </div>
     <ul class="clearfix">
-      <li>
-        <img src="" alt="">
-        <p>李小蹦</p>
+      <li v-for="item of members" :key="item.name">
+        <img :src="item.icon ? `${HostUrl.http}image/${item.icon}` : `/static/images/default_avator.png`" alt="">
+        <p>{{item.name}}</p>
       </li>
-      <li>
-        <img src="" alt="">
-        <p>李小蹦</p>
-      </li>
-
     </ul>
     <!-- 删除群成员 -->
     <DeletGroup :delGroupShow="showDelGroup" @offDelGroup="openDelGroup"></DeletGroup>
     <!-- 新增群成员 -->
-    <AddGroup :addGroupShow="showAddGroup" @offAddGroup="openAddGroup"></AddGroup>
+    <AddGroup 
+      v-if="showAddGroup" 
+      :addGroupShow="showAddGroup" 
+      @offAddGroup="openAddGroup"
+      :curChat="$store.state.curChat"
+      :index="id"
+      :isNewGroup="false"
+    ></AddGroup>
   </div>
 </template>
 
@@ -45,9 +52,10 @@
 
   export default {
     name: "group-info",
-    props: ['checkGroupShow'],
+    props: ['checkGroupShow', 'id'],
     data() {
       return {
+        groupName: '',
         groupInfoShow: this.checkGroupShow,
         showDelGroup: false,
         showAddGroup: false
@@ -56,6 +64,27 @@
     components: {
       DeletGroup,
       AddGroup
+    },
+    created() {
+      this.fetchGroup()
+    },
+    computed: {
+      isOwner() {
+        return this.owner.name === this.$store.state.userInfo.name
+      },
+      groupInfo() {
+        return this.$store.state.groupList.filter(item => {
+          return this.JsonBig.stringify(item.id) === this.id
+        })[0]
+      },
+      owner() {
+        return this.groupInfo.members.filter(item => {
+          return this.JsonBig.stringify(this.groupInfo.aid) === this.JsonBig.stringify(item.id); 
+        })[0]
+      },
+      members() {
+        return this.groupInfo.members
+      }
     },
     watch: {
       checkGroupShow(state) {
@@ -67,10 +96,38 @@
       }
     },
     methods: {
+      async fetchGroup() {
+        await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
+          this.$store.commit({type: 'getGroupList', data})
+        }).catch(error=>{
+          console.log(error)
+        })
+      },
+      async quit() {
+        await this.WsProxy.send('control', 'quit_group', {uid: this.$store.state.userInfo.uid, id: this.JsonBig.parse(this.id)}).then(data => {
+          this.closeGroup()
+          this.$store.commit({type: 'delChat', data: this.id})
+        }).catch(error=>{
+          console.log(error)
+        })
+      },
+      async updateGroup() {
+        if (this.groupName === '') return;
+        await this.WsProxy.send('control', 'update_group', 
+        {
+          Name: this.groupName, 
+          id: this.JsonBig.parse(this.id),
+        }).then(data => {
+
+        }).catch(error=>{
+          console.log(error)
+        })
+      },
       closeGroup() {
         this.$emit('offCheckGroup', 'false')
       },
       openDelGroup(st) {
+        if(!this.isOwner) return;
         if (st === 'false') {
           this.showDelGroup = false
         } else {
@@ -111,6 +168,7 @@
         margin-right 144px
       i
         color #FF794C
+        cursor pointer
       img
         position absolute
         right 12px

@@ -4,8 +4,8 @@
       <li class="title-info-name" v-if="curChat">{{curChat === 'system' ? '系统消息' : title}}</li>
       <li class="title-info-select" v-clickoutside="closeSelect" v-if="title && !chat[index].service">
         <img v-if="!chat[index].group" src="/static/images/add_talk.png" class="add-talk-img" @click="showSeletAdd">
-        <img v-else src="/static/images/groupchat.png" class="add-talk-img" @click="showCheckGroup = true">
-        <div v-show="seletAdd">
+        <img v-else src="/static/images/groupchat.png" class="add-talk-img" @click="openGroupInfo(curChat)">
+        <div v-show="seletAdd" @click="seletAdd = false">
           <i></i>
           <ul>
             <li @click="openAddFriend" v-if="!isFriend">+好友</li>
@@ -72,7 +72,14 @@
       >
     </AddFriend>
     <!-- 添加群聊弹窗 -->
-    <AddGroup v-if="showAddGroup" :addGroupShow="showAddGroup" @offAddGroup="openAddGroup"></AddGroup>
+    <AddGroup 
+      v-if="showAddGroup" 
+      :addGroupShow="showAddGroup" 
+      @offAddGroup="openAddGroup"
+      :curChat="curChat"
+      :index="index"
+      :isNewGroup="true"
+      ></AddGroup>
     <!-- 添加信任弹窗 -->
     <BasePopup class="belive-layer"
                :show="beliveLayer"
@@ -80,7 +87,12 @@
                :height=50
                :top=50
                :wrapStyleObject="beliveWrap">已加信任</BasePopup>
-    <GroupInfo :checkGroupShow="showCheckGroup" @offCheckGroup="openCheckGroup"></GroupInfo>
+    <GroupInfo 
+      v-if="showCheckGroup" 
+      :id="groupId"
+      :checkGroupShow="showCheckGroup" 
+      @offCheckGroup="openCheckGroup"
+    ></GroupInfo>
   </div>
 </template>
 
@@ -94,6 +106,8 @@
     name: "news-info-right",
     data() {
       return {
+        groupId: '',
+        isNewGroup: true,
         showCheckGroup: false,
         seletAdd: false,
         showAddFriend: false,
@@ -108,18 +122,13 @@
         timer: null
       }
     },
+    components: {
+      AddFriend,
+      AddGroup,
+      BasePopup,
+      GroupInfo
+    },
     mounted() {
-      // this.WsProxy.sendBase('send_sms', {
-      //     action: "send_sms",
-      //     type: 'text',
-      //     gid: 0,
-      //     tid: this.JsonBig.parse('197154964416499712'),
-      //     data: {
-      //       msg: 'adsfsadafdsafsaf'
-      //     }
-      //   }).then(data => {
-      //     consoel.log(data)
-      //   })
     },
     computed: {
       title() {
@@ -155,13 +164,11 @@
         return this.$store.state.trustList.includes(this.curChat)
       }
     },
-    components: {
-      AddFriend,
-      AddGroup,
-      BasePopup,
-      GroupInfo
-    },
     methods: {
+      openGroupInfo(id) {
+        this.groupId = id;
+        this.showCheckGroup = true
+      },
       openCheckGroup(st) {
         if (st === 'false') {
           this.showCheckGroup = false

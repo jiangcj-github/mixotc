@@ -48,7 +48,11 @@ export default {
   [types.delChat](state, { data }) {
     state.curChat = "";
     // 删除聊天
-    state.chat.splice(data, 1);
+    let idx = '';
+    state.chat.filter((item,index)=> {
+      item.id === data && (idx = index);
+    })
+    idx !== '' && state.chat.splice(idx, 1);
   },
   [types.getFriendList](state, { data }) {
     //好友列表

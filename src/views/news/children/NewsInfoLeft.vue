@@ -7,11 +7,11 @@
       <happy-scroll style="width:159px;height:325px" resize bigger-move-h="start">
         <div class="wrap">
           <ul class="firend-list" v-if="!search">
-            <li v-for="(content, index) in userList" :key="content.id" :class="{cur: content.id === $store.state.curChat}" @click="selectChat(content.id)">
+            <li v-for="content in userList" :key="content.id" :class="{cur: content.id === $store.state.curChat}" @click="selectChat(content.id)">
               <img :src="content.icon" alt="" class="head-portrait">
               <b v-if="content.unread"></b>
               <span>{{content.nickName}}</span>
-              <img src="/static/images/close_btn.png" alt="" class="close-head" @click.stop="delUser(index, content.id)">
+              <img src="/static/images/close_btn.png" alt="" class="close-head" @click.stop="delUser(content.id)">
             </li>
           </ul>
           <ul class="firend-list" v-else>
@@ -106,11 +106,10 @@
               length: length,
               service: false,
               icon: "/static/images/groupChat_icon.png",
-              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `群聊(${length})` : `${item.name}((${length}))`,
+              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.gid)}(${length})` : `${item.name}((${length}))`,
               phone: false,
               email: false,
-              unread: 0,
-              messages: []
+              unread: 0
             });
           }else if (item.is_peer_admin){
             result.push({
@@ -121,8 +120,7 @@
               nickName: '客服',
               phone: false,
               email: false,
-              unread: 0,
-              messages: []
+              unread: 0
             }); 
           }else {
             result.push({
@@ -133,8 +131,7 @@
               nickName: item.name,
               phone: item.phone,
               email: item.email,
-              unread: 0,
-              messages: []
+              unread: 0
             }); 
           }
         })
@@ -167,7 +164,7 @@
         })
         //好友
         this.$store.state.friendList.forEach(item => {
-          if (this.chatIds.includes(this.JsonBig.stringify(item.id))) return;
+          if (this.chatIds.includes(this.JsonBig.stringify(item.id)) || item.type === 0) return;
           if (item.name.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText)) {
             result.push({
               id: this.JsonBig.stringify(item.id),
@@ -177,8 +174,7 @@
               nickName: item.name,
               phone: item.phone,
               email: item.email,
-              unread: 0,
-              messages: []
+              unread: 0
             });
           }
         })
@@ -192,24 +188,23 @@
               service: false,
               length: item.members.length,
               icon: "/static/images/groupChat_icon.png",
-              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `群聊(${item.members.length})` : `${item.name}((${item.members.length}))`,
+              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.id)}(${item.members.length})` : `${item.name}((${item.members.length}))`,
               phone: false,
               email: false,
-              unread: 0,
-              messages: []
+              unread: 0
             });
           }
         })
       this.searchRange = result
       },
-      delUser(index, id) {
+      delUser(id) {
         // 删除联系人列表项接口尚未完成
         // this.WsProxy.send('control', 'delete_group', {uid:this.$store.state.userInfo.uid, id: this.JsonBig.parse(id)}).then(data => {
         //   console.log('deletgroup',data)
         // }).catch(error=>{
         //   console.log(error)
         // })
-        this.$store.commit({type: 'delChat', data: index})
+        this.$store.commit({type: 'delChat', data: id})
       },
       newChat(chat) {
         this.search = false
