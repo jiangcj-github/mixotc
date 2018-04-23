@@ -56,8 +56,9 @@
           </p>
           <p class="amount sort"
              title="当前可交易的数量"
+             :class="{'sort-add': filte.tradeable === 2, 'sort-minus': filte.tradeable === 1}"
           >
-            <span @click="sort()">可交易量</span>
+            <span @click="sort('tradeable')">可交易量</span>
           </p>
           <p class="price sort"
              title="单个数字币价格"
@@ -86,9 +87,9 @@
       <div class="inner clearfix">
         <h2>常见问题</h2>
         <ul>
-          <li>如何购买数字币</li>
-          <li>如何出售数字币</li>
-          <li>费率说明</li>
+          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 2}}">如何购买数字币</router-link></li>
+          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 3}}">如何出售数字币</router-link></li>
+          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 1}}">费率说明</router-link></li>
         </ul>
         <img src="/static/images/question.png" alt="">
       </div>
@@ -139,6 +140,7 @@ import NothingContent from '@/components/common/NothingContent';
           order: '',//订单数排序，1降序，2升序
           volume: '',//交易量排序，1降序，2升序
           rate: '',//好评率排序，1降序，2升序
+          tradeable: '',
           // trust: '',//信任人数排序，1降序，2升序
           // isWhole: false,
           page: 0
@@ -241,7 +243,9 @@ import NothingContent from '@/components/common/NothingContent';
         title !== 'date' && (this.filte.date = ''),
         title !== 'order' && (this.filte.order = ''),
         title !== 'volume' && (this.filte.volume = ''),
-        title !== 'rate' && (this.filte.rate =  '');
+        title !== 'rate' && (this.filte.rate =  ''),
+        title !== 'tradeable' && (this.filte.tradeable =  '');
+
         if (title && (this.filte[title] === 1 || !this.filte[title])) {
           this.filte[title] = 2;
           return;

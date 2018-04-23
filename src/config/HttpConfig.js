@@ -23,9 +23,13 @@ export default {
   httpList: [
     //test
     {name: "sales", data: {url: "/otc/sales/:page", method: "get"}}, // 获取交易中心广告列表内容
-    {name: "getPrice", data: {url: "/otc/prices/", method: "get"}},  // 获取购买下单cny和数字货币价格
-    {name: "userSearch", data: {url: "/otc/search/user/", method: "get"}},  // 获取交易中心用户模糊筛选下拉框
-    {name: "coinSearch", data: {url: "/otc/search/coin/", method: "get"}},  // 获取交易中心币种模糊筛选下拉框
+    {name: "getPrice", data: {url: "/otc/prices/", method: "get"}}, // 获取购买下单cny和数字货币价格
+    {name: "userSearch", data: {url: "/otc/search/user/", method: "get"}}, // 获取交易中心用户模糊筛选下拉框
+    {name: "coinSearch", data: {url: "/otc/search/coin/", method: "get"}}, // 获取交易中心币种模糊筛选下拉框
+    // {name: 'searchTips', data: {url: '/v1/home/searchTips', method: 'get'}}, //币种资料模糊搜索
+    // {name: 'getCoinData', data: {url: '/v1/currency/detail', method: 'get'}}, // 获取币种资料
+
+    // {name: "getCoinData", data: {url: "/otc/coins/", method: "get"}},  // 获取币种资料
 
     // {name: 'test', data: {url: '/v1/home/searchCurrency/:page', method: 'get'}},
 

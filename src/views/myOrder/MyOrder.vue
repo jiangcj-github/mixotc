@@ -95,7 +95,7 @@
         <p class="order-content-extre clearfix">
           <span>订单号：{{JsonBig.stringify(content.id)}}</span>
           <span>备注：{{content.info}}</span>
-          <span v-if="content.state == 1" class="reset-time">还剩{{minute}}分钟{{second}}秒</span>
+          <span  class="reset-time" v-if="content.state == 1">还剩{{minute}}分钟{{second}}秒</span>
         </p>
       </div>
     </div>
@@ -117,6 +117,7 @@
     <MarkedPaymentLayer :paymentShow="showPayment"
                         :id="updateId"
                         :info="updateInfo"
+                        :tradeCode="updateTradeCode"
                         @offPayment="openPayment">
     </MarkedPaymentLayer>
     <!-- 引入释放币弹窗 -->
@@ -154,6 +155,7 @@
   import ReleaseCoinLayer from '@/views/myOrder/orderLayer/ReleaseCoinLayer' // 释放币弹窗
   import SelectLayer from '@/views/myOrder/orderLayer/SelectLayer' // 申诉弹窗
   import CheckBox from '@/components/common/CheckBox' // 引入多选弹窗
+  // import CountDown from '@/components/common/CheckBox' // 引入多选弹窗
 
   export default {
     name: "my-order",
@@ -219,8 +221,9 @@
 
 
         updateId: '', //标记已付款弹窗所用id
-        updateInfo: '', // 标记弹窗所用info
+        updateInfo: '',
         updateUid: '',
+        updateTradeCode: '', // 标记弹窗所用资金码
 
         startValue: 'startValueDate',
         endValue: 'endValueDate',
@@ -274,16 +277,13 @@
       // 获取用户id
       this.userId = typeof this.$store.state.userInfo.uid  === 'string' ? this.$store.state.userInfo.uid : this.JsonBig.stringify(this.$store.state.userInfo.uid);
       console.log( this.JsonBig.stringify(this.$store.state.userInfo.uid))
-      //console.log('去你妹的这是个字符串', this.$store.state.userInfo.uid,  typeof this.$store.state.userInfo.uid)
+      //console.log('这是个字符串', this.$store.state.userInfo.uid,  typeof this.$store.state.userInfo.uid)
       //console.log('1111', typeof this.userId, this.userId, typeof this.$store.state.userInfo.uid, this.$store.state.userInfo.uid)
       // 获取进行状态
       this.selectState = "1,2,3";
       this.initData();
       this.getInitNum();
       this.getCompleteData(); // 获取完成数据
-      if (this.$route.query.flag == 1) { // 购买成功的订单显示弹窗
-        this.showPayment = true
-      }
     },
     mounted() {
       // 监听下拉框值，将值传给子组件
@@ -385,11 +385,18 @@
             if(!data || data.body.ret !== 0) return;
             console.log('order', data.body.data.orders)
             this.contentList = data.body.data.orders
+            // 购买成功的订单显示弹窗
+            if (this.$route.query.id) {
+              this.updateTradeCode = this.contentList[0].trade_code
+              this.showPayment = true
+            }
             // 根据状态进行判断
             this.contentList && this.contentList.forEach(v => {
               // 倒计时数据
               if (v.state == 1) {
-                this.minutes = v.limit
+                // limit - (now - create) 秒 2018-04-23 16:12:04  1524471124000 1524471379606
+                this.minutes = Math.floor(v.limit - ((new Date().getTime() - v.create * 1000) / 1000 / 60)) < 0 ? 0 : Math.floor(v.limit - ((new Date().getTime() - v.create * 1000) / 1000 / 60))
+                console.log('还剩几分钟', new Date().getTime())
               }
               // 状态数组
               let stateListObject = {
@@ -446,10 +453,10 @@
       },
       getCompleteData() {
         let ws = this.WebSocket; // 创建websocket连接
-        ws.onMessage['111'] = { // 完成状态的action
+        ws.onMessage['upd_ord'] = { // 完成状态的action
           callback: (data) => {
             if(!data || data.body.ret !== 0) return;
-            console.log('我完成了', data.body.data.orders)
+            console.log('我完成了', data.body.data)
           },
         };
       },
@@ -476,6 +483,7 @@
         this.contentTabIndex = type;
         this.clickUp = 20;
         this.clickDown = 20;
+
         // 获取用户id
         this.userId = this.JsonBig.stringify(this.$store.state.userInfo.uid)
         // console.log(this.userId)
@@ -523,6 +531,7 @@
           this.showPayment = true
           this.updateId = this.contentList[index].id
           this.updateInfo = this.contentList[index].info
+          this.updateTradeCode = this.contentList[index].trade_code
         }
       },
       remindCoin(content) { // 提醒弹窗

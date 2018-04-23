@@ -154,16 +154,17 @@
           color #333
           margin-bottom 23px
         li
-          height 20px
           line-height 20px
           margin-bottom 20px
         ul
           float left
-          margin-right 92px
+          width 60px
+          margin-right 90px
           li
             color #333
         ol
           float left
+          width 980px
           li
             color #999
           li:first-child
