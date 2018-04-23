@@ -143,6 +143,7 @@
         this.$store.state.chat.forEach(item=> {
           if (item.id === this.$store.state.curChat) {
             result = item.nickName
+            item.length && (result += `(${item.length})`)
           }
         })
         return result

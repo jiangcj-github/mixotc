@@ -1,7 +1,7 @@
 <template>
   <div class="news-info-left">
     <div class="search-box">
-      <input type="text" placeholder="查找昵称／账号" v-model="searchText" @blur="doSearch" @input="input" @keyup.enter="doSearch"/>
+      <input type="text" placeholder="查找昵称/账号" v-model="searchText" @blur="doSearch" @input="input" @keyup.enter="doSearch"/>
       <img src="/static/images/search_gray.png"/>
     </div>
       <happy-scroll style="width:159px;height:325px" resize bigger-move-h="start">
@@ -10,14 +10,14 @@
             <li v-for="content in userList" :key="content.id" :class="{cur: content.id === $store.state.curChat}" @click="selectChat(content.id)">
               <img :src="content.icon" alt="" class="head-portrait">
               <b v-if="content.unread"></b>
-              <span>{{content.nickName}}</span>
+              <span>{{content.nickName}}{{content.length ? `(${content.length})` : ''}}</span>
               <img src="/static/images/close_btn.png" alt="" class="close-head" @click.stop="delUser(content.id)">
             </li>
           </ul>
           <ul class="firend-list" v-else>
             <li v-for="(content) in searchRange" :key="content.id" :class="{cur: content.id === $store.state.curChat}" @click="newChat(content)">
               <img :src="content.icon" alt="" class="head-portrait">
-              <span>{{content.nickName}}</span>
+              <span>{{content.nickName}}{{content.length ? `(${content.length})` : ''}}</span>
             </li>
           </ul>
         </div>
@@ -106,7 +106,7 @@
               length: length,
               service: false,
               icon: "/static/images/groupChat_icon.png",
-              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.gid)}(${length})` : `${item.name}(${length})`,
+              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.gid)}` : `${item.name}`,
               phone: false,
               email: false,
               unread: 0
@@ -188,7 +188,7 @@
               service: false,
               length: item.members.length,
               icon: "/static/images/groupChat_icon.png",
-              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.id)}(${item.members.length})` : `${item.name}(${item.members.length})`,
+              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.id)}` : `${item.name}`,
               phone: false,
               email: false,
               unread: 0
@@ -237,10 +237,12 @@
         input
           width 140px
           height 30px
+          font-size $fz13
           padding-left 10px
           background #F4F6FA
           border-radius 2px 2px 2px 0
           margin-left 5px
+          placeholder()
         img
           position absolute
           top 12px

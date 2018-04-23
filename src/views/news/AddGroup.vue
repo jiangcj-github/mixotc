@@ -5,7 +5,7 @@
       <i @click="createGroup">确定</i>
       <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeGroup">
     </p>
-    <div class="contacts" :style="{paddingLeft: `${ids.length > 5 ? (75 + 3*35) + 12 : (75 + 3*35)}px`}">
+    <div class="contacts" :style="{paddingLeft: `${ids.length > 5 ? (75 + 3*35) + 12 : (75 + (ids.length > 2 ? ids.length - 2 : 0)*35)}px`}">
       <div class="selected">
         <div class="imgs">
           <img :src="item.icon" alt="" v-for="item in addList" :key="item.id">
@@ -142,7 +142,7 @@
               length: array.length,
               service: false,
               icon: "/static/images/groupChat_icon.png",
-              nickName: `${this.JsonBig.stringify(data.id)}(${array.length})`,
+              nickName: `${this.JsonBig.stringify(data.id)}`,
               phone: false,
               email: false,
               unread: 0
@@ -159,15 +159,19 @@
           }).map(item => {
             return this.JsonBig.parse(item);
           })
+        if (!array.length) {
+          this.closeGroup()
+          return;
+        };
         this.WsProxy.send('control', 'add_g_member',{
           id: this.JsonBig.parse(this.nowChat),
           ids: array,
           uid: this.userInfo.uid
         }).then(data => {
           this.fetchGroup()
+          this.$store.commit({'type':'updateGroupInfo', data: {id: this.nowChat, length: this.ids.length}})
           this.closeGroup()
         })
-
       },
       closeGroup() {
         this.$emit('offAddGroup', 'false')
@@ -263,7 +267,7 @@
           color $col9C9
     ul
       background #FFF
-      height 295px
+      height 334px
       overflow-y auto
       li
         height 40px

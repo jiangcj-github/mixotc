@@ -48,11 +48,9 @@ export default {
   [types.delChat](state, { data }) {
     state.curChat = "";
     // 删除聊天
-    let idx = '';
-    state.chat.filter((item,index)=> {
-      item.id === data && (idx = index);
-    })
-    idx !== '' && state.chat.splice(idx, 1);
+    state.chat.filter((item, index) => {
+      item.id === data && state.chat.splice(index, 1);
+    });
   },
   [types.getFriendList](state, { data }) {
     //好友列表
@@ -62,7 +60,6 @@ export default {
     //群組列表
     state.groupList = data;
   },
-
   [types.newChat](state, { data }) {
     // 新建聊天窗口
     state.chat.unshift(data);
@@ -78,5 +75,13 @@ export default {
     // 取消信任
     let index = state.trustList.indexOf(data);
     index !== -1 && state.trustList.splice(index, 1);
+  },
+  [types.updateGroupInfo](state, { data }) {
+    //更新群信息
+    state.curChat = data.id;
+    state.chat.filter((item, index) => {
+      item.id === data.id && data.length !== undefined && ((state.chat[index].length = data.length));
+      item.id === data.id && data.name !== undefined && ((state.chat[index].nickName = data.name));
+    });
   }
 };

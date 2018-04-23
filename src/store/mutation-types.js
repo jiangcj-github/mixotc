@@ -13,6 +13,7 @@ const getGroupList = "getGroupList";
 const newChat = "newChat";
 const newTrust = "newTrust";
 const delTrust = "delTrust";
+const updateGroupInfo = "updateGroupInfo";
 
 export {
   changeLoginForm,
@@ -29,5 +30,6 @@ export {
   getGroupList,
   newChat,
   newTrust,
-  delTrust
+  delTrust,
+  updateGroupInfo
 };

@@ -2,7 +2,7 @@
   <div class="group-info-wrap" v-show="groupInfoShow">
     <p class="wrap-title">
       <span>群信息</span>
-      <i @click="quit">退出该群</i>
+      <i @click="quitFlag = true">退出该群</i>
       <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeGroup">
     </p>
     <ol>
@@ -11,7 +11,7 @@
         <input 
           type="text" 
           v-model="groupName" 
-          :placeholder="(!groupInfo.name || groupInfo.name === $store.state.userInfo.name) ? '编辑群名称' : groupInfo.name"
+          :placeholder="(!groupInfo.name || groupInfo.name === $store.state.userInfo.name) ? '群聊' : groupInfo.name"
           @blur="updateGroup"
         />
       </li>
@@ -21,10 +21,10 @@
         <b>{{owner.name}}</b>
       </li>
     </ol>
-    <h1>群成员({{members.length}})</h1>
+    <h1>群成员({{members.length + '/300'}})</h1>
     <div class="operation">
       <img src="/static/images/add_user.png" alt="" @click="openAddGroup">
-      <img src="/static/images/del_user.png" alt="" @click="openDelGroup">
+      <img src="/static/images/del_user.png" alt="" @click="openDelGroup" v-if="isOwner">
     </div>
     <ul class="clearfix">
       <li v-for="item of members" :key="item.name">
@@ -33,7 +33,14 @@
       </li>
     </ul>
     <!-- 删除群成员 -->
-    <DeletGroup :delGroupShow="showDelGroup" @offDelGroup="openDelGroup"></DeletGroup>
+    <DeletGroup 
+      v-if="showDelGroup" 
+      :delGroupShow="showDelGroup" 
+      @offDelGroup="openDelGroup"
+      :members="members"
+      :curChat="id"
+    >
+    </DeletGroup>
     <!-- 新增群成员 -->
     <AddGroup 
       v-if="showAddGroup" 
@@ -43,27 +50,54 @@
       :groupInfo="groupInfo"
       :isNewGroup="false"
     ></AddGroup>
+    <BasePopup
+      class="quit-popup"
+      :width="235"
+      :height="117"
+      :top="50"
+      :show="quitFlag"
+      :wrapStyleObject="popupWrap"
+    >
+      <slot>
+        <div class="contents">
+          <p>确定退出？</p>
+          <div class="button">
+            <button class="cancel" @click="quitFlag = false">取消</button>
+            <button class="confirm" @click="quit">确定</button>
+          </div>
+        </div>
+      </slot>
+    </BasePopup>
   </div>
 </template>
 
 <script>
   import AddGroup from '@/views/news/AddGroup' // 添加群
   import DeletGroup from '@/views/news/DeletGroup' // 删除群成员
+  import BasePopup from '@/components/common/BasePopup' // 引入弹窗
 
   export default {
     name: "group-info",
     props: ['checkGroupShow', 'id'],
     data() {
       return {
+        quitFlag: false,
         groupName: '',
         groupInfoShow: this.checkGroupShow,
         showDelGroup: false,
-        showAddGroup: false
+        showAddGroup: false,
+        popupWrap: {
+          width: '560px',
+          height: '420px',
+          right: 0,
+          bottom: '100px'
+        }
       }
     },
     components: {
       DeletGroup,
-      AddGroup
+      AddGroup,
+      BasePopup
     },
     created() {
       this.fetchGroup()
@@ -105,11 +139,13 @@
       },
       async quit() {
         await this.WsProxy.send('control', 'quit_group', {uid: this.$store.state.userInfo.uid, id: this.JsonBig.parse(this.id)}).then(data => {
+          this.quitFlag = false;
           this.closeGroup()
           this.$store.commit({type: 'delChat', data: this.id})
         }).catch(error=>{
           console.log(error)
         })
+        this.fetchGroup()
       },
       async updateGroup() {
         if (this.groupName === '') return;
@@ -118,7 +154,7 @@
           Name: this.groupName, 
           id: this.JsonBig.parse(this.id),
         }).then(data => {
-
+          this.$store.commit({'type':'updateGroupInfo', data: {id: this.id, name: this.groupName}})
         }).catch(error=>{
           console.log(error)
         })
@@ -127,7 +163,6 @@
         this.$emit('offCheckGroup', 'false')
       },
       openDelGroup(st) {
-        if(!this.isOwner) return;
         if (st === 'false') {
           this.showDelGroup = false
         } else {
@@ -249,6 +284,30 @@
           overflow hidden
           white-space nowrap
           text-overflow ellipsis
+    .quit-popup
+      .contents
+        width 100%
+        height 100%
+        text-align center
+        font-size $fz14
+        letter-spacing 0.29px
+        p
+          padding-top 30px
+        .button
+          padding-top 30px
+          button
+            width 80px
+            height 30px
+            background #FFF
+            border 1px solid $col422
+            border-radius 2px
+            cursor pointer
+            &.cancel
+              color $col422
+              margin-right 20px
+            &.confirm
+              color #FFF
+              background  $col422
 
 
 
