@@ -247,6 +247,9 @@
         font-size 13px
         color #999999
         letter-spacing 0.23px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
     .empty
       background-color #fff
       box-sizing border-box

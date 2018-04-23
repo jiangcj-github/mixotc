@@ -5,8 +5,8 @@
         <li :class="{active:tab==1}" @click="tab=1">待审核<i v-if="uncheckNum>0">({{uncheckNum}})</i></li>
         <li :class="{active:tab==2}" @click="tab=2">已审核</li>
       </ul>
-      <Uncheck v-if="tab==1"></Uncheck>
-      <Check v-else-if="tab==2"></Check>
+      <Uncheck v-show="tab==1"></Uncheck>
+      <Check v-show="tab==2"></Check>
     </div>
   </Left>
 </template>

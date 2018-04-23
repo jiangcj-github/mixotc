@@ -5,99 +5,15 @@
       <h3>OTC客服专员1号</h3>
     </div>
     <div class="search">
-      <input type="text" title="">
+      <input type="text" title="" placeholder="搜索联系人">
     </div>
     <happy-scroll color="rgba(100,100,100,0.8)" size="5" hide-horizontal class="scrollPane">
       <ul class="persons">
-        <li>
-          <img src="/static/images/default_avator.png">
+        <li v-for="(e,i) in uls" :key="i" @click="onLiClick(i)" :class="{active:ulSel===i}">
+          <img :src="e.headimg">
           <div class="pinfo">
-            <p class="p1">李小蹦<span>12:12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>12:12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>2017/02/12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>2017/02/12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>2017/02/12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>2017/02/12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>2017/02/12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>2017/02/12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>2017/02/12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>2017/02/12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>2017/02/12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>2017/02/12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
-          </div>
-        </li>
-        <li>
-          <img src="/static/images/default_avator.png">
-          <div class="pinfo">
-            <p class="p1">李小蹦<span>2017/02/12</span></p>
-            <p class="p2">你好，有个问题需要问你，客顶顶顶</p>
+            <p class="p1">{{e.nickname}}<span>{{e.time}}</span></p>
+            <p class="p2">{{e.msg}}</p>
           </div>
         </li>
       </ul>
@@ -112,10 +28,36 @@
     },
     data() {
       return {
-
+        uls: [],
+        ulSel: 0,
       }
     },
     methods: {
+      onLiClick(i){
+        this.ulSel=i;
+        //
+      }
+    },
+    mounted(){
+      this.uls=[
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"12:12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"12:12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+        {headimg:"/static/images/default_avator.png",nickname:"李小蹦",time:"2016/01/12",msg:"你好，有个问题需要问你，客顶顶顶"},
+      ];
     }
   }
 </script>
@@ -165,7 +107,7 @@
         align-items center
         cursor default
         &:hover
-          background #474747
+          background #3c3737
         &.active
           background #474747
         >img
