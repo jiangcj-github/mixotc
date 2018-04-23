@@ -106,7 +106,7 @@
               length: length,
               service: false,
               icon: "/static/images/groupChat_icon.png",
-              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.gid)}(${length})` : `${item.name}((${length}))`,
+              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.gid)}(${length})` : `${item.name}(${length})`,
               phone: false,
               email: false,
               unread: 0
@@ -181,14 +181,14 @@
         //群组
         this.$store.state.groupList.forEach(item => {
           if (this.chatIds.includes(this.JsonBig.stringify(item.id))) return;
-          if (item.name.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText)) {
+          if (item.name.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText) || this.JsonBig.stringify(item.id).includes(this.searchText)) {
             result.push({
               id: this.JsonBig.stringify(item.id),
               group: true,
               service: false,
               length: item.members.length,
               icon: "/static/images/groupChat_icon.png",
-              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.id)}(${item.members.length})` : `${item.name}((${item.members.length}))`,
+              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.id)}(${item.members.length})` : `${item.name}(${item.members.length})`,
               phone: false,
               email: false,
               unread: 0
@@ -196,6 +196,7 @@
           }
         })
       this.searchRange = result
+      console.log(result)
       },
       delUser(id) {
         // 删除联系人列表项接口尚未完成

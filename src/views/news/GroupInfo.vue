@@ -39,8 +39,8 @@
       v-if="showAddGroup" 
       :addGroupShow="showAddGroup" 
       @offAddGroup="openAddGroup"
-      :curChat="$store.state.curChat"
-      :index="id"
+      :curChat="id"
+      :groupInfo="groupInfo"
       :isNewGroup="false"
     ></AddGroup>
   </div>

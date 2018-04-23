@@ -77,7 +77,6 @@
       :addGroupShow="showAddGroup" 
       @offAddGroup="openAddGroup"
       :curChat="curChat"
-      :index="index"
       :isNewGroup="true"
       ></AddGroup>
     <!-- 添加信任弹窗 -->
@@ -129,6 +128,14 @@
       GroupInfo
     },
     mounted() {
+      // this.WsProxy.send('control', 'add_friend', {
+      //     ack: 0,
+      //     id: this.JsonBig.parse('203309354277937152'),
+      //   }).then(data => {
+        
+      //   }).catch(error => {
+      //     console.log(error)
+      //   })
     },
     computed: {
       title() {

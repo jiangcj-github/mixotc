@@ -24,7 +24,7 @@
       return {
         timer1: null,
         timer2: null,
-        watchTokenFlag: true
+        // watchTokenFlag: true
       }
     },
     created() {
@@ -48,7 +48,7 @@
           });
 
           this.$store.commit({type: 'changeLogin', data: true});
-          this.watchTokenFlag = false
+          // this.watchTokenFlag = false
         }
       });
 

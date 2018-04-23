@@ -146,18 +146,7 @@ const RUN_APP = (App, config, plugin) => {
   config.LoopTaskConfig && Object.keys(config.LoopTaskConfig).length && Loop.install(Vue.prototype, config.LoopTaskConfig);
   config.PrototypeConfig && Prototype.install(Vue.prototype, config.PrototypeConfig);
 
-  router.beforeEach((to, from, next) => {
-    if (to.path === "/transaction" || to.path === "/" || to.path === "/homepage") {
-      next();
-      return;
-    }
-    if (!store.state.token) {
-      next({ path: "/transaction" });
-      return;
-    }
-    next()
-  })
-
+  
   let vm = new Vue({
     el: "#app",
     router,
@@ -173,10 +162,32 @@ const RUN_APP = (App, config, plugin) => {
       reload() {
         // console.log('this.isReload', this.isReload)
         this.isReload = false;
-        this.$nextTick(() => (this.isReload = true));
+        this.$nextTick(() => {
+          this.isReload = true;
+          !this.$store.state.token && this.$router.push({
+              name: "transaction"
+            });
+        });
       }
     }
   });
+
+  router.beforeEach((to, from, next) => {
+    if (to.path === "/transaction" || to.path === "/" || to.path === "/homepage") {
+      next();
+      return;
+    }
+    if (!store.state.token) {
+      if (to.path === "/homepage") {
+        next({ path: "/homepage" });
+        return;
+      } 
+      next({ path: "/transaction" });
+      return;
+    }
+    next();
+  });
+
 
   let changeTabIndex = function() {
     if (localStorage["tabIndex"]) {
