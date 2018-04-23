@@ -5,7 +5,7 @@
       <i @click="createGroup">确定</i>
       <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeGroup">
     </p>
-    <div class="contacts" :style="{paddingLeft: `${ids.length > 5 ? (75 + (ids.length - 2)*35) + 12 : (75 + (ids.length - 2)*35)}px`}">
+    <div class="contacts" :style="{paddingLeft: `${ids.length > 5 ? (75 + 3*35) + 12 : (75 + 3*35)}px`}">
       <div class="selected">
         <div class="imgs">
           <img :src="item.icon" alt="" v-for="item in addList" :key="item.id">
