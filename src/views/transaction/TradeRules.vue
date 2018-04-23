@@ -62,8 +62,8 @@
           <h3>二、用户权利</h3>
           <ol>
             <li v-for="(content, index) in rightList">{{content}}
-              <ul class="child-ul">
-                <li v-for="content in rightListChild" v-if="index == 0">{{content}}</li>
+              <ul class="child-ul" v-if="index == 0">
+                <li v-for="content in rightListChild">{{content}}</li>
               </ul>
             </li>
           </ol>
@@ -82,8 +82,8 @@
           <h3>六、服务的提供、修改及终止</h3>
           <ol>
             <li v-for="(content, index) in changeList">{{content}}
-              <ul class="child-ul">
-                <li v-for="content in changeListChild" v-if="index == 3">{{content}}</li>
+              <ul class="child-ul" v-if="index == 3">
+                <li v-for="content in changeListChild">{{content}}</li>
               </ul>
             </li>
           </ol>

@@ -26,7 +26,7 @@
     props: ['orderLayerShow', 'id', 'price', 'currency', 'money'],
     data() {
       return {
-        orderLayer: this.orderLayerShow
+        orderLayer: this.orderLayerShow,
       }
     },
     components: {
@@ -47,13 +47,14 @@
           price: this.price,
           currency: this.currency * 1,
           money: this.money * 1,
-          update_time:  String(Math.floor(new Date().getTime() / 1000))
+          update_time: Math.floor(new Date().getTime() / 1000)
         }).then((data)=>{
-          console.log('确认订单', data)
+          console.log('确认订单', data.id)
+          this.$router.push({ path: '/order', query: {id: data.id}})
         }).catch((msg)=>{
           console.log(msg);
         });
-        this.$router.push({ path: '/order', query: {flag: 1}})
+
       }
     }
   }

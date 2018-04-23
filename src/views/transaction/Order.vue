@@ -25,19 +25,19 @@
       <div class="order-info">
         <p class="tip">下单后此交易的比特币将托管锁定，请放心{{copy.type[type]}}</p>
         <ul>
-          <li class="price">
+          <li class="price clearfix">
             <span class="title">价格</span>
             <p>{{contentData.price}}CNY</p>
           </li>
-          <li>
+          <li class="clearfix">
             <span class="title">可交易量</span>
             <p>{{contentData.tradeable}} {{contentData.currency && contentData.currency.toUpperCase()}}</p>
           </li>
-          <li>
+          <li class="clearfix">
             <span class="title">限额</span>
             <p>{{contentData.min}}~{{contentData.max}}CNY</p>
           </li>
-          <li>
+          <li class="clearfix">
             <span class="title">付款方式</span>
             <p>
               <img src="/static/images/OTC_zhifubao.png" alt="" v-if="contentData.payments %2 === 1">
@@ -45,11 +45,11 @@
               <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(contentData.payments)">
             </p>
           </li>
-          <li>
+          <li class="clearfix">
             <span class="title">期限</span>
             <p>{{contentData.limit}}min</p>
           </li>
-          <li class="remark">
+          <li class="remark clearfix">
             <span class="title">备注</span>
             <p>{{contentData.info}}</p>
           </li>
@@ -308,7 +308,7 @@
                 height 20px
                 margin-top -10px
       .order-info
-        padding 20px 0 10px 0
+        padding 20px 0 10px
         border-bottom 1px solid $col1E1
         .tip
           text-align left
@@ -317,7 +317,6 @@
           fz11()
         ul
           li
-            height 34px
             line-height 34px
             .title
               float left
@@ -325,6 +324,8 @@
               height 100%
               letter-spacing 0.16px
             p
+              float left
+              width 980px
               color $col999
               letter-spacing 0.16px
             &.price

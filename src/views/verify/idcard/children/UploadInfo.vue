@@ -226,7 +226,7 @@
   .radio
     font-size 13px
     color #333333
-    letter-spacing 0.27
+    letter-spacing 0.27px
     display inline-block
     padding-left 27px
     cursor pointer

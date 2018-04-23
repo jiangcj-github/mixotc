@@ -9,6 +9,28 @@ import Fetch from "../libs/Fetch"; //引入Fetch
 
 let host, port;
 
+const formatParams = req => {
+  if (req.url.path.indexOf(":") > 0) {
+    let urlArr = req.url.path.split(":"),
+      url = urlArr[0],
+      replaceKey = urlArr[1];
+    req.url.path = `${url}${req.data.params[replaceKey]}`;
+    delete req.data.params[replaceKey];
+  }
+  console.log(req)
+  req.url.path && (req.url = `http://${req.url.host}:${req.url.port}${req.url.path}`);
+  if (req.data && req.data.method === "post")
+    Object.keys(req.data.params).length > 0 && (req.data.body = JSON.stringify(req.data.params));
+  if (req.data && req.data.method === "get")
+    Object.keys(req.data.params).length > 0 && (req.url += `?`) && Object.keys(req.data.params).forEach((key, index) =>
+      (req.url += `${key}=${req.data.params[key]}`) && Object.keys(req.data.params).length - 1 !== index && (req.url += "&"));
+
+  req.data = JSON.parse(JSON.stringify(req.data))
+  delete req.data.params
+  console.log(req)
+  return req
+}
+
 const HTTP_PROXY = {
   install(app, ServerConfig, httpList, httpPreHandler, httpAfterHandler) {
     host = ServerConfig.host;
@@ -17,45 +39,18 @@ const HTTP_PROXY = {
       HTTP_PROXY[v.name] = async params => {
         let req = {},
           res = {};
-        req.data = { ...v.data };
-        req.params = params;
-        // console.log('0', req.params)
+        req.url = {host, port}
+        req.url.path = v.data.url
+        let data = JSON.parse(JSON.stringify(v.data));
+        delete data.url
+        req.data = Object.assign({params}, data);
+        console.log('0', req)
         if (httpPreHandler) {
           httpPreHandler(app, req);
         }
-        // console.log('1', req.params)
-        // data.headers = new Headers({'tes1t': '1111'})//自定义请求头
-        if (req.data.url.indexOf(":") > 0) {
-          let urlArr = req.data.url.split(":"),
-            url = urlArr[0],
-            replaceKey = urlArr[1];
-          // console.log(
-          //   "req.data.url.indexOf",
-          //   req.data.url,
-          //   req.data.url.indexOf(":"),
-          //   urlArr,
-          //   url,
-          //   replaceKey
-          // );
-          req.data.url = `${url}${req.params[replaceKey]}`;
-          delete req.params[replaceKey];
-        }
-        req.data.url &&
-          (req.data.url = `http://${host}:${port}${req.data.url}`);
-        if (req.params && req.data.method === "post")
-          Object.keys(req.params).length > 0 &&
-            (req.data.body = JSON.stringify(req.params));
-        if (req.params && req.data.method === "get")
-          Object.keys(req.params).length > 0 &&
-            (req.data.url += `?`) &&
-            Object.keys(req.params).forEach(
-              (key, index) =>
-                (req.data.url += `${key}=${req.params[key]}`) &&
-                Object.keys(req.params).length - 1 !== index &&
-                (req.data.url += "&")
-            );
-        // console.log({...req.data})
-        res.result = await Fetch({ ...req.data });
+        req = formatParams(req)
+        console.log(1, req)
+        res.result = await Fetch(req.url, req.data);
         // console.log(data.url, !result, result.code !== 200, result.msg !== 'ok', result,httpFilter)
         if (httpAfterHandler) {
           httpAfterHandler(app, req, res);
@@ -64,7 +59,7 @@ const HTTP_PROXY = {
       };
     });
   },
-  fetch: Fetch
+  fetch: async (obj, req) => (req = formatParams(obj)) && await Fetch(req.url, req.data)
 };
 
 export default HTTP_PROXY;

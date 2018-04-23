@@ -4,7 +4,7 @@
              :width=396
              :height=234>
     <img src="/static/images/close_btn.png" alt="" @click="closePopup">
-    <h2>{{}}</h2>
+    <h2>{{tradeCode}}</h2>
     <p>付款的时候请备注“资金码”,以便对方收款</p>
     <button @click="markPay">标记已付款</button>
   </BasePopup>
@@ -16,7 +16,7 @@
 
   export default {
     name: "marked-payment-layer",
-    props: ['paymentShow', 'id', 'info'],
+    props: ['paymentShow', 'id', 'info', 'tradeCode'],
     data() {
       return {
         codeLayer: this.paymentShow

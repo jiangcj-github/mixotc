@@ -15,7 +15,7 @@
       <img src="/static/images/OTC_wechat.png" alt="" v-if="[3, 6, 7].includes(data.payments)">
       <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(data.payments)">
     </div>
-    <div class="title amount">123.45</div>
+    <div class="title amount">{{data.tradeable}}</div>
     <div class="title price">{{data.price}}</div>
     <div class="title button">
       <button @click="_toOrder(data)">购买</button>

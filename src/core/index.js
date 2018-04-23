@@ -203,9 +203,9 @@ const RUN_APP = (App, config, plugin) => {
   changeTabIndex();
 
   // console.log('vm.reload',Number(localStorage['tabIndex']),!Number(localStorage['tabIndex']))
-  if (!Number(localStorage["tabIndex"])) {
-    vm.reload();
-  }
+  // if (!Number(localStorage["tabIndex"])) {
+  //   vm.reload();
+  // }
 
   window.addEventListener("storage", function(event) {
     if (event.key == "getSessionStorage") {
@@ -228,7 +228,7 @@ const RUN_APP = (App, config, plugin) => {
         // console.log('开始赋值', vm)
         sessionStorage[key] = data[key];
         store.replaceState(JsonBig.parse(sessionStorage[key]));
-        vm.reload();
+        // vm.reload();
       }
     } else if (event.key == "getToken") {
       // 已存在的标签页会收到这个事件;
