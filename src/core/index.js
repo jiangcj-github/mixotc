@@ -101,7 +101,7 @@ window.onbeforeunload = function() {
   _beforeUnloadTime = Date.now();
   if (isFireFox)
     //火狐关闭执行
-    localStorage["test"] = "end";
+    localStorage.removeItem("tabIndex");
 };
 /**
  * 分辨第一次打开，还是在已经打开的情况下，再次打开一个页面
@@ -115,7 +115,7 @@ window.onbeforeunload = function() {
 if (!sessionStorage.length) {
   // 这个调用能触发目标事件，从而达到共享数据的目的
   // console.log(1, 'sessionStorage.length')
-  isNewTab = true;
+  // isNewTab = true;
   localStorage.setItem("getSessionStorage", Date.now());
 }
 
@@ -146,7 +146,7 @@ const RUN_APP = (App, config, plugin) => {
   config.LoopTaskConfig && Object.keys(config.LoopTaskConfig).length && Loop.install(Vue.prototype, config.LoopTaskConfig);
   config.PrototypeConfig && Prototype.install(Vue.prototype, config.PrototypeConfig);
 
-  
+
   let vm = new Vue({
     el: "#app",
     router,
@@ -174,7 +174,7 @@ const RUN_APP = (App, config, plugin) => {
   });
 
   router.beforeEach((to, from, next) => {
-    if (to.path === "/transaction" || to.path === "/" || to.path === "/homepage") {
+    if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/transaction/CoinData"].includes(to.path)) {
       next();
       return;
     }
@@ -182,7 +182,7 @@ const RUN_APP = (App, config, plugin) => {
       if (to.path === "/homepage") {
         next({ path: "/homepage" });
         return;
-      } 
+      }
       next({ path: "/transaction" });
       return;
     }
@@ -203,7 +203,7 @@ const RUN_APP = (App, config, plugin) => {
 
   changeTabIndex();
 
-  // console.log('vm.reload',Number(localStorage['tabIndex']),!Number(localStorage['tabIndex']))
+  console.log('vm.reload',Number(localStorage['tabIndex']),!Number(localStorage['tabIndex']))
   // if (!Number(localStorage["tabIndex"])) {
   //   vm.reload();
   // }
@@ -230,7 +230,7 @@ const RUN_APP = (App, config, plugin) => {
         sessionStorage[key] = data[key];
         store.replaceState(JsonBig.parse(sessionStorage[key]));
         store.state.isLogin = false;
-        // vm.reload();
+        vm.reload();
       }
     } else if (event.key == "getToken") {
       // 已存在的标签页会收到这个事件;
