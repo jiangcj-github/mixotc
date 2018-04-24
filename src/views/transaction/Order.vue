@@ -71,7 +71,8 @@
           <img src="/static/images/huansuan.png" alt="">
           <div>
             <input type="number" :placeholder="`输入${copy.type[type]}数量`" v-model="amount"  @input="changeAmount" @keydown="checkAmount(amount)">
-            <b>{{contentData.currency && contentData.currency.toUpperCase()}}</b>
+            <!--<b>{{contentData.currency && contentData.currency.toUpperCase()}}</b>-->
+            <b>BTC</b>
           </div>
         </div>
         <p class="charge" v-if="!type">手续费：0.2% 0BTC</p>
@@ -169,7 +170,7 @@
       async getPrice() {
         await this.Proxy.getPrice().then(res => {
           this.priceList = res.data.prices
-          console.log('this.priceList', this.priceList)
+          console.log('this.priceList', res)
           this.selectPrice = this.priceList.filter(item => {
             return item.currency == this.contentData.currency
           })
@@ -177,6 +178,7 @@
         this.rate = this.selectPrice[0] && (this.selectPrice[0].cny / this.selectPrice[0].btc)
         console.log('selectPrice', this.selectPrice)
       },
+
       changeMoney() {
         this.money = /^\d+\.?\d{0,2}$/.test(this.money) || this.money === '' ? this.money : this.moneyValue
         this.amount = (this.money / (this.rate)).toFixed(6);

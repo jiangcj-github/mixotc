@@ -20,13 +20,13 @@
                :show="verifyLayer"
                :width=470
                :height=250
-               v-if="this.$store.state.userInfo&&this.$store.state.userInfo.phone">
+               v-if="$store.state.userInfo && $store.state.userInfo.phone">
       <img src="/static/images/close_btn.png" alt="" @click="offVerify">
       <div class="buy-layer-content">
         <h1>请输入短信验证码</h1>
         <p>
           <input type="text" v-model="messageVerify"/><span @click="sendVerify" :class="{offBg: showOffBg}">{{verifyCode}}</span>
-          <b class="errortext" v-show="errorShow">请输入正确的验证码</b>
+          <b class="errortext" v-if="errorShow">请输入正确的验证码</b>
         </p>
         <div>
           <em @click="closePopup">取消</em>
@@ -39,7 +39,7 @@
                :show="verifyLayer"
                :width=470
                :height=250
-               v-if="this.$store.state.userInfo&&this.$store.state.userInfo.email">
+               v-if="$store.state.userInfo && $store.state.userInfo.email">
       <img src="/static/images/close_btn.png" alt="" @click="offVerify">
       <div class="buy-layer-content">
         <h1>请输入谷歌验证码</h1>
@@ -50,7 +50,7 @@
                maxlength="1"
                @keyup="getNum(index)"
                @keydown="delNum(index)"/>
-        <b class="errortext"  v-show="errorShow">请输入正确的验证码</b>
+        <b class="errortext" v-if="errorShow">请输入正确的验证码</b>
         <div>
           <em @click="closePopup">取消</em>
           <i @click="succPopup">确定</i>
@@ -88,7 +88,7 @@
     },
     watch: {
       releaseCoinShow(state) {
-        state === true ? this.buyLayer = true : this.buyLayer = false
+        this.buyLayer = state === true ?  true : false
       },
       inputGroup(newValue, oldValue) {
         // console.log(newValue, oldValue, newValue[newValue.length - 1].length)
@@ -101,10 +101,20 @@
       closePopup() {
         this.$emit('offRelease', 'false')
       },
-      buyNext() {
+      buyNext() { // 点击下一步
         if (this.PaymentValue === '') return
         this.$emit('offRelease', 'false');
         this.verifyLayer = true;
+        if (this.$store.state.userInfo.email) {
+          this.WsProxy.send('control','send_code',{ // 获取验证码
+            type: 2, // 0 登录; 1 修改密码; 2 支付
+            uid: this.id,
+          }).then((data)=>{
+            console.log('获取验证码', data)
+          }).catch((msg)=>{
+            console.log(msg);
+          });
+        }
       },
       offVerify() {
         this.verifyLayer = false;
@@ -127,7 +137,7 @@
           };
           verifyFn();
           let timer = setInterval(verifyFn, 1000)
-          this.WsProxy.send('otc','update_order',{ // 获取验证码
+          this.WsProxy.send('control','send_code',{ // 获取验证码
             type: 2, // 0 登录; 1 修改密码; 2 支付
             uid: this.id,
           }).then((data)=>{
@@ -158,9 +168,11 @@
           pass: this.PaymentValue,
           code: this.messageVerify
         }).then((data)=>{
-          console.log('cancel', data)
+          console.log('确定', data)
         }).catch((msg)=>{
-          console.log(msg);
+          msg.ret !== 0 && (this.errorShow = true)
+          // console.log('this.errorShow', this.errorShow)
+          console.log('你错了', msg.ret);
         })
       }
     }
