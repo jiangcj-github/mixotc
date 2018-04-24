@@ -6,28 +6,28 @@
         -
         <router-link to="">币种资料</router-link>
         -
-        <span>{{currency}}</span>
+        <span>{{coinDataObj.name}}</span>
       </h1>
       <div class="search-box">
         <p><input type="text"
                   placeholder="搜索币种(按首字母排列)"
                   v-model="inputValue"
                   @input="selectData"
-                  @click="showResult = true"><button></button>
+                  @click="showResult = true"><button @click="getCoinsData"></button>
           <!--@click="getCoinsData"-->
         </p>
         <ul class="search-result" v-if="showResult && inputValue">
           <li v-if="!result.length">暂无搜索结果</li>
-          <li v-for="item of result" :key="item" @click="selectResultContent(item)">{{item}}</li>
+          <li v-for="(item,index) of result" :key="index" @click="selectResultContent(item)">{{item}}</li>
         </ul>
       </div>
       <div class="coin-content">
         <div class="coin-content-top clearfix">
           <div class="coin-content-left clearfix">
-            <img :src="logo" alt="">
+            <img :src="coinDataObj.logo" alt="">
             <ol>
-              <li>{{currency}}({{name}})</li>
-              <li>${{price}}</li>
+              <li>{{coinDataObj.name}}({{coinDataObj.cnName}})</li>
+              <li>{{coinDataObj.price && (coinDataObj.price.cny * 1).format('cny')}}</li>
               <li>
                 <router-link to="/transaction">去交易</router-link>
                 <!--<router-link to="">去充币</router-link>-->
@@ -35,20 +35,20 @@
             </ol>
           </div>
           <ul class="coin-content-right clearfix">
-            <li><span>市值：</span><b>${{totalValue}}</b></li>
-            <li><span>发行总量：</span><b>{{totalVolume}}</b></li>
-            <li><span>流通量：</span><b>{{circulationVolume}}</b></li>
-            <li><span>发行价格：</span><b>${{icoPrice}}</b></li>
-            <li><span>发行日期：</span><b>{{releaseTime}}</b></li>
+            <li><span>市值：</span><b>{{coinDataObj.totalValue && (coinDataObj.totalValue.cny === 0 ? '-' : (coinDataObj.totalValue.cny * 1).format('cny'))}}</b></li>
+            <li><span>发行总量：</span><b>{{coinDataObj.totalVolume && coinDataObj.totalVolume.format()}}</b></li>
+            <li><span>流通量：</span><b>{{coinDataObj.circulationVolume && coinDataObj.circulationVolume.format()}}</b></li>
+            <li><span>发行价格：</span><b>{{coinDataObj.icoPrice && (coinDataObj.icoPrice.cny === 0 ? '-' : (coinDataObj.icoPrice.cny * 1).format('cny'))}}</b></li>
+            <li><span>发行日期：</span><b>{{coinDataObj.releaseTime && coinDataObj.releaseTime.toDate('yyyy/MM/dd')}}</b></li>
           </ul>
         </div>
         <div class="coin-content-bottom">
           <h2>币种介绍</h2>
-          <h3>{{info}}</h3>
+          <h3>{{coinDataObj.description}}</h3>
           <p>
-            <a :href="officialLink" target="_blank">官网</a>
-            <a href="blockLink">区块浏览器</a>
-            <a href="whitePaper">白皮书</a>
+            <a :href="coinDataObj.webSite && coinDataObj.webSite[0]" target="_blank">官网</a>
+            <a :href="coinDataObj.blockSites && coinDataObj.blockSites[0]" target="_blank">区块浏览器</a>
+            <a :href="coinDataObj.whitePaper" target="_blank">白皮书</a>
           </p>
         </div>
       </div>
@@ -61,49 +61,57 @@
     name: "coin-data",
     data() {
       return {
-        coinDataList: [], //获取币种资料数据
-        selectCoinList: [],
-        currency: '', // 币种名
-        name: '', // 币种全称
-        info: '', // 币种信息
-        logo: '', // 币种logo
-        officialLink: '', // 官网链接
-        blockLink: '', // 区块浏览器
-        whitePaper: '', // 白皮书
-        price: '',// 当前估值
-        totalValue: '',// 市值
-        totalVolume: '', // 发行总量
-        circulationVolume: '', // 流通量
-        icoPrice: '', // 发行价格
-        releaseTime: '', // 发行日期
+        coinDataObj: {}, // 获取币种资料数据
+        coinDataList: [], // 筛选所结有果数据
+        selectCoinList: [], // 匹配结果数据
         inputValue: '', // input值
         selectValue: 'btc',
         result: [], // 模糊搜索结果
         showResult: true, // 控制下拉框显示隐藏
-        id: '5adc83398bb78e0cea60266d'
+        id: ''
       }
     },
-    created() {
-      this.getCoinsData()
+    async created() {
+      await this.selectData() // 筛选出btcID 加载数据
+      this.getCoinsData();
     },
     mounted() {
     },
     methods: {
+      async selectData() { // 模糊筛选
+        this.result = [];
+        this.selectValue = this.inputValue;
+        await this.Proxy.fetch({
+          url: {
+            host: '47.74.244.196',
+            port: '8081',
+            path: '/v1/home/searchTips/'
+          },
+          data: {
+            method: 'get',
+            params: {word: this.selectValue}
+          },
+        }).then(res => {
+          console.log('搜索结果', res)
+          this.id = res.data.currency[0].id;
+          console.log('搜索this.selectValue', this.selectValue)
+          this.coinDataList = res.data.currency
+          res.data.currency && res.data.currency.forEach(v => {
+            this.result.push(v.name)
+          })
+          // this.selectCoinList = res.data.currency.filter(item => {
+          //   // console.log('选择item.currency', this.selectValue)
+          //   return item.name == this.selectValue
+          // });
+          // console.log('选择数组', this.selectCoinList)
+          // this.id = this.selectCoinList[0].id;
+        }).catch(msg => {
+          console.log(msg)
+        })
+      },
+
       async getCoinsData() { // 获取币种资料数据
-        // console.log('内容', this.selectValue)
         this.inputValue = '';
-        // await this.Proxy.getCoinData({symbolId: this.id}).then(res => {
-        //   console.log(res)
-        //   // this.coinDataList = res.data.coins;
-        //   // console.log('this.coinDataObject', this.coinDataList);
-        //   // this.selectCoinList = this.coinDataList.filter(item => {
-        //   //   return item.currency == this.selectValue
-        //   // });
-        //   // // console.log('选择数组', this.selectCoinList)
-        //   // this.currency = this.selectCoinList[0].currency.toUpperCase();
-        //   // this.name = this.selectCoinList[0].name;
-        //   // this.officialLink = this.selectCoinList[0].link
-        // })
         await this.Proxy.fetch(
           {
             url: {
@@ -117,50 +125,22 @@
             },
           }).then(res => {
           console.log('资料', res.data, this.JsonBig.stringify(res.data.price.cny), this.JsonBig.stringify(res.data.totalValue.cny))
+          this.coinDataObj = res.data
+        }).catch(msg => {
+          console.log(msg)
+        })
+      },
 
-          this.currency = res.data.name; // 简称
-          this.name = res.data.cnName; // 全称
-          this.logo = res.data.logo;
-          this.info = res.data.description; // 描述
-          this.whitePaper = res.data.whitePaper; // 白皮书地址
-          this.price = res.data.price.usd; // 当前估值
-          this.totalValue = res.data.totalValue.usd; // 市值
-          this.totalVolume = res.data.totalVolume; // 发行总量
-          this.circulationVolume = res.data.circulationVolume; // 流通量
-          this.icoPrice = res.data.icoPrice.usd; // 发行价格
-          this.releaseTime = res.data.releaseTime // 发行日期
-        }).catch(msg => {
-          console.log(msg)
-        })
-      },
-      async selectData() { // 模糊筛选
-        this.result = [];
-        this.selectValue = this.inputValue;
-        // await this.Proxy.searchTips({word: this.selectValue}).then(res => {
-        //   console.log('筛选', res)
-        //   res.data.currency && res.data.currency.forEach(v => {
-        //     this.result.push(v.name)
-        //   })
-        // })
-        await this.Proxy.fetch({
-          url: {
-            host: '47.74.244.196',
-            port: '8081',
-            path: '/v1/home/searchTips/'
-          },
-          data: {
-            method: 'get',
-            params: {word: this.selectValue}
-          },
-        }).then(res => {
-          console.log(res)
-        }).catch(msg => {
-          console.log(msg)
-        })
-      },
       selectResultContent(item) { // 根据筛选结果赋值
         this.selectValue = this.inputValue = item;
         this.showResult = false
+        this.selectCoinList = this.coinDataList.filter(item => {
+          // console.log('选择item.currency', this.selectValue)
+          return item.name == this.selectValue
+        });
+        console.log('选择数组', this.selectCoinList)
+        this.id = this.selectCoinList[0].id;
+        console.log('赋值', this.selectValue, this.inputValue, item)
       }
     }
   }
@@ -216,12 +196,13 @@
       .search-result
         position absolute
         width 453px
-        max-height 300px
+        max-height 200px
         margin-top -4px
         background #FFF
         border 1px solid #EEE
         border-top none
         overflow-y auto
+        z-index 2
         li
           font-size 12px
           padding 3px
@@ -249,7 +230,6 @@
           float left
           width 66px
           height 66px
-          background aquamarine
           border-radius 50%
           margin-right 30px
         ol

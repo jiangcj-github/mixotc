@@ -39,7 +39,6 @@ Number.prototype.formatSecord=function(){
     return "${h}h${m}min${s}s";
   }
 
-
     return "${h}h${m}min${s}s"
 };
 // xxxx-yy-zz, hh:mm:ss
@@ -51,6 +50,13 @@ Number.prototype.formatSecord=function(){
  *
  * @returns {string}
  */
+
+// 时间格式化
+Number.prototype.toDate = function (fmt) {
+  let date = new Date(this * 1000);
+  return date.dateHandle(fmt)
+};
+
 Date.prototype.dateHandle = function(fmt) {
   fmt = fmt || "yyyy-MM-dd HH:mm:ss";
   let obj = {

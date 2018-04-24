@@ -160,7 +160,7 @@ import NothingContent from '@/components/common/NothingContent';
     //       data && this.$store.commit('changeTrustList', {data: data.ids})
     //       !data && this.$store.commit('changeTrustList', {data: []})
     //     })
-    //   } 
+    //   }
       this.fetchData({type: 1, count: 20, page: 0 })
     },
     mounted() {
@@ -348,6 +348,7 @@ import NothingContent from '@/components/common/NothingContent';
         handler(curVal) {
           if (curVal) {
             this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
+              console.log('11111', data)
               data && this.$store.commit('changeTrustList', {data: data.ids.map(item => {
                 return this.JsonBig.stringify(item.Id);
               })})
