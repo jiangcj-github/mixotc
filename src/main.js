@@ -2,7 +2,6 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import App from './App';
-import jsonBig from 'json-bigint';
 import { DatePicker } from "element-ui";
 import '@/stylus/rest.styl'
 import "vue-happy-scroll/docs/happy-scroll.css";

@@ -151,20 +151,21 @@ const RUN_APP = (App, config, plugin) => {
     el: "#app",
     router,
     components: { App },
-    template: '<App v-if="isReload" />',
+    template: '<App v-if="!isReload" />',
     store,
     data() {
       return {
-        isReload: !isNewTab
+        isReload: isNewTab
       };
     },
     methods: {
       reload() {
         // console.log('this.isReload', this.isReload)
-        this.isReload = false;
+        this.isReload = true;
         this.$nextTick(() => {
-          this.isReload = true;
-          !this.$store.state.token && this.$router.push({
+          this.isReload = false;
+          !this.$store.state.token &&
+            this.$router.push({
               name: "transaction"
             });
         });
@@ -228,6 +229,7 @@ const RUN_APP = (App, config, plugin) => {
         // console.log('开始赋值', vm)
         sessionStorage[key] = data[key];
         store.replaceState(JsonBig.parse(sessionStorage[key]));
+        store.state.isLogin = false;
         // vm.reload();
       }
     } else if (event.key == "getToken") {

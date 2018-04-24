@@ -73,7 +73,9 @@
       async initData() {
         let result = [];
         //拉取好友列表
+        // console.log('sdfsdfdsfsdf', this.WebSocket.ws.readyState)
         await this.WsProxy.send('control', 'friend_list', {uid: this.$store.state.userInfo.uid}).then(data => {
+          // console.log(data)
           this.$store.commit({type: 'getFriendList', data})
         }).catch(error=>{
           console.log(error)
@@ -92,7 +94,7 @@
           console.log(error)
         })
         //加工数据
-        linkman.contacts && linkman.contacts.forEach(item => {
+        linkman && linkman.contacts && linkman.contacts.forEach(item => {
           let length = 0;
           if (item.gid) {
             this.$store.state.groupList.forEach(group => {
@@ -135,7 +137,7 @@
             }); 
           }
         })
-        this.$store.commit({type: 'changeChat', data: result});
+        linkman && linkman.contacts && this.$store.commit({type: 'changeChat', data: result});
       },
       //搜索框
       input() {
