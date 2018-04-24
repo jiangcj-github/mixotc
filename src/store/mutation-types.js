@@ -14,6 +14,9 @@ const newChat = "newChat";
 const newTrust = "newTrust";
 const delTrust = "delTrust";
 const updateGroupInfo = "updateGroupInfo";
+const addMessages = "addMessages";
+const changeMessageState = "changeMessageState";
+
 
 export {
   changeLoginForm,
@@ -31,5 +34,7 @@ export {
   newChat,
   newTrust,
   delTrust,
-  updateGroupInfo
+  updateGroupInfo,
+  addMessages,
+  changeMessageState
 };

@@ -30,7 +30,7 @@ WebSocketProxy.prototype.send = function (op, action, sendData){
   });
 };
 
-WebSocketProxy.prototype.sendBase = function(op, body) {
+WebSocketProxy.prototype.sendMessage = function({ group, tid, data}) {
   return new Promise((resolve, reject) => {
     this.seq = this.ws.seq;
     this.ws.onMessage[this.seq] = {
@@ -46,12 +46,16 @@ WebSocketProxy.prototype.sendBase = function(op, body) {
       },
       date: new Date()
     };
-    this.ws.send(
-      sendConfig(op, {
+    this.ws.send(sendConfig('send_sms', {
         seq: this.seq,
-        body: body
-      })
-    );
+        body: {
+          action: "send_sms",
+          type: 'text',
+          gid: group,
+          tid: tid,
+          data: data
+        }
+      }));
   });
 };
 

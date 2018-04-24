@@ -76,12 +76,36 @@ export default {
     let index = state.trustList.indexOf(data);
     index !== -1 && state.trustList.splice(index, 1);
   },
+
   [types.updateGroupInfo](state, { data }) {
     //更新群信息
     state.curChat = data.id;
     state.chat.filter((item, index) => {
-      item.id === data.id && data.length !== undefined && ((state.chat[index].length = data.length));
-      item.id === data.id && data.name !== undefined && ((state.chat[index].nickName = data.name));
+      item.id === data.id &&
+        data.length !== undefined &&
+        (state.chat[index].length = data.length);
+      item.id === data.id &&
+        data.name !== undefined &&
+        (state.chat[index].nickName = data.name);
     });
+  },
+  //接收到消息和发送消息时的处理
+  [types.addMessages](state, { data }) {
+    // 取消信任
+    !state.messages[data.id] && (state.messages[data.id] = []);
+    state.messages[data.id].push(data.msg)
+  },
+
+  [types.changeMessageState](state, { data: {id,time,code} }) {
+    // 消息发送成功或失败
+      state.messages[id].forEach(item => {
+        if(time === item.time){
+          item.isLoding = false
+          code && (item.isFail = true);
+        }
+      })
+      // state.messages[id].splice(state.messages[id].length - 1, 1);
+    // !state.messages[data.id] && (state.messages[data.id] = []);
+    // state.messages[data.id].push(data.msg)
   }
 };

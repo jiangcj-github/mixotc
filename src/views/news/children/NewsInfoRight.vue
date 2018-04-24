@@ -20,22 +20,24 @@
     </ul>
     <div class="blank" v-if="!title && curChat !== 'system'"></div>
     <div class="news-info-talk clearfix" v-if="title && curChat !== 'system'">
-      <p class="more-info">查看更多消息</p>
-      <p class="time-info">12月19日 12:12</p>
-      <div class="left-people">
-        <img src="" alt="">
-        <p>
-          <i></i>
-          <span>在</span>
-        </p>
+    <happy-scroll style="width:399px;height:320px" resize bigger-move-h="end" hide-horizontal>
+      <div style="width:399px">
+        <p class="more-info">查看更多消息</p>
+        <div class="messages clearfix" v-for="item of messages" :key="item.time">
+          <p class="time-info">{{item.time}}</p>
+          <div :class="{'left-people': item.from !== JsonBig.stringify($store.state.userInfo.uid), 'right-people': item.from === JsonBig.stringify($store.state.userInfo.uid)}">
+            <img class="avator" src="" alt="">
+            <p>
+              <i></i>
+              <span v-if="item.msg.type === 1" class="images"><img :src="item.msg.content" alt="" @load="item.isLoding = false" @error="item.isFail = true"></span>
+              <span v-if="item.msg.type === 0">{{item.msg.content}}</span>
+              <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding">
+              <img src="/static/images/hint.png" class="failFlag" v-if="!item.isLoding && item.isFail">
+            </p>
+          </div>
+        </div>
       </div>
-      <div class="right-people">
-        <p>
-          <i></i>
-          <span>在的在的</span>
-        </p>
-        <img src="" alt="">
-      </div>
+    </happy-scroll>
     </div>
     <div class="system-info" v-if="curChat === 'system'">
       <div>
@@ -50,7 +52,7 @@
 
     <ol class="input-text clearfix">
       <li>
-        <input type="text" :disabled="title === '' ? true : false">
+        <input type="text" :disabled="title === '' ? true : false" v-model="sendText" @keyup.enter="send">
       </li>
       <li>
         <img src="/static/images/picture_icon.png">
@@ -100,6 +102,7 @@
   import AddGroup from '@/views/news/AddGroup' // 添加群
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
   import GroupInfo from '@/views/news/GroupInfo' // 查看群
+  import { HappyScroll } from 'vue-happy-scroll'
 
   export default {
     name: "news-info-right",
@@ -118,24 +121,25 @@
           right: 0,
           bottom: '100px'
         },
-        timer: null
+        timer: null,
+        sendText: ''
       }
     },
     components: {
       AddFriend,
       AddGroup,
       BasePopup,
-      GroupInfo
+      GroupInfo,
+      HappyScroll
     },
     mounted() {
-      // this.WsProxy.send('control', 'add_friend', {
-      //     ack: 0,
-      //     id: this.JsonBig.parse('203309354277937152'),
-      //   }).then(data => {
-        
-      //   }).catch(error => {
-      //     console.log(error)
-      //   })
+     this.WebSocket.onMessage['sms']={
+       callback:(data) => {
+         if (data.op !== 7) return;
+         console.log(data.body);
+        //  this.$store.commit({type: 'addMessages', data:{id}})
+       }
+     }
     },
     computed: {
       title() {
@@ -170,9 +174,49 @@
       },
       isTrust() {
         return this.$store.state.trustList.includes(this.curChat)
+      },
+      messages() {
+        return this.$store.state.messages[this.curChat] ? this.$store.state.messages[this.curChat] : []
       }
     },
     methods: {
+      // dealTime(time) {
+        
+      // },
+      send() {
+        if (this.sendText === '') return;
+        let tid = this.JsonBig.parse(this.curChat),
+            chat= this.chat[this.index],
+            time = new Date() - 1;
+        let obj = {
+            from: this.JsonBig.stringify(this.$store.state.userInfo.uid), 
+            to: this.curChat,
+            icon: chat.icon,
+            msg:{
+              type: 0,
+              content: this.sendText
+            },
+            isLoding: true, 
+            isFail: false,
+            time: time
+          }
+        this.$store.commit({type: 'addMessages', data:{id: this.curChat, msg: obj }})
+        this.WsProxy.sendMessage({
+          group: chat.group ? 1 : 0,
+          tid: tid,
+          data:{
+            uid: this.$store.state.userInfo.uid,
+            rig: chat.group ? tid : 0,
+            tid: tid,
+            msg: 'how do you do!'
+          }
+        }).then(data => {
+          this.$store.commit({type: 'changeMessageState', data:{id: this.curChat, time: time, code:0 }})
+        }).catch(error => {
+          this.$store.commit({type: 'changeMessageState', data:{id: this.curChat, time: time, code:1 }})
+        })
+        this.sendText = '';
+      },
       openGroupInfo(id) {
         this.groupId = id;
         this.showCheckGroup = true
@@ -230,6 +274,7 @@
 <style scoped lang="stylus">
   @import "../../../stylus/base.styl"
   .news-info-right
+    position relative
     float right
     width 400px
     height 420px
@@ -315,16 +360,14 @@
           width 10px
           height 10px
           vertical-align middle
-
-
     .news-info-talk
       width 399px
       height 320px
-      padding-top 10px
       text-align center
       .more-info
         font-size 12px
         color #FF794C
+        padding-top 10px
         margin-bottom 5px
       .time-info
         width 90px
@@ -341,7 +384,6 @@
         img
           width 30px
           height 30px
-          background aquamarine
           border-radius 50%
           vertical-align top
         p
@@ -353,6 +395,13 @@
             padding 5px
             border-radius 2px
             margin-top 2px
+            &.images
+              width 90px
+              height 60px
+              img
+                width 100%
+                height 100%
+                cursor url('/static/images/bigger.ico'), auto;
           i
             position absolute
             top 9px
@@ -361,11 +410,26 @@
             border-style solid dashed dashed
             font-size 0
             line-height 0
+      .messages
+        width 100%
+        margin 0
+        .lodingFlag, .failFlag
+          position absolute
+          width 12px
+          height 12px
+        .lodingFlag
+          animation mymove 1.5s linear infinite;
+          -webkit-animation mymove 1.5s linear infinite;
       .left-people
         float left
         margin-left 10px
         text-align left
-        img
+        .lodingFlag, .failFlag
+          right -22px
+          top 50%
+          margin-top -6px
+        .avator
+          background aquamarine
           margin-right 10px
         span
           background #E1E1E1
@@ -376,13 +440,21 @@
         float right
         margin-right 10px
         text-align right
-        img
+        .lodingFlag, .failFlag
+          left -22px
+          top 50%
+          margin-top -6px
+        .avator
+          float right
+          background aquamarine
           margin-left 10px
         span
+          float right
           text-align left
+          margin-right 10px
           background #FFB422
         i
-          right -16px
+          right -6px
           border-color transparent transparent transparent #FFB422
     .blank
       width 399px
@@ -420,8 +492,11 @@
           li:last-child
             font-size 12px
             color #999
-
     .input-text
+      position absolute
+      bottom 0
+      left 0
+      width 400px
       padding 7px 0 3px
       background #FFF
       -webkit-box-shadow: 0 -3px 3px 0 rgba(0,0,0,0.1)
@@ -439,8 +514,10 @@
         margin-right 15px
         margin-left 5px
         input
-          width 284px
+          width 274px
           height 33px
+          padding-left 10px
+          font-size 12px
           border 1px solid #FFB422
       li:nth-child(2)
         width 30px

@@ -75,26 +75,27 @@
         //拉取好友列表
         // console.log('sdfsdfdsfsdf', this.WebSocket.ws.readyState)
         await this.WsProxy.send('control', 'friend_list', {uid: this.$store.state.userInfo.uid}).then(data => {
-          // console.log(data)
+          if(!data) data = []
           this.$store.commit({type: 'getFriendList', data})
         }).catch(error=>{
           console.log(error)
         })
         //拉取群組列表
         await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
+          if(!data) data = []
           this.$store.commit({type: 'getGroupList', data})
         }).catch(error=>{
           console.log(error)
         })
         //拉取近十天对话列表
         let linkman = await this.WsProxy.send('control', 'recent_contact', {uid: this.$store.state.userInfo.uid}).then(data => {
-          console.log(data)
-          return data
+          if(!data.contacts) return [];
+          return data.contacts
         }).catch(error=>{
           console.log(error)
         })
         //加工数据
-        linkman && linkman.contacts && linkman.contacts.forEach(item => {
+        linkman && linkman.forEach(item => {
           let length = 0;
           if (item.gid) {
             this.$store.state.groupList.forEach(group => {
@@ -137,7 +138,7 @@
             }); 
           }
         })
-        linkman && linkman.contacts && this.$store.commit({type: 'changeChat', data: result});
+        linkman && this.$store.commit({type: 'changeChat', data: result});
       },
       //搜索框
       input() {
@@ -198,15 +199,8 @@
           }
         })
       this.searchRange = result
-      console.log(result)
       },
       delUser(id) {
-        // 删除联系人列表项接口尚未完成
-        // this.WsProxy.send('control', 'delete_group', {uid:this.$store.state.userInfo.uid, id: this.JsonBig.parse(id)}).then(data => {
-        //   console.log('deletgroup',data)
-        // }).catch(error=>{
-        //   console.log(error)
-        // })
         this.$store.commit({type: 'delChat', data: id})
       },
       newChat(chat) {
@@ -282,7 +276,6 @@
             .head-portrait
               width 30px
               height 30px
-              background aquamarine
               border-radius 50%
               margin 0 10px 0 5px
             .close-head
