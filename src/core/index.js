@@ -164,6 +164,9 @@ const RUN_APP = (App, config, plugin) => {
         this.isReload = true;
         this.$nextTick(() => {
           this.isReload = false;
+          if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) {
+            return;
+          }
           !this.$store.state.token &&
             this.$router.push({
               name: "transaction"
@@ -174,7 +177,7 @@ const RUN_APP = (App, config, plugin) => {
   });
 
   router.beforeEach((to, from, next) => {
-    if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/transaction/CoinData"].includes(to.path)) {
+    if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(to.path)) {
       next();
       return;
     }

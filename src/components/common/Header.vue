@@ -88,9 +88,10 @@
         this.$store.commit({type: 'changeLogin', data: false});
         this.WebSocket.reConnectFlag = false;
         this.WebSocket.close();
-        if (this.path !== '/' && this.path !== 'transaction' && this.path !== 'homepage') {
-          this.$router.push('transaction')
+        if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) {
+            return;
         }
+        this.$router.push('transaction')
       },
       hideShowMenu() {
         if (!this.showMenu) return;

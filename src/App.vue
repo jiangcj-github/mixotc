@@ -56,9 +56,10 @@
         if (!this.token){
           ws.reConnectFlag = false;
           this.$store.commit({type: 'changeLogin', data: false});
-          if (this.path !== '/' && this.path !== 'transaction') {
-            this.$router.push('transaction');
+          if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) {
+            return;
           }
+          this.$router.push('transaction');
           return;
         }
         ws.send(sendConfig('login', {
@@ -98,9 +99,10 @@
         //websocket链接关闭
         this.WebSocket.close();
         //其他页面跳转至主页
-        if (this.path !== '/' && this.path !== 'transaction') {
-          this.$router.push('transaction')
+        if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) {
+            return;
         }
+        this.$router.push('transaction')
       }
     },
     computed: {
