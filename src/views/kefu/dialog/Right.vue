@@ -245,10 +245,12 @@
       onClickM0(){
         let text=MSGS.get(0,this.appl,this.recv);
         this.$refs.textarea.value=text;
+        this.$refs.textarea.focus();
       },
       onClickM2(){
         let text=MSGS.get(4,this.appl,this.recv);
         this.$refs.textarea.value=text;
+        this.$refs.textarea.focus();
       },
       onPop1Input(){
         if(this.pop1Text.length>50){
@@ -286,18 +288,22 @@
         this.showPop4=false;
         let text=MSGS.get(1,this.appl,this.recv);
         this.$refs.textarea.value=text;
+        this.$refs.textarea.focus();
       },
       onClickMf2(){
         let text=MSGS.get(5,this.appl,this.recv);
         this.$refs.textarea.value=text;
+        this.$refs.textarea.focus();
       },
       onClickMf3(){
         let text=MSGS.get(7,this.appl,this.recv);
         this.$refs.textarea.value=text;
+        this.$refs.textarea.focus();
       },
       onClickMf4(){
         let text=MSGS.get(2,this.appl,this.recv);
         this.$refs.textarea.value=text;
+        this.$refs.textarea.focus();
       }
     },
     mounted(){
