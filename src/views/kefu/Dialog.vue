@@ -29,13 +29,11 @@
   .kefu
     background-image url(/static/images/kefu/background.jpg)
     background-size 100% 100%
-    position relative
+    display flex
+    align-items center
+    justify-content center
     height 100%
     .dialog
-      position absolute
-      left 50%
-      top 50%
-      transform translateX(-50%) translateY(-50%)
       height 600px
       width 900px
       background #f4f6fa

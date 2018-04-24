@@ -65,8 +65,8 @@
         <p v-for="(e,i) in msgHis" :key="i" :class="{al:!e.isSend,ar:e.isSend}">
           <img :src="e.headimg"/>
           <span v-if="e.type===0">{{e.text}}</span>
-          <span v-else-if="e.type===1" class="img-wrap"><img :src="e.url"/></span>
-          <i class="err" title="发送失败" v-if="e.err===1"></i>
+          <span v-else-if="e.type===1" class="img-wrap"><img :src="e.url" @click="onClickImg(e)"/></span>
+          <i class="err" title="发送失败" v-if="e.err===1" @click="resend(e)"></i>
         </p>
         <!--
         <p class="al">
@@ -87,28 +87,24 @@
     </happy-scroll>
     <div class="sendBox">
       <div class="menu">
-        <img src="/static/images/kefu/album.png" @click="$refs.file.click()">
-        <input type="file" ref="file" v-show="0" @change="chooseImage">
+        <img src="/static/images/kefu/album.png" @click="$refs.file.click()" title="发送图片">
+        <input type="file" ref="file" v-show="0" accept="image/*" @change="chooseImage">
         <span class="br"></span>
         <button class="b1" @click="onClickM0">上传付款证明</button>
         <button class="b2" @click="showPop4=true">证明无效</button>
         <button class="b3" @click="onClickM2">通知放币</button>
       </div>
       <textarea ref="textarea" class="textarea" title=""
-                @keydown.enter.prevent="msgSend"
+                @keydown.enter.exact="send"
                 @keydown.ctrl.enter="onCtrlEnter">
       </textarea>
       <div class="bottom">
         <span>按下Enter发送内容/Ctrl+Enter换行</span>
-        <button @click="msgSend">发送</button>
+        <button @click="send">发送</button>
       </div>
     </div>
     <!--图片弹出框-->
-    <BasePopup :width="400" :height="250" :top="50" :show="showPopImg">
-      <div class="popImg">
-        <img :src="popSrc">
-      </div>
-    </BasePopup>
+    <ImagePopup v-if="showPopImg" :url="popImgSrc"></ImagePopup>
     <!--强制放币-->
     <BasePopup :width="470" :height="380" :top="50" :show="showPop1">
       <div class="pop">
@@ -181,12 +177,14 @@
 <script>
   import { HappyScroll } from 'vue-happy-scroll';
   import BasePopup from "@/components/common/BasePopup";
+  import ImagePopup from "../widges/ImagePopup";
   import MSGS from "./msg.js";
 
   export default {
     components: {
       HappyScroll,
-      BasePopup
+      BasePopup,
+      ImagePopup,
     },
     data() {
       return {
@@ -201,7 +199,7 @@
         orderId: "",
 
         showPopImg: false,
-        popSrc: "/static/images/kefu/background.jpg",
+        popImgSrc: "",
 
         showPop1: false,
         pop1Text: "",
@@ -225,14 +223,28 @@
     methods: {
       chooseImage(){
         this.sendFile=this.$refs.file.files[0];
-
+        let reader = new FileReader();
+        reader.readAsDataURL(this.sendFile);
+        reader.onload = ((e)=>{
+          //发送图片
+          //
+          this.msgHis.push({
+            headimg:"/static/images/default_avator.png",
+            url: e.target.result,
+            type:1,
+            isSend:1,
+            err:1,
+          });
+        });
       },
-      onCtrlEnter(e){
+      onCtrlEnter(){
         this.$refs.textarea.value+="\n";
+        console.log("dd");
       },
-      msgSend(){
+      send(){console.log("aa");
         let text=this.$refs.textarea.value;
         if(/^\s*$/.test(text)) return;
+        //发送信息
         this.msgHis.push({
           headimg:"/static/images/default_avator.png",
           text:text,
@@ -241,6 +253,10 @@
           err:1,
         });
         this.$refs.textarea.value=null;
+      },
+      resend(item){
+        item.err=0;
+        setTimeout(()=>{item.err=1;},2000);
       },
       onClickM0(){
         let text=MSGS.get(0,this.appl,this.recv);
@@ -304,6 +320,10 @@
         let text=MSGS.get(2,this.appl,this.recv);
         this.$refs.textarea.value=text;
         this.$refs.textarea.focus();
+      },
+      onClickImg(item){
+        this.showPopImg=true;
+        this.popImgSrc=item.url;
       }
     },
     mounted(){
@@ -316,8 +336,11 @@
         {headimg:"/static/images/default_avator.png",text:"请提交付款证明",type:0,isSend:0,err:0},
         {headimg:"/static/images/default_avator.png",url:"/static/images/kefu/background.jpg",type:1,isSend:0,err:1},
         {headimg:"/static/images/default_avator.png",url:"/static/images/kefu/background.jpg",type:1,isSend:1,err:1},
-      ]
-    }
+      ];
+      this.Bus.$on("onIpClose",()=>{
+        this.showPopImg=false;
+      });
+    },
   }
 </script>
 <style scoped lang="stylus">
@@ -454,9 +477,10 @@
           align-items center
           max-width 340px
           >img
-            width 100px
+            max-width 100px
             height auto
             border-radius 2px
+            cursor pointer
         >span.img-wrap
           padding 0
         >i.err
@@ -470,6 +494,7 @@
           text-align center
           line-height 16px
           font-size 12px
+          cursor pointer
           &:before
             content "!"
             color #fff
@@ -519,8 +544,6 @@
         display flex
         align-items center
         >img
-          width 20px
-          height 20px
           cursor pointer
         .br
           flex-grow 1
@@ -583,8 +606,6 @@
         height 20px
         margin-right 10px
         background-color $col422
-
-
     .head
       display flex
       justify-content center
@@ -651,8 +672,6 @@
         color #999
         letter-spacing 0
         padding 0 10px
-
-
     .btns
       margin 20px 0
       display flex
@@ -677,8 +696,6 @@
         color #ffb422
         &:hover
           background #fff3eb
-
-
   .popImg
     max-width 800px
     >img
