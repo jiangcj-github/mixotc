@@ -27,7 +27,7 @@
             <img :src="logo" alt="">
             <ol>
               <li>{{currency}}({{name}})</li>
-              <li>$66665.020</li>
+              <li>${{price}}</li>
               <li>
                 <router-link to="/transaction">去交易</router-link>
                 <!--<router-link to="">去充币</router-link>-->
@@ -35,11 +35,11 @@
             </ol>
           </div>
           <ul class="coin-content-right clearfix">
-            <li><span>市值：</span><b>$21000000</b></li>
-            <li><span>发行总量：</span><b>21000000</b></li>
-            <li><span>流通量：</span><b>21000000BTC</b></li>
-            <li><span>发行价格：</span><b>$21000000</b></li>
-            <li><span>发行日期：</span><b>2009-01-09</b></li>
+            <li><span>市值：</span><b>${{totalValue}}</b></li>
+            <li><span>发行总量：</span><b>{{totalVolume}}</b></li>
+            <li><span>流通量：</span><b>{{circulationVolume}}</b></li>
+            <li><span>发行价格：</span><b>${{icoPrice}}</b></li>
+            <li><span>发行日期：</span><b>{{releaseTime}}</b></li>
           </ul>
         </div>
         <div class="coin-content-bottom">
@@ -70,6 +70,12 @@
         officialLink: '', // 官网链接
         blockLink: '', // 区块浏览器
         whitePaper: '', // 白皮书
+        price: '',// 当前估值
+        totalValue: '',// 市值
+        totalVolume: '', // 发行总量
+        circulationVolume: '', // 流通量
+        icoPrice: '', // 发行价格
+        releaseTime: '', // 发行日期
         inputValue: '', // input值
         selectValue: 'btc',
         result: [], // 模糊搜索结果
@@ -112,11 +118,17 @@
           }).then(res => {
           console.log('资料', res.data, this.JsonBig.stringify(res.data.price.cny), this.JsonBig.stringify(res.data.totalValue.cny))
 
-          this.currency = res.data.name // 简称
-          this.name = res.data.cnName // 全称
-          this.logo = res.data.logo
-          this.info = res.data.description // 描述
-          this.whitePaper = res.data.whitePaper // 白皮书地址
+          this.currency = res.data.name; // 简称
+          this.name = res.data.cnName; // 全称
+          this.logo = res.data.logo;
+          this.info = res.data.description; // 描述
+          this.whitePaper = res.data.whitePaper; // 白皮书地址
+          this.price = res.data.price.usd; // 当前估值
+          this.totalValue = res.data.totalValue.usd; // 市值
+          this.totalVolume = res.data.totalVolume; // 发行总量
+          this.circulationVolume = res.data.circulationVolume; // 流通量
+          this.icoPrice = res.data.icoPrice.usd; // 发行价格
+          this.releaseTime = res.data.releaseTime // 发行日期
         }).catch(msg => {
           console.log(msg)
         })

@@ -18,36 +18,6 @@ String.prototype.shearStr = function(number, suffix = "...") {
   return this.slice(0, number) + suffix;
 };
 
-// 倒计时显示
-Number.prototype.resetTime = function () { // 倒计时操作
-  let timer = null;
-  let m = 0;
-  let s = 0;
-  m = Math.floor(this / 60 % 60);
-  // m < 10 && (m = '0' + m);
-  s = Math.floor(this % 60);
-  function countDown() {
-    s--;
-    s < 10 && ( s= '0' + s);
-    if (s.length >= 3) {
-      s = 59;
-      m = "0" + (Number(m) - 1);
-    }
-    if(m.length >= 3) {
-      m = '00';
-      s = '00';
-      clearInterval(timer);
-    }
-    return `还剩${m}分钟${s}秒`
-  }
-  timer = setInterval(countDown, 1000);
-}
-
-Number.prototype.toDate = function(fmt) {
-  let date = new Date(this * 1000);
-  return date.dateHandle(fmt);
-};
-
 //格式化秒
 /*
  * 传入：124
