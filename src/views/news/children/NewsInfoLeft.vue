@@ -237,10 +237,12 @@
         line-height 40px
         border-bottom 1px solid #E1E1E1
         input
-          width 140px
+          box-sizing()
+          width 150px
           height 30px
           font-size $fz13
           padding-left 10px
+          padding-right 30px
           background #F4F6FA
           border-radius 2px 2px 2px 0
           margin-left 5px

@@ -11,14 +11,14 @@
         <input 
           type="text" 
           v-model="groupName" 
-          :placeholder="(!groupInfo.name || groupInfo.name === $store.state.userInfo.name) ? '群聊' : groupInfo.name"
+          :placeholder="(!groupInfo || !groupInfo.name || groupInfo.name === $store.state.userInfo.name) ? '群聊' : groupInfo.name"
           @blur="updateGroup"
         />
       </li>
       <li>
         <span>群主</span>
         <img :src="owner.icon ? `${HostUrl.http}image/${owner.icon}` : `/static/images/default_avator.png`" alt="">
-        <b>{{owner.name}}</b>
+        <b>{{owner && owner.name}}</b>
       </li>
     </ol>
     <h1>群成员({{members.length + '/300'}})</h1>
@@ -26,12 +26,18 @@
       <img src="/static/images/add_user.png" alt="" @click="openAddGroup">
       <img src="/static/images/del_user.png" alt="" @click="openDelGroup" v-if="isOwner">
     </div>
-    <ul class="clearfix">
-      <li v-for="item of members" :key="item.name">
-        <img :src="item.icon ? `${HostUrl.http}image/${item.icon}` : `/static/images/default_avator.png`" alt="">
-        <p>{{item.name}}</p>
-      </li>
-    </ul>
+    <happy-scroll :style="{width:'300px', height:`${members.length > 20 ? 177 : 197 }px`}" resize bigger-move-h="start">
+      <ul class="clearfix">
+        <li v-for="item of showMembers" :key="item.name">
+          <img :src="item.icon ? `${HostUrl.http}image/${item.icon}` : `/static/images/default_avator.png`" alt="">
+          <p>{{item.name}}</p>
+        </li>
+      </ul>
+    </happy-scroll>
+    <div class="more" v-if="showMembers.length > 20">
+      <span class="all" v-if="!isAll" @click="isAll = true">查看群成员</span>
+      <span class="pickup" v-else @click="isAll = false">收起</span>
+    </div>
     <!-- 删除群成员 -->
     <DeletGroup 
       v-if="showDelGroup" 
@@ -75,12 +81,14 @@
   import AddGroup from '@/views/news/AddGroup' // 添加群
   import DeletGroup from '@/views/news/DeletGroup' // 删除群成员
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
+  import { HappyScroll } from 'vue-happy-scroll'
 
   export default {
     name: "group-info",
     props: ['checkGroupShow', 'id'],
     data() {
       return {
+        isAll: false,
         quitFlag: false,
         groupName: '',
         groupInfoShow: this.checkGroupShow,
@@ -97,13 +105,15 @@
     components: {
       DeletGroup,
       AddGroup,
-      BasePopup
+      BasePopup,
+      HappyScroll
     },
-    created() {
-      this.fetchGroup()
+    async created() {
+      await this.fetchGroup()
     },
     computed: {
       isOwner() {
+        if (!this.owner)  return false;
         return this.owner.name === this.$store.state.userInfo.name
       },
       groupInfo() {
@@ -112,12 +122,20 @@
         })[0]
       },
       owner() {
+        if (!this.groupInfo) return false;
         return this.groupInfo.members.filter(item => {
           return this.JsonBig.stringify(this.groupInfo.aid) === this.JsonBig.stringify(item.id); 
         })[0]
       },
       members() {
+        if (!this.groupInfo) return [];
         return this.groupInfo.members
+      },
+      showMembers() {
+        if(!this.isAll) {
+          return this.members.slice(0,20)
+        }
+        return this.members
       }
     },
     watch: {
@@ -261,7 +279,7 @@
         margin-left 10px
         margin-right 18px
     ul
-      margin 10px
+      padding 10px 0 0 10px
       li:nth-child(5n)
         margin-right 0
       li
@@ -308,8 +326,45 @@
             &.confirm
               color #FFF
               background  $col422
-
-
+    .more
+      position absolute
+      left 0
+      bottom 0
+      width 300px
+      height 30px
+      text-align center
+      line-height 30px
+      background #FFF
+      span
+        display inline-block
+        position relative
+        font-size $fz13
+        color $col999
+        letter-spacing 0.27px
+        &.all::after
+          position absolute
+          right -11px
+          bottom 9px
+          content ''
+          width 7px
+          height 11px
+          background url('/static/images/the_arrows copy.png') no-repeat;
+        &.pickup::after
+          position absolute
+          right -16px
+          bottom 12px
+          content ''
+          width 11px
+          height 6px
+          background url('/static/images/the_arrows copy 3.png') no-repeat;
+      &:hover
+        span
+          color $col333
+          cursor pointer
+          &.all::after
+            background url('/static/images/the_arrows.png') no-repeat;
+          &.pickup::after
+            background url('/static/images/the_arrows copy 2.png') no-repeat;
 
 </style>
 
