@@ -10,8 +10,8 @@
       </h1>
       <div class="search-box">
         <p><input type="text"
-                  placeholder="搜索币种(按首字母排列)"
-                  v-model="inputValue"
+                  placeholder="搜索币种"
+                  v-model.trim="inputValue"
                   @input="selectData"
                   @click="showResult = true"><button @click="getCoinsData"></button>
           <!--@click="getCoinsData"-->
@@ -27,9 +27,10 @@
             <img :src="coinDataObj.logo" alt="">
             <ol>
               <li>{{coinDataObj.name}}({{coinDataObj.cnName}})</li>
-              <li>{{coinDataObj.price && (coinDataObj.price.cny * 1).format('cny')}}</li>
+              <li>{{coinDataObj.price && (coinDataObj.price.cny === 0 ? '-' : (coinDataObj.price.cny * 1).format('cny'))}}</li>
               <li>
                 <router-link to="/transaction">去交易</router-link>
+                <!--<span @click="goRecharge">去充币</span>-->
                 <!--<router-link to="">去充币</router-link>-->
               </li>
             </ol>
@@ -80,7 +81,7 @@
     methods: {
       async selectData() { // 模糊筛选
         this.result = [];
-        this.selectValue = this.inputValue;
+        this.inputValue && (this.selectValue = this.inputValue);
         await this.Proxy.fetch({
           url: {
             host: '47.74.244.196',
@@ -99,12 +100,6 @@
           res.data.currency && res.data.currency.forEach(v => {
             this.result.push(v.name)
           })
-          // this.selectCoinList = res.data.currency.filter(item => {
-          //   // console.log('选择item.currency', this.selectValue)
-          //   return item.name == this.selectValue
-          // });
-          // console.log('选择数组', this.selectCoinList)
-          // this.id = this.selectCoinList[0].id;
         }).catch(msg => {
           console.log(msg)
         })
@@ -135,13 +130,18 @@
         this.selectValue = this.inputValue = item;
         this.showResult = false
         this.selectCoinList = this.coinDataList.filter(item => {
-          // console.log('选择item.currency', this.selectValue)
           return item.name == this.selectValue
         });
         console.log('选择数组', this.selectCoinList)
         this.id = this.selectCoinList[0].id;
-        console.log('赋值', this.selectValue, this.inputValue, item)
+        //console.log('赋值', this.selectValue, this.inputValue, item)
       }
+      // goRecharge() {
+      //   if (!this.$store.state.isLogin) {
+      //     this.$store.commit({type: 'changeLoginForm', data: true});
+      //     return;
+      //   }
+      // }
     }
   }
 </script>

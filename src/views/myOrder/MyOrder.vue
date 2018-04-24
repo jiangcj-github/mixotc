@@ -95,7 +95,8 @@
         <p class="order-content-extre clearfix">
           <span>订单号：{{JsonBig.stringify(content.id)}}</span>
           <span>备注：{{content.info}}</span>
-          <span  class="reset-time" v-if="content.state == 1">还剩{{minute}}分钟{{second}}秒</span>
+          <!--<span  class="reset-time" v-if="content.state == 1">还剩{{minute}}分钟{{second}}秒</span>-->
+          <CountDown :endTime="endTime" class="reset-time" v-if="content.state == 1"></CountDown>
         </p>
       </div>
     </div>
@@ -155,7 +156,7 @@
   import ReleaseCoinLayer from '@/views/myOrder/orderLayer/ReleaseCoinLayer' // 释放币弹窗
   import SelectLayer from '@/views/myOrder/orderLayer/SelectLayer' // 申诉弹窗
   import CheckBox from '@/components/common/CheckBox' // 引入多选弹窗
-  // import CountDown from '@/components/common/CheckBox' // 引入多选弹窗
+  import CountDown from '@/components/common/CountDown' // 引入倒计时
 
   export default {
     name: "my-order",
@@ -169,7 +170,8 @@
       MarkedPaymentLayer,
       ReleaseCoinLayer,
       SelectLayer,
-      CheckBox
+      CheckBox,
+      CountDown
     },
     data() {
       return {
@@ -209,6 +211,7 @@
 
         showPayment: false, // 标记已付款弹窗
         showReleaseCoin: false,
+        showPaymentFlag: true,
 
         showSelect: false, // 双向选择公共弹窗
         selectContent: 'selectContent', // 内容
@@ -263,9 +266,11 @@
         amount: 0,// 电子币数量排序 1降序 2升序
         money: 0,// 法币金额排序 1降序 2升序
 
-        minutes: 0, // 定时器用
-        seconds: 0,
-        showResetTimeFlag: true,
+        // minutes: 0, // 定时器用
+        // seconds: 0,
+        // showResetTimeFlag: true,
+
+        endTime: '', // 设置定时器时间
 
         conductNum: 0, // 进行数量
         completeNum: 0, // 完成数量
@@ -356,25 +361,25 @@
       this.Bus.$off(this.startValue);
       this.Bus.$off(this.endValue);
     },
-    watch: {
-      minutes: {
-        handler (newVal) { // 第一次变化开始定时器
-          // 定时器
-          if (this.showResetTimeFlag) {
-            this.showResetTime()
-            this.showResetTimeFlag = false
-          }
-        }
-      }
-    },
-    computed: {
-      second: function () {
-        return this.toZero(this.seconds)
-      },
-      minute: function () {
-        return this.minutes
-      }
-    },
+    // watch: {
+    //   minutes: {
+    //     handler (newVal) { // 第一次变化开始定时器
+    //       // 定时器
+    //       if (this.showResetTimeFlag) {
+    //         this.showResetTime()
+    //         this.showResetTimeFlag = false
+    //       }
+    //     }
+    //   }
+    // },
+    // computed: {
+    //   second: function () {
+    //     return this.toZero(this.seconds)
+    //   },
+    //   minute: function () {
+    //     return this.minutes
+    //   }
+    // },
     methods: {
       initData() {
         let ws = this.WebSocket; // 创建websocket连接
@@ -386,17 +391,21 @@
             console.log('order', data.body.data.orders)
             this.contentList = data.body.data.orders
             // 购买成功的订单显示弹窗
-            if (this.$route.query.id) {
+            if (this.$route.query.id && this.showPaymentFlag) {
               this.updateTradeCode = this.contentList[0].trade_code
               this.showPayment = true
+              this.showPaymentFlag = false
             }
             // 根据状态进行判断
             this.contentList && this.contentList.forEach(v => {
               // 倒计时数据
               if (v.state == 1) {
                 // limit - (now - create) 秒 2018-04-23 16:12:04  1524471124000 1524471379606
-                this.minutes = Math.floor(v.limit - ((new Date().getTime() - v.create * 1000) / 1000 / 60)) < 0 ? 0 : Math.floor(v.limit - ((new Date().getTime() - v.create * 1000) / 1000 / 60))
-                console.log('还剩几分钟', new Date().getTime())
+                // this.minutes = Math.floor(v.limit - ((new Date().getTime() - v.create * 1000) / 1000 / 60)) < 0 ? 0 : Math.floor(v.limit - ((new Date().getTime() - v.create * 1000) / 1000 / 60))
+                // console.log('还剩几分钟', new Date().getTime())
+                this.endTime = (v.limit - (Math.floor(new Date().getTime() / 1000) - v.create * 1) / 60) * 60000
+                // console.log(Math.floor(new Date().getTime() / 1000), v.create * 1, (new Date().getTime() / 1000 - v.create * 1) / 60)
+                console.log('this.endTime', this.endTime)
               }
               // 状态数组
               let stateListObject = {
@@ -406,8 +415,8 @@
                 4: [{name: '待付款'}, {name: '失败', flag: 1}, {name: '取消'}],
                 5: [{name: '待付款'}, {name: '失败', flag: 1}, {name: '超时'}],
                 6: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
-                7: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
-                8: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
+                7: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}, {name: '已评价'}] : [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
+                8: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}] : [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}, {name: '已评价'}],
                 9: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}, {name: '已评价'}],
                 10: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}, {name: '强制放币'}],
                 11: [{name: '待付款'}, {name: '待放币'}, {name: '失败', flag: 1}, {name: '终止'}]
@@ -415,12 +424,12 @@
               v.stateList = stateListObject[v.state]
               // 操作数组
               let operationListObject = {
-                1: v.buyer && this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '标记已付款', flag: 3}, {name: '取消订单', flag: 4}] : [{name: '提醒付款', flag: 5}],
-                2: v.buyer && this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '申述', flag: 7}] : [{name: '释放币', flag: 8}, {name: '申述', flag: 7}],
-                3: v.buyer && this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '撤销申述', flag: 9}] : [{name: '释放币', flag: 8}, {name: '撤销申述', flag: 9}],
+                1: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '标记已付款', flag: 3}, {name: '取消订单', flag: 4}] : [{name: '提醒付款', flag: 5}],
+                2: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '申述', flag: 7}] : [{name: '释放币', flag: 8}, {name: '申述', flag: 7}],
+                3: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '撤销申述', flag: 9}] : [{name: '释放币', flag: 8}, {name: '撤销申述', flag: 9}],
                 6: [{name: '去评价', flag: 1}],
-                7: [{name: '去评价', flag: 1}],
-                8: [{name: '去评价', flag: 1}],
+                7: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '查看评价', flag: 2}] : [{name: '去评价', flag: 1}],
+                8: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '去评价', flag: 1}] : [{name: '查看评价', flag: 2}],
                 9: [{name: '查看评价', flag: 2}]
               }
               v.operationList = operationListObject[v.state]
@@ -480,6 +489,7 @@
         });
       },
       selectStatus(type) { // Tab切换
+        this.showPaymentFlag = false;
         this.contentTabIndex = type;
         this.clickUp = 20;
         this.clickDown = 20;
@@ -500,13 +510,10 @@
         if (index === 0) {
           this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 1000)
           this.endValueDate = new Date().getTime()
-
         }
         if (index === 1) {
           this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 3 * 1000)
           this.endValueDate = new Date().getTime()
-
-          console.log()
           // console.log('this.startValueDate', this.startValueDate, this.endValueDate)
         }
         if (index === 2) {
@@ -603,23 +610,23 @@
         this.sortFlag = title.flag;
         this.initData()
       },
-      toZero: function (n) {
-        return n < 10 ? '0' + n : '' + n
-      },
-      showResetTime: function () {
-        var _this = this
-        var time = setInterval(function () {
-          if (_this.seconds === 0 && _this.minutes !== 0) {
-            _this.seconds = 59
-            _this.minutes -= 1
-          } else if (_this.minutes === 0 && _this.seconds === 0) {
-            _this.seconds = 0
-            clearInterval(time)
-          } else {
-            _this.seconds -= 1
-          }
-        }, 1000)
-      },
+      // toZero: function (n) {
+      //   return n < 10 ? '0' + n : '' + n
+      // },
+      // showResetTime: function () {
+      //   var _this = this
+      //   var time = setInterval(function () {
+      //     if (_this.seconds === 0 && _this.minutes !== 0) {
+      //       _this.seconds = 59
+      //       _this.minutes -= 1
+      //     } else if (_this.minutes === 0 && _this.seconds === 0) {
+      //       _this.seconds = 0
+      //       clearInterval(time)
+      //     } else {
+      //       _this.seconds -= 1
+      //     }
+      //   }, 1000)
+      // },
       // 分页操作
       clickPre() {
         this.page <= 0 ? this.page = 0 : this.page--;

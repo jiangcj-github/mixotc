@@ -40,12 +40,6 @@ export default {
       result: []
     }
   },
-  methods: {
-    changeCurrency(currency) {
-      this.Bus.$emit(this.emitValue, currency)
-      this.currency = currency
-    }
-  },
   mounted() {
     this.Bus.$on(this.emitValue1, data => {
       this.title = data
@@ -79,6 +73,10 @@ export default {
     this.Bus.$off(this.emitValue3);
   },
   methods: {
+    changeCurrency(currency) {
+      this.Bus.$emit(this.emitValue, currency)
+      this.currency = currency
+    },
     async getUserSearch() {
       await this.Proxy.getPrice().then(res => {
         this.priceList = res.data.prices

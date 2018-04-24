@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="transacation inner">
-      <TopSearch :topList="['ETH', 'BTC', 'ADA', 'BAT', 'LTC']"></TopSearch>
+      <TopSearch :topList="['ETH', 'BTC', 'ADA', 'BAT', 'LTC']" ></TopSearch>
 
       <div class="filtrate">
         <div class="select" @click.stop="switchPayment">
@@ -19,7 +19,7 @@
           <input type="number" class="max" @blur="filte.max = max" @keyup.enter="filte.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
         </div>
         <div class="wholesale">
-          <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="isWhole">
+          <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="filte.btrade">
           <img src="/static/images/unselect.png" alt="" @click="changeIsWhole" v-else>
           <span>大额交易区</span>
         </div>
@@ -121,7 +121,6 @@ import NothingContent from '@/components/common/NothingContent';
       return {
         tip: false,//限额错误文案提示
         showPayment: false,
-        isWhole: false,
         payment:[{type: '支付宝', score: 1, state: false}, {type: '微信', score: 2, state: false}, {type: '银行卡', score:4, state: false}],
         min:'',
         max:'',
@@ -142,7 +141,7 @@ import NothingContent from '@/components/common/NothingContent';
           rate: '',//好评率排序，1降序，2升序
           tradeable: '',
           // trust: '',//信任人数排序，1降序，2升序
-          // isWhole: false,
+          btrade: false,
           page: 0
         },
         showPopup: false,
@@ -211,7 +210,8 @@ import NothingContent from '@/components/common/NothingContent';
         }
       },
       changeIsWhole() {
-        this.isWhole = !this.isWhole
+        this.filte.btrade = !this.filte.btrade
+        this.filte.btrade = this.filte.btrade === true ? 1 : 0
       },
       //点击选择支付方式
       switchPayment() {
@@ -348,8 +348,7 @@ import NothingContent from '@/components/common/NothingContent';
         handler(curVal) {
           if (curVal) {
             this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
-              console.log('11111', data)
-              data && this.$store.commit('changeTrustList', {data: data.ids.map(item => {
+              data.ids && this.$store.commit('changeTrustList', {data: data.ids.map(item => {
                 return this.JsonBig.stringify(item.Id);
               })})
               !data && this.$store.commit('changeTrustList', {data: []})
