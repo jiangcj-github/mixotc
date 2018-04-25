@@ -13,5 +13,11 @@ export default {
   chat: [],
   messages: {
     system:[]
-  }
+  },
+
+  /**
+   * 审核申述客服部分
+   */
+
+  serviceTalk: []
 };

@@ -5,9 +5,9 @@
         <div class="search" >
           <input type="text" placeholder="查找昵称/帐号" v-model="srchText" v-clickoutside="clickSrchOutside" @input="fuzzyInput">
           <img src="/static/images/search_gray.png" @click="search">
-          <ul class="cand" v-show="srchShowTip">
-            <li v-for="(o,i) in tips" @mousedown="srchText=o.nickname+'/'+o.account"
-                @click="search" :key="i">{{o.nickname+"/"+o.account}}</li>
+          <ul class="cand" v-show="srchShowTip && tips.length>0">
+            <li v-for="(o,i) in tips" @mousedown="srchText=o.nickname"
+                @click="search" :key="i">{{o.nickname+" / "+o.account}}</li>
           </ul>
         </div>
         <ul class="results">
@@ -46,8 +46,7 @@
     methods: {
       fuzzyInput(){
         this.srchShowTip=true;
-        //ws-模糊搜索
-        this.loadSrchTips(this.srchText);
+        this.loadTips();
       },
       clickSrchOutside(){
         this.srchShowTip=false;
@@ -57,12 +56,12 @@
         this.loadUncheckByUid(id);
       },
       search(){
-        //ws-搜索-获取审核信息
         this.candSel=-1;
-        this.loadUncheckList(this.srchText);
+        this.loadUncheckList();
       },
-      loadUncheckList(srchKey,p=0){
-        this.WsProxy.send("control","a_get_waiting_identify_list",{
+      loadUncheckList(p=0){
+        let srchKey=this.srchText;
+        this.WsProxy.send("control","a_get_waiting_identity_user_list",{
           type:1,
           keyword:srchKey,
           page:p,
@@ -74,14 +73,15 @@
           console.log(msg);
         });
       },
-      loadSrchTips(srchKey){
+      loadTips(){
+        let srchKey=this.srchText;
         this.WsProxy.send("control","a_get_identity_tips",{
           type:1,
           state:1,
           keyword: srchKey,
           count: 10
         }).then((data)=>{
-          this.parseTips(data);
+          this.parseTips(data.tips);
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -112,10 +112,9 @@
           this.tips.push({
             uid: e.uid || 0,
             nickname: e.name || "-",
-            acount:e.phone || e.email || "-",
+            account:e.phone || e.email || "-",
           });
         });
-        return arr;
       },
       parseCands(data){
         this.cands=[];
@@ -150,7 +149,7 @@
       //ws-获取待审核列表
       this.loadUncheckList();
       this.Bus.$on("changePage",(p)=>{
-        this.loadUncheckList(this.srchText,p);
+        this.loadUncheckList(p);
       });
     }
   }

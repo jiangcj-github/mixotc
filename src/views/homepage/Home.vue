@@ -9,23 +9,25 @@
             <i class="online" :class="{active:isOnline}"></i>
           </div>
           <span class="nickname">{{info.nickname}}</span>
-          <span class="tran_num">和他交易过{{info.tradeWidthNum}}次</span>
+          <span class="tran_num" v-if="isLogin">和他交易过{{info.tradeWidthNum}}次</span>
         </div>
-        <div class="trust clearfix" v-if="info.isTrust">
-          <router-link class="contact isTrust" to="" tag="span">
-            <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
-          </router-link>
-          <span class="join-trust isTrust" @click="cancelTrust">
+        <div v-if="isLogin">
+          <div class="trust clearfix" v-if="info.isTrust">
+            <router-link class="contact isTrust" to="" tag="span">
+              <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
+            </router-link>
+            <span class="join-trust isTrust" @click="cancelTrust">
             <i>取消信任</i>
           </span>
-        </div>
-        <div class="trust clearfix" v-else>
+          </div>
+          <div class="trust clearfix" v-else>
           <span class="contact">
             <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
           </span>
-          <span class="join-trust" @click="joinTrust">
+            <span class="join-trust" @click="joinTrust">
             <i>加入信任</i>
           </span>
+          </div>
         </div>
       </div>
       <div class="sec2">
@@ -37,19 +39,21 @@
         <div class="unit"><label>{{info.securedNum}}</label><span>担保</span></div>
       </div>
     </div>
-    <!--取消信任弹框-->
-    <BasePopup :show="showUntrustPop">
-      <div class="pop">取消信任成功</div>
-    </BasePopup>
-    <!--菜单项tab-->
-    <ul class="menu-tab">
+    <div v-if="isLogin">
+      <!--菜单项tab-->
+      <ul class="menu-tab">
         <li :class="{active:tab==0}" @click="tab=0">他的发布</li>
         <li :class="{active:tab==1}" @click="tab=1">收到的评价<i v-if="ratesNum>0">({{ratesNum}})</i></li>
-    </ul>
-    <!--发布列表-->
-    <Sales :uid="uid" v-show="tab==0"></Sales>
-    <!--评价列表-->
-    <Rates :uid="uid" v-show="tab==1" totalChange="ratesNumChange"></Rates>
+      </ul>
+      <!--发布列表-->
+      <Sales :uid="uid" v-show="tab==0"></Sales>
+      <!--评价列表-->
+      <Rates :uid="uid" v-show="tab==1"></Rates>
+      <!--取消信任弹框-->
+      <BasePopup :show="showUntrustPop">
+        <div class="pop">取消信任成功</div>
+      </BasePopup>
+    </div>
   </div>
 </template>
 <script>
@@ -65,11 +69,12 @@
     },
     data() {
       return {
+        isLogin: false,
         loginUid: "",
         uid: "",
 
         isOnline: true,
-        infoOrg:{},
+        info:{},
         ratesNum: 0,
 
         tab:0,  //他的发布，他的评价
@@ -77,21 +82,6 @@
       }
     },
     computed:{
-      info(){
-        let o=this.infoOrg;
-        return {
-          nickname: o.name || 'unknown',
-          headimg: o.icon || '/static/images/default_avator.png',
-          tradeWidthNum: o.mytrade || 0,
-          orderNum: o.order || 0,
-          volumn: (o.volumes || 0)+"+BTC",
-          praiseRate: (o.rate || 0) +"%",
-          trustedNum: o.trusted || 0,
-          trustNum: o.trust || 0,
-          securedNum: o.secured || 0,
-          isTrust: o.is_trust || false,
-        }
-      },
       trustList(){
         return this.$store.state.trustList.map((item)=>{
           return this.JsonBig.stringify(item);
@@ -99,17 +89,22 @@
       }
     },
     mounted() {
-      this.loginUid= this.$store.state.userInfo.uid || "";
+      //是否登录
+      this.isLogin= this.$store.state.isLogin;
+      if(this.isLogin){
+        this.loginUid= this.$store.state.userInfo.uid || "";
+      }
+      //
       this.uid= this.JsonBig.parse(this.$route.query.uid) || "";
       this.loadTraderInfo();
-      this.Bus.$on('ratesNumChange',(num) => {
+      this.Bus.$on('onRatesTotalChange',(num) => {
         this.ratesNum=num;
       });
     },
     methods: {
       joinTrust(){
         this.WsProxy.send('otc','new_trust',{uid:this.loginUid, id:this.uid, trust:1}).then((data)=>{
-          this.infoOrg.is_trust=true;
+          this.info.is_trust=true;
           this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(this.uid)});
         }).catch((msg)=>{
           console.log(msg);
@@ -122,21 +117,40 @@
           setInterval(()=>{
             this.showUntrustPop=false;
           },1000);
-          this.infoOrg.is_trust=false;
+          this.info.is_trust=false;
         }).catch((msg)=>{
           console.log(msg);
         });
       },
       loadTraderInfo(){
-        this.WsProxy.send('otc','trader_info',{
-          uid:this.loginUid,
-          id:this.uid
-        }).then((data)=>{
-          this.infoOrg=data;
-        }).catch((msg)=>{
-          console.log(msg);
-        });
+        if(this.isLogin){
+          this.WsProxy.send("otc","trader_info",{id:this.uid, uid:this.loginUid}).then((data)=>{
+            this.parseInfo(data);
+          }).catch((msg)=>{
+            console.log(msg);
+          });
+        }else{
+          this.Proxy.hp_tradeInfo({id:this.uid}).then((data)=>{
+            this.parseInfo(data.data);
+          }).catch((msg)=>{
+            console.log(msg);
+          });
+        }
       },
+      parseInfo(data){
+        this.info= {
+          nickname: data.name || "-",
+          headimg: (data.icon && this.HostUrl.http+"image/"+data.icon) || "/static/images/default_avator.png",
+          tradeWidthNum: data.mytrade || "0",
+          orderNum: data.order || 0,
+          volumn: (data.volumes || 0)+"+BTC",
+          praiseRate: (data.rate || 0) +"%",
+          trustedNum: data.trusted || 0,
+          trustNum: data.trust || 0,
+          securedNum: data.secured || 0,
+          isTrust: data.is_trust || false,
+        }
+      }
     }
   }
 </script>
@@ -180,13 +194,14 @@
           font-size 14px
           letter-spacing 0.16px
           .avatar
-            display inline-block
-            width 45px
-            height 45px
             margin-right 20px
-            border-radius 50%
-            background-color skyblue
             position relative
+            >img
+              display inline-block
+              width 45px
+              height 45px
+              border-radius 50%
+              background-color skyblue
             .online
               display inline-block
               width 11px

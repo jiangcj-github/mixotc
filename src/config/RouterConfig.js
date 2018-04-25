@@ -25,7 +25,7 @@ const ROUTES = [
     component: resolve => require(['@/views/transaction/CoinData'], resolve) // 币种资料
   },
   {
-    path: "/homepage",
+    path: "/homepage",      //?uid=xxx
     name: "homepage",
     component: resolve => require(['@/views/homepage/Home'], resolve) // 买卖家个人中心-他的发布
   },

@@ -5,9 +5,9 @@
         <div class="f1">
           <input type="text" placeholder="搜索商家昵称/账号" v-model="srchText" v-clickoutside="clickOutside" @input="fuzzyInput">
           <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
-          <a href="javascript:void(0)" @click="search"></a>
-          <ul v-show="srchShowTip" class="ft-cand">
-            <li v-for="(o,i) in tips" :key="i" @mousedown="srchText=o.nickname+'/'+o.phone" @click="search">{{o.nickname+'/'+o.phone}}</li>
+          <a href="javascript:void(0)" @click="loadCheckedList"></a>
+          <ul v-show="srchShowTip && tips.length>0" class="ft-cand">
+            <li v-for="(o,i) in tips" :key="i" @mousedown="srchText=o.nickname+'/'+o.account" @click="search">{{o.nickname+'/'+o.account}}</li>
           </ul>
         </div>
         <div class="f2">
@@ -23,11 +23,11 @@
         <span class="tjsj">提交时间</span>
         <span class="yh">用户</span>
         <span class="shr">审批人</span>
-        <span class="shsj sortable" @click="sortField=0;sortType=!sortType">
-          审核时间<i class="sort" :class="{up:sortType,down:!sortType,field:sortField===0}"></i>
+        <span class="shsj sortable" @click="sort=(sort+1)%2">
+          审核时间<i class="sort" :class="{up:sort===0,down:sort===1}"></i>
         </span>
-        <span class="ys sortable" @click="sortField=1;sortType=!sortType">
-          用时<i class="sort" :class="{up:sortType,down:!sortType,field:sortField===1}"></i>
+        <span class="ys sortable" @click="sort=(sort+1)%2+2">
+          用时<i class="sort" :class="{up:sort===2,down:sort===3}"></i>
         </span>
         <span class="zt drop">
           <a href="javascript:void(0)" v-clickoutside="clickStatusOutside" @click="statusDropShow=!statusDropShow">{{status[statusDropSel].text}}</a>
@@ -68,7 +68,7 @@
         </BasePopup>
       </div>
       <div v-else-if="err===1">
-        <div class="err no-result">无相应的用户，请重新搜索</div>
+        <div class="err no-result">无相应的数据，请重新搜索</div>
       </div>
       <div v-else-if="err===2">
         <div class="err load-failed">网络异常，请重新搜索</div>
@@ -93,14 +93,13 @@
       return {
         srchText: "",
         srchShowTip: false,
-        tips: [],
+        tips: [],     //模糊搜索结果
 
         days: 1,
 
-        sortField: -1, //0-审核时间,1-用时
-        sortType: false, //true-升序,false-降序
+        sort: 1, //0-审核时间升序,1-审核时间降序,2-用时升序,3-用时降序
 
-        statusDropShow: false,
+        statusDropShow: false,    //审核结果下拉框
         statusDropSel: 0,
         status:[
           {text:"全部状态",value:0},
@@ -109,23 +108,23 @@
         ],
 
         err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败
-        list: [],
-        total: 0,
-        pageSize:15,
+        list: [],   //分页数据
+        total: 0,   //数据长度
+        pageSize:15,  //分页大小
 
         popSel: 0,
         pop: false,  //弹窗-查看
       }
     },
     watch:{
-      statusDropSel:()=>{
-        //ws-状态过滤
+      statusDropSel:function(){
+        this.loadCheckedList();
       },
       sortFiled:()=> {
-        //ws-排序
+        this.loadCheckedList();
       },
       sortType:()=>{
-        //ws-排序
+        this.loadCheckedList();
       },
       days:function(){
         this.$refs.di.date1=new Date(Date.now()-24*60*60*1000*this.days);
@@ -135,6 +134,7 @@
     methods: {
       fuzzyInput(){
         this.srchShowTip=true;
+        this.loadTips();
       },
       clickOutside(){
         this.srchShowTip=false;
@@ -142,16 +142,34 @@
       clickStatusOutside(){
         this.statusDropShow=false;
       },
-      search(){
-
-      },
       showPop(id){
         this.popSel=id;
         this.pop=true;
       },
-      loadCheckList(srchKey,start,end,result,sort,p){
+      loadCheckedList(p=0){
+        //
+        let srchKey=this.srchText;
+        let start= this.$refs.di.date1;
+        let end= this.$refs.di.date2;
+        if(!start){
+          start=new Date(this.$refs.di.date1).getTime()*1000;
+        }
+        if(!end){
+          end=new Date(this.$refs.di.date2).getTime()*1000;
+        }
+        let result=this.status[this.statusDropSel].value;
+        let sort=this.sort;
+        switch (sort){
+          case 0:sort=1;break;
+          case 1:sort=0;break;
+          case 2:sort=3;break;
+          case 3:sort=2;break;
+          default:sort=0;break;
+        }
+        //
         this.WsProxy.send("control","a_get_identity_list",{
           type:1,
+          state:1,
           result: result,
           sort: sort,
           keyword:srchKey,
@@ -172,6 +190,19 @@
           }else if(msg.ret!==0){
             this.err=3; //加载异常
           }
+        });
+      },
+      loadTips(){
+        let srchKey=this.srchText;
+        this.WsProxy.send("control","a_get_identity_tips",{
+          type:1,
+          state:2,
+          keyword: srchKey,
+          count: 10
+        }).then((data)=>{
+          this.parseTips(data.tips);
+        }).catch((msg)=>{
+          console.log(msg);
         });
       },
       parseList(data){
@@ -195,11 +226,22 @@
             img3: e.image3 || "",
           });
         });
+      },
+      parseTips(data){
+        this.tips=[];
+        data && data.forEach((e)=>{
+          this.tips.push({
+            uid: e.uid || 0,
+            nickname: e.name || "-",
+            account:e.phone || e.email || "-",
+          });
+        });
       }
     },
     mounted(){
+      this.loadCheckedList(0);
       this.Bus.$on("changePage",(p)=>{
-
+        this.loadCheckedList(p);
       });
     }
   }
@@ -277,6 +319,7 @@
             color #FFB422
 
     .tb-head
+      user-select none
       height 50px
       padding 0 32px
       font-size 13px
@@ -308,13 +351,12 @@
               right -15px
               top 50%
               margin-top 1px
-            &.field
-              &.up
-                &:before
-                  border-bottom-color #ffb422
-              &.down
-                &:after
-                  border-top-color #ffb422
+          .sort.up
+            &:before
+              border-bottom-color #ffb422
+          .sort.down
+            &:after
+              border-top-color #ffb422
           &:hover
             color #666
         &.drop

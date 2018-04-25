@@ -23,7 +23,9 @@
 <script>
   import Pagination from '@/components/common/Pagination';
   export default {
-    props:["totalChange"],
+    props:{
+      onRatesTotalChange:{type: String ,default: "onRatesTotalChange"}
+    },
     components: {
       Pagination,
     },

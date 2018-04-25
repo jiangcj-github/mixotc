@@ -120,5 +120,17 @@ export default {
       // state.messages[id].splice(state.messages[id].length - 1, 1);
     // !state.messages[data.id] && (state.messages[data.id] = []);
     // state.messages[data.id].push(data.msg)
-  }
+  },
+
+
+
+  /**
+   * 审核申述客服部分
+   */
+
+  // 初始化聊天部分数据
+  [types.initServiceData](state, { data }) {
+    state.chat = data;
+  },
+
 };

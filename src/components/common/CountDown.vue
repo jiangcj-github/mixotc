@@ -1,5 +1,5 @@
 <template>
-  <span>{{content}}</span>
+  <span v-if="countDownShow">{{content}}</span>
 </template>
 <script>
   export default {
@@ -7,6 +7,7 @@
       return {
         content: '',
         time: this.endTime,
+        countDownShow: true
       }
     },
     props: {
@@ -41,6 +42,8 @@
             }
           } else {
             clearInterval(timer);
+            this.countDownShow = false;
+            location.reload()
           }
         }, 1000);
       }

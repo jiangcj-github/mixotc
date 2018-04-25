@@ -141,5 +141,9 @@ export default {
     //   name: "searchMarket",
     //   data: { url: "/v1/home/searchMarket", method: "get" }
     // }
+
+    {name: "hp_tradeInfo", data: {url: "/otc/traderinfo/", method: "get"}}, // 个人中心-获取个人信息
+    {name: "hp_sales", data: {url: "/otc/", method: "get"}}, // 获取发布信息
+    {name: "hp_rates", data: {url: "/otc/", method: "get"}}, // 获取评价
   ]
 };
