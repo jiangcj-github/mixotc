@@ -23,6 +23,7 @@
         let _this = this;
         let timer = setInterval(function () {
           _this.time -= 1000;
+          // console.log(_this.time)
           if (_this.time > 0) {
             let day = Math.floor(_this.time / 86400000);
             let hour = Math.floor((_this.time / 3600000) % 24);
@@ -42,7 +43,7 @@
             }
           } else {
             clearInterval(timer);
-            this.countDownShow = false;
+            _this.countDownShow = false;
             location.reload()
           }
         }, 1000);

@@ -3,6 +3,7 @@ export default {
   isLogin: false,
   userInfo: null,
   showChat: false,
+  newOrder: false,
   trustList: [],
   friendList: [],
   groupList: [],
