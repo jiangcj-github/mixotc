@@ -1,7 +1,7 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
-import App from './App';
+import App from './App3';
 
 import { DatePicker } from "element-ui";
 import '@/stylus/rest.styl'
