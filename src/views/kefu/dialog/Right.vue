@@ -11,9 +11,9 @@
       </div>
       <div class="mf2">
         <span class="i1">已被申诉1次</span>
-        <button class="i2" @click="onClickMf2">强制放币</button>
-        <button class="i3" @click="onClickMf3">终止交易</button>
-        <button class="i3" @click="onClickMf4">驳回申诉</button>
+        <button class="i2" @click="showPop1 = true">强制放币</button>
+        <button class="i3" @click="showPop3 = true">终止交易</button>
+        <button class="i3" @click="showPop2 = true">驳回申诉</button>
       </div>
     </div>
     <div class="fixed" v-else-if="appl === 0 && recv === 1">
@@ -26,8 +26,8 @@
       </div>
       <div class="mf2">
         <span class="i1">已被申诉一次</span>
-        <button class="i2" @click="onClickMf2">强制放币</button>
-        <button class="i3" @click="onClickMf3">终止交易</button>
+        <button class="i2" @click="showPop1 = true">强制放币</button>
+        <button class="i3" @click="showPop3 = true">终止交易</button>
       </div>
     </div>
     <div class="fixed" v-else-if="appl === 1 && recv === 1">
@@ -40,9 +40,9 @@
       </div>
       <div class="mf2">
         <span class="i1">已被申诉一次</span>
-        <button class="i2" @click="onClickMf2">强制放币</button>
-        <button class="i3" @click="onClickMf3">终止交易</button>
-        <button class="i3" @click="onClickMf4">驳回申诉</button>
+        <button class="i2" @click="showPop1 = true">强制放币</button>
+        <button class="i3" @click="showPop3 = true">终止交易</button>
+        <button class="i3" @click="showPop2 = true">驳回申诉</button>
       </div>
     </div>
     <div class="fixed" v-else-if="appl === 1 && recv === 0">
@@ -55,8 +55,8 @@
       </div>
       <div class="mf2">
         <span class="i1">已被申诉一次</span>
-        <button class="i2" @click="onClickMf2">强制放币</button>
-        <button class="i3" @click="onClickMf3">终止交易</button>
+        <button class="i2" @click="showPop1 = true">强制放币</button>
+        <button class="i3" @click="showPop3 = true">终止交易</button>
       </div>
     </div>
     <happy-scroll color="rgba(200,200,200,0.8)" size="5" bigger-move-h="end" resize hide-horizontal class="scrollPane">
@@ -66,7 +66,8 @@
           <img :src="e.headimg"/>
           <span v-if="e.type === 0">{{e.text}}</span>
           <span v-else-if="e.type === 1" class="img-wrap"><img :src="e.url" @click="onClickImg(e)"/></span>
-          <i class="err" title="发送失败" v-if="e.err === 1" @click="resend(e)"></i>
+          <i class="err" title="发送失败" v-if="!e.loding && e.err === 1" @click="resend(e)"></i>
+          <img src="/static/images/loding.png" class="lodingFlag" v-if="e.loding">
         </p>
         <!--
         <p class="al">
@@ -91,8 +92,8 @@
         <input type="file" ref="file" v-show="0" accept="image/*" @change="chooseImage">
         <span class="br"></span>
         <button class="b1" @click="onClickM0">上传付款证明</button>
-        <button class="b2" @click="onClickM1">证明无效</button>
-        <button class="b3" @click="onClickM2">通知放币</button>
+        <button class="b2" @click="showPop4 = true">证明无效</button>
+        <button class="b3" @click="onClickM1">通知放币</button>
       </div>
       <textarea ref="textarea" class="textarea" title=""
                 @keydown.enter.exact="send"
@@ -115,7 +116,7 @@
           <p>{{pop1Text.length}}/50</p>
         </div>
         <div class="btns">
-          <button class="b1">确认</button>
+          <button class="b1" @click="onPop1Ok">确认</button>
           <button class="b2" @click="showPop1 = false">我再想想</button>
         </div>
       </div>
@@ -128,7 +129,7 @@
           <p>{{pop2Text.length}}/50</p>
         </div>
         <div class="btns">
-          <button class="b1">确认</button>
+          <button class="b1" @click="onPop2Ok">确认</button>
           <button class="b2" @click="showPop2 = false">我再想想</button>
         </div>
       </div>
@@ -154,7 +155,7 @@
           <p>{{pop3Text.length}}/50</p>
         </div>
         <div class="btns">
-          <button class="b1">确认</button>
+          <button class="b1" @click="onPop3Ok">确认</button>
           <button class="b2" @click="showPop3 = false">我再想想</button>
         </div>
       </div>
@@ -232,6 +233,7 @@
             type: 1, // 0: 发送文字, 1: 发送图片
             isSend: 1, // 0: 接收信息, 1: 发送信息
             err: 1, // 0: 发送成功, 1: 发送失败
+            loding: true
           });
         });
       },
@@ -264,17 +266,13 @@
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
       },
-      onClickM1() { // 点击证明无效按钮
-        let text = MSGS.get(1, this.appl, this.recv);
-        this.$refs.textarea.value = text;
-        this.$refs.textarea.focus();
-      },
-      onClickM2() { // 点击通知放币按钮
+      onClickM1() { // 点击通知放币按钮
         let text = MSGS.get(4, this.appl, this.recv);
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
       },
-      onPop1Input() { // 填写强制放币理由
+
+      onPop1Input() { // 填写强制放币理由(责任人已定)
         if (this.pop1Text.length > 50) {
           this.pop1Text = this.pop1TextOld;
           this.$refs.pop1Text.value = this.pop1TextOld;
@@ -290,7 +288,7 @@
           this.pop2TextOld = this.pop2Text;
         }
       },
-      onPop3Input() { // 填写强制放币理由
+      onPop3Input() { // 填写强制放币理由(选择终止交易的责任人)
         if (this.pop3Text.length > 50) {
           this.pop3Text = this.pop3TextOld;
           this.$refs.pop3Text.value = this.pop3TextOld;
@@ -306,24 +304,56 @@
           this.pop4TextOld = this.pop4Text;
         }
       },
+      onPop1Ok() { // 强制放币确认
+        this.showPop1 = false
+        let text = MSGS.get(5, this.appl, this.recv).replace(/reason/, this.pop1TextOld);
+        this.$refs.textarea.value = text;
+        this.$refs.textarea.focus();
+        this.WsProxy.send('control', 'send_order_by_admin',{
+          "id": this.JsonBig.parse("209038372436447232"),
+          "seller": this.JsonBig.parse("203973913955278848"),
+          "buyer": this.JsonBig.parse("197129593973379072"),
+          "responsible": this.JsonBig.parse("203973913955278848"),
+          "info": this.pop1TextOld
+        }).then((data)=>{
+          console.log('强制放币', data)
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
+      onPop2Ok() { // 驳回申述确认
+        this.showPop2 = false
+        let text = MSGS.get(2, this.appl, this.recv).replace(/reason/, this.pop2TextOld);
+        this.$refs.textarea.value = text;
+        this.$refs.textarea.focus();
+        this.WsProxy.send('control', 'reject_appeal',{
+          "id": this.JsonBig.parse("209038372436447232"),
+          "type": 1  // 1: 交易, 2: 担保转账
+        }).then((data)=>{
+          console.log('驳回申述', data)
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
+      onPop3Ok() { // 终止交易确认
+        this.showPop3 = false
+        let text = MSGS.get(7, this.appl, this.recv).replace(/reason/, this.pop3TextOld);
+        this.$refs.textarea.value = text;
+        this.$refs.textarea.focus();
+        this.WsProxy.send('control', 'terminate_order_by_admin',{
+          "id": this.JsonBig.parse("209038372436447232"),
+          "type": 1, // 1: 订单, 2: 担保
+          "responsible": this.JsonBig.parse("203973913955278848"),
+          "info": this.pop3TextOld
+        }).then((data)=>{
+          console.log('终止交易', data)
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
       onPop4Ok() { // 证明无效确认
         this.showPop4 = false;
-        let text = MSGS.get(1, this.appl, this.recv);
-        this.$refs.textarea.value = text;
-        this.$refs.textarea.focus();
-      },
-      onClickMf2() { // 强制放币
-        let text = MSGS.get(5, this.appl, this.recv);
-        this.$refs.textarea.value = text;
-        this.$refs.textarea.focus();
-      },
-      onClickMf3() { // 终止交易
-        let text = MSGS.get(7, this.appl, this.recv);
-        this.$refs.textarea.value = text;
-        this.$refs.textarea.focus();
-      },
-      onClickMf4() { // 驳回申述
-        let text = MSGS.get(2, this.appl, this.recv);
+        let text = MSGS.get(1, this.appl, this.recv).replace(/reason/, this.pop4TextOld);
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
       },
@@ -334,17 +364,17 @@
     },
     mounted() {
       this.msgHis = [
-        {headimg: "/static/images/default_avator.png", text: "你好", type: 0, isSend: 0, err: 0},
+        {headimg: "/static/images/default_avator.png", text: "你好", type: 0, isSend: 0, err: 1, loding: true},
         {headimg: "/static/images/default_avator.png", text: "有事吗", type: 0, isSend: 0, err: 0},
         {headimg: "/static/images/default_avator.png", text: "你好", type: 0, isSend: 0, err: 0},
         {
-          headimg: "/static/images/default_avator.png",
+          headimg: "/static/images/kefu/kefu.png",
           text: "是您的验证码，请尽快提交验证，切勿泄露给他人，如非本人操作请忽略",
           type: 0,
           isSend: 1,
           err: 0
         },
-        {headimg: "/static/images/default_avator.png", text: "上传付款证明", type: 0, isSend: 1, err: 0},
+        {headimg: "/static/images/kefu/kefu.png", text: "上传付款证明", type: 0, isSend: 1, err: 0},
         {headimg: "/static/images/default_avator.png", text: "请提交付款证明", type: 0, isSend: 0, err: 0},
         {
           headimg: "/static/images/default_avator.png",
@@ -354,7 +384,7 @@
           err: 1
         },
         {
-          headimg: "/static/images/default_avator.png",
+          headimg: "/static/images/kefu/kefu.png",
           url: "/static/images/kefu/background.jpg",
           type: 1,
           isSend: 1,
@@ -470,6 +500,13 @@
     .msgBox
       padding 20px
       box-sizing border-box
+      .lodingFlag
+        width 16px
+        height 16px
+        margin 0 10px
+        align-self center
+        animation mymove 1.5s linear infinite;
+        -webkit-animation mymove 1.5s linear infinite;
       .tline
         text-align center
         > i

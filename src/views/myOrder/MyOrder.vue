@@ -211,7 +211,6 @@
 
         showPayment: false, // 标记已付款弹窗
         showReleaseCoin: false,
-        showPaymentFlag: true,
 
         showSelect: false, // 双向选择公共弹窗
         selectContent: 'selectContent', // 内容
@@ -265,10 +264,6 @@
         price: 0,// 单价排序 1降序 2升序
         amount: 0,// 电子币数量排序 1降序 2升序
         money: 0,// 法币金额排序 1降序 2升序
-
-        // minutes: 0, // 定时器用
-        // seconds: 0,
-        // showResetTimeFlag: true,
 
         endTime: '', // 设置定时器时间
 
@@ -361,25 +356,6 @@
       this.Bus.$off(this.startValue);
       this.Bus.$off(this.endValue);
     },
-    // watch: {
-    //   minutes: {
-    //     handler (newVal) { // 第一次变化开始定时器
-    //       // 定时器
-    //       if (this.showResetTimeFlag) {
-    //         this.showResetTime()
-    //         this.showResetTimeFlag = false
-    //       }
-    //     }
-    //   }
-    // },
-    // computed: {
-    //   second: function () {
-    //     return this.toZero(this.seconds)
-    //   },
-    //   minute: function () {
-    //     return this.minutes
-    //   }
-    // },
     methods: {
       initData() {
         let ws = this.WebSocket; // 创建websocket连接
@@ -391,21 +367,17 @@
             console.log('order', data.body.data.orders)
             this.contentList = data.body.data.orders
             // 购买成功的订单显示弹窗
-            if (this.$route.query.id && this.showPaymentFlag) {
+            if (this.$store.state.newOrder) {
               this.updateTradeCode = this.contentList[0].trade_code
               this.showPayment = true
-              this.showPaymentFlag = false
             }
             // 根据状态进行判断
             this.contentList && this.contentList.forEach(v => {
               // 倒计时数据
               if (v.state == 1) {
                 // limit - (now - create) 秒 2018-04-23 16:12:04  1524471124000 1524471379606
-                // this.minutes = Math.floor(v.limit - ((new Date().getTime() - v.create * 1000) / 1000 / 60)) < 0 ? 0 : Math.floor(v.limit - ((new Date().getTime() - v.create * 1000) / 1000 / 60))
-                // console.log('还剩几分钟', new Date().getTime())
                 this.endTime = (v.limit - (Math.floor(new Date().getTime() / 1000) - v.create * 1) / 60) * 60000
-                // console.log(Math.floor(new Date().getTime() / 1000), v.create * 1, (new Date().getTime() / 1000 - v.create * 1) / 60)
-                console.log('this.endTime', this.endTime)
+                // console.log('this.endTime', this.endTime)
               }
               // 状态数组
               let stateListObject = {
@@ -489,7 +461,6 @@
         });
       },
       selectStatus(type) { // Tab切换
-        this.showPaymentFlag = false;
         this.contentTabIndex = type;
         this.clickUp = 20;
         this.clickDown = 20;
@@ -610,23 +581,6 @@
         this.sortFlag = title.flag;
         this.initData()
       },
-      // toZero: function (n) {
-      //   return n < 10 ? '0' + n : '' + n
-      // },
-      // showResetTime: function () {
-      //   var _this = this
-      //   var time = setInterval(function () {
-      //     if (_this.seconds === 0 && _this.minutes !== 0) {
-      //       _this.seconds = 59
-      //       _this.minutes -= 1
-      //     } else if (_this.minutes === 0 && _this.seconds === 0) {
-      //       _this.seconds = 0
-      //       clearInterval(time)
-      //     } else {
-      //       _this.seconds -= 1
-      //     }
-      //   }, 1000)
-      // },
       // 分页操作
       clickPre() {
         this.page <= 0 ? this.page = 0 : this.page--;
@@ -858,9 +812,6 @@
       margin-right 100px
     .unable-btn
       background #999
-
-
-
 
 
 </style>

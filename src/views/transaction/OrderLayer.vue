@@ -50,11 +50,11 @@
           update_time: Math.floor(new Date().getTime() / 1000)
         }).then((data)=>{
           console.log('确认订单', data.id)
-          this.$router.push({ path: '/order', query: {id: data.id}})
+          this.$store.state.newOrder = true
+          this.$router.push({ path: '/order'})
         }).catch((msg)=>{
           console.log(msg);
         });
-
       }
     }
   }
