@@ -18,6 +18,12 @@ const addMessages = "addMessages";
 const changeMessageState = "changeMessageState";
 
 
+/**
+ * 审核申述客服部分
+ */
+ const initServiceData = 'initServiceData';
+
+
 export {
   changeLoginForm,
   changeLogin,
@@ -36,5 +42,12 @@ export {
   delTrust,
   updateGroupInfo,
   addMessages,
-  changeMessageState
+  changeMessageState,
+
+
+  /**
+   * 审核申述客服部分
+   */
+  initServiceData
+
 };

@@ -40,11 +40,11 @@
       }
     },
     methods: {
-      onLiClick(i){
+      onLiClick(i){ // 点击添加active类
         this.ulSel=i;
         //
       },
-      parseUls(){
+      parseUls(){ // 搜索输入框
         this.uls = [];
         this.ulsBuf.forEach((e) => {
           if (new RegExp("^.*"+this.srchText+".*$").test(e.nickname)) {
