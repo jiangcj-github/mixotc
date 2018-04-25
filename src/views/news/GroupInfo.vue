@@ -26,7 +26,7 @@
       <img src="/static/images/add_user.png" alt="" @click="openAddGroup">
       <img src="/static/images/del_user.png" alt="" @click="openDelGroup" v-if="isOwner">
     </div>
-    <happy-scroll :style="{width:'300px', height:`${members.length > 20 ? 177 : 197 }px`}" resize bigger-move-h="start">
+    <happy-scroll :style="{width:'300px', height:`${members.length > 20 ? 177 : 197 }px`}" resize bigger-move-h="start" hide-horizontal>
       <ul class="clearfix">
         <li v-for="item of showMembers" :key="item.name">
           <img :src="item.icon ? `${HostUrl.http}image/${item.icon}` : `/static/images/default_avator.png`" alt="">
@@ -261,7 +261,7 @@
           width 30px
           height 30px
           margin-right 10px
-          background aquamarine
+          // background aquamarine
           border-radius 50%
           vertical-align middle
     h1
@@ -291,7 +291,7 @@
         img
           width 30px
           height 30px
-          background aquamarine
+          // background aquamarine
           border-radius 50%
           vertical-align middle
           margin-bottom 5px

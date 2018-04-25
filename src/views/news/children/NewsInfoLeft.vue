@@ -4,7 +4,7 @@
       <input type="text" placeholder="查找昵称/账号" v-model="searchText" @blur="doSearch" @input="input" @keyup.enter="doSearch"/>
       <img src="/static/images/search_gray.png"/>
     </div>
-      <happy-scroll style="width:159px;height:325px" resize bigger-move-h="start">
+      <happy-scroll style="width:159px;height:325px" resize bigger-move-h="start" hide-horizontal>
         <div class="wrap">
           <ul class="firend-list" v-if="!search">
             <li v-for="content in userList" :key="content.id" :class="{cur: content.id === $store.state.curChat}" @click="selectChat(content.id)">
@@ -112,7 +112,8 @@
               nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.gid)}` : `${item.name}`,
               phone: false,
               email: false,
-              unread: 0
+              unread: 0,
+              exists: true//踢出群聊的标志
             });
           }else if (item.is_peer_admin){
             result.push({
@@ -194,7 +195,8 @@
               nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.id)}` : `${item.name}`,
               phone: false,
               email: false,
-              unread: 0
+              unread: 0,
+              exists: true
             });
           }
         })

@@ -117,7 +117,7 @@
       img
         width 37px
         height 37px
-        background aquamarine
+        // background aquamarine
         border-radius 50%
         margin-left 10px
         margin-right 20px

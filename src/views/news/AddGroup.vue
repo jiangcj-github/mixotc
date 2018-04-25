@@ -246,7 +246,7 @@
           width 30px
           height 30px
           border-radius 50%
-          background aquamarine
+          // background aquamarine
           vertical-align middle
           margin-left 5px
         img:first-child
@@ -276,7 +276,7 @@
           width 30px
           height 30px
           border-radius 50%
-          background aquamarine
+          // background aquamarine
           vertical-align middle
           margin-left 10px
           margin-right 10px

@@ -163,7 +163,7 @@
         .head-portrait
           width 30px
           height 30px
-          background aquamarine
+          // background aquamarine
           border-radius 50%
           vertical-align middle
           margin-bottom 5px

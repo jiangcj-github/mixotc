@@ -91,19 +91,32 @@ export default {
   },
   //接收到消息和发送消息时的处理
   [types.addMessages](state, { data }) {
-    // 取消信任
+    let idex = false,
+      flag = false;
+    state.chat.forEach((item, index) => {
+      item.id === data.id && (idex = index);
+      item.id === data.id && item.exists === false && (flag = true);//判断是否踢出群
+    });
+    if (flag) return; //被踢出群后不更新信息
     !state.messages[data.id] && (state.messages[data.id] = []);
-    state.messages[data.id].push(data.msg)
+    state.messages[data.id].push(data.msg);
+    data.id === "system" && state.curChat !=="system" && state.systemMessage++;
+    data.id !== "system" && state.curChat !== data.id && idex !== false && state.chat[idex].unread++
+    state.isLogin && !state.showChat && state.unreadNumber++;
+    state.chat.unshift(state.chat.splice(idex, 1)[0]);
   },
 
   [types.changeMessageState](state, { data: {id,time,code} }) {
     // 消息发送成功或失败
-      state.messages[id].forEach(item => {
+    let idx = 0;
+      state.messages[id].forEach((item, index) => {
         if(time === item.time){
           item.isLoding = false
           code && (item.isFail = true);
+          idx = index;
         }
       })
+      state.messages = Object.assign({}, state.messages);
       // state.messages[id].splice(state.messages[id].length - 1, 1);
     // !state.messages[data.id] && (state.messages[data.id] = []);
     // state.messages[data.id].push(data.msg)
