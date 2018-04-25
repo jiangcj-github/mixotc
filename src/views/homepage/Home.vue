@@ -49,7 +49,7 @@
     <!--发布列表-->
     <Sales :uid="uid" v-show="tab==0"></Sales>
     <!--评价列表-->
-    <Rates :uid="uid" v-show="tab==1" totalChange="ratesNumChange"></Rates>
+    <Rates :uid="uid" v-show="tab==1"></Rates>
   </div>
 </template>
 <script>
@@ -102,7 +102,7 @@
       this.loginUid= this.$store.state.userInfo.uid || "";
       this.uid= this.JsonBig.parse(this.$route.query.uid) || "";
       this.loadTraderInfo();
-      this.Bus.$on('ratesNumChange',(num) => {
+      this.Bus.$on('onRatesTotalChange',(num) => {
         this.ratesNum=num;
       });
     },

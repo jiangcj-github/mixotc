@@ -4,7 +4,6 @@
     <button @click="close">&times;</button>
   </div>
 </template>
-
 <script>
   export default {
     props: {
@@ -79,7 +78,6 @@
     }
   }
 </script>
-
 <style scoped lang="stylus">
   .wrap
     position fixed

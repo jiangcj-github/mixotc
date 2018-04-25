@@ -696,10 +696,5 @@
         color #ffb422
         &:hover
           background #fff3eb
-  .popImg
-    max-width 800px
-    >img
-      width 100%
-      height auto
   placeholder()
 </style>

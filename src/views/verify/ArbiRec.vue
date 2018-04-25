@@ -310,6 +310,7 @@
               border-radius 2px
               color #FFB422
     .tb-head
+      user-select none
       height 50px
       padding 0 30px
       span

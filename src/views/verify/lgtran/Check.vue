@@ -281,6 +281,7 @@
             color #FFB422
 
     .tb-head
+      user-select none
       height 50px
       padding 0 32px
       font-size 13px
