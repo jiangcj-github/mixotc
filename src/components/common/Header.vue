@@ -63,7 +63,7 @@
       HeaderPrice
     },
     mounted() {
-      console.log('header')
+      // console.log('header')
       let ws = this.WebSocket;
       ws.onMessage['upd_ord_top'] = {
         callback: (data) => {

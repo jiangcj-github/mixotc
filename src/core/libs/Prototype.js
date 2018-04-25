@@ -56,7 +56,15 @@ Number.prototype.toDate = function (fmt) {
   let date = new Date(this * 1000);
   return date.dateHandle(fmt)
 };
-
+// 时间戳转化为min:second，早于今天转化为xx月xx日min:second
+Number.prototype.formatTime = function() {
+  let time = new Date(this);
+  let ms = `${time.getHours() > 9 ? time.getHours() : "0" + time.getHours()}:${time.getMinutes() > 9 ? time.getMinutes() : "0" + time.getMinutes()}`;
+  if (this < new Date() - 0 && time.getDate() !== new Date().getDate()) {
+    return time.getMonth() + "月" + time.getDate() + "日" + ms;
+  }
+  return ms;
+};
 Date.prototype.dateHandle = function(fmt) {
   fmt = fmt || "yyyy-MM-dd HH:mm:ss";
   let obj = {

@@ -22,9 +22,9 @@
       <div class="wrap">
         <div class="blank" v-if="!title && curChat !== 'system'"></div>
         <div class="news-info-talk clearfix" v-if="title && curChat !== 'system'">
-          <p class="more-info">查看更多消息</p>
-          <div class="messages clearfix" v-for="item of messages" :key="item.time">
-            <p class="time-info">{{item.time}}</p>
+          <p class="more-info" v-if="moreFlag" @click="fetchMore">查看更多消息</p>
+          <div class="messages clearfix" v-for="(item, index) of messages" :key="item.time">
+            <p class="time-info" v-if="index > 0 && dealTime(messages[index-1].time, item.time)">{{dealTime(messages[index-1].time, item.time)}}</p>
             <div :class="{'left-people': item.from !== JsonBig.stringify($store.state.userInfo.uid), 'right-people': item.from === JsonBig.stringify($store.state.userInfo.uid)}">
               <img class="avator" :src="item.icon" alt="">
               <p>
@@ -53,10 +53,15 @@
     <!-- 底部 -->
     <ol class="input-text clearfix">
       <li>
-        <input type="text" :disabled="title === '' ? ((chat[index] && chat[index].exists === undefined || chat[index] && chat[index].exists) ? true : false) : false" v-model="sendText" @keyup.enter="send">
+        <input type="text" :disabled="title === '' ? ((chat[index] && chat[index].exists === undefined || chat[index] && chat[index].exists) ? true : false) : false" v-model="sendText" @keyup.enter="sendMs">
       </li>
-      <li>
-        <img src="/static/images/picture_icon.png">
+      <li @click="$refs.up_img.click()" class="send-image">
+        <img src="/static/images/picture_icon.png"  title="发送图片">
+        <div style='display:none'>
+          <form action='' method='post' enctype='multipart/form-data'>
+            <input type='file' ref="up_img" accept="image/png, image/jpeg" @change="uploadImage">
+          </form>
+        </div>
         <span>图片</span>
       </li>
       <li>
@@ -123,7 +128,9 @@
           bottom: '100px'
         },
         timer: null,
-        sendText: ''
+        sendText: '',
+        moreFlag: true,
+        sendFile: ''
       }
     },
     components: {
@@ -135,6 +142,7 @@
     },
     mounted() {
       let _this = this;
+      //聊天信息监听
       this.WebSocket.onMessage['sms']={
         async callback(res){
           // op为7单人聊天信息，对象类型, op为6群聊信息，数组第0项
@@ -145,6 +153,7 @@
             // 文字
             if (type === 'text') {
               let obj = {
+                id: id,
                 from: _this.JsonBig.stringify(uid), 
                 to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
                 icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
@@ -154,7 +163,7 @@
                 },
                 isLoding: false, 
                 isFail: false,
-                time: new Date() - 1
+                time: new Date() - 0
               }
               _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
               return;
@@ -174,6 +183,7 @@
             })[0].icon
             if (type === 'text') {
               let obj = {
+                id: id,
                 from: _this.JsonBig.stringify(uid), 
                 to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
                 icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
@@ -183,7 +193,7 @@
                 },
                 isLoding: false, 
                 isFail: false,
-                time: new Date() - 1
+                time: new Date() - 0
               }
               _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
               return;
@@ -250,7 +260,7 @@
               unread: 0
            }})
         })
-        console.log(this.chatIds.includes(id));
+        // console.log(this.chatIds.includes(id));
         flag && !this.chatIds.includes(id) && await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
           this.$store.commit({type: 'getGroupList', data})
           let group = this.$store.state.groupList.filter(item => {
@@ -271,26 +281,39 @@
           }).catch(error=>{
           console.log(error)
         })
-        
-              // id: id,
-              // group: true,
-              // length: length,
-              // service: false,
-              // icon: "/static/images/groupChat_icon.png",
-              // nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.gid)}` : `${item.name}`,
-              // phone: false,
-              // email: false,
-              // unread: 0,
-              // exists: true
       },
-      // dealTime(time) {
-        
-      // },
-      send() {
+      fetchMore() {
+        this.WsProxy.send('control', 'get_history_msgs', {
+          peer_id: this.chat[this.index].group ? 0 : this.JsonBig.parse(this.curChat),
+          group_id: this.chat[this.index].group ? this.JsonBig.parse(this.curChat) : 0,
+          last_msg_id: this.messages[0] && this.messages[0].id ? messages[0].id : 0,
+          is_peer_admin: this.chat[this.index].service ? 1 : 0,
+          count: 10
+        }).then(data=>{
+          console.log(data)
+        })
+      },
+      // 处理是否显示消息时间
+      dealTime(time1, time2) {
+        if(time2 - time1 < 180000) return false;
+        return time2.formatTime()
+      },
+      // 发送图片
+      uploadImage() {
+        let a = new FormData();
+        a.append("uploadimage", this.$refs.up_img.files[0]);
+        fetch(`${this.HostUrl.http}image/`, {
+          method: 'Post',
+          body: a
+        }).then(res => res.text()).then(res=>{console.log(res)})
+      },
+      //发送消息
+      sendMs() {
         if (this.sendText === '') return;
+        // 本地store更新消息
         let tid = this.JsonBig.parse(this.curChat),
             chat= this.chat[this.index],
-            time = new Date() - 1;
+            time = new Date() - 0;
         let obj = {
             from: this.JsonBig.stringify(this.$store.state.userInfo.uid), 
             to: this.curChat,
@@ -304,6 +327,7 @@
             time: time
           }
         this.$store.commit({type: 'addMessages', data:{id: this.curChat, msg: obj }})
+        // 发消息
         this.WsProxy.sendMessage({
           gid: chat.group ? tid : 0,
           tid: tid,
@@ -472,8 +496,10 @@
         color #FF794C
         padding-top 10px
         margin-bottom 5px
+        cursor pointer
       .time-info
-        width 90px
+        display inline-block
+        padding 0px 5px
         margin 0 auto
         margin-bottom 20px
         font-size 12px
@@ -606,6 +632,8 @@
       li
         float left
         text-align center
+        &.send-image
+          cursor pointer
         span
           display block
           margin-top -3px

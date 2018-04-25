@@ -206,7 +206,7 @@ const RUN_APP = (App, config, plugin) => {
 
   changeTabIndex();
 
-  console.log('vm.reload',Number(localStorage['tabIndex']),!Number(localStorage['tabIndex']))
+  // console.log('vm.reload',Number(localStorage['tabIndex']),!Number(localStorage['tabIndex']))
   // if (!Number(localStorage["tabIndex"])) {
   //   vm.reload();
   // }

@@ -98,11 +98,12 @@ export default {
       item.id === data.id && item.exists === false && (flag = true);//判断是否踢出群
     });
     if (flag) return; //被踢出群后不更新信息
-    !state.messages[data.id] && (state.messages[data.id] = []);
+    !state.messages[data.id] && (state.messages[data.id] = []);//对话记录不存在时创建
     state.messages[data.id].push(data.msg);
     data.id === "system" && state.curChat !=="system" && state.systemMessage++;
     data.id !== "system" && state.curChat !== data.id && idex !== false && state.chat[idex].unread++
     state.isLogin && !state.showChat && state.unreadNumber++;
+    // 有新增加消息进来，将对话列表置顶
     state.chat.unshift(state.chat.splice(idex, 1)[0]);
   },
 
