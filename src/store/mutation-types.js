@@ -23,7 +23,11 @@ const changeMoreFlag = "changeMoreFlag";
 /**
  * 审核申述客服部分
  */
- const initServiceData = 'initServiceData';
+ const initServiceData = 'initServiceData'; // 初始化数据
+ const changeServiceNowtalk = 'changeServiceNowtalk'; // 根据左边选择右边人员
+ const addServiceMessages = 'addServiceMessages' // 存储发送信息
+ const changeServiceMessages = 'changeServiceMessages' // 新增发送消息
+
 
 
 export {
@@ -51,6 +55,8 @@ export {
   /**
    * 审核申述客服部分
    */
-  initServiceData
-
+  initServiceData,
+  changeServiceNowtalk,
+  addServiceMessages,
+  changeServiceMessages
 };

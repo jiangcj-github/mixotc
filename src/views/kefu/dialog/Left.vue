@@ -10,14 +10,15 @@
     <happy-scroll color="rgba(100,100,100,0.8)" size="5" resize hide-horizontal
                   bigger-move-h="start" smaller-move-h="start" class="scrollPane">
       <ul class="persons">
-        <li v-for="(e,i) in uls" :key="i" @click="onLiClick(i)" :class="{active:ulSel===i}">
-          <img :src="e.headimg"><i v-show="i===1">{{i}}</i>
+        <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index)" :class="{active: ulSel === index}">
+          <img :src="content.appellant_icon ? `${HostUrl.http}image/${content.appellant_icon}` : `/static/images/default_avator.png`">
+          <i v-if="content.unread">{{unreadNum}}</i>
           <div class="pinfo">
             <p class="p1">
-              <span class="s1">{{e.nickname}}</span>
-              <span class="s2">{{e.time}}</span>
+              <span class="s1">{{content.appellant_name}}</span>
+              <span class="s2">{{content.time}}</span>
             </p>
-            <p class="p2">{{e.msg}}</p>
+            <p class="p2">{{content.data}}</p>
           </div>
         </li>
       </ul>
@@ -36,26 +37,12 @@
         uls: [],
         ulsBuf: [],
         ulSel: 0,
-
-      }
-    },
-    methods: {
-      onLiClick(i){ // 点击添加active类
-        this.ulSel=i;
-        //
-      },
-      parseUls(){ // 搜索输入框
-        this.uls = [];
-        this.ulsBuf.forEach((e) => {
-          if (new RegExp("^.*"+this.srchText+".*$").test(e.nickname)) {
-            this.uls.push(e);
-          }
-        });
+        unreadNum: 1
       }
     },
     mounted(){
       this.ulsBuf=[
-        {headimg:"/static/images/default_avator.png",nickname:"兰陵王",account:"15810269653",time:"12:12",msg:"你好"},
+        {headimg:"/static/images/default_avator.png",nickname:"兰陵王",account:"15810269653",time:"12:12",msg:"你好", unread: true},
         {headimg:"/static/images/default_avator.png",nickname:"程咬金",account:"15810269653",time:"12:12",msg:"你好"},
         {headimg:"/static/images/default_avator.png",nickname:"吕布",account:"15810269653",time:"2016/01/12",msg:"你好"},
         {headimg:"/static/images/default_avator.png",nickname:"孙尚香",account:"15810269653",time:"2016/01/12",msg:"你好"},
@@ -70,6 +57,30 @@
         {headimg:"/static/images/default_avator.png",nickname:"杜甫",account:"398017990@qq.com",time:"2016/01/12",msg:"你好"},
       ];
       this.parseUls();
+      this.initData() //初始化列表数据
+    },
+    methods: {
+      initData() { // 初始化列表数据
+        this.WsProxy.send('control', 'a_get_appeal_users').then(data => {
+          console.log('对话列表', data);
+          // this.ulsBuf = data;
+          // this.$store.commit({type: 'initServiceData', data: this.ulsBuf}); // 获取列表数据存储到vuex中
+        }).catch(error=>{
+          console.log('错误', error)
+        })
+      },
+      onLiClick(index) { // 点击列表
+        this.ulSel = index;
+        // this.$store.commit({type: 'changeServiceNowtalk', data: {}}) // 存储右边聊天人员
+      },
+      parseUls() { // 搜索输入框
+        this.uls = [];
+        this.ulsBuf.forEach((v) => {
+          if (new RegExp("^.*"+this.srchText+".*$").test(v.nickname)) {
+            this.uls.push(v);
+          }
+        });
+      }
     }
   }
 </script>

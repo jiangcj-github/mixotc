@@ -20,5 +20,7 @@ export default {
    * 审核申述客服部分
    */
 
-  serviceTalk: []
+  serviceData: [], // 左侧聊天内容
+  serviceNow: '', // 当前客服聊天
+  serviceMessage: {} // 聊天信息
 };

@@ -1,6 +1,6 @@
 <template>
   <div class="right">
-    <div class="h1">李小蹦</div>
+    <div class="h1">{{user}}</div>
     <div class="fixed" v-if="appl === 0 && recv === 0">
       <h3>申诉人</h3>
       <div class="mf1">
@@ -59,10 +59,12 @@
         <button class="i3" @click="showPop3 = true">终止交易</button>
       </div>
     </div>
+    <!-- 聊天-->
     <happy-scroll color="rgba(200,200,200,0.8)" size="5" bigger-move-h="end" resize hide-horizontal class="scrollPane">
       <div class="msgBox">
+        <p class="check-more"><i>查看更多</i></p>
         <div class="tline"><i>12月19日 12:12</i></div>
-        <p v-for="(e, i) in msgHis" :key="i" :class="{al: !e.isSend, ar: e.isSend}">
+        <p v-for="(e, i) in msgHis" :key="i" :class="{al: e.isSend !== JsonBig.stringify($store.state.userInfo.uid), ar: e.isSend == JsonBig.stringify($store.state.userInfo.uid)}">
           <img :src="e.headimg"/>
           <span v-if="e.type === 0">{{e.text}}</span>
           <span v-else-if="e.type === 1" class="img-wrap"><img :src="e.url" @click="onClickImg(e)"/></span>
@@ -96,6 +98,7 @@
         <button class="b3" @click="onClickM1">通知放币</button>
       </div>
       <textarea ref="textarea" class="textarea" title=""
+                v-model="sendMsg"
                 @keydown.enter.exact="send"
                 @keydown.ctrl.enter="onCtrlEnter">
       </textarea>
@@ -189,10 +192,9 @@
     },
     data() {
       return {
-        sendFile: "",
-        sendMsg: "",
-        sendMsgOld: "",
-        msgHis: [],
+        sendFile: "", // 发送图片用
+        sendMsg: "", // 发送消息内容
+        // msgHis: [],
 
         appl: 0, // 申诉人：0-买家,1-卖家
         recv: 0, // 收件人：0-买家,1-卖家
@@ -221,6 +223,88 @@
 
       }
     },
+    computed: {
+      user() { // 监听右侧当前聊天人员
+        let result = '李小蹦';
+        this.$store.state.serviceData.forEach(item => {
+          console.log('和谁聊天', item)
+          if (item.id === this.$store.state.serviceNow) {
+            result = item.nickName
+          }
+        });
+        return result
+      },
+      serviceNow() { // 当前聊天人员id
+        return this.$store.state.serviceNow
+      },
+      serviceData() { // 左侧存储信息
+        return this.$store.state.serviceData
+      },
+      msgHis() { // 当前聊天信息
+        return this.$store.state.serviceMessage[this.serviceNow] ? this.$store.state.serviceMessage[this.serviceNow] : []
+      },
+    },
+    mounted() {
+      // this.msgHis = [
+      //   {headimg: "/static/images/default_avator.png", text: "你好", type: 0, isSend: 0, err: 1, loding: true},
+      //   {headimg: "/static/images/default_avator.png", text: "有事吗", type: 0, isSend: 0, err: 0},
+      //   {headimg: "/static/images/default_avator.png", text: "你好", type: 0, isSend: 0, err: 0},
+      //   {
+      //     headimg: "/static/images/kefu/kefu.png",
+      //     text: "是您的验证码，请尽快提交验证，切勿泄露给他人，如非本人操作请忽略",
+      //     type: 0,
+      //     isSend: 1,
+      //     err: 0
+      //   },
+      //   {headimg: "/static/images/kefu/kefu.png", text: "上传付款证明", type: 0, isSend: 1, err: 0},
+      //   {headimg: "/static/images/default_avator.png", text: "请提交付款证明", type: 0, isSend: 0, err: 0},
+      //   {
+      //     headimg: "/static/images/default_avator.png",
+      //     url: "/static/images/kefu/background.jpg",
+      //     type: 1,
+      //     isSend: 0,
+      //     err: 1
+      //   },
+      //   {
+      //     headimg: "/static/images/kefu/kefu.png",
+      //     url: "/static/images/kefu/background.jpg",
+      //     type: 1,
+      //     isSend: 1,
+      //     err: 1
+      //   },
+      // ];
+
+      // 获取聊天消息
+      let _this = this;
+      //聊天信息监听
+      this.WebSocket.onMessage['sms']={
+        async callback(res){
+          // console.log('聊天消息', res)
+          // op为7单人聊天信息，对象类型
+          if (res.op && res.op === 7) {
+            let {id, uid, icon, name, data, type } = res.body;
+            // await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
+            // 文字
+            if (type === 'text') {
+              let obj = {
+                isSend:  _this.JsonBig.stringify(uid),
+                headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                type: 0, // 0: 发送文字, 1: 发送图片
+                isLoding: true, // 加载中
+                err: 0, // 0: 发送成功, 1: 发送失败
+                text: data.msg
+              };
+              _this.$store.commit({type: 'addServiceMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
+              return;
+            }
+          }
+        }
+      };
+
+      this.Bus.$on("onIpClose", () => {
+        this.showPopImg = false;
+      });
+    },
     methods: {
       chooseImage() { // 发送图片
         this.sendFile = this.$refs.file.files[0];
@@ -232,63 +316,53 @@
             url: e.target.result,
             type: 1, // 0: 发送文字, 1: 发送图片
             isSend: 1, // 0: 接收信息, 1: 发送信息
-            err: 1, // 0: 发送成功, 1: 发送失败
+            err: 0, // 0: 发送成功, 1: 发送失败
             loding: true
           });
         });
       },
       onCtrlEnter() { // 换行
         this.$refs.textarea.value += "\n";
-        console.log("dd");
       },
       send() { // 发送消息
-        console.log("aa");
-        let text = this.$refs.textarea.value;
-        if (/^\s*$/.test(text)) return;
-        //发送信息
-        this.msgHis.push({
-          headimg: "/static/images/default_avator.png",
-          text: text,
-          type: 0,
-          isSend: 1,
-          err: 1,
+        if (/^\s*$/.test(this.sendMsg)) return;
+        // 本地store更新消息
+        // this.msgHis.push({
+        //   headimg: "/static/images/kefu/kefu.png",
+        //   text: this.sendMsg,
+        //   type: 0,
+        //   isSend: 1,
+        //   err: 1,
+        // });
+
+        let obj = {
+          isSend: this.JsonBig.stringify(this.$store.state.userInfo.uid),
+          headimg: "/static/images/kefu/kefu.png",
+          type: 0, // 0: 发送文字, 1: 发送图片
+          isLoding: true, // 加载中
+          err: 0, // 0: 发送成功, 1: 发送失败
+          text: this.sendMsg
+        };
+        this.$store.commit({type: 'addServiceMessages', data:{id: this.serviceNow, msg: obj }})
+        // 发送消息
+        this.WsProxy.sendMessage({
+          type: 'text',
+          gid: this.JsonBig.parse("197129593973379072"),
+          tid: this.JsonBig.parse("197129593973379072"),
+          data:{
+            uid: this.$store.state.userInfo.uid,
+            rid: this.JsonBig.parse("197129593973379072"),
+            tid: this.JsonBig.parse("197129593973379072"),
+            msg: this.sendMsg
+          }
+        }).then(data => { // 发送消息成功后更改原保存信息
+         console.log('1111111', data)
+          // this.$store.commit({type: 'changeMessageState', data:{id: this.curChat, time: time, code:0 }})
+        }).catch(error => {
+          console.log('2222222', error)
         });
-        this.$refs.textarea.value = null;
 
-        // if (text === '') return;
-        // let tid = this.JsonBig.parse(this.curChat),
-        //   chat= this.chat[this.index],
-        //   time = new Date() - 1;
-        // let obj = {
-        //   from: this.JsonBig.stringify(this.$store.state.userInfo.uid),
-        //   to: this.curChat,
-        //   icon: this.$store.state.userInfo.icon ? `${this.HostUrl.http}image/${this.$store.state.userInfo.icon}` : "/static/images/default_avator.png",
-        //   msg:{
-        //     type: 0,
-        //     content: this.sendText
-        //   },
-        //   isLoding: true,
-        //   isFail: false,
-        //   time: time
-        // }
-        // this.$store.commit({type: 'addMessages', data:{id: this.curChat, msg: obj }})
-        // this.WsProxy.sendMessage({
-        //   gid: chat.group ? tid : 0,
-        //   tid: tid,
-        //   data:{
-        //     uid: this.$store.state.userInfo.uid,
-        //     rid: chat.group ? tid : 0,
-        //     tid: tid,
-        //     msg: this.sendText
-        //   }
-        // }).then(data => {
-        //   this.$store.commit({type: 'changeMessageState', data:{id: this.curChat, time: time, code:0 }})
-        // }).catch(error => {
-        //   this.$store.commit({type: 'changeMessageState', data:{id: this.curChat, time: time, code:1 }})
-        // })
-
-        text = '';
-
+        this.$refs.textarea.value = '';
       },
       resend(item) { // 发送失败
         item.err = 0;
@@ -344,7 +418,7 @@
         let text = MSGS.get(5, this.appl, this.recv).replace(/reason/, this.pop1TextOld);
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
-        this.WsProxy.send('control', 'send_order_by_admin',{
+        this.WsProxy.send('control', 'a_send_order',{
           "id": this.JsonBig.parse("209038372436447232"),
           "seller": this.JsonBig.parse("203973913955278848"),
           "buyer": this.JsonBig.parse("197129593973379072"),
@@ -361,7 +435,7 @@
         let text = MSGS.get(2, this.appl, this.recv).replace(/reason/, this.pop2TextOld);
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
-        this.WsProxy.send('control', 'reject_appeal',{
+        this.WsProxy.send('control', 'a_reject_appeal',{
           "id": this.JsonBig.parse("209038372436447232"),
           "type": 1  // 1: 交易, 2: 担保转账
         }).then((data)=>{
@@ -375,7 +449,7 @@
         let text = MSGS.get(7, this.appl, this.recv).replace(/reason/, this.pop3TextOld);
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
-        this.WsProxy.send('control', 'terminate_order_by_admin',{
+        this.WsProxy.send('control', 'a_terminate_order',{
           "id": this.JsonBig.parse("209038372436447232"),
           "type": 1, // 1: 订单, 2: 担保
           "responsible": this.JsonBig.parse("203973913955278848"),
@@ -396,39 +470,6 @@
         this.showPopImg = true;
         this.popImgSrc = item.url;
       }
-    },
-    mounted() {
-      this.msgHis = [
-        {headimg: "/static/images/default_avator.png", text: "你好", type: 0, isSend: 0, err: 1, loding: true},
-        {headimg: "/static/images/default_avator.png", text: "有事吗", type: 0, isSend: 0, err: 0},
-        {headimg: "/static/images/default_avator.png", text: "你好", type: 0, isSend: 0, err: 0},
-        {
-          headimg: "/static/images/kefu/kefu.png",
-          text: "是您的验证码，请尽快提交验证，切勿泄露给他人，如非本人操作请忽略",
-          type: 0,
-          isSend: 1,
-          err: 0
-        },
-        {headimg: "/static/images/kefu/kefu.png", text: "上传付款证明", type: 0, isSend: 1, err: 0},
-        {headimg: "/static/images/default_avator.png", text: "请提交付款证明", type: 0, isSend: 0, err: 0},
-        {
-          headimg: "/static/images/default_avator.png",
-          url: "/static/images/kefu/background.jpg",
-          type: 1,
-          isSend: 0,
-          err: 1
-        },
-        {
-          headimg: "/static/images/kefu/kefu.png",
-          url: "/static/images/kefu/background.jpg",
-          type: 1,
-          isSend: 1,
-          err: 1
-        },
-      ];
-      this.Bus.$on("onIpClose", () => {
-        this.showPopImg = false;
-      });
     }
   }
 </script>
@@ -542,6 +583,13 @@
         align-self center
         animation mymove 1.5s linear infinite;
         -webkit-animation mymove 1.5s linear infinite;
+      .check-more
+        font-size 11px
+        color #ff794c
+        margin-bottom 10px
+        i
+          display inline-block
+          margin 0 auto
       .tline
         text-align center
         > i
