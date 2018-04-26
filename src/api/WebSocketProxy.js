@@ -30,7 +30,7 @@ WebSocketProxy.prototype.send = function (op, action, sendData){
   });
 };
 
-WebSocketProxy.prototype.sendMessage = function({ gid, tid, data}) {
+WebSocketProxy.prototype.sendMessage = function({ gid, tid, data, type}) {
   return new Promise((resolve, reject) => {
     this.seq = this.ws.seq;
     this.ws.onMessage[this.seq] = {
@@ -50,7 +50,7 @@ WebSocketProxy.prototype.sendMessage = function({ gid, tid, data}) {
         seq: this.seq,
         body: {
           action: "send_sms",
-          type: 'text',
+          type: type ? type : 'text',
           gid: gid,
           tid: tid,
           data: data

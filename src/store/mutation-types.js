@@ -16,6 +16,8 @@ const delTrust = "delTrust";
 const updateGroupInfo = "updateGroupInfo";
 const addMessages = "addMessages";
 const changeMessageState = "changeMessageState";
+const changeImgsrc = "changeImgsrc";
+const changeMoreFlag = "changeMoreFlag";
 
 
 /**
@@ -43,7 +45,8 @@ export {
   updateGroupInfo,
   addMessages,
   changeMessageState,
-
+  changeImgsrc,
+  changeMoreFlag,
 
   /**
    * 审核申述客服部分

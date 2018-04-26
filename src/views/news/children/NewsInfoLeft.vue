@@ -113,6 +113,7 @@
               phone: false,
               email: false,
               unread: 0,
+              moreFlag: true,
               exists: true//踢出群聊的标志
             });
           }else if (item.is_peer_admin){
@@ -124,6 +125,7 @@
               nickName: '客服',
               phone: false,
               email: false,
+              moreFlag: true,
               unread: 0
             }); 
           }else {
@@ -135,6 +137,7 @@
               nickName: item.name,
               phone: item.phone,
               email: item.email,
+              moreFlag: true,
               unread: 0
             }); 
           }
@@ -178,6 +181,7 @@
               nickName: item.name,
               phone: item.phone,
               email: item.email,
+              moreFlag: true,
               unread: 0
             });
           }
@@ -196,6 +200,7 @@
               phone: false,
               email: false,
               unread: 0,
+              moreFlag: true,
               exists: true
             });
           }

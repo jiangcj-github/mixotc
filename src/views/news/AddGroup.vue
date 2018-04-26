@@ -145,6 +145,7 @@
               nickName: `${this.JsonBig.stringify(data.id)}`,
               phone: false,
               email: false,
+              moreFlag: true,
               unread: 0
             }
             this.$store.commit({'type':'newChat', data: newChat})

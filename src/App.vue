@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Header></Header>
-    <router-view class="main-container"/>
+    <router-view class="main-container" :key="new Date() - 0"/>
     <Footer></Footer>
     <News></News>
   </div>

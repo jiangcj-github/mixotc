@@ -115,16 +115,59 @@ export default {
           item.isLoding = false
           code && (item.isFail = true);
           idx = index;
+          console.log(item.isFail);
         }
       })
       state.messages = Object.assign({}, state.messages);
-      // state.messages[id].splice(state.messages[id].length - 1, 1);
-    // !state.messages[data.id] && (state.messages[data.id] = []);
-    // state.messages[data.id].push(data.msg)
+  },
+  [types.changeMessageState](state, { data: {id,time,code} }) {
+    // 消息发送成功或失败
+    let idx = 0;
+      state.messages[id].forEach((item, index) => {
+        if(time === item.time){
+          item.isLoding = false
+          code && (item.isFail = true);
+          idx = index;
+          console.log(item.isFail);
+        }
+      })
+      state.messages = Object.assign({}, state.messages);
+  },
+[types.changeMessageState](state, { data: {id, time, code} }) {
+    // 消息发送成功或失败
+    let idx = 0;
+      state.messages[id].forEach((item, index) => {
+        if(time === item.time){
+          item.isLoding = false
+          !code && (item.isFail = false);
+          code && (item.isFail = true);
+          idx = index;
+        }
+      })
+      state.messages = Object.assign({}, state.messages);
   },
 
+  [types.changeImgsrc](state, { data: {id, time, src} }) {
+    // 消息发送成功或失败
+    let idx = 0;
+      state.messages[id].forEach((item, index) => {
+        if(time === item.time){
+          item.msg.content = src;
+        }
+      })
+      state.messages = Object.assign({}, state.messages);
+  },
 
-
+  [types.changeMoreFlag](state, { data: {id, flag} }) {
+    // 改变更多消息的标志
+    let idx = 0;
+      state.chat.forEach((item, index) => {
+        if(time.id === data.id){
+          item.moreFlag = flag;
+        }
+      })
+      // state.messages = Object.assign({}, state.messages);
+  },
   /**
    * 审核申述客服部分
    */

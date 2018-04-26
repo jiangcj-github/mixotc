@@ -160,7 +160,7 @@ const RUN_APP = (App, config, plugin) => {
     },
     methods: {
       reload() {
-        // console.log('this.isReload', this.isReload)
+        console.log('this.isReload', this.isReload)
         this.isReload = true;
         this.$nextTick(() => {
           this.isReload = false;
