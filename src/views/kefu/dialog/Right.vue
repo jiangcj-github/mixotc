@@ -254,6 +254,41 @@
           err: 1,
         });
         this.$refs.textarea.value = null;
+
+        // if (text === '') return;
+        // let tid = this.JsonBig.parse(this.curChat),
+        //   chat= this.chat[this.index],
+        //   time = new Date() - 1;
+        // let obj = {
+        //   from: this.JsonBig.stringify(this.$store.state.userInfo.uid),
+        //   to: this.curChat,
+        //   icon: this.$store.state.userInfo.icon ? `${this.HostUrl.http}image/${this.$store.state.userInfo.icon}` : "/static/images/default_avator.png",
+        //   msg:{
+        //     type: 0,
+        //     content: this.sendText
+        //   },
+        //   isLoding: true,
+        //   isFail: false,
+        //   time: time
+        // }
+        // this.$store.commit({type: 'addMessages', data:{id: this.curChat, msg: obj }})
+        // this.WsProxy.sendMessage({
+        //   gid: chat.group ? tid : 0,
+        //   tid: tid,
+        //   data:{
+        //     uid: this.$store.state.userInfo.uid,
+        //     rid: chat.group ? tid : 0,
+        //     tid: tid,
+        //     msg: this.sendText
+        //   }
+        // }).then(data => {
+        //   this.$store.commit({type: 'changeMessageState', data:{id: this.curChat, time: time, code:0 }})
+        // }).catch(error => {
+        //   this.$store.commit({type: 'changeMessageState', data:{id: this.curChat, time: time, code:1 }})
+        // })
+
+        text = '';
+
       },
       resend(item) { // 发送失败
         item.err = 0;
