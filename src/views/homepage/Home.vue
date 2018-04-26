@@ -69,7 +69,6 @@
     },
     data() {
       return {
-        isLogin: false,
         loginUid: "",
         uid: "",
 
@@ -86,11 +85,13 @@
         return this.$store.state.trustList.map((item)=>{
           return this.JsonBig.stringify(item);
         });
+      },
+      isLogin(){
+        return this.$store.state.isLogin;
       }
     },
     mounted() {
       //是否登录
-      this.isLogin= this.$store.state.isLogin;
       if(this.isLogin){
         this.loginUid= this.$store.state.userInfo.uid || "";
       }
@@ -151,6 +152,9 @@
           isTrust: data.is_trust || false,
         }
       }
+    },
+    destroyed(){
+      this.Bus.$off('onRatesTotalChange');
     }
   }
 </script>
@@ -201,7 +205,6 @@
               width 45px
               height 45px
               border-radius 50%
-              background-color skyblue
             .online
               display inline-block
               width 11px

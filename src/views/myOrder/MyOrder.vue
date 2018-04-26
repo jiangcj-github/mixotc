@@ -383,7 +383,7 @@
               let stateListObject = {
                 1: [{name: '待付款', flag: 3}],
                 2: [{name: '待付款'}, {name: '待放币', flag: 3}],
-                3: [{name: '待付款'}, {name: '待放币'}, {name: '申述中', flag: 1}],
+                3: [{name: '待付款'}, {name: '待放币'}, {name: '申诉中', flag: 1}],
                 4: [{name: '待付款'}, {name: '失败', flag: 1}, {name: '取消'}],
                 5: [{name: '待付款'}, {name: '失败', flag: 1}, {name: '超时'}],
                 6: [{name: '待付款'}, {name: '待放币'}, {name: '完成', flag: 2}],
@@ -397,8 +397,8 @@
               // 操作数组
               let operationListObject = {
                 1: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '标记已付款', flag: 3}, {name: '取消订单', flag: 4}] : [{name: '提醒付款', flag: 5}],
-                2: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '申述', flag: 7}] : [{name: '释放币', flag: 8}, {name: '申述', flag: 7}],
-                3: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '撤销申述', flag: 9}] : [{name: '释放币', flag: 8}, {name: '撤销申述', flag: 9}],
+                2: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '申诉', flag: 7}] : [{name: '释放币', flag: 8}, {name: '申诉', flag: 7}],
+                3: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '撤销申诉', flag: 9}] : [{name: '释放币', flag: 8}, {name: '撤销申诉', flag: 9}],
                 6: [{name: '去评价', flag: 1}],
                 7: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '查看评价', flag: 2}] : [{name: '去评价', flag: 1}],
                 8: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '去评价', flag: 1}] : [{name: '查看评价', flag: 2}],
@@ -555,13 +555,13 @@
               break;
             case 7: // 买家申请弹窗
               this.selectContent = this.JsonBig.stringify(content.buyer) === this.userId ? '请先与对方联系，核实对方是否放币' : '请先与对方联系，核实对方是否付款'; // 内容
-              this.selectLeft = '申述'; // 左边内容
+              this.selectLeft = '申诉'; // 左边内容
               this.selectRight = '联系对方'; // 右边内容
               this.updateId = this.contentList[index].id;
               this.updateInfo = this.contentList[index].info;
               break;
             case 9: // 撤销订单弹窗
-              this.selectContent = '确定撤销申述？'
+              this.selectContent = '确定撤销申诉？'
               this.selectLeft = '取消'; // 左边内容
               this.selectRight = '确定'; // 右边内容
               this.updateId = this.contentList[index].id;

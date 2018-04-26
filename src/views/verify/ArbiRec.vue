@@ -1,212 +1,306 @@
 <template>
-  <Left :leftBar="4">
-    <div class="right" slot="right">
-      <div class="head">
-        <div class="filter">
-          <div class="f1">
+  <div class="verify inner">
+    <h2>mixOTC-审核</h2>
+    <div class="main">
+      <!--左侧菜单栏-->
+      <Left :leftBar="4"></Left>
+      <!--右侧-->
+      <div class="right">
+        <div class="head">
+          <div class="filter">
+            <div class="f1">
               <div class="search">
-                <span @click="srchUlShow=!srchUlShow" v-clickoutside="clickSrchOutside">搜索{{srchUls[srchUlSel].text}}</span>
-                <ul v-show="srchUlShow">
+                <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">搜索{{srchUls[srchUlSel].text}}</span>
+                <ul v-show="srchUlShow" class="srch-ul">
                   <li v-for="(e,i) in srchUls" :key="i" @click="srchUlSel=i">{{e.text}}</li>
                 </ul>
-                <input type="text" v-model="srchInput" title="">
-                <img src="/static/images/cancel_icon.png" @click="srchInput=''" v-show="srchInput.length>0">
+                <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput">
+                <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
                 <a href="javascript:void(0)"></a>
+                <ul v-show="srchTipShow && tips.length>0" class="tip-ul">
+                  <li v-for="(e,i) in tips" :key="i" @mousedown="srchText=e.nickname" @click="search">{{e}}</li>
+                </ul>
               </div>
-          </div>
-          <div class="f2">
-            <DateInterval ref="di"></DateInterval>
-          </div>
-          <div class="f3">
-            <a href="javascript:void(0)" :class="{active:fltDays===1}" @click="fltDays=1">今天</a>
-            <a href="javascript:void(0)" :class="{active:fltDays===3}" @click="fltDays=3">三天</a>
-            <a href="javascript:void(0)" :class="{active:fltDays===7}" @click="fltDays=7">七天</a>
+            </div>
+            <div class="f2">
+              <DateInterval ref="di" onDiChange="onDiChange"></DateInterval>
+            </div>
+            <div class="f3">
+              <a href="javascript:void(0)" :class="{active:days===1}" @click="days=1">今天</a>
+              <a href="javascript:void(0)" :class="{active:days===3}" @click="days=3">三天</a>
+              <a href="javascript:void(0)" :class="{active:days===7}" @click="days=7">七天</a>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="tb-head">
-        <span class="tjsj sortable" @click="sortField=0;sortType=!sortType">
-          提交时间<i class="sort" :class="{up:sortType,down:!sortType,field:sortField===0}"></i></span>
-        <span class="ddxx">订单信息</span>
-        <span class="sqr">申请人</span>
-        <span class="sqdx">申请对象</span>
-        <span class="zcr">仲裁人</span>
-        <span class="wcsj">完成时间</span>
-        <span class="ys sortable" @click="sortField=1;sortType=!sortType">
-          用时<i class="sort" :class="{up:sortType,down:!sortType,field:sortField===1}"></i></span>
-        <span class="jg drop">
-          <a href="javascript:void(0)" v-clickoutside="clickResOutside" @click="resUlShow=!resUlShow">{{resUls[resUlSel].text}}</a>
+        <div class="tb-head">
+        <span class="tjsj sortable" @click="sort=(sort+1)%2">
+          提交时间<i class="sort" :class="{up:sort===0,down:sort===1}"></i>
+        </span>
+          <span class="ddxx">订单信息</span>
+          <span class="sqr">申请人</span>
+          <span class="sqdx">申请对象</span>
+          <span class="zcr">仲裁人</span>
+          <span class="wcsj">完成时间</span>
+          <span class="ys sortable" @click="sort=(sort+1)%2+2">
+          用时<i class="sort" :class="{up:sort===2,down:sort===3}"></i>
+        </span>
+          <span class="jg drop">
+          <a href="javascript:void(0)" v-clickoutside="()=>{resUlShow=false}" @click="resUlShow=!resUlShow">{{resUls[resUlSel].text}}</a>
           <ul v-show="resUlShow">
             <li @click="resUlSel=i" v-for="(e,i) in resUls" :key="i">{{e.text}}</li>
           </ul>
         </span>
-        <span class="zrr">责任人</span>
-        <span class="cz">操作</span>
-      </div>
-      <div v-if="err===0">
-        <div class="li" v-for="(e,i) in arbis" :key="i">
-          <div class="booth">
-            <div class="tjsj"><p>{{e.createTime1}}</p><p>{{e.createTime2}}</p></div>
-            <div class="ddxx"><p>{{e.orderType}}</p><p>{{e.orderCoin}}</p></div>
-            <div class="sqr">
-              <router-link to="" target="_blank" tag="p" class="link">{{e.applyUser}}</router-link>
-              <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
-            </div>
-            <div class="sqdx">
-              <router-link to="" target="_blank" tag="p" class="link">{{e.appliedUser}}</router-link>
-              <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
-            </div>
-            <div class="zcr"><p>{{e.dealUser}}</p></div>
-            <div class="wcsj"><p>{{e.finishTime1}}</p><p>{{e.finishTime2}}</p></div>
-            <div class="ys"><p>{{e.spend}}</p></div>
-            <div class="jg"><p>{{e.result}}</p></div>
-            <div class="zrr"><p>{{e.respUser1}}</p><p>{{e.respUser2}}</p></div>
-            <div class="cz"><p><a href="javascript:void(0)" class="ck" @click="showPop(e.id)">查看</a></p></div>
-          </div>
-          <div class="division"></div>
-          <div class="remark">备注：{{e.remark}}</div>
+          <span class="zrr">责任人</span>
+          <span class="cz">操作</span>
         </div>
-        <Pagination :total="43" :pageSize="2" emitValue="onPageChange" style="width:1000px;margin-top:20px" v-show="total>pageSize"></Pagination>
-        <BasePopup :show="pop" :width="746" :height="500" :top="50">
-          <div class="pop">
-            <h2>沟通记录：</h2>
-            <div class="p-ul">
-              <p class="p-li"><span class="xxsj">信息时间</span><span class="fjr">发件人</span><span class="xxnr">信息内容</span></p>
-              <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
-              <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
-              <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
-              <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
-              <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
-              <p class="p-li"><span class="xxsj">2018/03/09 12:12:34</span><span class="fjr">李小蹦</span><span class="xxnr">在线放币，放心购买。。。。。。</span></p>
+        <div v-if="err===0">
+          <div class="li" v-for="(e,i) in arbis" :key="i">
+            <div class="booth">
+              <div class="tjsj"><p>{{e.createTime1}}</p><p>{{e.createTime2}}</p></div>
+              <div class="ddxx"><p>{{e.orderType}}{{e.orderCoin}}</p></div>
+              <div class="sqr">
+                <router-link :to="'/homepage?uid='+e.applyUid" target="_blank" tag="p" class="link">{{e.applyU}}</router-link>
+                <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
+              </div>
+              <div class="sqdx">
+                <router-link to="'/homepage?uid='+e.appliedUid" target="_blank" tag="p" class="link">{{e.appliedU}}</router-link>
+                <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
+              </div>
+              <div class="zcr"><p>{{e.dealU}}</p></div>
+              <div class="wcsj"><p>{{e.finishTime1}}</p><p>{{e.finishTime2}}</p></div>
+              <div class="ys"><p>{{e.spend}}</p></div>
+              <div class="jg"><p>{{e.result}}</p></div>
+              <div class="zrr"><p>{{e.respU1}}</p><p>{{e.respU2}}</p></div>
+              <div class="cz"><p><a href="javascript:void(0)" class="ck" @click="">查看</a></p></div>
             </div>
-            <i class="close" @click="pop=false">&times;</i>
+            <div class="division"></div>
+            <div class="remark">备注：{{e.remark}}</div>
           </div>
-        </BasePopup>
-      </div>
-      <div v-else-if="err===1">
-        <div class="err no-result">无相应的用户，请重新搜索</div>
-      </div>
-      <div v-else-if="err===2">
-        <div class="err load-failed">网络异常，请重新搜索</div>
-      </div>
-      <div v-else-if="err===3">
-        <div class="err net-error">加载失败，请重新搜索</div>
-      </div>
-      <div v-else>
-        <div class="err empty">没有仲裁记录</div>
+          <Pagination :total="arbiTotal" :pageSize="arbiPageSize"
+                      emitValue="onPageChange" style="width:1000px;margin-top:20px" v-show="arbiTotal>arbiPageSize"></Pagination>
+        </div>
+        <div v-else-if="err===1">
+          <div class="err no-result">没有对应的数据</div>
+        </div>
+        <div v-else-if="err===2">
+          <div class="err load-failed">网络异常，请重新搜索</div>
+        </div>
+        <div v-else-if="err===3">
+          <div class="err net-error">加载失败，请重新搜索</div>
+        </div>
+        <div v-else-if="err===4">
+          <div class="err net-error">数据加载中...</div>
+        </div>
+        <div v-else>
+          <div class="err empty">没有仲裁数据</div>
+        </div>
       </div>
     </div>
-  </Left>
+  </div>
 </template>
 <script>
   import Pagination from "@/components/common/Pagination";
   import DateInterval from "@/components/common/DateInterval";
-  import BasePopup from "@/components/common/BasePopup";
-  import SearchInput from "@/components/common/SearchInput";
   import Left from "./layout/Left";
-
   export default {
     components: {
       Left,
       Pagination,
       DateInterval,
-      BasePopup,
-      SearchInput,
     },
     data() {
       return {
 
         srchUls: [
-          {text: "申诉人", key: ""},
-          {text: "申诉对象", key: ""},
-          {text: "处理人", key: ""},
-          {text: "责任人", key: ""},
-          {text: "订单号", key: ""},
+          {text: "申诉人", key: 0},
+          {text: "申诉对象", key: 1},
+          {text: "处理人", key: 2},
+          {text: "责任人", key: 3},
+          {text: "订单号", key: 4},
         ],
         srchUlSel: 0,
         srchUlShow: false,
-        srchInput: "",
+        srchTipShow: false,
+        srchText: "",
 
-        fltDays: 0,
+        tips: [1,3,4,5,5,5,5],
+        tipsCount: 10,
 
-        sortType: false, //true-升序,false-降序
-        sortField: 0, //0-提交时间,1-用时
+        days: 0,
+
+        sort: 0, //0-提交时间升序，1-提交时间降序，2-用时升序，3-用时降序
 
         resUlShow: false,
         resUlSel: 0,
         resUls:[
-          {text:"全部结果",key:""},
-          {text:"撤销申诉",key:""},
-          {text:"终止交易",key:""},
-          {text:"强制放币",key:""},
-          {text:"驳回申诉",key:""},
+          {text:"全部结果",key:0},
+          {text:"申诉中",key:1},
+          {text:"撤销申诉",key:2},
+          {text:"终止交易",key:5},
+          {text:"强制放币",key:4},
+          {text:"驳回申诉",key:3},
         ],
 
-        err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败
-        arbisOrg: [1,2,3],
-        total: 0,
-        pageSize: 20,
-
-        pop: false,  //查看-弹窗框
-      }
-    },
-    computed:{
-      arbis(){
-        let arr=[];
-        this.arbisOrg && this.arbisOrg.forEach(function (e) {
-          arr.push({
-            id: "",
-            createTime1: "2016/01/01",
-            createTime2: "11:11:11",
-            orderType: "购买",
-            orderCoin: "BTC",
-            applyUser:"lilin",
-            appliedUser: "linki",
-            dealUser:"lindakai",
-            finishTime1: "2016/01/01",
-            finishTime2: "11:11:11",
-            spend: "6min8s",
-            result: 1,
-            respUser1: "lilin",
-            respUser2: "lilin",
-            remark: "订单号：123456789098765432",
-          });
-        });
-        return arr;
+        err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败,4-加载中
+        arbis: [],
+        arbiTotal: 0,
+        arbiPageSize: 15,
       }
     },
     watch:{
-      fltDays:function(){
-        this.$refs.di.date1=new Date(Date.now()-24*60*60*1000*this.fltDays);
+      days:function(){
+        this.$refs.di.date1=new Date(Date.now()-24*60*60*1000*this.days);
         this.$refs.di.date2=new Date();
-      }
+      },
+      resUlSel:function(){
+        this.loadArbiLists();
+      },
+      sort:function(){
+        this.loadArbiLists();
+      },
     },
     mounted(){
+      this.loadArbiLists();
       this.Bus.$on("onPageChange",(p) => {
-
-      });
-      this.Bus.$on("onDiInput",()=>{
-        this.fltDays=-1;
+        this.loadArbiLists(p-1);
       });
       this.Bus.$on("onDiChange",()=>{
-        console.log("d");
+        this.loadArbiLists();
       });
     },
     methods: {
-      clickSrchOutside(){
-        this.srchUlShow=false;
+      fuzzyInput(){
+        this.srchTipShow=true;
+        this.loadTips();
       },
-      clickResOutside(){
-        this.resUlShow=false;
+      search(){
+        this.loadArbiLists();
       },
-      showPop(){
-        this.pop=true;
+      loadArbiLists(p){
+        //
+        let srchKey1=null;  //订单ID
+        let srchKey2=null;  //申诉人
+        let srchKey3=null;  //被申诉人
+        let srchKey4=null;  //受理人
+        let srchKey5=null;  //责任人
+        switch(this.srchUls[this.srchUlSel].key){
+          case 0:srchKey1=this.srchText;break;
+          case 1:srchKey2=this.srchText;break;
+          case 2:srchKey3=this.srchText;break;
+          case 3:srchKey4=this.srchText;break;
+          case 4:srchKey5=this.srchText;break;
+        }
+        let result=this.resUls[this.resUlSel].key;
+        let start= this.$refs.di.date1;
+        let end= this.$refs.di.date2;
+        start=start?Math.floor(new Date(this.$refs.di.date1).getTime()/1000):null;
+        end=end?Math.floor(new Date(this.$refs.di.date2).getTime()/1000):null;
+        let sortByDuration=null;
+        let sortByCreate=null;
+        switch(this.sort){
+          case 0: sortByCreate=2;break;
+          case 1: sortByCreate=1;break;
+          case 2: sortByDuration=2;break;
+          case 3: sortByDuration=1;break;
+        }
+        //
+        this.WsProxy.send("control","a_get_appeal_list",{
+          id: srchKey1,
+          appellant: srchKey2,
+          appellee: srchKey3,
+          handler: srchKey4,
+          responsible: srchKey5,
+          type: 0,
+          result: result,
+          start: start,
+          end: end,
+          duration: sortByDuration,
+          create: sortByCreate,
+          origin: p,
+          count: this.arbiPageSize,
+        }).then((data)=>{
+          if(!data||!data.appeals||data.appeals.length<=0){
+            this.err=1; //无数据
+          }else{
+            this.err=0;
+            //this.arbiTotal=data.amount;
+            this.parseArbis(data.appeals);
+          }
+        }).catch((msg)=>{console.log(msg);
+          if(!msg){
+            this.err=2; //网络异常
+          }else if(msg.ret!==0){
+            this.err=3; //加载异常
+          }
+        });
       },
+      loadTips(){
+        let srchKey=this.srchText;
+        let srchType=this.srchUls[this.srchUlSel].key;
+        let actions=[
+          "a_fuzzy_search_appellant",
+          "a_fuzzy_search_appellee",
+          "a_fuzzy_search_responsible",
+          "a_fuzzy_search_handler ",
+          "a_fuzzy_search_trade_id "
+        ];
+        //申诉人
+        this.WsProxy.send("control",actions[srchType],{
+          keyword:srchKey,
+          //count:this.tipsCount
+        }).then((data)=>{
+          this.parseTips(data.tips);
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
+      parseTips(data){
+        this.tips=[];
+        data && data.forEach((e)=>{
+          this.tips.push({
+            uid: e.id || 0,
+            nickname: e.name || "-",
+            account:e.phone || e.email || "-",
+          });
+        });
+      },
+      parseArbis(data){
+        this.arbis=[];
+        data && data.forEach((e)=>{
+          this.arbis.push({
+            id: e.id,
+            createTime: new Date(e.create*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
+            createTime1: new Date(e.create*1000).dateHandle("yyyy/MM/dd"),
+            createTime2: new Date(e.create*1000).dateHandle("HH:mm"),
+            orderType: e.type && ["出售","购买","担保"][e.type-1],
+            orderCoin: e.currency || "-",
+            applyU: e.appellant_name || "-",
+            applyUid: e.appellant_id,
+            appliedU: e.appellee_name || "-",
+            appliedUid: e.appellee_id,
+            dealU: e.handler_name || "-",
+            dealUid: e.handler_id,
+            finishTime: new Date(e.update*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
+            finishTime1: new Date(e.update*1000).dateHandle("yyyy/MM/dd"),
+            finishTime2: new Date(e.update*1000).dateHandle("HH:mm"),
+            spend: (e.update-e.create).formatSecord() || "-",
+            result: e.result && ["申诉中","撤回申诉","驳回申诉","强制放币","终止交易"][e.result-1],
+            respU1: e.responsible_name || "-",
+            respU2: e.responsible_account,
+            remark: e.info,
+          });
+        });
+      }
+    },
+    destroyed(){
+      this.Bus.$off("onPageChange");
+      this.Bus.$off("onDiChange");
     }
   }
 </script>
 <style scoped lang="stylus">
   @import "../../stylus/base.styl";
+  @import "./stylus/verify.styl";
   .right
     width 1000px
     margin-left 200px
@@ -246,7 +340,7 @@
                 position absolute
                 top 13px
                 right 0
-            >ul
+            ul
               position absolute
               left -1px
               right -1px
@@ -313,74 +407,73 @@
       user-select none
       height 50px
       padding 0 30px
-      span
+      >span
         display inline-block
         line-height 50px
         font-size 13px
         color #999999
         letter-spacing 0.27px
-        &.sortable
-          cursor pointer
-          .sort
-            position relative
-            margin-left 3px
-            &:before
-              content ''
-              border-left 5px solid transparent
-              border-right 5px solid transparent
-              border-bottom:5px solid #999
-              position absolute
-              right -15px
-              top 50%
-              margin-top -6px
-            &:after
-              content ''
-              border-left 5px solid transparent
-              border-right 5px solid transparent
-              border-top 5px solid #999
-              position absolute
-              right -15px
-              top 50%
-              margin-top 1px
-            &.field
-              &.up
-                &:before
-                  border-bottom-color #ffb422
-              &.down
-                &:after
-                  border-top-color #ffb422
+      >span.sortable
+        cursor pointer
+        .sort
+          position relative
+          margin-left 3px
+          &:before
+            content ''
+            border-left 5px solid transparent
+            border-right 5px solid transparent
+            border-bottom:5px solid #999
+            position absolute
+            right -15px
+            top 50%
+            margin-top -6px
+          &:after
+            content ''
+            border-left 5px solid transparent
+            border-right 5px solid transparent
+            border-top 5px solid #999
+            position absolute
+            right -15px
+            top 50%
+            margin-top 1px
+        .sort.up
+          &:before
+            border-bottom-color #ffb422
+        .sort.down
+          &:after
+            border-top-color #ffb422
+        &:hover
+          color #666
+      >span.drop
+        position relative
+        >a
+          color #999
+          display inline-block
+          width 100%
           &:hover
             color #666
-        &.drop
-          position relative
-          >a
-            color #999
+          &:after
             display inline-block
-            width 100%
+            width 0
+            height 0
+            content ""
+            border 5px solid transparent
+            border-top 5px solid #999
+            border-bottom-width 2px
+            margin-left 7px
+        >ul
+          position absolute
+          margin-top -10px
+          margin-left -10px
+          background #fff
+          border 1px solid #e1e1e1
+          width 100%
+          >li
+            line-height 30px
+            cursor pointer
+            padding 0 10px
             &:hover
-              color #666
-            &:after
-              display inline-block
-              width 0
-              height 0
-              content ""
-              border 5px solid transparent
-              border-top 5px solid #999
-              border-bottom-width 2px
-              margin-left 7px
-          >ul
-            position absolute
-            margin-top -10px
-            margin-left -10px
-            background #fff
-            border 1px solid #e1e1e1
-            width 100%
-            >li
-              line-height 30px
-              cursor pointer
-              padding 0 10px
-              &:hover
-                background #fff3eb
+              background #fff3eb
     .li
       padding 0 30px
       background #fff
@@ -399,7 +492,11 @@
           vertical-align top
           >p
             line-height 20px
-            margin-top 10px
+            overflow hidden
+            text-overflow ellipsis
+            white-space nowrap
+            &:not(:first-of-type)
+              margin-top 3px
             &.contact
               font-size 11px
               color #FFB422

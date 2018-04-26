@@ -1,5 +1,5 @@
 <template>
-  <div class="pagination">
+  <div class="simplePage">
     <p>第 {{curPage}}/{{totalPage}} 页</p>
     <ul>
       <li class="prev" @click="clickPage(curPage - 1)"></li>
@@ -12,17 +12,15 @@ export default {
   props: {
     total: {
       type: Number,//数据总条数
-      required: true,
       default: 0
     },
     pageSize: {
       type: Number,//每页展示数据条数
-      required: true,
       default: 15
     },
-    emitValue: {
+    onPageChange: {
       type: String,//自定义事件名
-      required: true
+      default: "onPageChange"
     }
   },
   data() {
@@ -37,19 +35,20 @@ export default {
   },
   methods: {
     clickPage(i) {
-      if(num === 0 || num > this.totalPage) return;
-      this.curPage = num;
-      this.Bus.$emit(this.emitValue, num);
+      if(i === 0 || i > this.totalPage) return;
+      this.curPage = i;
+      this.Bus.$emit(this.onPageChange, i);
     }
   }
 };
 </script>
 <style lang="stylus">
-.pagination
+.simplePage
   display flex
   justify-content:center
   align-items center
-  height 30px
+  height 40px
+  width 100%
   >p
     font-size 13px
     color #333
@@ -60,7 +59,7 @@ export default {
     >li
       float left
       width 24px
-      height 24px
+      height 20px
       text-align center
       font-size 13px
       letter-spacing 0.15px

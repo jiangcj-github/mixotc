@@ -158,7 +158,36 @@ export default {
 
   // 初始化聊天部分数据
   [types.initServiceData](state, { data }) {
-    state.chat = data;
+    state.serviceData = data;
   },
-
+  // 根据左边选择右边状态
+  [types.changeServiceNowtalk](state, { data }) {
+    // 改变当前聊天
+    state.serviceNow = data.id;
+  },
+  //接收到消息和发送消息时的处理
+  [types.addServiceMessages](state, { data }) {
+    let idex = false;
+    state.serviceData.forEach((item, index) => {
+      item.id === data.id && (idex = index);
+    });
+    !state.serviceMessage[data.id] && (state.serviceMessage[data.id] = []);//对话记录不存在时创建
+    state.serviceMessage[data.id].push(data.msg);
+    // state.isLogin && !state.showChat && state.unreadNum++;
+    // 有新增加消息进来，将对话列表置顶
+    state.serviceData.unshift(state.serviceData.splice(idex, 1)[0]);
+  },
+  // 新增发送消息
+  [types.changeServiceMessages](state, { data: {id, time, code} }) {
+    // 消息发送成功或失败
+    let idx = 0;
+    state.serviceMessage[id].forEach((item, index) => {
+      if(time === item.time){
+        item.isLoding = false
+        code && (item.err = true);
+        idx = index;
+      }
+    })
+    state.serviceMessage = Object.assign({}, state.serviceMessage);
+  },
 };

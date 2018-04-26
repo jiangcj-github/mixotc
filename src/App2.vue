@@ -1,7 +1,7 @@
 <template>
   <div id="kefu">
     <Header></Header>
-    <Dialog></Dialog>
+    <Dialog v-if="this.$store.state.isLogin"></Dialog>
   </div>
 </template>
 

@@ -6,12 +6,12 @@
         <input type="text" placeholder="搜索商家昵称/账号" v-model="srchText" v-clickoutside="clickOutside" @input="fuzzyInput">
         <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
         <a href="javascript:void(0)" @click="search"></a>
-        <ul v-show="srchShowTip" class="ft-cand">
-          <li v-for="(o,i) in tips" :key="i" @mousedown="srchText=o.nickname+'/'+o.phone" @click="search">{{o.nickname+'/'+o.phone}}</li>
+        <ul v-show="srchShowTip && tips.length>0" class="ft-cand">
+          <li v-for="(o,i) in tips" :key="i" @mousedown="srchText=o.nickname" @click="search">{{o.nickname}}</li>
         </ul>
       </div>
       <div class="f2">
-        <DateInterval ref="di"></DateInterval>
+        <DateInterval ref="di" onDiChange="onDiChange1"></DateInterval>
       </div>
       <div class="f3">
         <a href="javascript:void(0)" :class="{active:days===1}" @click="days=1">今天</a>
@@ -23,11 +23,11 @@
       <span class="tjsj">提交时间</span>
       <span class="yh">用户</span>
       <span class="shr">审批人</span>
-      <span class="shsj sortable" @click="sortField=0;sortType=!sortType">
-          审核时间<i class="sort" :class="{up:sortType,down:!sortType,field:sortField===0}"></i>
+      <span class="shsj sortable" @click="sort=(sort+1)%2">
+          审核时间<i class="sort" :class="{up:sort===0,down:sort===1}"></i>
         </span>
-      <span class="ys sortable" @click="sortField=1;sortType=!sortType">
-          用时<i class="sort" :class="{up:sortType,down:!sortType,field:sortField===1}"></i>
+      <span class="ys sortable" @click="sort=(sort+1)%2+2">
+          用时<i class="sort" :class="{up:sort===2,down:sort===3}"></i>
         </span>
       <span class="zt drop">
           <a href="javascript:void(0)" v-clickoutside="clickStatusOutside" @click="statusDropShow=!statusDropShow">{{status[statusDropSel].text}}</a>
@@ -40,24 +40,28 @@
     <div v-if="err===0">
       <div class="li" v-for="(e,i) in list" :key="i">
         <div class="booth">
-          <span class="tjsj">{{e.submitTime}}</span>
-          <span class="yh">{{e.nickname}}/{{e.account}}</span>
-          <span class="shr">{{e.nicknameCk}}/{{e.accountCk}}</span>
-          <span class="shsj">{{e.checkTime}}</span>
-          <span class="ys">{{e.spend}}</span>
-          <span class="zt">{{e.checkResult}}</span>
-          <span class="cz"><a href="javascript:void(0)" class="ck" @click="showPop(e.id)">查看</a></span>
+          <div class="tjsj">
+            <p>{{e.submitTime1}}</p>
+            <p>{{e.submitTime2}}</p>
+          </div>
+          <div class="yh"><router-link tag="a" :to="'/homepage?uid='+e.uid">{{e.nickname}}</router-link></div>
+          <div class="shr">{{e.nicknameCk}}</div>
+          <div class="shsj">
+            <p>{{e.checkTime1}}</p>
+            <p>{{e.checkTime2}}</p>
+          </div>
+          <div class="ys">{{e.spend}}</div>
+          <div class="zt">{{e.checkResult}}</div>
+          <div class="cz"><a href="javascript:void(0)" class="ck" @click="showPop(i)">查看</a></div>
         </div>
         <div class="division"></div>
         <div class="remark">备注：{{e.checkRemark}}</div>
       </div>
       <Pagination :total="total" :pageSize="pageSize" emitValue="changePage"
-                  style="width:100%;margin-top:20px" v-show="total>pageSize"></Pagination>
+                  style="width:100%;margin-top:20px"  v-show="total>pageSize"></Pagination>
       <BasePopup :show="pop" :width="764" :height="382" :top="50">
         <div class="pop">
           <p class="inf-li"><label>提交时间</label><span>{{list[popSel].submitTime}}</span></p>
-          <p class="inf-li"><label>姓名</label><span>{{list[popSel].name}}</span></p>
-          <p class="inf-li"><label>身份证号</label><span>{{list[popSel].idcard}}</span></p>
           <p class="inf-li"><label>银行卡号</label><span>{{list[popSel].bankcard}}</span></p>
           <p class="inf-li"><label>开户行</label><span>{{list[popSel].bank}}</span></p>
           <p class="check-img">
@@ -70,13 +74,16 @@
       </BasePopup>
     </div>
     <div v-else-if="err===1">
-      <div class="err no-result">无相应的用户，请重新搜索</div>
+      <div class="err no-result">无相应的数据，请重新搜索</div>
     </div>
     <div v-else-if="err===2">
       <div class="err load-failed">网络异常，请重新搜索</div>
     </div>
     <div v-else-if="err===3">
       <div class="err net-error">加载失败，请重新搜索</div>
+    </div>
+    <div v-else-if="err===4">
+      <div class="err loading">加载中...</div>
     </div>
     <div v-else>
       <div class="err empty">没有已审核数据</div>
@@ -86,23 +93,23 @@
 <script>
   import DateInterval from "@/components/common/DateInterval";
   import BasePopup from "@/components/common/BasePopup";
+  import Pagination from "@/components/common/Pagination";
   export default {
     components: {
       BasePopup,
       DateInterval,
+      Pagination,
     },
     data() {
       return {
         srchText: "",
         srchShowTip: false,
-        tips: [],
+        tips: [],     //模糊搜索结果
 
-        days: 1,
+        days: 0,
+        sort: 1, //0-审核时间升序,1-审核时间降序,2-用时升序,3-用时降序
 
-        sortField: -1, //0-审核时间,1-用时
-        sortType: false, //true-升序,false-降序
-
-        statusDropShow: false,
+        statusDropShow: false,    //审核结果下拉框
         statusDropSel: 0,
         status:[
           {text:"全部状态",value:0},
@@ -111,23 +118,20 @@
         ],
 
         err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败
-        list: [],
-        total: 0,
-        pageSize:15,
+        list: [],   //分页数据
+        total: 0,   //数据长度
+        pageSize:15,  //分页大小
 
         popSel: 0,
         pop: false,  //弹窗-查看
       }
     },
     watch:{
-      statusDropSel:()=>{
-        //ws-状态过滤
+      statusDropSel:function(){
+        this.loadCheckedList();
       },
-      sortFiled:()=> {
-        //ws-排序
-      },
-      sortType:()=>{
-        //ws-排序
+      sort:function(){
+        this.loadCheckedList();
       },
       days:function(){
         this.$refs.di.date1=new Date(Date.now()-24*60*60*1000*this.days);
@@ -137,6 +141,10 @@
     methods: {
       fuzzyInput(){
         this.srchShowTip=true;
+        this.loadTips();
+      },
+      search(){
+        this.loadCheckedList();
       },
       clickOutside(){
         this.srchShowTip=false;
@@ -144,27 +152,42 @@
       clickStatusOutside(){
         this.statusDropShow=false;
       },
-      search(){
-
-      },
       showPop(id){
         this.popSel=id;
         this.pop=true;
       },
-      loadCheckList(srchKey,start,end,result,sort,p){
+      loadCheckedList(p=0){
+        //
+        let srchKey=this.srchText;
+        let start= this.$refs.di.date1;
+        let end= this.$refs.di.date2;
+        start=start?Math.floor(new Date(this.$refs.di.date1).getTime()/1000):null;
+        end=end?Math.floor(new Date(this.$refs.di.date2).getTime()/1000):null;
+        let result=this.status[this.statusDropSel].value;
+        let sort=this.sort;
+        switch (sort){
+          case 0:sort=1;break;
+          case 1:sort=0;break;
+          case 2:sort=3;break;
+          case 3:sort=2;break;
+          default:sort=0;break;
+        }
+        //
         this.WsProxy.send("control","a_get_identity_list",{
           type:2,
+          state:2,
           result: result,
           sort: sort,
           keyword:srchKey,
           start: start,
           end: end,
           page:p,
-          count:this.candPageSize
+          count:this.pageSize
         }).then((data)=>{
           if(!data||!data.identities||data.identities.length<=0){
-            this.err=1; //无相应的用户
+            this.err=1; //无数据
           }else{
+            this.err=0;
             this.total=data.amount;
             this.parseList(data.identities);
           }
@@ -176,35 +199,70 @@
           }
         });
       },
+      loadTips(){
+        let srchKey=this.srchText;
+        this.WsProxy.send("control","a_get_identity_tips",{
+          type:2,
+          state:2,
+          keyword: srchKey,
+          count: 10
+        }).then((data)=>{
+          this.parseTips(data.tips);
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
       parseList(data){
         this.list=[];
         data && data.forEach((e,i)=>{
           this.list.push({
-            id: i,
+            id: e.id,
             submitTime: new Date(e.create*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
+            submitTime1: new Date(e.create*1000).dateHandle("yyyy/MM/dd"),
+            submitTime2: new Date(e.create*1000).dateHandle("HH:mm"),
+            uid: e.uid,
             nickname: e.nick || "-",
-            acount:e.phone || e.email || "-",
+            account: e.phone || e.email || "-",
             nicknameCk: e.verify_name || "-",
             accountCk: e.verify_phone || e.verify_email || "-",
             checkTime: new Date(e.update*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
+            checkTime1: new Date(e.update*1000).dateHandle("yyyy/MM/dd"),
+            checkTime2: new Date(e.update*1000).dateHandle("HH:mm"),
             spend: (e.used && e.used.formatSecord()) || "-",
             checkResult: (e.state && ["待审核","通过","未通过","恶意上传"][e.state-1]) || "-",
-            checkRemark: e.info || "-",
+            checkRemark: e.info,
             name: e.name || "-",
-            idcard: e.number || "-",
+            bankcard: e.number || "-",
             bank: e.bank_name || "-",
-            bankcard: e.bank_number || "-",
-            img1: e.image1 || "",
-            img2: e.image2 || "",
-            img3: e.image3 || "",
+            img1: this.HostUrl.http+"image/"+e.image1,
+            img2: this.HostUrl.http+"image/"+e.image2,
+            img3: this.HostUrl.http+"image/"+e.image3,
+          });
+        });
+      },
+      parseTips(data){
+        this.tips=[];
+        data && data.forEach((e)=>{
+          this.tips.push({
+            uid: e.uid || 0,
+            nickname: e.name || "-",
+            account:e.phone || e.email || "-",
           });
         });
       }
     },
     mounted(){
+      this.loadCheckedList(0);
       this.Bus.$on("changePage",(p)=>{
-
+        this.loadCheckedList(p-1);
       });
+      this.Bus.$on("onDiChange",()=>{
+        this.loadCheckedList();
+      });
+    },
+    destroyed(){
+      this.Bus.$off("onDiChange");
+      this.Bus.$off("changePage");
     }
   }
 </script>
@@ -313,13 +371,12 @@
               right -15px
               top 50%
               margin-top 1px
-            &.field
-              &.up
-                &:before
-                  border-bottom-color #ffb422
-              &.down
-                &:after
-                  border-top-color #ffb422
+          .sort.up
+            &:before
+              border-bottom-color #ffb422
+          .sort.down
+            &:after
+              border-top-color #ffb422
           &:hover
             color #666
         &.drop
@@ -352,20 +409,20 @@
               padding 0 10px
               &:hover
                 background #fff3eb
-      .tjsj
-        width 160px
-      .yh
-        width 140px
-      .shr
-        width 140px
-      .cz
-        width 100px
-      .shsj
-        width 160px
-      .ys
-        width 100px
-      .zt
-        width 100px
+    .tjsj
+      width 140px
+    .yh
+      width 140px
+    .shr
+      width 140px
+    .cz
+      width 120px
+    .shsj
+      width 140px
+    .ys
+      width 120px
+    .zt
+      width 100px
     .pop
       padding 60px 80px
       position relative
@@ -406,16 +463,26 @@
       background #fff
       border 1px solid #E1E1E1
       margin-bottom 10px
-      span
-        display inline-block
       .booth
         font-size 14px
         color #333333
         letter-spacing 0.16px
-        height 67px
-        line-height 67px
-        .yh
-          color #ffb422
+        >div
+          display inline-block
+          height 70px
+          vertical-align top
+          padding 15px 0
+          box-sizing border-box
+          overflow hidden
+          text-overflow ellipsis
+          white-space nowrap
+          >p
+            line-height 20px
+            &:not(:first-of-type)
+              margin-top 3px
+        .yh>a
+            cursor pointer
+            color #ffb422
         .cz
           .ck
             color #ffb422
@@ -430,20 +497,6 @@
         font-size: 13px;
         color: #999999;
         letter-spacing: 0.23px;
-      .tjsj
-        width 160px
-      .yh
-        width 140px
-      .shr
-        width 140px
-      .cz
-        width 100px
-      .shsj
-        width 160px
-      .ys
-        width 100px
-      .zt
-        width 100px
     .err
       background-repeat no-repeat
       background-position  center 102px
