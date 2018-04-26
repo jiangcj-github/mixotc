@@ -433,13 +433,13 @@
         }))
       },
       getCompleteData() {
-        let ws = this.WebSocket; // 创建websocket连接
-        ws.onMessage['upd_ord'] = { // 完成状态的action
-          callback: (data) => {
-            if(!data || data.body.ret !== 0) return;
-            console.log('我完成了', data.body.data)
-          },
-        };
+        // let ws = this.WebSocket; // 创建websocket连接
+        // ws.onMessage['upd_ord'] = { // 完成状态的action
+        //   callback: (data) => {
+        //     if(!data || data.body.ret !== 0) return;
+        //     // console.log('我完成了', data.body.data)
+        //   },
+        // };
       },
       getInitNum() {
         // 获取进行中和已完成数量

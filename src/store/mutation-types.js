@@ -18,6 +18,8 @@ const addMessages = "addMessages";
 const changeMessageState = "changeMessageState";
 const changeImgsrc = "changeImgsrc";
 const changeMoreFlag = "changeMoreFlag";
+const moreMessage = "moreMessage";
+const moneyAddress = "moneyAddress";
 
 
 /**
@@ -47,6 +49,8 @@ export {
   changeMessageState,
   changeImgsrc,
   changeMoreFlag,
+  moreMessage,
+  moneyAddress,
 
   /**
    * 审核申述客服部分

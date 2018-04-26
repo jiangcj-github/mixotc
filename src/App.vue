@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Header></Header>
-    <router-view class="main-container" :key="new Date() - 0"/>
+    <router-view class="main-container" :key="$route.path + JsonBig.stringify($route.query)"/>
     <Footer></Footer>
     <News></News>
   </div>

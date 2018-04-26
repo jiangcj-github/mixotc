@@ -22,7 +22,7 @@
       <div class="wrap">
         <div class="blank" v-if="!title && curChat !== 'system'"></div>
         <div class="news-info-talk clearfix" v-if="title && curChat !== 'system'">
-          <p class="more-info" v-if="moreFlag" @click="fetchMore(10)">查看更多消息</p>
+          <p class="more-info" v-if="chat[index].moreFlag" @click="fetchMore(10)">查看更多消息</p>
           <div class="messages clearfix" v-for="(item, index) of messages" :key="item.time">
             <p class="time-info" v-if="index > 0 && dealTime(messages[index-1].time, item.time)">{{dealTime(messages[index-1].time, item.time)}}</p>
             <div :class="{'left-people': item.from !== JsonBig.stringify($store.state.userInfo.uid), 'right-people': item.from === JsonBig.stringify($store.state.userInfo.uid)}">
@@ -53,7 +53,7 @@
     <!-- 底部 -->
     <ol class="input-text clearfix">
       <li>
-        <input type="text" :disabled="title === '' ? ((chat[index] && chat[index].exists === undefined || chat[index] && chat[index].exists) ? true : false) : false" v-model="sendText" @keyup.enter="sendMs">
+        <input type="text" :disabled="title === '' ? ((chat[index] && chat[index].exists === undefined || chat[index] && chat[index].exists) ? true : false) : false" v-model="sendText" @keyup.enter="sendMs(sendText)">
       </li>
       <li @click="$refs.up_img.click()" class="send-image">
         <img src="/static/images/picture_icon.png"  title="发送图片">
@@ -63,7 +63,20 @@
         <span>图片</span>
       </li>
       <li>
-        <img src="/static/images/address_icon.png">
+        <div 
+          class="money-address" 
+          v-show="showAddress" 
+          @click="showAddress = false"  
+          v-clickoutside="()=>{showAddress && (this.showAddress = false)}"
+          >
+          <!-- <p v-for="(item, index) of $store.state.moneyAddress" :key="index" @click="send(item)">
+            {{dealAddress(item)}}
+          </p> -->
+          <p @click="sendAddress('中国工商银行***6223')">中国工商银行***6223</p>
+          <p>支付宝：18789998767</p>
+          <p>微信：8908877790</p>
+        </div>
+        <img src="/static/images/address_icon.png" @click.stop="foldAddress">
         <span>收款地址</span>
       </li>
     </ol>
@@ -114,6 +127,7 @@
       return {
         groupId: '',
         isNewGroup: true,
+        showAddress: false,
         showCheckGroup: false,
         seletAdd: false,
         showAddFriend: false,
@@ -127,7 +141,6 @@
         },
         timer: null,
         sendText: '',
-        moreFlag: true,
         sendFile: ''
       }
     },
@@ -139,6 +152,7 @@
       HappyScroll
     },
     mounted() {
+      this.fetchAddress()
       let _this = this;
       //聊天信息监听
       this.WebSocket.onMessage['sms']={
@@ -151,7 +165,7 @@
             await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
             // 文字
             if (type === 'text') {
-              bj = {
+              obj = {
                 id: id,
                 from: _this.JsonBig.stringify(uid), 
                 to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
@@ -276,6 +290,23 @@
       },
     },
     methods: {
+      dealAddress(item) {
+         if(item.id === 1) {
+          return `支付宝:${item.number}`
+        }
+        if(item.id === 2) {
+          return `微信:${item.number}`;
+        }
+        if(item.id === 4) {
+          return `${item.bank + (item.number % 10000)}`;
+        }
+      },
+      sendAddress(item) {
+        this.sendMs(item)
+      },
+      foldAddress() {
+        this.showAddress = true;
+      },
       toHomepage(id) {
         this.$router.push({ name: 'homepage', query: { uid: id }})
       },
@@ -285,6 +316,14 @@
       imgError(tid, time, src) {
         if (src === '') return;
         this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
+      },
+      async fetchAddress() {
+        await this.WsProxy.send('wallet', 'my_accounts', {
+          uid: this.$store.state.userInfo.uid,
+          origin: 0
+        }).then(data => {
+          data.accounts && this.$store.commit({type: 'moneyAddress', data: data.accounts})
+        })
       },
       // 不在消息列表的人来消息时的处理
       async dealNewChat(id, flag) {
@@ -324,22 +363,47 @@
           console.log(error)
         })
       },
-      fetchMore(num) {
-        this.WsProxy.send('control', 'get_history_msgs', {
-          peer_id: this.chat[this.index].group ? 0 : this.JsonBig.parse(this.curChat),
+      //更多消息
+      async fetchMore(num) {
+        if(this.index === '') return;
+        let result = [];
+        await this.WsProxy.send('control', 'get_history_msgs', {
+          peer_id:  this.chat[this.index].group ? 0 : this.JsonBig.parse(this.curChat),
           group_id: this.chat[this.index].group ? this.JsonBig.parse(this.curChat) : 0,
-          last_msg_id: this.messages[0] && this.messages[0].id ? messages[0].id : 0,
+          last_msg_id: this.messages[0] && this.messages[0].id ? this.JsonBig.parse(this.messages[0].id) : 0,
           is_peer_admin: this.chat[this.index].service ? 1 : 0,
           count: num
-        }).then(data=>{
-          (!data.msgs || data.msgs.length <= 10) && this.morFlag
+        }).then(data => {
+          (!data.msgs || data.msgs.length < num) && this.$store.commit({type: 'changeMoreFlag', data:{id: this.curChat, flag: false }})
+          if (!data.msgs) return;
+          console.log()
+          let uid = this.JsonBig.stringify(this.$store.state.userInfo.uid);
+          data.msgs.forEach(item => {
+            let sender_id = this.JsonBig.stringify(item.sender_id),
+                create_time = item.create_time * 1000;
+            result.push({
+              id: this.JsonBig.stringify(item.id),
+              from: sender_id === uid ? uid : sender_id, 
+              to: sender_id === uid ? this.curChat : uid,
+              icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
+              msg:{
+                type: item.type === 'image' ? 1 : 0,
+                content: item.type === 'image' ? `${this.HostUrl.http}file/${item.data.id}` : item.data.msg
+              },
+              isLoding: item.type === 'image' ? true : false,
+              isFail: false,
+              time: create_time
+            })
+          })
         })
+        this.$store.commit({type: 'moreMessage', data:result })
       },
       // 处理是否显示消息时间
       dealTime(time1, time2) {
         if(time2 - time1 < 180000) return false;
         return time2.formatTime()
       },
+      //发送增加本地消息记录
       addStoreMessages(tid, type, content, time) {
         let obj = {
           from: this.JsonBig.stringify(this.$store.state.userInfo.uid), 
@@ -397,13 +461,13 @@
         this.addStoreMessages(tid, 1, '', time);
       },
       //发送消息
-      sendMs() {
-        if (this.sendText === '') return;
+      sendMs(text) {
+        if (text === '') return;
         // 本地store更新消息
         let tid = this.JsonBig.parse(this.curChat),
             chat= this.chat[this.index],
             time = new Date() - 0;
-        this.addStoreMessages(tid, 0, this.sendText, time)
+        this.addStoreMessages(tid, 0, text, time)
         // 发消息
         this.WsProxy.sendMessage({
           gid: chat.group ? tid : 0,
@@ -412,7 +476,7 @@
             uid: this.$store.state.userInfo.uid,
             rid: chat.group ? tid : 0,
             tid: tid,
-            msg: this.sendText
+            msg: text
           }
         }).then(data => {
           this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0 }})
@@ -470,6 +534,17 @@
         }).catch((msg)=>{
           console.log(msg);
         });
+      }
+    },
+    watch: {
+      curChat:{
+        handler(curvalue){
+          let messages = this.$store.state.messages[curvalue];
+          if (!messages || messages && messages.length === 0) {
+            this.fetchMore(3)
+          }
+        },
+        immediate: true
       }
     }
   }
@@ -710,10 +785,39 @@
       -webkit-box-shadow: 0 -3px 3px 0 rgba(0,0,0,0.1)
       box-shadow:  0 -3px 3px 0 rgba(0,0,0,0.1)
       li
+        position relative
         float left
         text-align center
+        img
+          cursor pointer
         &.send-image
           cursor pointer
+        .money-address
+          position absolute
+          top -81px
+          right 12px
+          width 150px
+          height 75px
+          color #FFF
+          font-size $fz12
+          letter-spacing: 0.14px;
+          border-radius 2px
+          background $col333
+          &::after
+            position absolute
+            bottom -6px
+            right 12px
+            content ''
+            border-top 7px solid $col333
+            border-left 6px solid transparent
+            border-right 6px solid transparent
+          p
+            height 25px
+            line-height 25px
+            color #FFF
+            cursor pointer
+            &:hover
+              background #474747
         span
           display block
           margin-top -3px

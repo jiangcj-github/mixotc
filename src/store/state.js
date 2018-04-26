@@ -12,6 +12,7 @@ export default {
   systemMessage: 0, //未读系统消息
   token: "",
   chat: [],
+  moneyAddress: [],
   messages: {
     system:[]
   },

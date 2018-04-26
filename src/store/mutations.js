@@ -115,40 +115,12 @@ export default {
           item.isLoding = false
           code && (item.isFail = true);
           idx = index;
-          console.log(item.isFail);
+          // console.log(item.isFail);
         }
       })
       state.messages = Object.assign({}, state.messages);
   },
-  [types.changeMessageState](state, { data: {id,time,code} }) {
-    // 消息发送成功或失败
-    let idx = 0;
-      state.messages[id].forEach((item, index) => {
-        if(time === item.time){
-          item.isLoding = false
-          code && (item.isFail = true);
-          idx = index;
-          console.log(item.isFail);
-        }
-      })
-      state.messages = Object.assign({}, state.messages);
-  },
-[types.changeMessageState](state, { data: {id, time, code} }) {
-    // 消息发送成功或失败
-    let idx = 0;
-      state.messages[id].forEach((item, index) => {
-        if(time === item.time){
-          item.isLoding = false
-          !code && (item.isFail = false);
-          code && (item.isFail = true);
-          idx = index;
-        }
-      })
-      state.messages = Object.assign({}, state.messages);
-  },
-
   [types.changeImgsrc](state, { data: {id, time, src} }) {
-    // 消息发送成功或失败
     let idx = 0;
       state.messages[id].forEach((item, index) => {
         if(time === item.time){
@@ -162,11 +134,23 @@ export default {
     // 改变更多消息的标志
     let idx = 0;
       state.chat.forEach((item, index) => {
-        if(time.id === data.id){
+        if(item.id === id){
           item.moreFlag = flag;
         }
       })
-      // state.messages = Object.assign({}, state.messages);
+      
+  },
+
+  [types.moreMessage](state, { data }) {
+    // 查看更多消息
+    !state.messages[state.curChat] && (state.messages[state.curChat] = []);
+    state.messages[state.curChat] = data.reverse().concat(state.messages[state.curChat]);
+    state.messages = Object.assign({}, state.messages);
+  },
+
+  [types.moneyAddress](state, { data }) {
+    // 收款地址
+    state.moneyAddress = data
   },
   /**
    * 审核申述客服部分
