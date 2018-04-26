@@ -5,9 +5,9 @@
         <div class="f1">
           <input type="text" placeholder="搜索商家昵称/账号" v-model="srchText" v-clickoutside="clickOutside" @input="fuzzyInput">
           <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
-          <a href="javascript:void(0)" @click="loadCheckedList"></a>
+          <a href="javascript:void(0)" @click="search"></a>
           <ul v-show="srchShowTip && tips.length>0" class="ft-cand">
-            <li v-for="(o,i) in tips" :key="i" @mousedown="srchText=o.nickname+'/'+o.account" @click="search">{{o.nickname+'/'+o.account}}</li>
+            <li v-for="(o,i) in tips" :key="i" @mousedown="srchText=o.nickname" @click="search">{{o.nickname}}</li>
           </ul>
         </div>
         <div class="f2">
@@ -40,13 +40,19 @@
       <div v-if="err===0">
         <div class="li" v-for="(e,i) in list" :key="i">
           <div class="booth">
-            <span class="tjsj">{{e.submitTime}}</span>
-            <span class="yh">{{e.nickname}}/{{e.account}}</span>
-            <span class="shr">{{e.nicknameCk}}/{{e.accountCk}}</span>
-            <span class="shsj">{{e.checkTime}}</span>
-            <span class="ys">{{e.spend}}</span>
-            <span class="zt">{{e.checkResult}}</span>
-            <span class="cz"><a href="javascript:void(0)" class="ck" @click="showPop(e.id)">查看</a></span>
+            <div class="tjsj">
+              <p>{{e.submitTime1}}</p>
+              <p>{{e.submitTime2}}</p>
+            </div>
+            <div class="yh"><router-link tag="a" :to="'/homepage?uid='+e.uid">{{e.nickname}}</router-link></div>
+            <div class="shr">{{e.nicknameCk}}</div>
+            <div class="shsj">
+              <p>{{e.checkTime1}}</p>
+              <p>{{e.checkTime2}}</p>
+            </div>
+            <div class="ys">{{e.spend}}</div>
+            <div class="zt">{{e.checkResult}}</div>
+            <div class="cz"><a href="javascript:void(0)" class="ck" @click="showPop(i)">查看</a></div>
           </div>
           <div class="division"></div>
           <div class="remark">备注：{{e.checkRemark}}</div>
@@ -76,6 +82,9 @@
       <div v-else-if="err===3">
         <div class="err net-error">加载失败，请重新搜索</div>
       </div>
+      <div v-else-if="err===4">
+        <div class="err loading">加载中...</div>
+      </div>
       <div v-else>
         <div class="err empty">没有已审核数据</div>
       </div>
@@ -84,10 +93,12 @@
 <script>
   import DateInterval from "@/components/common/DateInterval";
   import BasePopup from "@/components/common/BasePopup";
+  import Pagination from "@/components/common/Pagination";
   export default {
     components: {
       BasePopup,
       DateInterval,
+      Pagination,
     },
     data() {
       return {
@@ -95,7 +106,7 @@
         srchShowTip: false,
         tips: [],     //模糊搜索结果
 
-        days: 1,
+        days: 0,
 
         sort: 1, //0-审核时间升序,1-审核时间降序,2-用时升序,3-用时降序
 
@@ -120,10 +131,7 @@
       statusDropSel:function(){
         this.loadCheckedList();
       },
-      sortFiled:()=> {
-        this.loadCheckedList();
-      },
-      sortType:()=>{
+      sort:function(){
         this.loadCheckedList();
       },
       days:function(){
@@ -135,6 +143,9 @@
       fuzzyInput(){
         this.srchShowTip=true;
         this.loadTips();
+      },
+      search(){
+        this.loadCheckedList();
       },
       clickOutside(){
         this.srchShowTip=false;
@@ -151,12 +162,8 @@
         let srchKey=this.srchText;
         let start= this.$refs.di.date1;
         let end= this.$refs.di.date2;
-        if(!start){
-          start=new Date(this.$refs.di.date1).getTime()*1000;
-        }
-        if(!end){
-          end=new Date(this.$refs.di.date2).getTime()*1000;
-        }
+        start=start?Math.floor(new Date(this.$refs.di.date1).getTime()/1000):null;
+        end=end?Math.floor(new Date(this.$refs.di.date2).getTime()/1000):null;
         let result=this.status[this.statusDropSel].value;
         let sort=this.sort;
         switch (sort){
@@ -167,20 +174,22 @@
           default:sort=0;break;
         }
         //
+        this.err=4;
         this.WsProxy.send("control","a_get_identity_list",{
           type:1,
-          state:1,
+          state:2,
           result: result,
           sort: sort,
           keyword:srchKey,
           start: start,
           end: end,
           page:p,
-          count:this.candPageSize
+          count:this.pageSize
         }).then((data)=>{
           if(!data||!data.identities||data.identities.length<=0){
-            this.err=1; //无相应的用户
+            this.err=1; //无数据
           }else{
+            this.err=0;
             this.total=data.amount;
             this.parseList(data.identities);
           }
@@ -209,21 +218,26 @@
         this.list=[];
         data && data.forEach((e,i)=>{
           this.list.push({
-            id: i,
+            id: e.id,
             submitTime: new Date(e.create*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
+            submitTime1: new Date(e.create*1000).dateHandle("yyyy/MM/dd"),
+            submitTime2: new Date(e.create*1000).dateHandle("HH:mm"),
+            uid: e.uid,
             nickname: e.nick || "-",
-            acount:e.phone || e.email || "-",
+            account: e.phone || e.email || "-",
             nicknameCk: e.verify_name || "-",
             accountCk: e.verify_phone || e.verify_email || "-",
             checkTime: new Date(e.update*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
+            checkTime1: new Date(e.update*1000).dateHandle("yyyy/MM/dd"),
+            checkTime2: new Date(e.update*1000).dateHandle("HH:mm"),
             spend: (e.used && e.used.formatSecord()) || "-",
             checkResult: (e.state && ["待审核","通过","未通过","恶意上传"][e.state-1]) || "-",
-            checkRemark: e.info || "-",
+            checkRemark: e.info,
             name: e.name || "-",
             idcard: e.number || "-",
-            img1: e.image1 || "",
-            img2: e.image2 || "",
-            img3: e.image3 || "",
+            img1: this.HostUrl.http+"image/"+e.image1,
+            img2: this.HostUrl.http+"image/"+e.image2,
+            img3: this.HostUrl.http+"image/"+e.image3,
           });
         });
       },
@@ -241,8 +255,15 @@
     mounted(){
       this.loadCheckedList(0);
       this.Bus.$on("changePage",(p)=>{
-        this.loadCheckedList(p);
+        this.loadCheckedList(p-1);
       });
+      this.Bus.$on("onDiChange",()=>{
+        this.loadCheckedList();
+      });
+    },
+    destroyed(){
+      this.Bus.$off("onDiChange");
+      this.Bus.$off("changePage");
     }
   }
 </script>
@@ -389,20 +410,6 @@
               padding 0 10px
               &:hover
                 background #fff3eb
-      .tjsj
-        width 160px
-      .yh
-        width 140px
-      .shr
-        width 140px
-      .cz
-        width 100px
-      .shsj
-        width 160px
-      .ys
-        width 100px
-      .zt
-        width 100px
     .pop
       padding 60px 80px
       position relative
@@ -449,10 +456,22 @@
         font-size 14px
         color #333333
         letter-spacing 0.16px
-        height 67px
-        line-height 67px
-        .yh
-          color #ffb422
+        >div
+          display inline-block
+          height 70px
+          vertical-align top
+          padding 15px 0
+          box-sizing border-box
+          overflow hidden
+          text-overflow ellipsis
+          white-space nowrap
+          >p
+            line-height 20px
+            &:not(:first-of-type)
+              margin-top 3px
+        .yh>a
+            color #ffb422
+            cursor pointer
         .cz
           .ck
             color #ffb422
@@ -467,20 +486,20 @@
         font-size: 13px;
         color: #999999;
         letter-spacing: 0.23px;
-      .tjsj
-        width 160px
-      .yh
-        width 140px
-      .shr
-        width 140px
-      .cz
-        width 100px
-      .shsj
-        width 160px
-      .ys
-        width 100px
-      .zt
-        width 100px
+    .tjsj
+      width 140px
+    .yh
+      width 140px
+    .shr
+      width 140px
+    .cz
+      width 120px
+    .shsj
+      width 140px
+    .ys
+      width 120px
+    .zt
+      width 100px
     .err
       background-repeat no-repeat
       background-position  center 102px

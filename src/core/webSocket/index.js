@@ -133,9 +133,23 @@ pool.start = function(_url) {
  */
 pool.send = function(txt) {
   if(!(pool.beforeSend && pool.beforeSend(txt))) return;
-  pool.seq++;
-  console.log("send text");
-  pool.ws.send(txt);
+  if(this.ws.readyState!==WebSocket.OPEN){
+    pool.delaySend(txt);
+  }else{
+    pool.seq++;
+    pool.ws.send(txt);
+  }
+};
+
+pool.delaySend=function(txt){
+  if(pool.ws.readyState!==WebSocket.OPEN){
+    setTimeout(()=>{
+      pool.delaySend(txt);
+    },1000);
+  }else{
+    pool.seq++;
+    pool.ws.send(txt);
+  }
 };
 
 /**

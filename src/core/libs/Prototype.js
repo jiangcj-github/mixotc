@@ -27,19 +27,17 @@ Number.prototype.formatSecord=function(){
   let h,m,s;
   if(this<60){
     s=this;
-    return "${s}s";
+    return s+"s";
   }else if(this>=60&&this<3600){
     let m=Math.floor(this/60);
     let s=this-m*60;
-    return "${m}min${s}s";
+    return m+"min";
   }else{
     let h=Math.floor(this/3600);
     let m=Math.floor((this-h*3600)/60);
     let s=this-h*3600-m*60;
-    return "${h}h${m}min${s}s";
+    return h+"h";
   }
-
-    return "${h}h${m}min${s}s"
 };
 // xxxx-yy-zz, hh:mm:ss
 /**

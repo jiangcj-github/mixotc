@@ -79,6 +79,9 @@
           console.log(msg);
         });
       }
+    },
+    destroyed(){
+      this.Bus.$off('changePage');
     }
   }
 </script>

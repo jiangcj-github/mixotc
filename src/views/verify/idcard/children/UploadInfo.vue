@@ -1,11 +1,11 @@
 <template>
-  <div class="upload-info" v-if="infoErr===0">
+  <div class="upload-info" v-if="err===0">
     <h3>{{infos.nickname}}/{{infos.account}}</h3>
     <div v-for="(e,i) in infos.his" :key="i">
-      <sup>第{{i}}次认证</sup>
+      <sup>第{{i+1}}次认证</sup>
       <div v-if="e.flag===1">
         <p class="inf-li"><label>提交时间</label><span>{{e.submitTime}}</span></p>
-        <p class="inf-li"><label>姓名</label><span>{{e.name}}</span></p>
+        <p class="inf-li"><label>真实姓名</label><span>{{e.name}}</span></p>
         <p class="inf-li"><label>身份证号</label><span>{{e.idcard}}</span></p>
         <p class="check-img">
           <img :src="e.img1">
@@ -44,14 +44,19 @@
       </div>
     </div>
   </div>
-  <div class="err no-result" v-else-if="infoErr===1">无相应的用户，请重新搜索</div>
-  <div class="err load-failed" v-else-if="infoErr===2">网络异常，请重新搜索</div>
-  <div class="err net-error" v-else-if="infoErr===3">加载失败，请重新搜索</div>
+  <div class="err no-result" v-else-if="err===1">该用户没有待审核数据</div>
+  <div class="err load-failed" v-else-if="err===2">网络异常，请重新搜索</div>
+  <div class="err net-error" v-else-if="err===3">加载失败，请重新搜索</div>
+  <div class="err loading" v-else-if="err===4">数据加载中...</div>
   <div class="err empty" v-else>没有待审核数据</div>
 </template>
 <script>
   export default {
-    props:["infos","infoErr"],
+    props: {
+      infos:{},
+      err:{},
+      onSubmit:{type: String,default:"onSubmit"},
+    },
     data(){
       return{
         formResult: -1,
@@ -102,12 +107,14 @@
         let id=this.infos.his[0].id;
         let uid=this.infos.his[0].uid;
         let type=1;
-        let result=this.formResult;
-        let spite=this.formMali;
+        let result=2-this.formResult;
+        let spite=2-(this.formMali?0:1);
         let info=this.formRemark;
         //ws-提交审核
         this.WsProxy.send("control","a_identify",{
           id:id,uid:uid,type:type,result:result,spite:spite,info:info
+        }).then((data)=>{
+          this.Bus.$emit("onSubmit",this.infos);
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -184,9 +191,10 @@
           font-size 13px
           color #FFFFFF
           letter-spacing 0.15px
-          cursor pointer
+          cursor not-allowed
           &.active
             background-color #ffb422
+            cursor pointer
           &.active:hover
             background-color #f5a60e
   .textarea
@@ -209,8 +217,6 @@
       letter-spacing 0
       line-height 24px
       padding 0 6px
-
-
   .checkbox
     font-size 13px
     color #333333

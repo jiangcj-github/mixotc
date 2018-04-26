@@ -3,20 +3,17 @@
     <div class="uncheck">
       <div class="search-bar">
         <div class="search" >
-          <input type="text" placeholder="查找昵称/帐号" v-model="srchText" v-clickoutside="clickSrchOutside" @input="fuzzyInput">
+          <input type="text" placeholder="查找昵称/帐号" v-model="srchText" @input="fuzzyInput">
           <img src="/static/images/search_gray.png" @click="search">
-          <ul class="cand" v-show="srchShowTip && tips.length>0">
-            <li v-for="(o,i) in tips" @mousedown="srchText=o.nickname"
-                @click="search" :key="i">{{o.nickname+" / "+o.account}}</li>
-          </ul>
         </div>
         <ul class="results">
-          <li :class="{active:candSel==i}" v-for="(o,i) in cands" :key="i"
-              @mousedown="candSel=i" @click="clickCand">{{o.nickname+"/"+o.account}}</li>
+          <li :class="{active:candSel===i}" v-for="(o,i) in cands" :key="i" @click="clickCand(o,i)">
+            <p class="nick">{{o.nickname}}</p><p class="account">{{o.account}}</p>
+          </li>
         </ul>
-        <SimplePagination :total="candTotal" :pageSize="candPageSize" style="width:100%" emitValue="changePage" v-if="candTotal>candPageSize"></SimplePagination>
+        <SimplePagination :total="candTotal" :pageSize="candPageSize"  v-if="candTotal>candPageSize"></SimplePagination>
       </div>
-      <UploadInfo infos="infos" err="infoErr"></UploadInfo>
+      <UploadInfo :infos="infos" :err="infoErr"></UploadInfo>
     </div>
 </template>
 <script>
@@ -31,11 +28,11 @@
       return {
         srchText: "",
 
-        srchShowTip: false,
-        tips: [],
+        //srchShowTip: false,
+        //tips: [],
 
         candTotal: 0,
-        candPageSize: 20,
+        candPageSize: 15,
         cands: [],
         candSel: 0,
 
@@ -45,15 +42,12 @@
     },
     methods: {
       fuzzyInput(){
-        this.srchShowTip=true;
-        this.loadTips();
+        this.loadUncheckList();
       },
-      clickSrchOutside(){
-        this.srchShowTip=false;
-      },
-      clickCand(id){
-        //ws-获取审核信息
-        this.loadUncheckByUid(id);
+      clickCand(item,i){
+        if(this.candSel===i) return;
+        this.candSel=i;
+        this.loadUncheckByUid(item.uid);
       },
       search(){
         this.candSel=-1;
@@ -68,25 +62,14 @@
           count:this.candPageSize
         }).then((data)=>{
           this.candTotal=data.amount;
+          this.candSel=-1;
           this.parseCands(data.users);
         }).catch((msg)=>{
           console.log(msg);
         });
       },
-      loadTips(){
-        let srchKey=this.srchText;
-        this.WsProxy.send("control","a_get_identity_tips",{
-          type:1,
-          state:1,
-          keyword: srchKey,
-          count: 10
-        }).then((data)=>{
-          this.parseTips(data.tips);
-        }).catch((msg)=>{
-          console.log(msg);
-        });
-      },
       loadUncheckByUid(id){
+        this.infoErr=4;
         this.WsProxy.send("control","a_get_user_identity",{
           type: 1,
           uid: id,
@@ -94,8 +77,10 @@
           if(!data||!data.identities||data.identities.length<=0){
             this.infoErr=1; //无相应的用户
           }else{
+            this.infoErr=0;
+            this.infos={};
             this.infos.nickname=data.name || "-";
-            this.infos.acount=data.phone || data.email || "-";
+            this.infos.account=data.phone || data.email || "-";
             this.parseInfos(data.identities);
           }
         }).catch((msg)=>{
@@ -106,23 +91,13 @@
           }
         });
       },
-      parseTips(data){
-        this.tips=[];
-        data && data.forEach((e)=>{
-          this.tips.push({
-            uid: e.uid || 0,
-            nickname: e.name || "-",
-            account:e.phone || e.email || "-",
-          });
-        });
-      },
       parseCands(data){
         this.cands=[];
         data && data.forEach((e)=>{
           this.cands.push({
             uid: e.id || 0,
             nickname: e.name || "-",
-            acount:e.phone || e.email || "-",
+            account:e.phone || e.email || "-",
           });
         });
       },
@@ -131,14 +106,14 @@
         this.infos.his=[];
         data && data.forEach((e)=>{
           this.infos.his.unshift({
-            id: e.id || 0,
-            uid: e.uid || 0,
+            id: e.id && e.id || 0,
+            uid: e.uid && e.uid || 0,
             name: e.name || "-",
             submitTime: new Date(e.create*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
             idcard: e.number || "-",
-            img1: e.image1 || "",
-            img2: e.image2 || "",
-            img3: e.image3 || "",
+            img1: this.HostUrl.http+"image/"+e.image1,
+            img2: this.HostUrl.http+"image/"+e.image2,
+            img3: this.HostUrl.http+"image/"+e.image3,
             remark: e.info,
             flag: e.state,  //1:待审核,2:审核通过,3:审核未通过,4:恶意上传
           });
@@ -148,9 +123,19 @@
     mounted(){
       //ws-获取待审核列表
       this.loadUncheckList();
-      this.Bus.$on("changePage",(p)=>{
-        this.loadUncheckList(p);
+      this.Bus.$on("onPageChange",(p)=>{
+        this.loadUncheckList(p-1);
       });
+      this.Bus.$on("onSubmit",(info)=>{
+        this.Bus.$emit("onSubmit2",info);
+        this.infoErr=-1;
+        this.candSel=-1;
+        this.loadUncheckList();
+      });
+    },
+    destroyed(){
+      this.Bus.$off("onPageChange");
+      this.Bus.$off("onSubmit");
     }
   }
 </script>
@@ -202,21 +187,31 @@
             padding 0 10px
             cursor pointer
             font-size 13px
+            text-overflow ellipsis
+            overflow hidden
+            white-space nowrap
             &:hover
               background #fff3eb
       .results
-        margin-top 2px
         font-size 14px
         color #FFB422
         letter-spacing 0.16px
-        padding-bottom 15px
         min-height 477px
+        box-sizing border-box
         >li
           line-height 20px
-          padding 0 34px
-          margin-top 15px
+          padding 8px 34px
           cursor pointer
+          &:hover
+            background #fcfcfc
           &.active
-            color #FFB422
+            background #f9f0f0
+          >p
+            display block
+            &.nick
+              color #333
+            &.account
+              color #999
+              font-size 12px
   placeholder()
 </style>

@@ -1,17 +1,22 @@
 <template>
-  <Left :leftBar="1">
-    <div class="right" slot="right">
-      <ul class="tab">
-        <li :class="{active:tab==1}" @click="tab=1">待审核<i v-if="uncheckNum>0">({{uncheckNum}})</i></li>
-        <li :class="{active:tab==2}" @click="tab=2">已审核</li>
-      </ul>
-      <Uncheck v-show="tab==1"></Uncheck>
-      <Check v-show="tab==2"></Check>
+  <div class="verify inner">
+    <h2>mixOTC-审核</h2>
+    <div class="main">
+      <!-- 左边栏菜单 -->
+      <Left :leftBar="1"></Left>
+      <!--右边内容-->
+      <div class="right">
+        <ul class="tab">
+          <li :class="{active:tab===1}" @click="tab=1">待审核<i>({{uncheckNum}})</i></li>
+          <li :class="{active:tab===2}" @click="tab=2">已审核</li>
+        </ul>
+        <Uncheck v-show="tab===1"></Uncheck>
+        <Check v-show="tab===2"></Check>
+      </div>
     </div>
-  </Left>
+  </div>
 </template>
 <script>
-
   import Left from "./layout/Left";
   import Uncheck from "./idcard/Uncheck";
   import Check from "./idcard/Check";
@@ -29,6 +34,9 @@
     },
     mounted(){
       this.loadUncheckTotal();
+      this.Bus.$on("onSubmit2",(info)=>{
+        this.loadUncheckTotal();
+      });
     },
     methods:{
       loadUncheckTotal(){
@@ -46,6 +54,7 @@
 </script>
 <style scoped lang="stylus">
   @import "../../stylus/base.styl";
+  @import "./stylus/verify.styl";
   .right
     width 1000px
     margin-left 200px
