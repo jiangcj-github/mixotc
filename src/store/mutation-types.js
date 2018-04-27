@@ -20,6 +20,9 @@ const changeImgsrc = "changeImgsrc";
 const changeMoreFlag = "changeMoreFlag";
 const moreMessage = "moreMessage";
 const moneyAddress = "moneyAddress";
+const newSystemMes = "newSystemMes";
+const beKick = 'beKick' // 新增发送消息
+const chatTop = "chatTop"; // 新增发送消息
 
 
 /**
@@ -55,6 +58,9 @@ export {
   changeMoreFlag,
   moreMessage,
   moneyAddress,
+  newSystemMes,
+  beKick,// 被踢出群
+  chatTop,
 
   /**
    * 审核申述客服部分

@@ -53,6 +53,12 @@
     },
     mounted() {
       this.initData()
+      this.fetchAddress()//拉取收款地址
+      this.listenChat()//监听消息
+      this.reqFriend()//监听好友请求
+      this.beFriend()//监听被加好友
+      this.beAddedGroup()//监听被加入群
+      this.beKickGroup()//监听被踢出群
       document.querySelector('.news-info-left .happy-scroll-container').className = 'happy-scroll-container import';
     },
     computed: {
@@ -143,6 +149,200 @@
           }
         })
         linkman && this.$store.commit({type: 'changeChat', data: result});
+      },
+      // 不在消息列表的人来消息时的处理
+      async dealNewChat(id, flag) {
+        !flag && !this.chatIds.includes(id) && await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(id)}).then( ({name, phone, email, icon }) => {
+           this.$store.commit({type: 'newChat', data:{
+              id: id,
+              group: false,
+              service: false,
+              icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+              nickName: name,
+              phone: phone,
+              email: email,
+              moreFlag: true,
+              unread: 0
+           }})
+        })
+        // console.log(this.chatIds.includes(id));
+        flag && !this.chatIds.includes(id) && await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
+          this.$store.commit({type: 'getGroupList', data})
+          let group = this.$store.state.groupList.filter(item => {
+            return id === this.JsonBig.stringify(item.id)
+          })[0]
+          this.$store.commit({type: 'newChat', data:{
+            id: id,
+            group: true,
+            length: group.members.length,
+            service: false,
+            icon: "/static/images/groupChat_icon.png",
+            nickName: (!group.name || group.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(group.id)}` : `${group.name}`,
+            phone: false,
+            email: false,
+            unread: 0,
+            moreFlag: true,
+            exists: true
+          }})
+          }).catch(error=>{
+          console.log(error)
+        })
+      },
+      // 拉取收款地址数据
+      async fetchAddress() {
+        await this.WsProxy.send('wallet', 'my_accounts', {
+          uid: this.$store.state.userInfo.uid,
+          origin: 0
+        }).then(data => {
+          data.accounts && this.$store.commit({type: 'moneyAddress', data: data.accounts})
+        })
+      },
+      // 监听系统消息(请求加好友)
+      reqFriend(){
+        this.WebSocket.onMessage['req_friend'] = {
+          callback:(res) => {
+            // console.log('sdfaasadfadsfasf', res)
+            if (res.body && res.body.type === "req_fd") {
+              const obj = {
+                sid: this.JsonBig.stringify(res.body.id), 
+                id: this.JsonBig.stringify(res.body.data.id),
+                icon: res.body.data.icon,
+                name: res.body.data.name
+              }
+              this.$store.commit({type:'newSystemMes', data: obj})
+            }
+          }
+        }
+      },
+      // 监听被添加好友
+      beFriend(){
+        this.WebSocket.onMessage['add_friend'] = {
+          callback:async (res) => {
+            if (res.body && res.body.type === "add_fd") {
+              let {ack, id} = res.body.data;
+              if(ack) return;
+              await this.dealNewChat(this.JsonBig.stringify(id), 0)
+              this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
+            }
+          }
+        }
+      },
+      // 监听被加入群聊
+      beAddedGroup() {
+        this.WebSocket.onMessage['add_g_notify'] = {
+          callback:async (res) => {
+            if (res.body && ["add_g", "cre_g"].includes(res.body.type)) {
+              let {id} = res.body.data;
+              await this.dealNewChat(this.JsonBig.stringify(id), 1)
+              this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
+            }
+          }
+        }
+      },
+      beKickGroup() {
+         this.WebSocket.onMessage['kick_g_notify'] = {
+          callback:async (res) => {
+            if (res.body && res.body.type === 'kick_g') {
+              let {id} = res.body.data;
+              this.$store.commit({type: 'beKick', data: this.JsonBig.stringify(id)})
+            }
+          }
+        }
+      },
+      // 监听消息
+      listenChat() {
+        //聊天信息监听
+        let _this = this;
+        this.WebSocket.onMessage['sms']={
+          async callback(res){
+            // op为7单人聊天信息，对象类型, op为6群聊信息，数组第0项
+            // 单聊
+            if (res.op && res.op === 7) {
+              let {id, uid, icon, name, data, type } = res.body;
+              let obj = {}
+              await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
+              // 文字
+              if (type === 'text') {
+                obj = {
+                  id: id,
+                  from: _this.JsonBig.stringify(uid), 
+                  to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
+                  icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                  msg:{
+                    type: 0,
+                    content: data.msg
+                  },
+                  isLoding: false, 
+                  isFail: false,
+                  time: new Date() - 0
+                }
+                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
+                return;
+              }
+              // 图片
+              obj = {
+                  id: id,
+                  from: _this.JsonBig.stringify(uid), 
+                  to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
+                  icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                  msg:{
+                    type: 1,
+                    content: `${_this.HostUrl.http}file/${data.id}`
+                  },
+                  isLoding: true, 
+                  isFail: false,
+                  time: new Date() - 0
+                }
+                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
+            };
+            // 群聊
+            if (Array.isArray(res) && res[0].op === 6) { 
+              let {id, uid, gid, name, data, type } = res[0].body;
+              let obj = {};
+
+              if (_this.JsonBig.stringify(_this.$store.state.userInfo.uid) === _this.JsonBig.stringify(uid)) return;
+            await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
+              
+              let icon = _this.$store.state.groupList.filter(item => {
+                return _this.JsonBig.stringify(gid) === _this.JsonBig.stringify(item.id)
+              })[0].members.filter(item => {
+                return _this.JsonBig.stringify(uid) === _this.JsonBig.stringify(item.id)
+              })[0].icon
+              if (type === 'text') {
+                obj = {
+                  id: id,
+                  from: _this.JsonBig.stringify(uid), 
+                  to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
+                  icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                  msg:{
+                    type: 0,
+                    content: data.msg
+                  },
+                  isLoding: false, 
+                  isFail: false,
+                  time: new Date() - 0
+                }
+                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
+                return;
+              }
+              //图片
+              obj = {
+                  id: id,
+                  from: _this.JsonBig.stringify(uid), 
+                  to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
+                  icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                  msg:{
+                    type: 1,
+                    content: `${_this.HostUrl.http}file/${data.id}`
+                  },
+                  isLoding: true, 
+                  isFail: false,
+                  time: new Date() - 0
+                }
+                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
+            }
+          }
+        }
       },
       //搜索框
       input() {

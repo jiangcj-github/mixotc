@@ -102,7 +102,7 @@ export default {
         return
       }
 
-      this.$router.push({ name: 'order', query: { id: id }})
+      this.$router.push({ name: 'order', query: { id: this.JsonBig.stringify(id) }})
     },
   }
 };

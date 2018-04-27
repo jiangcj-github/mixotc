@@ -16,6 +16,7 @@ export default {
   },
   [types.changeChatBox](state, { data }) {
     // 控制右下方消息框显示
+    if (data) state.unreadNumber = 0;
     state.showChat = data;
   },
   [types.changeToken](state, { data }) {
@@ -39,6 +40,11 @@ export default {
       state.chat.forEach(item => {
         item.id === data.id && (item.unread = 0);
       });
+  },
+  
+  [types.chatTop](state, { data }) {
+    // 聊天置顶
+    state.chat.unshift(state.chat.splice(data)[0]);
   },
 
   [types.changeChat](state, { data }) {
@@ -95,63 +101,97 @@ export default {
       flag = false;
     state.chat.forEach((item, index) => {
       item.id === data.id && (idex = index);
-      item.id === data.id && item.exists === false && (flag = true);//判断是否踢出群
     });
-    if (flag) return; //被踢出群后不更新信息
-    !state.messages[data.id] && (state.messages[data.id] = []);//对话记录不存在时创建
+    !state.messages[data.id] && (state.messages[data.id] = []); //对话记录不存在时创建
     state.messages[data.id].push(data.msg);
-    data.id === "system" && state.curChat !=="system" && state.systemMessage++;
-    data.id !== "system" && state.curChat !== data.id && idex !== false && state.chat[idex].unread++
+    data.id === "system" && state.curChat !== "system" && state.systemMessage++;
+    data.id !== "system" &&
+      state.curChat !== data.id &&
+      idex !== false &&
+      state.chat[idex].unread++;
     state.isLogin && !state.showChat && state.unreadNumber++;
     // 有新增加消息进来，将对话列表置顶
     state.chat.unshift(state.chat.splice(idex, 1)[0]);
   },
 
-  [types.changeMessageState](state, { data: {id,time,code} }) {
+  [types.changeMessageState](
+    state,
+    {
+      data: { id, time, code }
+    }
+  ) {
     // 消息发送成功或失败
     let idx = 0;
-      state.messages[id].forEach((item, index) => {
-        if(time === item.time){
-          item.isLoding = false
-          code && (item.isFail = true);
-          idx = index;
-          // console.log(item.isFail);
-        }
-      })
-      state.messages = Object.assign({}, state.messages);
-  },
-  [types.changeImgsrc](state, { data: {id, time, src} }) {
-    let idx = 0;
-      state.messages[id].forEach((item, index) => {
-        if(time === item.time){
-          item.msg.content = src;
-        }
-      })
-      state.messages = Object.assign({}, state.messages);
+    state.messages[id].forEach((item, index) => {
+      if (time === item.time) {
+        item.isLoding = false;
+        code && (item.isFail = true);
+        idx = index;
+      }
+    });
+    state.messages = Object.assign({}, state.messages);
   },
 
-  [types.changeMoreFlag](state, { data: {id, flag} }) {
+  [types.changeImgsrc](
+    state,
+    {
+      data: { id, time, src }
+    }
+  ) {
+    let idx = 0;
+    state.messages[id].forEach((item, index) => {
+      if (time === item.time) {
+        item.msg.content = src;
+      }
+    });
+    state.messages = Object.assign({}, state.messages);
+  },
+
+  [types.changeMoreFlag](
+    state,
+    {
+      data: { id, flag }
+    }
+  ) {
     // 改变更多消息的标志
     let idx = 0;
-      state.chat.forEach((item, index) => {
-        if(item.id === id){
-          item.moreFlag = flag;
-        }
-      })
-      
+    state.chat.forEach((item, index) => {
+      if (item.id === id) {
+        item.moreFlag = flag;
+      }
+    });
   },
 
   [types.moreMessage](state, { data }) {
     // 查看更多消息
     !state.messages[state.curChat] && (state.messages[state.curChat] = []);
-    state.messages[state.curChat] = data.reverse().concat(state.messages[state.curChat]);
+    state.messages[state.curChat] = data
+      .reverse()
+      .concat(state.messages[state.curChat]);
     state.messages = Object.assign({}, state.messages);
   },
 
   [types.moneyAddress](state, { data }) {
     // 收款地址
-    state.moneyAddress = data
+    state.moneyAddress = data;
   },
+
+  [types.newSystemMes](state, { data }) {
+    // 收款地址
+    state.messages["system"].push(data);
+    if (state.curChat !== "system") state.systemMessage++;
+    if (state.isLogin && !state.showChat) state.unreadNumber++;
+  },
+
+  [types.beKick](state, { data }) {
+    //被踢出群
+    state.chat.forEach(item => {
+      if (item.id === data) {
+        item.exists = false;
+      }
+    });
+  },
+
   /**
    * 审核申述客服部分
    */
@@ -171,23 +211,28 @@ export default {
     state.serviceData.forEach((item, index) => {
       item.id === data.id && (idex = index);
     });
-    !state.serviceMessage[data.id] && (state.serviceMessage[data.id] = []);//对话记录不存在时创建
+    !state.serviceMessage[data.id] && (state.serviceMessage[data.id] = []); //对话记录不存在时创建
     state.serviceMessage[data.id].push(data.msg);
     // state.isLogin && !state.showChat && state.unreadNum++;
     // 有新增加消息进来，将对话列表置顶
     state.serviceData.unshift(state.serviceData.splice(idex, 1)[0]);
   },
   // 新增发送消息
-  [types.changeServiceMessages](state, { data: {id, time, code} }) {
+  [types.changeServiceMessages](
+    state,
+    {
+      data: { id, time, code }
+    }
+  ) {
     // 消息发送成功或失败
     let idx = 0;
     state.serviceMessage[id].forEach((item, index) => {
-      if(time === item.time){
-        item.isLoding = false
+      if (time === item.time) {
+        item.isLoding = false;
         code && (item.err = true);
         idx = index;
       }
-    })
+    });
     state.serviceMessage = Object.assign({}, state.serviceMessage);
-  },
+  }
 };

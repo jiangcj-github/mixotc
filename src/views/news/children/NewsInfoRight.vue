@@ -18,34 +18,45 @@
         <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeTalk">
       </li>
     </ul>
-    <happy-scroll style="width:399px;height:325px" :resize="true" bigger-move-h="end" smaller-move-h="end" hide-horizontal>
+    <happy-scroll style="width:399px;height:325px" :resize="true" bigger-move-h="end" smaller-move-h="end" hide-horizontal class="main-content">
       <div class="wrap">
+        <!-- 空白消息框 -->
         <div class="blank" v-if="!title && curChat !== 'system'"></div>
+        <!-- 聊天消息框 -->
         <div class="news-info-talk clearfix" v-if="title && curChat !== 'system'">
           <p class="more-info" v-if="chat[index].moreFlag" @click="fetchMore(10)">查看更多消息</p>
-          <div class="messages clearfix" v-for="(item, index) of messages" :key="item.time">
+          <p class="more-info" v-else></p>
+          <div class="messages clearfix" v-for="(item, index) of messages" :key="item.id ? item.id :item.time">
             <p class="time-info" v-if="index > 0 && dealTime(messages[index-1].time, item.time)">{{dealTime(messages[index-1].time, item.time)}}</p>
             <div :class="{'left-people': item.from !== JsonBig.stringify($store.state.userInfo.uid), 'right-people': item.from === JsonBig.stringify($store.state.userInfo.uid)}">
               <img class="avator" :src="item.icon" alt="" @click="toHomepage(item.from)">
               <p>
                 <i></i>
-                <span v-if="item.msg.type === 1" class="images"><img :src="item.msg.content" alt="" @load="imgLoad(curChat, item.time)" @error="imgError(curChat, item.time, item.msg.content)"></span>
+                <span v-if="item.msg.type === 1" class="images">
+                  <img 
+                    :src="item.msg.content" 
+                    alt="" 
+                    @load="imgLoad(curChat, item.time)" 
+                    @error="imgError(curChat, item.time, item.msg.content)"
+                    @click="showBigPicture(!item.isLoding && !item.isFail, item.msg.content)"
+                  >
+                </span>
                 <span v-if="item.msg.type === 0" v-html="item.msg.content"></span>
                 <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding">
                 <img src="/static/images/hint.png" class="failFlag" v-if="!item.isLoding && item.isFail">
               </p>
             </div>
           </div>
+        </div>
           <!-- 系统消息 -->
-          <div class="system-info" v-if="curChat === 'system'" >
-            <div>
-              <img src="" alt="">
-              <ul>
-                <li>Andy</li>
-                <li>我是李小蹦，想添加你为好友</li>
-              </ul>
-              <button>同意</button>
-            </div>
+        <div class="system-info" v-if="curChat === 'system'">
+          <div v-for="item of $store.state.messages['system']" :key="item.sid">
+            <img :src="item.icon ? `${HostUrl.http}image/${item.icon}` : '/static/images/default_avator.png'" alt="">
+            <ul>
+              <li>{{item.name}}</li>
+              <li>{{item.info}}</li>
+            </ul>
+            <button @click="addFriend(item.id)">同意</button>
           </div>
         </div>
       </div>
@@ -53,7 +64,7 @@
     <!-- 底部 -->
     <ol class="input-text clearfix">
       <li>
-        <input type="text" :disabled="title === '' ? ((chat[index] && chat[index].exists === undefined || chat[index] && chat[index].exists) ? true : false) : false" v-model="sendText" @keyup.enter="sendMs(sendText)">
+        <input type="text" :disabled="curChat === 'system' || curChat === ''? true  : ((chat[index] && chat[index].exists === false) ?  true : false )" v-model="sendText" @keyup.enter="sendMs(sendText)">
       </li>
       <li @click="$refs.up_img.click()" class="send-image">
         <img src="/static/images/picture_icon.png"  title="发送图片">
@@ -77,6 +88,20 @@
         <span>收款地址</span>
       </li>
     </ol>
+    <!-- 大图展示 -->
+    <div class="big-img" v-if="showBig">
+      <span>
+        <img 
+          src="/static/images/close_btn_tr.png" 
+          ref="bigPic" 
+          alt="" 
+          @click="()=>{this.showBigSrc = ''; this.showBig = false}" 
+          >
+        </span>
+      <div class="picture">
+        <img v-if="showBigSrc" :src="showBigSrc" alt="">
+      </div>
+    </div>
     <!-- 添加好友弹窗 -->
     <AddFriend 
       v-if="showAddFriend" 
@@ -104,6 +129,7 @@
                :wrapStyleObject="beliveWrap"
     >已加信任
     </BasePopup>
+    <!-- 无收款地址提示弹窗 -->
     <BasePopup class="address-layer"
                :show="addressLayer"
                :width=135
@@ -112,6 +138,7 @@
                :wrapStyleObject="beliveWrap"
     >暂无收款地址
     </BasePopup>
+    <!-- 群信息 -->
     <GroupInfo 
       v-if="showCheckGroup" 
       :id="groupId"
@@ -149,7 +176,9 @@
         },
         timer: null,
         sendText: '',
-        sendFile: ''
+        sendFile: '',
+        showBig: false,
+        showBigSrc: ''
       }
     },
     components: {
@@ -160,99 +189,12 @@
       HappyScroll
     },
     mounted() {
-      this.fetchAddress()
-      let _this = this;
-      //聊天信息监听
-      this.WebSocket.onMessage['sms']={
-        async callback(res){
-          // op为7单人聊天信息，对象类型, op为6群聊信息，数组第0项
-          // 单聊
-          if (res.op && res.op === 7) {
-            let {id, uid, icon, name, data, type } = res.body;
-            let obj = {}
-            await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
-            // 文字
-            if (type === 'text') {
-              obj = {
-                id: id,
-                from: _this.JsonBig.stringify(uid), 
-                to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
-                icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                msg:{
-                  type: 0,
-                  content: data.msg
-                },
-                isLoding: false, 
-                isFail: false,
-                time: new Date() - 0
-              }
-              _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
-              return;
-            }
-            // 图片
-            obj = {
-                id: id,
-                from: _this.JsonBig.stringify(uid), 
-                to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
-                icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                msg:{
-                  type: 1,
-                  content: `${_this.HostUrl.http}file/${data.id}`
-                },
-                isLoding: true, 
-                isFail: false,
-                time: new Date() - 0
-              }
-              _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
-          };
-          // 群聊
-          if (Array.isArray(res) && res[0].op === 6) { 
-            let {id, uid, gid, name, data, type } = res[0].body;
-            let obj = {};
-
-            if (_this.JsonBig.stringify(_this.$store.state.userInfo.uid) === _this.JsonBig.stringify(uid)) return;
-           await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
-            
-            let icon = _this.$store.state.groupList.filter(item => {
-              return _this.JsonBig.stringify(gid) === _this.JsonBig.stringify(item.id)
-            })[0].members.filter(item => {
-              return _this.JsonBig.stringify(uid) === _this.JsonBig.stringify(item.id)
-            })[0].icon
-            if (type === 'text') {
-              obj = {
-                id: id,
-                from: _this.JsonBig.stringify(uid), 
-                to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
-                icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                msg:{
-                  type: 0,
-                  content: data.msg
-                },
-                isLoding: false, 
-                isFail: false,
-                time: new Date() - 0
-              }
-              _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
-              return;
-            }
-            //图片
-             obj = {
-                id: id,
-                from: _this.JsonBig.stringify(uid), 
-                to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
-                icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                msg:{
-                  type: 1,
-                  content: `${_this.HostUrl.http}file/${data.id}`
-                },
-                isLoding: true, 
-                isFail: false,
-                time: new Date() - 0
-              }
-              _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
-          }
-        }
-      }
+      this.Bus.$on('contactSomeone',({id, msg})=> {
+        this.contactSomeone(id, msg)
+      });
+    },
+    destroyed() {
+      this.Bus.$off('contactSomeone');
     },
     computed: {
       title() {
@@ -311,6 +253,22 @@
       }
     },
     methods: {
+      async contactSomeone(id, msg) {
+        let flag = this.chatIds.indexOf(id);
+        await this.dealNewChat(id, 0);
+        this.$store.commit({type: 'changeChatBox', data: true})
+        if (flag !== -1 ) {
+          this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
+          this.$store.commit({type: 'chatTop', data: flag})
+        };
+        if (!msg) return;
+        this.sendMs(msg)
+      },
+      showBigPicture(flag, src) {
+        if (!flag) return;
+        this.showBigSrc = src;
+        this.showBig = true;
+      },
       sendAddress(item) {
         this.sendMs(item)
       },
@@ -334,52 +292,6 @@
       imgError(tid, time, src) {
         if (src === '') return;
         this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
-      },
-      async fetchAddress() {
-        await this.WsProxy.send('wallet', 'my_accounts', {
-          uid: this.$store.state.userInfo.uid,
-          origin: 0
-        }).then(data => {
-          data.accounts && this.$store.commit({type: 'moneyAddress', data: data.accounts})
-        })
-      },
-      // 不在消息列表的人来消息时的处理
-      async dealNewChat(id, flag) {
-        !flag && !this.chatIds.includes(id) && await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(id)}).then( ({name, phone, email, icon }) => {
-           this.$store.commit({type: 'newChat', data:{
-              id: id,
-              group: false,
-              service: false,
-              icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-              nickName: name,
-              phone: phone,
-              email: email,
-              moreFlag: true,
-              unread: 0
-           }})
-        })
-        // console.log(this.chatIds.includes(id));
-        flag && !this.chatIds.includes(id) && await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
-          this.$store.commit({type: 'getGroupList', data})
-          let group = this.$store.state.groupList.filter(item => {
-            return id === this.JsonBig.stringify(item.id)
-          })[0]
-          this.$store.commit({type: 'newChat', data:{
-            id: id,
-            group: true,
-            length: group.members.length,
-            service: false,
-            icon: "/static/images/groupChat_icon.png",
-            nickName: (!group.name || group.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(group.id)}` : `${group.name}`,
-            phone: false,
-            email: false,
-            unread: 0,
-            moreFlag: true,
-            exists: true
-          }})
-          }).catch(error=>{
-          console.log(error)
-        })
       },
       //更多消息
       async fetchMore(num) {
@@ -475,6 +387,44 @@
             this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
           })
       },
+      // 不在消息列表的人来消息时的处理
+      async dealNewChat(id, flag) {
+        !flag && !this.chatIds.includes(id) && await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(id)}).then( ({name, phone, email, icon }) => {
+           this.$store.commit({type: 'newChat', data:{
+              id: id,
+              group: false,
+              service: false,
+              icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+              nickName: name,
+              phone: phone,
+              email: email,
+              moreFlag: true,
+              unread: 0
+           }})
+        })
+        // console.log(this.chatIds.includes(id));
+        flag && !this.chatIds.includes(id) && await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
+          this.$store.commit({type: 'getGroupList', data})
+          let group = this.$store.state.groupList.filter(item => {
+            return id === this.JsonBig.stringify(item.id)
+          })[0]
+          this.$store.commit({type: 'newChat', data:{
+            id: id,
+            group: true,
+            length: group.members.length,
+            service: false,
+            icon: "/static/images/groupChat_icon.png",
+            nickName: (!group.name || group.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(group.id)}` : `${group.name}`,
+            phone: false,
+            email: false,
+            unread: 0,
+            moreFlag: true,
+            exists: true
+          }})
+          }).catch(error=>{
+          console.log(error)
+        })
+      },
       sendImg(tid, time) {
         this.addStoreMessages(tid, 1, '', time);
       },
@@ -502,6 +452,15 @@
           this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
         })
         this.sendText = '';
+      },
+      // 同意好友请求
+      async addFriend(id) {
+        await this.WsProxy.send('control', 'add_friend', {
+          ack: 0,
+          id: this.JsonBig.parse(id)
+        }).then(data => {})
+        await this.dealNewChat(id, 0);
+        this.$store.commit({type: 'changeCurChat', data: {id: id}})
       },
       openGroupInfo(id) {
         this.groupId = id;
@@ -584,12 +543,15 @@
       >li
         float left
       .title-info-name
+        overflow hidden
         width 304px
         height 40px
         margin-left 20px
         font-size 14px
         color $col333
         font-weight bold
+        text-overflow ellipsis
+        white-space nowrap
         letter-spacing 0.16px
       .title-info-select
         img
@@ -659,6 +621,7 @@
         img
           width 10px
           height 10px
+          cursor pointer
           vertical-align middle
     .news-info-talk
       width 399px
@@ -766,7 +729,7 @@
       text-align center
     .system-info
       width 399px
-      height 320px
+      max-height 320px
       padding-top 10px
       div
         display flex
@@ -775,7 +738,7 @@
         height 37px
         padding 12px 20px 11px 15px
         background #FFF
-        margin 0 auto
+        margin 10px auto 0
         img
           width 37px
           height 37px
@@ -788,8 +751,11 @@
           background #FFB422
           border-radius 2px
           color #FFF
-          margin-left 80px
+          margin-left 46px
+          cursor pointer
         ul
+          li
+            width 190px
           li:first-child
             font-size 14px
           li:last-child
@@ -862,6 +828,42 @@
         img
           width 19.4px
           height 19px
+    .big-img
+      box-sizing()
+      position absolute
+      left -400px
+      top 0
+      width 400px
+      height 420px
+      padding 44px 20px 0 20px
+      background $col6FA
+      box-shadow -2px -2px 8px 0 rgba(51, 51, 51, 0.30)
+      span
+        position absolute
+        top 15px
+        right 23.5px
+        img
+          width 10px
+          height 10px
+          cursor pointer
+      .picture
+        width 100%
+        height 100%
+        overflow auto
+        text-align center
+        vertical-align middle
+        img
+          max-width 100%
+          height auto
+          position relative
+          left 0
+          top 50%
+          transform translateY(-50%)
+          -ms-transform translateY(-50%)
+          -moz-transform translateY(-50%)
+          -webkit-transform translateY(-50%)
+          -o-transform translateY(-50%)
+
   /*弹窗*/
   .belive-layer, .address-layer
     text-align center

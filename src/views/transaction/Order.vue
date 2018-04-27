@@ -11,10 +11,10 @@
           <span class="nickname">{{contentData.trader}}</span>
         </div>
         <div class="contact clearfix">
-          <router-link class="conversation" to="" tag="span">
+          <span @click="contactSomeone(JsonBig.stringify(contentData.sid))" class="conversation">
             <img src="/static/images/conversation_icon.png" alt="">
             <i @click="$store.commit({'type':'changeChatBox', data: true})">联系TA</i>
-          </router-link>
+          </span>
           <router-link class="self-page" :to="{path:'/homepage', query:{uid: contentData.sid}}" tag="span">
             <img src="/static/images/selfpage_icon.png" alt="">
             <i>访问TA的主页</i>
@@ -154,9 +154,9 @@
       BasePopup
     },
     mounted() {
-      console.log(this.$route.query.id)
+      console.log('ddddddd', this.$route.query.id)
       this.WsProxy.send('otc','sale_detail',{
-        id: this.$route.query.id
+        id: this.JsonBig.parse(this.$route.query.id)
       }).then((data)=>{
         console.log('sale_detail', data)
         this.contentData = data
@@ -178,7 +178,9 @@
         this.rate = this.selectPrice[0] && (this.selectPrice[0].cny / this.selectPrice[0].btc)
         console.log('selectPrice', this.selectPrice)
       },
-
+      contactSomeone(id){
+        this.Bus.$emit('contactSomeone', {id: id})
+      },
       changeMoney() {
         this.money = /^\d+\.?\d{0,2}$/.test(this.money) || this.money === '' ? this.money : this.moneyValue
         this.amount = (this.money / (this.rate)).toFixed(6);
