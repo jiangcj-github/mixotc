@@ -120,8 +120,8 @@
 
         srchUls: [
           {text: "申诉人", key:0,},
-          {text: "申诉对象",key:1},
-          {text: "处理人",key:2},
+          {text: "被申诉人",key:1},
+          {text: "受理人",key:2},
           {text: "责任人",key:3},
           {text: "订单号",key:4},
         ],
@@ -254,8 +254,8 @@
         switch(key){
           case 0:type=1;break;
           case 1:type=2;break;
-          case 2:type=3;break;
-          case 3:type=4;break;
+          case 2:type=4;break;
+          case 3:type=3;break;
         }
         //
         this.WsProxy.send("control",action,{
