@@ -30,7 +30,7 @@
             </ul>
           </div>
           <div class="btn-wrap">
-            <button class="submit-btn" :class="{active:canSubmit}" @click="submit">提交</button>
+            <button class="submit-btn" :class="{active:canSubmit}" @click="submit(i)">提交</button>
           </div>
         </div>
       </div>
@@ -38,10 +38,10 @@
         <p class="inf-li"><span>已通过审核</span></p>
       </div>
       <div v-else-if="e.flag===3">
-        <p class="inf-li"><span>拒绝理由：&nbsp;{{e.remark}}</span></p>
+        <p class="inf-li"><label>拒绝理由：</label><span>{{e.remark}}</span></p>
       </div>
       <div v-else-if="e.flag===4">
-        <p class="inf-li"><span>拒绝理由：&nbsp;恶意上传</span></p>
+        <p class="inf-li"><label>拒绝理由：</label><span>恶意上传</span></p>
       </div>
     </div>
   </div>
@@ -102,11 +102,11 @@
           this.formRemarkOld=this.formRemark;
         }
       },
-      submit(){
+      submit(i){
         if(!this.canSubmit) return;
         //
-        let id=this.infos.his[0].id;
-        let uid=this.infos.his[0].uid;
+        let id=this.infos.his[i].id;
+        let uid=this.infos.his[i].uid;
         let type=2;
         let result=2-this.formResult;
         let spite=2-(this.formMali?0:1);
@@ -117,151 +117,14 @@
         }).then((data)=>{
           this.Bus.$emit("onSubmit",this.infos);
         }).catch((msg)=>{
-          console.log(msg);
+          alert(msg);
         });
       }
     },
   }
 </script>
 <style scoped lang="stylus">
-  @import "../../../../stylus/base.styl";
-  .upload-info
-    margin-left 250px
-    padding 30px
-    background #fff
-    h3
-      font-size 20px
-      color #333333
-      letter-spacing 0.23px
-      border-bottom 1px solid #E1E1E1
-      padding-bottom 20px
-      font-weight bold
-    sup
-      display inline-block
-      font-size 11px
-      color #FF794C
-      letter-spacing 0.12px
-      margin-top 20px
-    .inf-li
-      font-size 14px
-      letter-spacing 0.16px
-      line-height 20px
-      margin-top 10px
-      label
-        color #333333
-        width 150px
-        display inline-block
-      span
-        color #999999
-        display inline-block
-    .check-img
-      height 180px
-      display flex
-      justify-content center
-      align-items center
-      >img
-        width 180px
-        height 120px
-        border 1px solid #EEEEEE
-        border-radius 2px
-        margin 0 10px
-    .form
-      background #F4F6FA
-      padding 20px
-      .mali
-        margin-top 12px
-        display flex
-        align-items flex-start
-        >ul
-          margin-left 30px
-          >li
-            font-size 11px
-            color #FF794C
-            letter-spacing 0.12px
-            margin-bottom 10px
-      .btn-wrap
-        text-align center
-        margin-top 30px
-        .submit-btn
-          background #999999
-          border-radius 2px
-          width 464px
-          height 40px
-          line-height 40px
-          text-align center
-          font-size 13px
-          color #FFFFFF
-          letter-spacing 0.15px
-          cursor not-allowed
-          &.active
-            background-color #ffb422
-            cursor pointer
-          &.active:hover
-            background-color #f5a60e
-  .textarea
-    border 1px solid #E1E1E1
-    border-radius 2px
-    height 150px
-    display flex
-    flex-direction column
-    textarea
-      resize none
-      border none
-      background transparent
-      outline none
-      flex-grow 1
-      padding 10px
-    .indicator
-      text-align right
-      font-size 13px
-      color #999999
-      letter-spacing 0
-      line-height 24px
-      padding 0 6px
-  .checkbox
-    font-size 13px
-    color #333333
-    letter-spacing 0.27
-    display inline-block
-    padding-left 23px
-    cursor pointer
-    background  url(/static/images/rules_unchecked.png) no-repeat 3px center
-    &.check
-      background-image url(/static/images/rules_checked.png)
-    &:hover
-      color #666
-  .radio
-    font-size 13px
-    color #333333
-    letter-spacing 0.27
-    display inline-block
-    padding-left 27px
-    cursor pointer
-    background  url(/static/images/unselect.png) no-repeat 3px center
-    &.check
-      background-image url(/static/images/selected.png)
-    &:hover
-      color #666
-  .err
-    background-repeat no-repeat
-    background-position  center 102px
-    background-size 140px 140px
-    height 547px
-    margin-left 250px
-    background-color #fff
-    padding-top 270px
-    text-align center
-    font-size 14px
-    color #999
-    letter-spacing 0.36px
-    box-sizing border-box
-    &.no-result
-      background-image url(/static/images/verify/err_no_result.png)
-    &.load-failed
-      background-image url(/static/images/verify/err_load_failed.png)
-    &.net-error
-      background-image url(/static/images/verify/err_net_error.png)
-    &.empty
-      background-image url(/static/images/rectangle.png)
+  @import "../../../../stylus/base";
+  @import "../../stylus/uploadInfo";
 </style>
 

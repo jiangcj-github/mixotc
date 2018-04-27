@@ -102,9 +102,9 @@
         //返回结果时间降序
         this.infos.his=[];
         data && data.forEach((e)=>{
-          this.infos.his.unshift({
-            id: e.id && e.id || 0,
-            uid: e.uid && e.uid || 0,
+          this.infos.his.push({
+            id: e.id || 0,
+            uid: e.uid || 0,
             name: e.name || "-",
             submitTime: new Date(e.create*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
             bankcard: e.number || "-",
@@ -115,6 +115,9 @@
             remark: e.info,
             flag: e.state,  //1:待审核,2:审核通过,3:审核未通过,4:恶意上传
           });
+        });
+        this.infos.his.sort((a,b)=>{
+          return a.submitTime<b.submitTime?-1:1;
         });
       },
     },

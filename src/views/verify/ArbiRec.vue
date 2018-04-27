@@ -16,9 +16,16 @@
                 </ul>
                 <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput">
                 <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
-                <a href="javascript:void(0)"></a>
+                <a href="javascript:void(0)" @click="search"></a>
                 <ul v-show="srchTipShow && tips.length>0" class="tip-ul">
-                  <li v-for="(e,i) in tips" :key="i" @mousedown="srchText=e.nickname" @click="search">{{e}}</li>
+                  <li v-for="(e,i) in tips" :key="i" @click="search">
+                    <div v-if="e.resType===0" @mousedown="srchText=e.nickname">
+                      <span class="sp1">{{e.nickname}}</span><span class="sp2">{{e.account}}</span>
+                    </div>
+                    <div class="" v-else="" @mousedown="srchText=e.orderId">
+                      <span class="sp1">{{e.orderId}}</span>
+                    </div>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -37,8 +44,8 @@
           提交时间<i class="sort" :class="{up:sort===0,down:sort===1}"></i>
         </span>
           <span class="ddxx">订单信息</span>
-          <span class="sqr">申请人</span>
-          <span class="sqdx">申请对象</span>
+          <span class="sqr">申诉人</span>
+          <span class="sqdx">被申诉人</span>
           <span class="zcr">仲裁人</span>
           <span class="wcsj">完成时间</span>
           <span class="ys sortable" @click="sort=(sort+1)%2+2">
@@ -59,11 +66,11 @@
               <div class="tjsj"><p>{{e.createTime1}}</p><p>{{e.createTime2}}</p></div>
               <div class="ddxx"><p>{{e.orderType}}{{e.orderCoin}}</p></div>
               <div class="sqr">
-                <router-link :to="'/homepage?uid='+e.applyUid" target="_blank" tag="p" class="link">{{e.applyU}}</router-link>
+                <router-link :to="'/homepage?uid='+e.applyUid" tag="p" class="link">{{e.applyU}}</router-link>
                 <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
               </div>
               <div class="sqdx">
-                <router-link to="'/homepage?uid='+e.appliedUid" target="_blank" tag="p" class="link">{{e.appliedU}}</router-link>
+                <router-link :to="'/homepage?uid='+e.appliedUid" tag="p" class="link">{{e.appliedU}}</router-link>
                 <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
               </div>
               <div class="zcr"><p>{{e.dealU}}</p></div>
@@ -112,11 +119,11 @@
       return {
 
         srchUls: [
-          {text: "申诉人", key: 0},
-          {text: "申诉对象", key: 1},
-          {text: "处理人", key: 2},
-          {text: "责任人", key: 3},
-          {text: "订单号", key: 4},
+          {text: "申诉人", key:0,},
+          {text: "申诉对象",key:1},
+          {text: "处理人",key:2},
+          {text: "责任人",key:3},
+          {text: "订单号",key:4},
         ],
         srchUlSel: 0,
         srchUlShow: false,
@@ -178,11 +185,11 @@
       },
       loadArbiLists(p){
         //
-        let srchKey1=null;  //订单ID
-        let srchKey2=null;  //申诉人
-        let srchKey3=null;  //被申诉人
-        let srchKey4=null;  //受理人
-        let srchKey5=null;  //责任人
+        let srchKey1=null;  //申诉人
+        let srchKey2=null;  //被申诉人
+        let srchKey3=null;  //受理人
+        let srchKey4=null;  //责任人
+        let srchKey5=null;  //订单ID
         switch(this.srchUls[this.srchUlSel].key){
           case 0:srchKey1=this.srchText;break;
           case 1:srchKey2=this.srchText;break;
@@ -205,11 +212,11 @@
         }
         //
         this.WsProxy.send("control","a_get_appeal_list",{
-          id: srchKey1,
-          appellant: srchKey2,
-          appellee: srchKey3,
-          handler: srchKey4,
-          responsible: srchKey5,
+          sid: srchKey5,
+          appellant: srchKey1,
+          appellee: srchKey2,
+          handler: srchKey3,
+          responsible: srchKey4,
           type: 0,
           result: result,
           start: start,
@@ -236,31 +243,44 @@
       },
       loadTips(){
         let srchKey=this.srchText;
-        let srchType=this.srchUls[this.srchUlSel].key;
-        let actions=[
-          "a_fuzzy_search_appellant",
-          "a_fuzzy_search_appellee",
-          "a_fuzzy_search_responsible",
-          "a_fuzzy_search_handler ",
-          "a_fuzzy_search_trade_id "
-        ];
-        //申诉人
-        this.WsProxy.send("control",actions[srchType],{
+        let key=this.srchUls[this.srchUlSel].key;
+        let action="";
+        if(key===4){
+          action="a_fuzzy_search_trade_id";
+        }else{
+          action="a_fuzzy_search_appeal_tips";
+        }
+        let type=null;
+        switch(key){
+          case 0:type=1;break;
+          case 1:type=2;break;
+          case 2:type=3;break;
+          case 3:type=4;break;
+        }
+        //
+        this.WsProxy.send("control",action,{
           keyword:srchKey,
-          //count:this.tipsCount
+          type: type,
+          count:this.tipsCount
         }).then((data)=>{
-          this.parseTips(data.tips);
+          if(key===4){
+            this.parseTips(data.ids,1);
+          }else{
+            this.parseTips(data.tips,0);
+          }
         }).catch((msg)=>{
           console.log(msg);
         });
       },
-      parseTips(data){
+      parseTips(data,resType){    //resType: 0-用户,1-订单ID
         this.tips=[];
         data && data.forEach((e)=>{
           this.tips.push({
             uid: e.id || 0,
             nickname: e.name || "-",
             account:e.phone || e.email || "-",
+            orderId: e.Id && e.Id.toString() || 0,
+            resType:resType,
           });
         });
       },
@@ -286,7 +306,8 @@
             spend: (e.update-e.create).formatSecord() || "-",
             result: e.result && ["申诉中","撤回申诉","驳回申诉","强制放币","终止交易"][e.result-1],
             respU1: e.responsible_name || "-",
-            respU2: e.responsible_account,
+            respU2: e.responsible_account || "-",
+            respUid: e.responsible_id,
             remark: e.info,
           });
         });
@@ -356,6 +377,13 @@
                 font-size 13px
                 &:hover
                   background #fff3eb
+            ul.tip-ul>li
+              .sp1
+                display inline-block
+              .sp2
+                margin-left 15px
+                color #999
+                font-size 12px
             >img
               align-self center
               margin-right 10px
@@ -531,25 +559,25 @@
         color: #999999;
         letter-spacing: 0.23px;
     .tjsj
-      width 100px
+      width 90px
     .ddxx
       width 80px
     .sqr
-      width 80px
+      width 100px
     .sqdx
       width 100px
     .zcr
-      width 90px
-    .wcsj
       width 100px
+    .wcsj
+      width 90px
     .ys
       width 80px
     .jg
       width 90px
     .zrr
-      width 80px
+      width 100px
     .cz
-      width 90px
+      width 70px
     .pop
       padding 40px 10px 40px 60px
       position relative
