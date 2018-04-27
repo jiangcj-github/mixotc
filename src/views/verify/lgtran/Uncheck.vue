@@ -1,14 +1,14 @@
 <template>
   <!--待审核-->
   <div class="uncheck">
-    <div class="search-bar">
-      <div class="search" >
+    <div class="srch">
+      <div class="head" >
         <input type="text" placeholder="查找昵称/帐号" v-model="srchText" @input="fuzzyInput">
         <img src="/static/images/search_gray.png" @click="search">
       </div>
-      <ul class="results">
+      <ul>
         <li :class="{active:candSel===i}" v-for="(o,i) in cands" :key="i" @click="clickCand(o,i)">
-          <p class="nick">{{o.nickname}}</p><p class="account">{{o.account}}</p>
+          <p>{{o.nickname}}</p><p class="account">{{o.account}}</p>
         </li>
       </ul>
       <SimplePagination :total="candTotal" :pageSize="candPageSize" v-if="candTotal>candPageSize"></SimplePagination>
@@ -102,9 +102,9 @@
         //返回结果时间降序
         this.infos.his=[];
         data && data.forEach((e)=>{
-          this.infos.his.unshift({
-            id: e.id && e.id || 0,
-            uid: e.uid && e.uid || 0,
+          this.infos.his.push({
+            id: e.id || 0,
+            uid: e.uid || 0,
             name: e.name || "-",
             submitTime: new Date(e.create*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
             bankcard: e.number || "-",
@@ -115,6 +115,9 @@
             remark: e.info,
             flag: e.state,  //1:待审核,2:审核通过,3:审核未通过,4:恶意上传
           });
+        });
+        this.infos.his.sort((a,b)=>{
+          return a.submitTime<b.submitTime?-1:1;
         });
       },
     },
@@ -138,78 +141,7 @@
   }
 </script>
 <style scoped lang="stylus">
-  @import "../../../stylus/base.styl";
-  .uncheck
-    position relative
-    &::after
-      clear both
-      content ''
-      display block
-    .search-bar
-      width 230px
-      background #fff
-      float left
-      .search
-        padding 10px 30px
-        border-bottom 1px solid #E1E1E1
-        display flex
-        align-items center
-        position relative
-        input
-          background #F4F6FA
-          border-radius 2px
-          padding 5px 30px 5px 10px
-          font-size 13px
-          line-height 20px
-          width 100%
-          min-width 0
-          box-sizing border-box
-          border 1px solid #e1e1e1
-        img
-          margin-left -24px
-          cursor pointer
-        ul.cand
-          position absolute
-          top 100%
-          margin-top -10px
-          width 170px
-          background #fff
-          z-index 1000
-          border 1px solid #e1e1e1
-          border-top none
-          box-sizing border-box
-          max-height 301px
-          overflow-y auto
-          li
-            line-height 30px
-            padding 0 10px
-            cursor pointer
-            font-size 13px
-            text-overflow ellipsis
-            overflow hidden
-            white-space nowrap
-            &:hover
-              background #fff3eb
-      .results
-        font-size 14px
-        color #FFB422
-        letter-spacing 0.16px
-        min-height 477px
-        box-sizing border-box
-        >li
-          line-height 20px
-          padding 8px 34px
-          cursor pointer
-          &:hover
-            background #fcfcfc
-          &.active
-            background #f9f0f0
-          >p
-            display block
-            &.nick
-              color #333
-            &.account
-              color #999
-              font-size 12px
+  @import "../../../stylus/base";
+  @import "../stylus/uncheck";
   placeholder()
 </style>

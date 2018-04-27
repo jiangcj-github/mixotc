@@ -38,6 +38,9 @@
         this.loadUncheckTotal();
       });
     },
+    destroyed(){
+      this.Bus.$off("onSubmit2");
+    },
     methods:{
       loadUncheckTotal(){
         this.WsProxy.send("control","a_get_identity_amount",{
@@ -53,26 +56,6 @@
   }
 </script>
 <style scoped lang="stylus">
-  @import "../../stylus/base.styl";
-  @import "./stylus/verify.styl";
-  .right
-    width 1000px
-    margin-left 200px
-    .tab
-      background #fff
-      height 60px
-      line-height 58px
-      margin-bottom 20px
-      padding 0 30px
-      font-size 16px
-      >li
-        display inline-block
-        width 100px
-        text-align center
-        color #999999
-        letter-spacing 0.33px
-        cursor pointer
-        &.active
-          color #FFB422
-          border-bottom 2px solid #FFB422
+  @import "../../stylus/base";
+  @import "./stylus/verify";
 </style>

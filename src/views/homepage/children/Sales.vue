@@ -39,8 +39,8 @@
           </span>
         <span class="pay-time">{{e.dead}}</span>
         <span class="operation">
-             <router-link class="buy-to" to="" tag="span" v-if="e.type=='出售'"><i>向他购买</i></router-link>
-             <router-link class="buy-to" to="" tag="span" v-if="e.type=='购买'"><i>向他出售</i></router-link>
+             <router-link class="buy-to" :to="'/transaction/order?id='+e.id" tag="span" v-if="e.type==='出售'"><i>向他购买</i></router-link>
+             <span class="buy-to" v-else-if="e.type==='购买'"><i>向他出售</i></span>
           </span>
       </div>
       <div class="division"></div>
@@ -60,7 +60,7 @@
       return {
         uid: "",
 
-        salesOrg:[],
+        sales:[],
         total:0,
         pageSize:1,
 
@@ -84,22 +84,6 @@
       }
     },
     computed:{
-      sales(){
-        let arr=[];
-        this.salesOrg && this.salesOrg.forEach(function(item) {
-          arr.push({
-            create: new Date(item.create).dateHandle("yyyy/MM/dd hh:mm:ss"),
-            type: {1:"购买",2:"出售"}[item.type+""],
-            currency: item.currency.toUpperCase(),
-            price: {"CNY":"¥"}[item.money.toUpperCase()]+" "+item.price,
-            minmax: item.min+"~"+item.max,
-            pays: item.payments,
-            dead: item.limit+"min",
-            info: item.info,
-          });
-        });
-        return arr;
-      },
       fltType(){
         return this.fltTypes[this.fltTypeSel].value;
       },
@@ -127,11 +111,27 @@
         this.WsProxy.send('otc','his_sales',{
           id: this.uid,origin: 0,type: this.fltType,currency: this.fltCoin
         }).then((data)=>{
-          this.salesOrg=data.sales;
+          this.parseSales(data.sales);
         }).catch((msg)=>{
           console.log(msg);
         });
       },
+      parseSales(data){
+        this.sales=[];
+        data && data.forEach((item)=>{
+          this.sales.push({
+            create: new Date(item.create).dateHandle("yyyy/MM/dd hh:mm:ss"),
+            type: {1:"购买",2:"出售"}[item.type+""],
+            currency: item.currency.toUpperCase(),
+            price: {"CNY":"¥"}[item.money.toUpperCase()]+" "+item.price,
+            minmax: item.min+"~"+item.max,
+            pays: item.payments,
+            dead: item.limit+"min",
+            info: item.info,
+            id:item.id,
+          });
+        });
+      }
     },
     destroyed(){
       this.Bus.$off('changePage');

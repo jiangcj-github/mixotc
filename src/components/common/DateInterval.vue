@@ -32,7 +32,7 @@
       onDiEndChange:{type:String,default:"onDiEndChange"},
       //输入时间时触发(包括起始时间和结束时间)
       onDiInput:{type:String,default:"onDiInput"},
-      //输入起始时间时触发(包括起始时间和结束时间)
+      //输入起始时间时触发
       onDiStartInput:{type:String,default:"onDiStartInput"},
       //输入结束时间时触发
       onDiEndInput:{type:String,default:"onDiEndInput"},
