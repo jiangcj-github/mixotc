@@ -30,7 +30,7 @@
               <p>
                 <i></i>
                 <span v-if="item.msg.type === 1" class="images"><img :src="item.msg.content" alt="" @load="imgLoad(curChat, item.time)" @error="imgError(curChat, item.time, item.msg.content)"></span>
-                <span v-if="item.msg.type === 0">{{item.msg.content}}</span>
+                <span v-if="item.msg.type === 0" v-html="item.msg.content"></span>
                 <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding">
                 <img src="/static/images/hint.png" class="failFlag" v-if="!item.isLoding && item.isFail">
               </p>
@@ -69,12 +69,9 @@
           @click="showAddress = false"  
           v-clickoutside="()=>{showAddress && (this.showAddress = false)}"
           >
-          <!-- <p v-for="(item, index) of $store.state.moneyAddress" :key="index" @click="send(item)">
-            {{dealAddress(item)}}
-          </p> -->
-          <p @click="sendAddress('中国工商银行***6223')">中国工商银行***6223</p>
-          <p>支付宝：18789998767</p>
-          <p>微信：8908877790</p>
+          <p v-for="(item, index) of mapAddress" :key="index" @click="sendAddress(item.sendText)">
+            {{item.text}}
+          </p>
         </div>
         <img src="/static/images/address_icon.png" @click.stop="foldAddress">
         <span>收款地址</span>
@@ -104,7 +101,17 @@
                :width=135
                :height=50
                :top=50
-               :wrapStyleObject="beliveWrap">已加信任</BasePopup>
+               :wrapStyleObject="beliveWrap"
+    >已加信任
+    </BasePopup>
+    <BasePopup class="address-layer"
+               :show="addressLayer"
+               :width=135
+               :height=50
+               :top=50
+               :wrapStyleObject="beliveWrap"
+    >暂无收款地址
+    </BasePopup>
     <GroupInfo 
       v-if="showCheckGroup" 
       :id="groupId"
@@ -133,6 +140,7 @@
         showAddFriend: false,
         showAddGroup: false,
         beliveLayer: false,
+        addressLayer: false,
         beliveWrap: {
           width: '560px',
           height: '420px',
@@ -288,23 +296,33 @@
           return item.id;
         })
       },
+      mapAddress(){
+        return this.$store.state.moneyAddress.map(item => {
+           if(item.type === 1) {
+              return {text: `支付宝:${item.number}`, sendText: `收款人:${item.name}<br>支付宝账号:${item.number}`}
+            }
+            if(item.type === 2) {
+              return {text: `微信:${item.number}`, sendText: `收款人:${item.name}<br>微信账号:${item.number}`};
+            }
+            if(item.type === 4) {
+              return {text: `${item.bank + '****' + (item.number.slice(-4))}`, sendText: `收款人：${item.name}<br>银行卡号:${item.number}<br> 开户行:${item.bank}`}
+            }
+        })
+      }
     },
     methods: {
-      dealAddress(item) {
-         if(item.id === 1) {
-          return `支付宝:${item.number}`
-        }
-        if(item.id === 2) {
-          return `微信:${item.number}`;
-        }
-        if(item.id === 4) {
-          return `${item.bank + (item.number % 10000)}`;
-        }
-      },
       sendAddress(item) {
         this.sendMs(item)
       },
       foldAddress() {
+        if(this.mapAddress.length === 0) {
+          this.addressLayer = true;
+          clearTimeout(this.timer)
+          this.timer = setTimeout(() => {
+            this.addressLayer = false
+          }, 3000)
+          return;
+        }
         this.showAddress = true;
       },
       toHomepage(id) {
@@ -602,8 +620,10 @@
               line-height 25px
               font-size 12px
               color #FFF
-              cursor pointer
               z-index 99
+              background #333
+              cursor pointer
+              border-radius 2px
             li:hover
               background #474747
             li:nth-child(1):before
@@ -797,7 +817,6 @@
           top -81px
           right 12px
           width 150px
-          height 75px
           color #FFF
           font-size $fz12
           letter-spacing: 0.14px;
@@ -844,7 +863,7 @@
           width 19.4px
           height 19px
   /*弹窗*/
-  .belive-layer
+  .belive-layer, .address-layer
     text-align center
     line-height 50px
     font-size 12px
