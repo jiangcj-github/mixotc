@@ -69,7 +69,7 @@ export default {
 
     // 是否有钱包(创建成功5，创建失败4)
       await this.WsProxy.send('wallet', 'wallets', {}).then(data => {
-        data.wallets.filter(item => {
+        data.wallets && data.wallets.filter(item => {
           return currency === item.currency
         }).length > 0 ? (flag = 5) : (flag = 4)
       })

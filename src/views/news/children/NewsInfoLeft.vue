@@ -264,7 +264,7 @@
               // 文字
               if (type === 'text') {
                 obj = {
-                  id: id,
+                  id: _this.JsonBig.stringify(id),
                   from: _this.JsonBig.stringify(uid), 
                   to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
                   icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
@@ -281,7 +281,7 @@
               }
               // 图片
               obj = {
-                  id: id,
+                  id: _this.JsonBig.stringify(id),
                   from: _this.JsonBig.stringify(uid), 
                   to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
                   icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
@@ -310,7 +310,7 @@
               })[0].icon
               if (type === 'text') {
                 obj = {
-                  id: id,
+                  id: _this.JsonBig.stringify(id),
                   from: _this.JsonBig.stringify(uid), 
                   to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
                   icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
@@ -327,7 +327,7 @@
               }
               //图片
               obj = {
-                  id: id,
+                  id: _this.JsonBig.stringify(id),
                   from: _this.JsonBig.stringify(uid), 
                   to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
                   icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",

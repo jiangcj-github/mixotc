@@ -37,7 +37,7 @@
   .news-info-wrap
     box-sizing border-box
     position fixed
-    bottom 100px
+    bottom 0
     right 0
     width 560px
     height  420px

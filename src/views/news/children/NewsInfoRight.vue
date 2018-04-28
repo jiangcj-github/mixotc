@@ -238,6 +238,19 @@
           return item.id;
         })
       },
+      mapCurMembers() {
+        let obj = {}
+        if(!this.chat[this.index].group) {
+          obj[this.curChat] = this.chat[this.index].icon
+          return obj;
+        }
+        this.$store.state.groupList.filter(item => {
+          return this.curChat === this.JsonBig.stringify(item.id)
+        })[0].members.forEach(item => {
+          obj[this.JsonBig.stringify(item.id)] = item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png"
+        })
+        return obj
+      },
       mapAddress(){
         return this.$store.state.moneyAddress.map(item => {
            if(item.type === 1) {
@@ -258,9 +271,9 @@
         await this.dealNewChat(id, 0);
         this.$store.commit({type: 'changeChatBox', data: true})
         if (flag !== -1 ) {
-          this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
           this.$store.commit({type: 'chatTop', data: flag})
         };
+        this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
         if (!msg) return;
         this.sendMs(msg)
       },
@@ -306,8 +319,9 @@
         }).then(data => {
           (!data.msgs || data.msgs.length < num) && this.$store.commit({type: 'changeMoreFlag', data:{id: this.curChat, flag: false }})
           if (!data.msgs) return;
-          console.log()
-          let uid = this.JsonBig.stringify(this.$store.state.userInfo.uid);
+          let uid = this.JsonBig.stringify(this.$store.state.userInfo.uid),
+              icon = this.$store.state.userInfo.icon;
+
           data.msgs.forEach(item => {
             let sender_id = this.JsonBig.stringify(item.sender_id),
                 create_time = item.create_time * 1000;
@@ -315,7 +329,7 @@
               id: this.JsonBig.stringify(item.id),
               from: sender_id === uid ? uid : sender_id, 
               to: sender_id === uid ? this.curChat : uid,
-              icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
+              icon: sender_id === uid ? (icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png") : this.mapCurMembers[sender_id],
               msg:{
                 type: item.type === 'image' ? 1 : 0,
                 content: item.type === 'image' ? `${this.HostUrl.http}file/${item.data.id}` : item.data.msg
