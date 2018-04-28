@@ -105,7 +105,7 @@
     methods: {
       joinTrust(){
         this.WsProxy.send('otc','new_trust',{uid:this.loginUid, id:this.uid, trust:1}).then((data)=>{
-          this.info.is_trust=true;
+          this.info.isTrust=true;
           this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(this.uid)});
         }).catch((msg)=>{
           console.log(msg);
@@ -118,7 +118,7 @@
           setInterval(()=>{
             this.showUntrustPop=false;
           },1000);
-          this.info.is_trust=false;
+          this.info.isTrust=false;
         }).catch((msg)=>{
           console.log(msg);
         });

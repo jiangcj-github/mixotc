@@ -86,10 +86,19 @@
           </li>
           <!-- 操作显示 -->
           <li class="operation-li">
-            <p v-for="operation in content.operationList"
-               :class="{'active-btn': operation.flag == 1 || operation.flag == 3 || operation.flag == 8, 'text-b': operation.flag == 2}"
-               @click="operation.flag == 3 ? openPayment($event, index) : (operation.flag == 4 || operation.flag == 7 || operation.flag == 9 ? openSelect($event, operation, index, content) : (operation.flag == 8 ? openReleaseCoin($event, content, index) : (operation.flag == 5 || operation.flag == 6 ? remindCoin(content) : showOperation(index))))"
-            >{{operation.name}}</p>
+            <p v-for="(operation,i) in content.operationList">
+              <span v-if="operation.flag===1" class="active-btn" @click="showOperation(index)">{{operation.name}}</span>
+              <span v-else-if="operation.flag===3" class="active-btn" @click="openPayment($event, index)">{{operation.name}}</span>
+              <span v-else-if="operation.flag===8" class="active-btn" @click="openReleaseCoin($event, content, index)">{{operation.name}}</span>
+              <span v-else-if="operation.flag===2" class="text-b" @click="showOperation(index)">{{operation.name}}</span>
+              <span v-else-if="operation.flag===4" @click="openSelect($event, operation, index, content)">{{operation.name}}</span>
+              <span v-else-if="operation.flag===7" @click="openSelect($event, operation, index, content)">
+                {{operation.name}}<i v-if="content.timeToAppeal>0">({{content.timeToAppeal.formatSecord()}}可申诉)</i>
+              </span>
+              <span v-else-if="operation.flag===9" @click="openSelect($event, operation, index, content)">{{operation.name}}</span>
+              <span v-else-if="operation.flag===5" @click="remindCoin(content)">{{operation.name}}</span>
+              <span v-else-if="operation.flag===6" @click="remindCoin(content)">{{operation.name}}</span>
+            </p>
           </li>
         </ul>
         <p class="order-content-extre clearfix">
@@ -270,7 +279,7 @@
         conductNum: 0, // 进行数量
         completeNum: 0, // 完成数量
 
-        page: 0 // 分页数量
+        page: 0, // 分页数量
       }
     },
     created() {
@@ -357,6 +366,13 @@
       this.Bus.$off(this.endValue);
     },
     methods: {
+      appealTimer(item){
+        if(item.timeToAppeal<=0) return;
+        setTimeout(()=>{
+          item.timeToAppeal--;
+          this.appealTimer(item);
+        },1000);
+      },
       initData() {
         let ws = this.WebSocket; // 创建websocket连接
         let seq = ws.seq;
@@ -405,6 +421,9 @@
                 9: [{name: '查看评价', flag: 2}]
               }
               v.operationList = operationListObject[v.state]
+              //可申诉时间到计时
+              v.timeToAppeal=30*60-(Math.floor(Date.now()/1000)-v.paytime);
+              this.appealTimer(v);
             })
           },
           date:new Date()
@@ -554,6 +573,7 @@
               this.updateId = this.contentList[index].id;
               break;
             case 7: // 买家申请弹窗
+              if(content.timeToAppeal>0) return;
               this.selectContent = this.JsonBig.stringify(content.buyer) === this.userId ? '请先与对方联系，核实对方是否放币' : '请先与对方联系，核实对方是否付款'; // 内容
               this.selectLeft = '申诉'; // 左边内容
               this.selectRight = '联系对方'; // 右边内容
