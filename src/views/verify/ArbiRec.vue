@@ -67,11 +67,11 @@
               <div class="ddxx"><p>{{e.orderType}}{{e.orderCoin}}</p></div>
               <div class="sqr">
                 <router-link :to="'/homepage?uid='+e.applyUid" tag="p" class="link">{{e.applyU}}</router-link>
-                <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
+                <p @lcik="Bus.$emit('contactSomeone',{id:e.applyUid})" class="contact"><img src="/static/images/talk.png">联系他</p>
               </div>
               <div class="sqdx">
                 <router-link :to="'/homepage?uid='+e.appliedUid" tag="p" class="link">{{e.appliedU}}</router-link>
-                <router-link tag="p" to="" class="contact"><img src="/static/images/talk.png">联系他</router-link>
+                <p @click="Bus.$emit('contactSomeone',{id:e.appliedUid})" class="contact"><img src="/static/images/talk.png">联系他</p>
               </div>
               <div class="zcr"><p>{{e.dealU}}</p></div>
               <div class="wcsj"><p>{{e.finishTime1}}</p><p>{{e.finishTime2}}</p></div>

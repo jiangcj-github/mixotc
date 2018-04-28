@@ -12,21 +12,12 @@
           <span class="tran_num" v-if="isLogin">和他交易过{{info.tradeWidthNum}}次</span>
         </div>
         <div v-if="isLogin">
-          <div class="trust clearfix" v-if="info.isTrust">
-            <router-link class="contact isTrust" to="" tag="span">
+          <div class="trust clearfix">
+            <span class="contact isTrust" @click="Bus.$emit('contactSomeone',{id:info.id})">
               <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
-            </router-link>
-            <span class="join-trust isTrust" @click="cancelTrust">
-            <i>取消信任</i>
-          </span>
-          </div>
-          <div class="trust clearfix" v-else>
-          <span class="contact">
-            <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
-          </span>
-            <span class="join-trust" @click="joinTrust">
-            <i>加入信任</i>
-          </span>
+            </span>
+            <span class="join-trust isTrust" @click="cancelTrust" v-if="info.isTrust"><i>取消信任</i></span>
+            <span class="join-trust" @click="joinTrust" v-else><i>加入信任</i></span>
           </div>
         </div>
       </div>
@@ -140,6 +131,7 @@
       },
       parseInfo(data){
         this.info= {
+          id: data.id,
           nickname: data.name || "-",
           headimg: (data.icon && this.HostUrl.http+"image/"+data.icon) || "/static/images/default_avator.png",
           tradeWidthNum: data.mytrade || "0",
