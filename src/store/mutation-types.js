@@ -32,6 +32,7 @@ const chatTop = "chatTop"; // 新增发送消息
  const changeServiceNowtalk = 'changeServiceNowtalk'; // 根据左边选择右边人员
  const addServiceMessages = 'addServiceMessages' // 存储发送信息
  const changeServiceMessages = 'changeServiceMessages' // 新增发送消息
+ const transformServiceUser = 'transformServiceUser' // 双方人员身份转换
 
 
 
@@ -68,5 +69,6 @@ export {
   initServiceData,
   changeServiceNowtalk,
   addServiceMessages,
-  changeServiceMessages
+  changeServiceMessages,
+  transformServiceUser
 };

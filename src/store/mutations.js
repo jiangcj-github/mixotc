@@ -41,7 +41,7 @@ export default {
         item.id === data.id && (item.unread = 0);
       });
   },
-  
+
   [types.chatTop](state, { data }) {
     // 聊天置顶
     state.chat.unshift(state.chat.splice(data)[0]);
@@ -192,20 +192,27 @@ export default {
     });
   },
 
+
   /**
    * 审核申述客服部分
    */
 
-  // 初始化聊天部分数据
+  // 初始化聊天部分数据 （自己的信息）
   [types.initServiceData](state, { data }) {
     state.serviceData = data;
   },
-  // 根据左边选择右边状态
+  // 根据左边选择右边状态（对方的信息）
   [types.changeServiceNowtalk](state, { data }) {
     // 改变当前聊天
-    state.serviceNow = data.id;
+    state.serviceNow = data.id; // 聊天入口人的id
+    state.serviceNowOther = data.data //  聊天入口对方人的id
   },
-  //接收到消息和发送消息时的处理
+  // 双方人员置换
+  [types.transformServiceUser](state, { data }) {
+    state.serviceData.unshift(data)
+  },
+
+  // 接收到消息和发送消息时的处理
   [types.addServiceMessages](state, { data }) {
     let idex = false;
     state.serviceData.forEach((item, index) => {
@@ -214,8 +221,6 @@ export default {
     !state.serviceMessage[data.id] && (state.serviceMessage[data.id] = []); //对话记录不存在时创建
     state.serviceMessage[data.id].push(data.msg);
     // state.isLogin && !state.showChat && state.unreadNum++;
-    // 有新增加消息进来，将对话列表置顶
-    state.serviceData.unshift(state.serviceData.splice(idex, 1)[0]);
   },
   // 新增发送消息
   [types.changeServiceMessages](
