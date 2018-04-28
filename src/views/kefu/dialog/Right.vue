@@ -1,93 +1,47 @@
 <template>
   <div class="right">
     <div class="h1">{{user}}</div>
-    <div class="fixed" v-if="appl === 0 && recv === 0">
-      <h3>申诉人</h3>
-      <div class="mf1">
-        <img src="/static/images/default_avator.png">
-        <span class="i1">王华华</span>
-        <span class="i2">已标记付款</span>
-        <span class="i3">69分钟</span>
+
+    <!-- 对话框展示 -->
+    <div class="swiper-container">
+      <div class="swiper-wrapper">
+        <div class="fixed swiper-slide" v-for="(content, index) in otherInfo" >
+          <h3>{{(appl === 0 && recv === 0) || (appl === 1 && recv === 1) ? '申诉人' : '被申诉人'}}</h3>
+          <div class="mf1">
+            <img src="/static/images/default_avator.png" @click="changeUser(index)">
+            <span class="i1" @click="changeUser(index)">{{content.name}}</span>
+            <span class="i2">已标记付款</span>
+            <span class="i3">{{content.update}}分钟</span>
+          </div>
+          <div class="mf2">
+            <span class="i1">已被申诉{{content.times}}次</span>
+            <button class="i2" @click="showPop1 = true">强制放币</button>
+            <button class="i3" @click="showPop3 = true">终止交易</button>
+            <button class="i3" @click="showPop2 = true" v-if="(appl === 0 && recv === 0) || (appl === 1 && recv === 1)">驳回申诉</button>
+          </div>
+        </div>
       </div>
-      <div class="mf2">
-        <span class="i1">已被申诉1次</span>
-        <button class="i2" @click="showPop1 = true">强制放币</button>
-        <button class="i3" @click="showPop3 = true">终止交易</button>
-        <button class="i3" @click="showPop2 = true">驳回申诉</button>
-      </div>
+      <div class="swiper-button-prev" v-if="otherInfo && otherInfo.length > 1"></div>
+      <div class="swiper-button-next" v-if="otherInfo && otherInfo.length > 1"></div>
     </div>
-    <div class="fixed" v-else-if="appl === 0 && recv === 1">
-      <h3>被申诉人</h3>
-      <div class="mf1">
-        <img src="/static/images/default_avator.png">
-        <span class="i1">王华华</span>
-        <span class="i2">已标记付款</span>
-        <span class="i3">69分钟</span>
-      </div>
-      <div class="mf2">
-        <span class="i1">已被申诉一次</span>
-        <button class="i2" @click="showPop1 = true">强制放币</button>
-        <button class="i3" @click="showPop3 = true">终止交易</button>
-      </div>
-    </div>
-    <div class="fixed" v-else-if="appl === 1 && recv === 1">
-      <h3>申诉人</h3>
-      <div class="mf1">
-        <img src="/static/images/default_avator.png">
-        <span class="i1">王华华</span>
-        <span class="i2">已标记付款</span>
-        <span class="i3">69分钟</span>
-      </div>
-      <div class="mf2">
-        <span class="i1">已被申诉一次</span>
-        <button class="i2" @click="showPop1 = true">强制放币</button>
-        <button class="i3" @click="showPop3 = true">终止交易</button>
-        <button class="i3" @click="showPop2 = true">驳回申诉</button>
-      </div>
-    </div>
-    <div class="fixed" v-else-if="appl === 1 && recv === 0">
-      <h3>被申诉人</h3>
-      <div class="mf1">
-        <img src="/static/images/default_avator.png">
-        <span class="i1">王华华</span>
-        <span class="i2">已标记付款</span>
-        <span class="i3">69分钟</span>
-      </div>
-      <div class="mf2">
-        <span class="i1">已被申诉一次</span>
-        <button class="i2" @click="showPop1 = true">强制放币</button>
-        <button class="i3" @click="showPop3 = true">终止交易</button>
-      </div>
-    </div>
+
     <!-- 聊天-->
     <happy-scroll color="rgba(200,200,200,0.8)" size="5" bigger-move-h="end" resize hide-horizontal class="scrollPane">
       <div class="msgBox">
-        <p class="check-more"><i>查看更多</i></p>
-        <div class="tline"><i>12月19日 12:12</i></div>
-        <p v-for="(e, i) in msgHis" :key="i" :class="{al: e.isSend !== JsonBig.stringify($store.state.userInfo.uid), ar: e.isSend == JsonBig.stringify($store.state.userInfo.uid)}">
-          <img :src="e.headimg"/>
-          <span v-if="e.type === 0">{{e.text}}</span>
-          <span v-else-if="e.type === 1" class="img-wrap"><img :src="e.url" @click="onClickImg(e)"/></span>
-          <i class="err" title="发送失败" v-if="!e.loding && e.err === 1" @click="resend(e)"></i>
-          <img src="/static/images/loding.png" class="lodingFlag" v-if="e.loding">
-        </p>
-        <!--
-        <p class="al">
-          <img src="/static/images/default_avator.png">
-          <span>付款证明<br>这是所有的付款证明</span>
-        </p>
-        <p class="ar">
-          <img src="/static/images/default_avator.png">
-          <span>付款证明这是所有的付款证明付款证明这是所有的付款证明付款证明</span>
-        </p>
-        <p class="al">
-          <img src="/static/images/default_avator.png">
-          <span class="img-wrap"><img src="/static/images/kefu/background.jpg"></span>
-          <i class="err" title="发送失败"></i>
-        </p>
-        -->
+        <p class="check-more" @click="checkMore">查看更多</p>
+        <div v-for="(item, index) in msgHis" :key="index" class="message">
+          <div class="tline" v-if="index > 0 && dealTime(msgHis[index-1].time, item.time)"><i>12月19日 12:12</i></div>
+          <p :class="{al: item.isSend !== JsonBig.stringify($store.state.userInfo.uid), ar: item.isSend == JsonBig.stringify($store.state.userInfo.uid)}">
+            <img :src="item.headimg"/>
+            <span v-if="item.type === 0">{{item.content}}</span>
+            <span v-else-if="item.type === 1" class="img-wrap"><img :src="item.url" @click="onClickImg(item)"/></span>
+            <i class="err" title="发送失败" v-if="!item.loding && item.err === 1" @click="resend(item)"></i>
+            <img src="/static/images/loding.png" class="lodingFlag" v-if="item.loding">
+          </p>
+        </div>
       </div>
     </happy-scroll>
+    <!-- 下方发送消息 -->
     <div class="sendBox">
       <div class="menu">
         <img src="/static/images/kefu/album.png" @click="$refs.file.click()" title="发送图片">
@@ -183,6 +137,8 @@
   import BasePopup from "@/components/common/BasePopup";
   import ImagePopup from "../widges/ImagePopup";
   import MSGS from "./msg.js";
+  import Swiper from 'swiper'; // 引入swiper
+  import 'swiper/dist/css/swiper.min.css';
 
   export default {
     components: {
@@ -196,7 +152,7 @@
         sendMsg: "", // 发送消息内容
         // msgHis: [],
 
-        appl: 0, // 申诉人：0-买家,1-卖家
+        // appl: 0, // 申诉人：0-买家,1-卖家
         recv: 0, // 收件人：0-买家,1-卖家
         resp: 0, // 责任人：0-买家,2-卖家
         orderId: "",
@@ -225,11 +181,10 @@
     },
     computed: {
       user() { // 监听右侧当前聊天人员
-        let result = '李小蹦';
+        let result = '';
         this.$store.state.serviceData.forEach(item => {
-          console.log('和谁聊天', item)
-          if (item.id === this.$store.state.serviceNow) {
-            result = item.nickName
+          if (this.JsonBig.stringify(item.appellant_id) === this.$store.state.serviceNow) {
+            result = item.appellant_name
           }
         });
         return result
@@ -243,37 +198,26 @@
       msgHis() { // 当前聊天信息
         return this.$store.state.serviceMessage[this.serviceNow] ? this.$store.state.serviceMessage[this.serviceNow] : []
       },
+      otherInfo() { // 对方信息
+        this.startSwiper()
+        return this.$store.state.serviceNowOther
+      },
+      appl() { // 确定申述人是否为购买者
+        let applUser; //88607959879680   88607959879680
+        this.otherInfo.forEach(item => {
+          if (this.JsonBig.stringify(item.buyer_id) == this.serviceNow) {
+            applUser = 0
+            this.recv = 1
+          } else {
+            applUser = 1
+            this.recv = 0
+          }
+        })
+        return applUser
+      }
     },
     mounted() {
-      // this.msgHis = [
-      //   {headimg: "/static/images/default_avator.png", text: "你好", type: 0, isSend: 0, err: 1, loding: true},
-      //   {headimg: "/static/images/default_avator.png", text: "有事吗", type: 0, isSend: 0, err: 0},
-      //   {headimg: "/static/images/default_avator.png", text: "你好", type: 0, isSend: 0, err: 0},
-      //   {
-      //     headimg: "/static/images/kefu/kefu.png",
-      //     text: "是您的验证码，请尽快提交验证，切勿泄露给他人，如非本人操作请忽略",
-      //     type: 0,
-      //     isSend: 1,
-      //     err: 0
-      //   },
-      //   {headimg: "/static/images/kefu/kefu.png", text: "上传付款证明", type: 0, isSend: 1, err: 0},
-      //   {headimg: "/static/images/default_avator.png", text: "请提交付款证明", type: 0, isSend: 0, err: 0},
-      //   {
-      //     headimg: "/static/images/default_avator.png",
-      //     url: "/static/images/kefu/background.jpg",
-      //     type: 1,
-      //     isSend: 0,
-      //     err: 1
-      //   },
-      //   {
-      //     headimg: "/static/images/kefu/kefu.png",
-      //     url: "/static/images/kefu/background.jpg",
-      //     type: 1,
-      //     isSend: 1,
-      //     err: 1
-      //   },
-      // ];
-
+      this.startSwiper();
       // 获取聊天消息
       let _this = this;
       //聊天信息监听
@@ -283,20 +227,30 @@
           // op为7单人聊天信息，对象类型
           if (res.op && res.op === 7) {
             let {id, uid, icon, name, data, type } = res.body;
-            // await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
-            // 文字
-            if (type === 'text') {
-              let obj = {
+            let obj = {};
+            if (type === 'text') { // 文字
+              obj = {
                 isSend:  _this.JsonBig.stringify(uid),
                 headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                 type: 0, // 0: 发送文字, 1: 发送图片
                 isLoding: true, // 加载中
                 err: 0, // 0: 发送成功, 1: 发送失败
-                text: data.msg
+                content: data.msg,
+                time: new Date() - 0
               };
               _this.$store.commit({type: 'addServiceMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
               return;
             }
+            obj = { // 图片
+              isSend:  _this.JsonBig.stringify(uid),
+              headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+              type: 1, // 0: 发送文字, 1: 发送图片
+              isLoding: true, // 加载中
+              err: 0, // 0: 发送成功, 1: 发送失败
+              content: `${_this.HostUrl.http}file/${data.id}`,
+              time: new Date() - 0
+            };
+            _this.$store.commit({type: 'addServiceMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
           }
         }
       };
@@ -306,6 +260,87 @@
       });
     },
     methods: {
+       startSwiper() {
+         new Swiper('.swiper-container', { // 调用轮播图
+           nextButton: '.swiper-button-next',
+           prevButton: '.swiper-button-prev',
+           // onSlideChangeEnd: function(swiper){
+           //   swiper.update(); //swiper更新
+           // }
+         })
+       },
+      // async uploadImage() {
+      //   let a = new FormData();
+      //   let chat = this.chat[this.index],
+      //     tid = this.JsonBig.parse(this.curChat),
+      //     file = this.$refs.up_img.files[0],
+      //     time = new Date() - 0;
+      //   a.append("uploadfile", file);
+      //   this.$refs.up_img.value = ''
+      //   this.sendImg(tid, time);
+      //   let icon = await fetch(`${this.HostUrl.http}file/`, {
+      //     method: 'Post',
+      //     body: a
+      //   }).then(res => res.text()).then(res => res).catch(error=>{
+      //     this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
+      //     return false;
+      //   })
+      //   if(!icon) return;
+      //   this.$store.commit({type: 'changeImgsrc', data:{id: tid, time: time, src: `${this.HostUrl.http}file/${icon}`}})
+      //   this.WsProxy.sendMessage({
+      //     gid: chat.group ? tid : 0,
+      //     tid: tid,
+      //     type: 'image',
+      //     data:{
+      //       uid: this.$store.state.userInfo.uid,
+      //       rid: chat.group ? tid : 0,
+      //       tid: tid,
+      //       type: 'image',
+      //       id: icon,
+      //       length: file.size,
+      //       ext: file.type,
+      //     }
+      //   }).then(data => {
+      //     this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0 }})
+      //   }).catch(error => {
+      //     this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
+      //   })
+      // },
+      onCtrlEnter() { // 换行
+        this.$refs.textarea.value += "\n";
+      },
+      changeUser(index) { // 点击切换身份
+        let otherObj = {
+          appellant_icon: this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : "/static/images/default_avator.png",
+          appellant_name: this.otherInfo[index].name,
+          time: new Date().getTime().formatTime(),
+          data: '',
+          appellant_id: ''
+        }
+        this.$store.commit({type: 'transformServiceUser', data: otherObj})
+        this.recv = this.recv === 1 ? 0 : 1;
+        console.log('uid', index)
+        this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人对方资料
+          "appellee_id": this.otherInfo[index].uid
+        }).then(data => {
+          console.log('申述人', data);
+          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.uls[index].appellant_id})}) // 存储右边聊天人员
+        }).catch(error=>{
+          console.log('错误', error)
+        })
+      },
+      addStoreMessages(type, content, time) { // 设置发送样式
+        let obj = {
+          isSend: this.JsonBig.stringify(this.$store.state.userInfo.uid),
+          headimg: "/static/images/kefu/kefu.png",
+          type: type, // 0: 发送文字, 1: 发送图片
+          content: content,
+          isLoding: true, // 加载中
+          err: 0, // 0: 发送成功, 1: 发送失败
+          time: time
+        };
+        this.$store.commit({type: 'addServiceMessages', data:{id: this.serviceNow, msg: obj }})
+      },
       chooseImage() { // 发送图片
         this.sendFile = this.$refs.file.files[0];
         let reader = new FileReader();
@@ -321,47 +356,26 @@
           });
         });
       },
-      onCtrlEnter() { // 换行
-        this.$refs.textarea.value += "\n";
-      },
       send() { // 发送消息
         if (/^\s*$/.test(this.sendMsg)) return;
-        // 本地store更新消息
-        // this.msgHis.push({
-        //   headimg: "/static/images/kefu/kefu.png",
-        //   text: this.sendMsg,
-        //   type: 0,
-        //   isSend: 1,
-        //   err: 1,
-        // });
-
-        let obj = {
-          isSend: this.JsonBig.stringify(this.$store.state.userInfo.uid),
-          headimg: "/static/images/kefu/kefu.png",
-          type: 0, // 0: 发送文字, 1: 发送图片
-          isLoding: true, // 加载中
-          err: 0, // 0: 发送成功, 1: 发送失败
-          text: this.sendMsg
-        };
-        this.$store.commit({type: 'addServiceMessages', data:{id: this.serviceNow, msg: obj }})
+        let time = new Date() - 0;
+        this.addStoreMessages(0, this.sendMsg, time)
         // 发送消息
         this.WsProxy.sendMessage({
           type: 'text',
-          gid: this.JsonBig.parse("197129593973379072"),
-          tid: this.JsonBig.parse("197129593973379072"),
+          // gid: this.JsonBig.parse("197129593973379072"),
+          tid: this.JsonBig.parse(this.serviceNow),
           data:{
             uid: this.$store.state.userInfo.uid,
-            rid: this.JsonBig.parse("197129593973379072"),
-            tid: this.JsonBig.parse("197129593973379072"),
+            rid: this.JsonBig.parse(this.serviceNow),
+            tid: this.JsonBig.parse(this.serviceNow),
             msg: this.sendMsg
           }
         }).then(data => { // 发送消息成功后更改原保存信息
-         console.log('1111111', data)
-          // this.$store.commit({type: 'changeMessageState', data:{id: this.curChat, time: time, code:0 }})
+          this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:0 }})
         }).catch(error => {
-          console.log('2222222', error)
+          this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:1 }})
         });
-
         this.$refs.textarea.value = '';
       },
       resend(item) { // 发送失败
@@ -369,6 +383,22 @@
         setTimeout(() => {
           item.err = 1;
         }, 2000);
+      },
+      checkMore(num) { // 查看更多消息
+        // this.WsProxy.send('control', 'get_history_msgs', {
+        //   peer_id: this.chat[this.index].group ? 0 : this.JsonBig.parse(this.curChat),
+        //   group_id: this.chat[this.index].group ? this.JsonBig.parse(this.curChat) : 0,
+        //   last_msg_id: this.messages[0] && this.messages[0].id ? messages[0].id : 0,
+        //   is_peer_admin: this.chat[this.index].service ? 1 : 0,
+        //   count: num
+        // }).then(data=>{
+        //   (!data.msgs || data.msgs.length <= 10) && this.morFlag
+        // })
+      },
+      // 处理是否显示消息时间
+      dealTime(time1, time2) {
+        if(time2 - time1 < 180000) return false;
+        return time2.formatTime()
       },
       onClickM0() { // 点击上传付款证明按钮
         let text = MSGS.get(0, this.appl, this.recv);
@@ -419,9 +449,9 @@
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_send_order',{
-          "id": this.JsonBig.parse("209038372436447232"),
-          "seller": this.JsonBig.parse("203973913955278848"),
-          "buyer": this.JsonBig.parse("197129593973379072"),
+          "id": this.JsonBig.parse("209038372436447232"),  // this.otherInfo
+          "seller": this.JsonBig.parse("203973913955278848"), // this.otherInfo
+          "buyer": this.JsonBig.parse("197129593973379072"), // this.otherInfo
           "responsible": this.JsonBig.parse("203973913955278848"),
           "info": this.pop1TextOld
         }).then((data)=>{
@@ -436,7 +466,7 @@
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_reject_appeal',{
-          "id": this.JsonBig.parse("209038372436447232"),
+          "id": this.JsonBig.parse("209038372436447232"), // this.otherInfo
           "type": 1  // 1: 交易, 2: 担保转账
         }).then((data)=>{
           console.log('驳回申述', data)
@@ -450,9 +480,9 @@
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_terminate_order',{
-          "id": this.JsonBig.parse("209038372436447232"),
+          "id": this.JsonBig.parse("209038372436447232"), // this.otherInfo
           "type": 1, // 1: 订单, 2: 担保
-          "responsible": this.JsonBig.parse("203973913955278848"),
+          "responsible": this.JsonBig.parse("197113900708139008"), // this.otherInfo
           "info": this.pop3TextOld
         }).then((data)=>{
           console.log('终止交易', data)
@@ -490,10 +520,11 @@
       letter-spacing 0.19px
       padding 0 20px
     .fixed
-      margin 15px 20px
+      margin 15px 0
       height 160px
       background #fff
       box-shadow 0 2px 4px 0 #999
+      cursor pointer
       > h3
         height 45px
         padding 0 20px
@@ -587,9 +618,8 @@
         font-size 11px
         color #ff794c
         margin-bottom 10px
-        i
-          display inline-block
-          margin 0 auto
+        text-align center
+        cursor pointer
       .tline
         text-align center
         > i
@@ -599,87 +629,88 @@
           background #E1E1E1
           border-radius 2px
           padding 1px 5px
-      > p
-        font-size 13px
-        color #333333
-        letter-spacing 0.16px
-        margin-top 10px
-        display flex
-        align-items flex-start
-        box-sizing border-box
-        > img
-          width 40px
-          height 40px
-          border-radius 50%
-        > span
-          border-radius 2px
-          padding 10px
-          line-height 20px
-          position relative
+      .message
+        > p
+          font-size 13px
+          color #333333
+          letter-spacing 0.16px
+          margin-top 10px
+          display flex
+          align-items flex-start
           box-sizing border-box
-          min-height 40px
-          display inline-flex
-          align-items center
-          max-width 340px
           > img
-            max-width 100px
-            height auto
+            width 40px
+            height 40px
+            border-radius 50%
+          > span
             border-radius 2px
+            padding 10px
+            line-height 20px
+            position relative
+            box-sizing border-box
+            min-height 40px
+            display inline-flex
+            align-items center
+            max-width 340px
+            > img
+              max-width 100px
+              height auto
+              border-radius 2px
+              cursor pointer
+          > span.img-wrap
+            padding 0
+          > i.err
+            display inline-block
+            width 16px
+            height 16px
+            background #FF794C
+            align-self center
+            margin 0 10px
+            border-radius 50%
+            text-align center
+            line-height 16px
+            font-size 12px
             cursor pointer
-        > span.img-wrap
-          padding 0
-        > i.err
-          display inline-block
-          width 16px
-          height 16px
-          background #FF794C
-          align-self center
-          margin 0 10px
-          border-radius 50%
-          text-align center
-          line-height 16px
-          font-size 12px
-          cursor pointer
-          &:before
-            content "!"
-            color #fff
-      > p.al
-        > span
-          background #E1E1E1
-          margin-left 18px
-          &:before
-            content ""
-            height 2px
-            display inline-block
-            border-right 8px solid #e1e1e1
-            border-top 5px solid transparent
-            border-bottom 5px solid transparent
-            position absolute
-            left -8px
-            top 15px
-        > span.img-wrap
-          background transparent
-          &:before
-            display none
-      > p.ar
-        flex-direction row-reverse
-        > span
-          background #FFB422
-          margin-right 18px
-          &:before
-            content ""
-            height 2px
-            display inline-block
-            border-left 8px solid #FFB422
-            border-top 5px solid transparent
-            border-bottom 5px solid transparent
-            position absolute
-            right -8px
-            top 15px
-        > span.img-wrap
-          background transparent
-          &:before
-            display none
+            &:before
+              content "!"
+              color #fff
+        > p.al
+          > span
+            background #E1E1E1
+            margin-left 18px
+            &:before
+              content ""
+              height 2px
+              display inline-block
+              border-right 8px solid #e1e1e1
+              border-top 5px solid transparent
+              border-bottom 5px solid transparent
+              position absolute
+              left -8px
+              top 15px
+          > span.img-wrap
+            background transparent
+            &:before
+              display none
+        > p.ar
+          flex-direction row-reverse
+          > span
+            background #FFB422
+            margin-right 18px
+            &:before
+              content ""
+              height 2px
+              display inline-block
+              border-left 8px solid #FFB422
+              border-top 5px solid transparent
+              border-bottom 5px solid transparent
+              position absolute
+              right -8px
+              top 15px
+          > span.img-wrap
+            background transparent
+            &:before
+              display none
     .sendBox
       height 160px
       border-top 1px solid #D8D8D8
@@ -844,4 +875,12 @@
           background #fff3eb
 
   placeholder()
+
+  /* 轮播图展示 */
+  .swiper-container, swiper-container-horizontal
+    width 610px
+    margin 0 20px
+
+
 </style>
+

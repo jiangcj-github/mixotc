@@ -10,7 +10,7 @@
     <happy-scroll color="rgba(100,100,100,0.8)" size="5" resize hide-horizontal
                   bigger-move-h="start" smaller-move-h="start" class="scrollPane">
       <ul class="persons">
-        <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index)" :class="{active: ulSel === index}">
+        <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index, content.appellant_id)" :class="{active: JsonBig.stringify(content.appellant_id) === $store.state.serviceNow}">
           <img :src="content.appellant_icon ? `${HostUrl.http}image/${content.appellant_icon}` : `/static/images/default_avator.png`">
           <i v-if="content.unread">{{unreadNum}}</i>
           <div class="pinfo">
@@ -36,47 +36,47 @@
         srchText: "",
         uls: [],
         ulsBuf: [],
-        ulSel: 0,
         unreadNum: 1
       }
     },
     mounted(){
-      this.ulsBuf=[
-        {headimg:"/static/images/default_avator.png",nickname:"兰陵王",account:"15810269653",time:"12:12",msg:"你好", unread: true},
-        {headimg:"/static/images/default_avator.png",nickname:"程咬金",account:"15810269653",time:"12:12",msg:"你好"},
-        {headimg:"/static/images/default_avator.png",nickname:"吕布",account:"15810269653",time:"2016/01/12",msg:"你好"},
-        {headimg:"/static/images/default_avator.png",nickname:"孙尚香",account:"15810269653",time:"2016/01/12",msg:"你好"},
-        {headimg:"/static/images/default_avator.png",nickname:"乔峰",account:"15810269653",time:"2016/01/12",msg:"你好"},
-        {headimg:"/static/images/default_avator.png",nickname:"张无忌",account:"15810269653",time:"2016/01/12",msg:"你好"},
-        {headimg:"/static/images/default_avator.png",nickname:"王兰",account:"15810269653",time:"2016/01/12",msg:"你好"},
-        {headimg:"/static/images/default_avator.png",nickname:"赵信",account:"398017990@qq.com",time:"2016/01/12",msg:"你好"},
-        {headimg:"/static/images/default_avator.png",nickname:"易大师",account:"398017990@qq.com",time:"2016/01/12",msg:"你好"},
-        {headimg:"/static/images/default_avator.png",nickname:"盖伦",account:"398017990@qq.com",time:"2016/01/12",msg:"你好"},
-        {headimg:"/static/images/default_avator.png",nickname:"艾希",account:"398017990@qq.com",time:"2016/01/12",msg:"你好"},
-        {headimg:"/static/images/default_avator.png",nickname:"李白",account:"398017990@qq.com",time:"2016/01/12",msg:"你好"},
-        {headimg:"/static/images/default_avator.png",nickname:"杜甫",account:"398017990@qq.com",time:"2016/01/12",msg:"你好"},
-      ];
       this.parseUls();
-      this.initData() //初始化列表数据
+      this.initData()
+      // this.$store.state.serviceData.length ? this.uls =  this.ulsBuf = this.$store.state.serviceData : this.initData() //初始化列表数据
     },
     methods: {
       initData() { // 初始化列表数据
-        this.WsProxy.send('control', 'a_get_appeal_users').then(data => {
+        this.WsProxy.send('control', 'a_get_appeal_users', {
+          "id": this.$store.state.userInfo.uid
+        }).then(data => {
           console.log('对话列表', data);
-          // this.ulsBuf = data;
-          // this.$store.commit({type: 'initServiceData', data: this.ulsBuf}); // 获取列表数据存储到vuex中
+          this.uls =  this.ulsBuf = data;
+          data.forEach(v => {
+            v.appellant_id = this.JsonBig.stringify(v.appellant_id)
+            v.id = this.JsonBig.stringify(v.id)
+          })
+          this.$store.commit({type: 'initServiceData', data: data}); // 获取列表数据存储到vuex中
         }).catch(error=>{
           console.log('错误', error)
         })
       },
-      onLiClick(index) { // 点击列表
-        this.ulSel = index;
-        // this.$store.commit({type: 'changeServiceNowtalk', data: {}}) // 存储右边聊天人员
+      onLiClick(index, id) { // 点击列表
+        console.log('aaa', this.uls[index].appellant_id)
+        this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人资料
+          "appellant_id": this.JsonBig.parse(this.uls[index].appellant_id),
+          //"appellee_id": this.JsonBig.parse(this.uls[index].appellee_id)
+        }).then(data => {
+          console.log('申述人', data);
+          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.JsonBig.stringify(this.uls[index].appellant_id)})}) // 存储右边聊天人员
+        }).catch(error=>{
+          console.log('错误', error)
+        })
+
       },
       parseUls() { // 搜索输入框
         this.uls = [];
         this.ulsBuf.forEach((v) => {
-          if (new RegExp("^.*"+this.srchText+".*$").test(v.nickname)) {
+          if (new RegExp("^.*"+this.srchText+".*$").test(v.appellant_name)) {
             this.uls.push(v);
           }
         });
@@ -128,7 +128,7 @@
         box-sizing border-box
         display flex
         align-items center
-        cursor default
+        cursor pointer
         position relative
         &:hover
           background #3c3737
