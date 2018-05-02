@@ -25,12 +25,12 @@
         <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend, disable: !moveTrue || !checkAccount(account)}" @click="sendCode">{{isSend ? time + '秒后重发': sendCodeText}}</button>
       </div>
 
-      <button :class="{able: moveTrue && agree}" :disabled="!moveTrue || !agree" @click="login">登录</button>
+      <button class="log" :class="{able: moveTrue && agree}" :disabled="!moveTrue || !agree" @click="login">登录</button>
 
       <div class="yhxy">
         <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
         <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
-        <p>我已阅读并同意 <a href="">用户协议</a></p>
+        <p>我已阅读并同意 <a href="http://localhost:8080/#/transaction/tradeRules?source=4" target="_blank">用户协议</a></p>
       </div>
 
       <span :class="{'hide-tips':agree,'yhxy-tips':!agree}"><img src="/static/images/hint.png" alt="">&nbsp;&nbsp;<b>请勾选用户协议</b></span>
@@ -118,7 +118,7 @@
       },
       sendCode(){
         if (this.isSend) {
-        console.log(9999999999);
+        // console.log(9999999999);
         return
       };
        this.type = this.checkAccount(this.account);
@@ -272,11 +272,12 @@
     noselect()
     .login
       position fixed
-      top 30px
+      top 50%
       left 50%
       width 400px
       height 342px
       margin-left -200px
+      margin-top -210px
       padding 40px 0
       background-color: #fff
       z-index 999
@@ -407,6 +408,7 @@
           height 40px
           margin 0
           text-align center
+          font-size 14px
           line-height 40px
           color #fff
           cursor pointer
@@ -418,22 +420,21 @@
           &.disable
             background-color $col999
             cursor default
-
-      button
+      .log
         width 350px
         height 40px
+        margin-left 25px
         background-color: $col999
         text-align center
         line-height 40px
         color #FFF
-        margin-left 25px
+        border-radius 2px
         &:focus
           outline 0
         &.able
           background $col422
           &:active
             background $col350
-
       .yhxy
         height: 12px
         line-height 12px

@@ -27,7 +27,7 @@
         <ul>
           <li class="price clearfix">
             <span class="title">价格</span>
-            <p>{{contentData.price}}CNY</p>
+            <p>{{contentData.price}} CNY</p>
           </li>
           <li class="clearfix">
             <span class="title">可交易量</span>
@@ -35,13 +35,13 @@
           </li>
           <li class="clearfix">
             <span class="title">限额</span>
-            <p>{{contentData.min}}~{{contentData.max}}CNY</p>
+            <p>{{contentData.min}}~{{contentData.max}} CNY</p>
           </li>
           <li class="clearfix">
             <span class="title">付款方式</span>
             <p>
               <img src="/static/images/OTC_zhifubao.png" alt="" v-if="contentData.payments %2 === 1">
-              <img src="/static/images/OTC_wechat.png" alt="" v-if="[3, 6, 7].includes(contentData.payments)">
+              <img src="/static/images/OTC_wechat.png" alt="" v-if="[2, 3, 6, 7].includes(contentData.payments)">
               <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(contentData.payments)">
             </p>
           </li>
@@ -51,7 +51,7 @@
           </li>
           <li class="remark clearfix">
             <span class="title">备注</span>
-            <p>{{contentData.info}}</p>
+            <p>{{contentData.info ? contentData.info : '无'}}</p>
           </li>
         </ul>
       </div>

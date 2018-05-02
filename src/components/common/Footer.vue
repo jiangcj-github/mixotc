@@ -1,27 +1,40 @@
 <template>
-  <div class="footer">
-    <article class="footer-wrapper">
-      <section class="foot-left">
-        <img src="/static/images/footlogo.png" alt="">
-      </section>
-      <section class="foot-mid">
-        <ul class="mid-up">
-          <!--<li>关于我们</li>-->
-          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 4}}">用户协议</router-link></li>
-          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 5}}">隐私政策</router-link></li>
-          <li><router-link :to="{path: '/coinData'}">币种资料</router-link></li>
+  <div class="wrap">
+    <div class="faq" v-if="['/', '/transaction'].includes($route.path)">
+      <div class="inner clearfix">
+        <h2>常见问题</h2>
+        <ul>
+          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 2}}">如何购买数字币</router-link></li>
+          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 3}}">如何出售数字币</router-link></li>
+          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 1}}">费率说明</router-link></li>
         </ul>
-        <ul class="mid-down">
-          <li class="down-left">市场有风险，投资需谨慎</li>
-          <li>网站备案信息</li>
-        </ul>
-      </section>
-      <section class="foot-right">
-        <img src="/static/images/QRcode.png" alt="">
-        <span class="right-up">微信客服</span>
-        <span class="right-down">工作时间：10:00-22:00 (周一至周五)</span>
-      </section>
-    </article>
+        <img src="/static/images/question.png" alt="">
+      </div>
+    </div>
+    <div class="footer">
+      <article class="footer-wrapper">
+        <section class="foot-left">
+          <img src="/static/images/footlogo.png" alt="">
+        </section>
+        <section class="foot-mid">
+          <ul class="mid-up">
+            <!--<li>关于我们</li>-->
+            <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 4}}">用户协议</router-link></li>
+            <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 5}}">隐私政策</router-link></li>
+            <li><router-link :to="{path: '/coinData'}">币种资料</router-link></li>
+          </ul>
+          <ul class="mid-down">
+            <li class="down-left">市场有风险，投资需谨慎</li>
+            <li>网站备案信息</li>
+          </ul>
+        </section>
+        <section class="foot-right">
+          <img src="/static/images/QRcode.png" alt="">
+          <span class="right-up">微信客服</span>
+          <span class="right-down">工作时间：10:00-22:00 (周一至周五)</span>
+        </section>
+      </article>
+    </div>
   </div>
 </template>
 
@@ -42,6 +55,77 @@
         color $col999
         a
           color $col999
+  .faq
+    position relative
+    height 200px
+    background-color #FFF
+    .inner
+      position relative
+    h2
+      float left
+      height 30px
+      margin-top 15px
+      margin-right 40px
+      line-height 30px
+      letter-spacing 0.23px
+      font-size $fz20
+      font-weight bold
+      color $col333
+      &::before
+        position relative
+        top 2px
+        left 0
+        display inline-block
+        content ''
+        width 3px
+        height 20px
+        margin-right 10px
+        background-color $col422
+    ul
+      height 141px
+      padding-top 59px
+      margin-left 389px
+      font-size $fz14
+      color $col333
+      letter-spacing 0.16px
+      li
+        position relative
+        margin-bottom 20px
+        line-height 14px
+        cursor pointer
+        &:hover
+          a
+            color $col422
+            &:active
+              color $col350
+        &::before
+          position absolute
+          top 0
+          left -34px
+          width 14px
+          height 14px
+          content ''
+          border-radius 50%
+          background $col422
+        &::after
+          position absolute
+          top 4px
+          left -31px
+          width 5px
+          height 5px
+          content ''
+          transform rotate(-45deg)
+          -ms-transform rotate(-45deg) 	/* IE 9 */
+          -moz-transform rotate(-45deg) 	/* Firefox */
+          -webkit-transform rotate(-45deg) /* Safari 和 Chrome */
+          -o-transform rotate(-45deg) 	/* Opera */
+          border 1px solid #FFF
+          border-left 0
+          border-top 0
+    img
+      position absolute
+      left 650px
+      top 35px
 
   .footer
     height: 100px

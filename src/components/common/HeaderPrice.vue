@@ -19,7 +19,7 @@
       <li><span class="line">帮助</span></li>
       <li><router-link tag="span" to="/verify/largeTransaction" class="line">大额交易申请</router-link></li>
       <li><router-link tag="span" to="/verify/identifyAuth" class="line">审核</router-link></li>
-      <li><router-link tag="span" to="/verify/arbitrationRecord">仲裁</router-link></li>
+      <li><router-link tag="span" to="/verify/arbitrationRecord">申诉</router-link></li>
     </ul>
   </div>
 </template>

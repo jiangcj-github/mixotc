@@ -44,7 +44,7 @@ export default {
 
   [types.chatTop](state, { data }) {
     // 聊天置顶
-    state.chat.unshift(state.chat.splice(data)[0]);
+    state.chat.unshift(state.chat.splice(data, 1)[0]);
   },
 
   [types.changeChat](state, { data }) {

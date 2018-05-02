@@ -12,7 +12,7 @@
     <div class="title limit-price">{{`${data.min}-${data.max}`}}</div>
     <div class="title payment">
       <img src="/static/images/OTC_zhifubao.png" alt="" v-if="data.payments %2 === 1">
-      <img src="/static/images/OTC_wechat.png" alt="" v-if="[3, 6, 7].includes(data.payments)">
+      <img src="/static/images/OTC_wechat.png" alt="" v-if="[2, 3, 6, 7].includes(data.payments)">
       <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(data.payments)">
     </div>
     <div class="title amount">{{data.tradeable}}</div>
@@ -176,11 +176,11 @@ export default {
     &.good-reputation
       width 110px
     &.amount
-      width 120px
+      width 140px
     &.limit-price
       width 140px
     &.price
-      width 150px
+      width 130px
       font-size 16px
       color $col100
       letter-spacing 0.18px
@@ -188,6 +188,7 @@ export default {
       button
         width 100px
         height 30px
+        font-size $fz14
         margin-bottom 27px
         color #FFF
         background $col422

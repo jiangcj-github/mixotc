@@ -163,6 +163,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
   .main-container{
+    position relative
     flex-grow: 1;
   }
 </style>

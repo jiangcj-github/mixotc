@@ -5,7 +5,7 @@
 
       <div class="filtrate">
         <div class="select" @click.stop="switchPayment">
-          <i>{{payTitle}}</i>
+          <i :class="{'select-item': payTitle !== '选择支付方式' }">{{payTitle}}</i>
           <ul class="payment" v-clickoutside="changePayment" v-show="showPayment">
             <li v-for="(item, index) of payment" :key="index" :class="{selected: item.state}" @click.stop="item.state = !item.state">
               <span>{{item.type}}</span>
@@ -83,17 +83,7 @@
 
     </div>
 
-    <div class="faq">
-      <div class="inner clearfix">
-        <h2>常见问题</h2>
-        <ul>
-          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 2}}">如何购买数字币</router-link></li>
-          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 3}}">如何出售数字币</router-link></li>
-          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 1}}">费率说明</router-link></li>
-        </ul>
-        <img src="/static/images/question.png" alt="">
-      </div>
-    </div>
+    
     <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="popupClick(toPath)">
       <slot>
         <p><span>{{popupTip}}</span></p>
@@ -121,7 +111,7 @@ import NothingContent from '@/components/common/NothingContent';
       return {
         tip: false,//限额错误文案提示
         showPayment: false,
-        payment:[{type: '支付宝', score: 1, state: false}, {type: '微信', score: 2, state: false}, {type: '银行卡', score:4, state: false}],
+        payment:[{type: '支付宝', score: 1, state: true}, {type: '微信', score: 2, state: true}, {type: '银行卡', score:4, state: true}],
         min:'',
         max:'',
         filte:{
@@ -307,7 +297,7 @@ import NothingContent from '@/components/common/NothingContent';
         }).map(item => {
             return item.type;
         })
-        if(title.length ===0) return '选择支付方式'
+        if(title.length === 0) return '选择支付方式'
         return title.join('/');
       },
       paymentScore() {
@@ -331,7 +321,7 @@ import NothingContent from '@/components/common/NothingContent';
           curVal.min === '' && (curVal.min = 200);
           curVal.min === '' && (curVal.min = 9007199254741);
           if ((min > max && curVal.min !== '' && curVal.max !== '') || curVal.min < 200) {
-            console.log(this.tip)
+            // console.log(this.tip)
             this.tip = true
             return;
           }
@@ -395,6 +385,8 @@ import NothingContent from '@/components/common/NothingContent';
           font-size $fz13
           color #999
           letter-spacing 0.27px
+          &.select-item
+            color $col333
         &::before
           position absolute
           top 12.5px
@@ -538,11 +530,11 @@ import NothingContent from '@/components/common/NothingContent';
           &.good-reputation
             width 110px
           &.amount
-            width 120px
+            width 140px
           &.limit-price
             width 140px
           &.price
-            width 150px
+            width 130px
           &.sort
             span
               position relative
@@ -573,72 +565,6 @@ import NothingContent from '@/components/common/NothingContent';
       ul
         li.even
           background-color #FFF
-  .faq
-    position relative
-    height 200px
-    background-color #FFF
-    .inner
-      position relative
-    h2
-      float left
-      height 30px
-      margin-top 15px
-      margin-right 40px
-      line-height 30px
-      letter-spacing 0.23px
-      font-size $fz20
-      font-weight bold
-      color $col333
-      &::before
-        position relative
-        top 2px
-        left 0
-        display inline-block
-        content ''
-        width 3px
-        height 20px
-        margin-right 10px
-        background-color $col422
-    ul
-      height 141px
-      padding-top 59px
-      margin-left 389px
-      font-size $fz14
-      color $col333
-      letter-spacing 0.16px
-      li
-        position relative
-        margin-bottom 20px
-        line-height 14px
-        cursor pointer
-        &::before
-          position absolute
-          top 0
-          left -34px
-          width 14px
-          height 14px
-          content ''
-          border-radius 50%
-          background $col422
-        &::after
-          position absolute
-          top 4px
-          left -31px
-          width 5px
-          height 5px
-          content ''
-          transform rotate(-45deg)
-          -ms-transform rotate(-45deg) 	/* IE 9 */
-          -moz-transform rotate(-45deg) 	/* Firefox */
-          -webkit-transform rotate(-45deg) /* Safari 和 Chrome */
-          -o-transform rotate(-45deg) 	/* Opera */
-          border 1px solid #FFF
-          border-left 0
-          border-top 0
-    img
-      position absolute
-      left 650px
-      top 35px
   .popup
     text-align center
     p

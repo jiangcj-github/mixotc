@@ -64,9 +64,14 @@
     <!-- 底部 -->
     <ol class="input-text clearfix">
       <li>
-        <input type="text" :disabled="curChat === 'system' || curChat === '' ? true  : ((chat[index] && chat[index].exists === false) ?  true : false )" v-model="sendText" @keyup.enter="sendMs(sendText)">
+        <input type="text" :disabled="isDisable" :class="{disable: isDisable}" v-model="sendText" @keyup.enter="sendMs(sendText)">
       </li>
-      <li @click="$refs.up_img.click()" class="send-image">
+      <li @click="()=>{
+          if(isDisable) return;
+          this.$refs.up_img.click()
+        }" 
+        class="send-image"
+      >
         <img src="/static/images/picture_icon.png"  title="发送图片">
         <div style='display:none'>
           <input type='file' ref="up_img" accept="image/png, image/jpeg" @change="uploadImage">
@@ -136,6 +141,7 @@
                :height=50
                :top=50
                :wrapStyleObject="beliveWrap"
+               @click.native="addressLayer = false"
     >暂无收款地址
     </BasePopup>
     <!-- 群信息 -->
@@ -222,6 +228,9 @@
         })
         return idx
       },
+      isDisable() {
+        return this.curChat === 'system' || this.curChat === '' ? true  : ((this.chat[this.index] && this.chat[this.index].exists === false) ?  true : false )
+      },
       isFriend() {
         let result = false;
         this.$store.state.friendList.forEach(item => {
@@ -278,14 +287,15 @@
       },
       async contactSomeone(id, msg) {
         let flag = this.chatIds.indexOf(id);
+        console.log(id)
         await this.dealNewChat(id, 0);
         this.$store.commit({type: 'changeChatBox', data: true})
         if (flag !== -1 ) {
           this.$store.commit({type: 'chatTop', data: flag})
         };
-        this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
-        if (!msg) return;
-        this.sendMs(msg)
+        this.$store.commit({type: 'changeCurChat', data: {id: id}})
+        if (msg) this.sendMs(msg);
+        
       },
       showBigPicture(flag, src) {
         if (!flag) return;
@@ -296,6 +306,7 @@
         this.sendMs(item)
       },
       foldAddress() {
+        if(this.isDisable) return;
         if(this.mapAddress.length === 0) {
           this.addressLayer = true;
           clearTimeout(this.timer)
@@ -887,6 +898,8 @@
           padding-left 10px
           font-size 12px
           border 1px solid #FFB422
+          &.disable
+            border-color $col1E1
       li:nth-child(2)
         width 30px
         img
