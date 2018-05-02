@@ -48,7 +48,7 @@
   <div class="err no-result" v-else-if="err===1">无相应的用户，请重新搜索</div>
   <div class="err load-failed" v-else-if="err===2">网络异常，请重新搜索</div>
   <div class="err net-error" v-else-if="err===3">加载失败，请重新搜索</div>
-  <div class="err net-error" v-else-if="err===4">数据加载中...</div>
+  <div class="err loading" v-else-if="err===4">数据加载中...</div>
   <div class="err empty" v-else>没有待审核数据</div>
 </template>
 <script>

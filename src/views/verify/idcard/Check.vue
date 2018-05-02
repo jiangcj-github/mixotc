@@ -2,7 +2,7 @@
     <!--已审核-->
     <div class="check">
       <div class="filter">
-        <div class="f1">
+        <div class="f1" :class="{disabled:srchText.length<=0}">
           <input type="text" placeholder="搜索商家昵称/账号" v-model="srchText" v-clickoutside="clickOutside" @input="fuzzyInput">
           <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
           <a href="javascript:void(0)" @click="search"></a>

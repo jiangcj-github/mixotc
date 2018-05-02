@@ -13,8 +13,8 @@
         </div>
         <div v-if="isLogin">
           <div class="trust clearfix">
-            <span class="contact isTrust" @click="Bus.$emit('contactSomeone',{id:info.id})">
-              <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
+            <span class="contact isTrust" @click="Bus.$emit('contactSomeone',{id:info.id_str})">
+              <img src="/static/images/talk.png" alt=""><i>联系TA</i>
             </span>
             <span class="join-trust isTrust" @click="cancelTrust" v-if="info.isTrust"><i>取消信任</i></span>
             <span class="join-trust" @click="joinTrust" v-else><i>加入信任</i></span>
@@ -30,11 +30,11 @@
         <div class="unit"><label>{{info.securedNum}}</label><span>担保</span></div>
       </div>
     </div>
-    <div v-if="isLogin">
+    <div v-if="isLogin" @click="showUntrustPop=false">
       <!--菜单项tab-->
       <ul class="menu-tab">
         <li :class="{active:tab==0}" @click="tab=0">他的发布</li>
-        <li :class="{active:tab==1}" @click="tab=1">收到的评价<i v-if="ratesNum>0">({{ratesNum}})</i></li>
+        <li :class="{active:tab==1}" @click="tab=1">收到的评价</li>
       </ul>
       <!--发布列表-->
       <Sales :uid="uid" v-show="tab==0"></Sales>
@@ -51,7 +51,6 @@
   import Sales from './children/Sales';
   import Rates from './children/Rates';
   import BasePopup from '@/components/common/BasePopup';
-
   export default {
     components: {
       Sales,
@@ -65,7 +64,6 @@
 
         isOnline: true,
         info:{},
-        ratesNum: 0,
 
         tab:0,  //他的发布，他的评价
         showUntrustPop:false,
@@ -89,9 +87,6 @@
       //
       this.uid= this.JsonBig.parse(this.$route.query.uid) || "";
       this.loadTraderInfo();
-      this.Bus.$on('onRatesTotalChange',(num) => {
-        this.ratesNum=num;
-      });
     },
     methods: {
       joinTrust(){
@@ -99,19 +94,19 @@
           this.info.isTrust=true;
           this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(this.uid)});
         }).catch((msg)=>{
-          console.log(msg);
+          alert(JSON.stringify(msg));
         });
       },
       cancelTrust(){
         this.WsProxy.send('otc','new_trust',{uid:this.loginUid, id:this.uid, trust:0}).then((data)=>{
           this.showUntrustPop=true;
           this.$store.commit({type:"delTrust",data:this.JsonBig.stringify(this.uid)});
-          setInterval(()=>{
+          setTimeout(()=>{
             this.showUntrustPop=false;
-          },1000);
+          },3000);
           this.info.isTrust=false;
         }).catch((msg)=>{
-          console.log(msg);
+          alert(JSON.stringify(msg));
         });
       },
       loadTraderInfo(){
@@ -119,25 +114,26 @@
           this.WsProxy.send("otc","trader_info",{id:this.uid, uid:this.loginUid}).then((data)=>{
             this.parseInfo(data);
           }).catch((msg)=>{
-            console.log(msg);
+            alert(JSON.stringify(msg));
           });
         }else{
           this.Proxy.hp_tradeInfo({id:this.uid}).then((data)=>{
             this.parseInfo(data.data);
           }).catch((msg)=>{
-            console.log(msg);
+            alert(JSON.stringify(msg));
           });
         }
       },
       parseInfo(data){
         this.info= {
           id: data.id,
+          id_str: this.JsonBig.stringify(data.id),
           nickname: data.name || "-",
           headimg: (data.icon && this.HostUrl.http+"image/"+data.icon) || "/static/images/default_avator.png",
-          tradeWidthNum: data.mytrade || "0",
+          tradeWidthNum: data.mytrade || 0,
           orderNum: data.order || 0,
-          volumn: (data.volumes || 0)+"+BTC",
-          praiseRate: (data.rate || 0) +"%",
+          volumn: data.volumes && data.volumes.toFixed(6)+"+BTC" || "0+BTC",
+          praiseRate: data.rate && data.rate+"%" || "0%",
           trustedNum: data.trusted || 0,
           trustNum: data.trust || 0,
           securedNum: data.secured || 0,
@@ -145,9 +141,6 @@
         }
       }
     },
-    destroyed(){
-      this.Bus.$off('onRatesTotalChange');
-    }
   }
 </script>
 <style scoped lang="stylus">
