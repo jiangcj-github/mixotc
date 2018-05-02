@@ -7,7 +7,9 @@
         <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
         <a href="javascript:void(0)" @click="search"></a>
         <ul v-show="srchShowTip && tips.length>0">
-          <li v-for="(o,i) in tips" :key="i" @mousedown="srchText=o.nickname" @click="search">{{o.nickname}}</li>
+          <li v-for="(o,i) in tips" @mousedown="srchText=o.nickname" @click="search">
+            <span class="sp1">{{o.nickname}}</span><span class="sp2">{{o.account}}</span>
+          </li>
         </ul>
       </div>
       <div class="f2">
@@ -57,8 +59,7 @@
         <div class="division"></div>
         <div class="remark">备注：{{e.checkRemark}}</div>
       </div>
-      <Pagination :total="total" :pageSize="pageSize" emitValue="changePage"
-                  style="width:100%;margin-top:20px"  v-show="total>pageSize"></Pagination>
+      <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
       <BasePopup :show="pop" :width="764" :height="382" :top="50">
         <div class="pop">
           <p class="inf-li"><label>提交时间</label><span>{{list[popSel].submitTime}}</span></p>
@@ -93,7 +94,7 @@
 <script>
   import DateInterval from "@/components/common/DateInterval";
   import BasePopup from "@/components/common/BasePopup";
-  import Pagination from "@/components/common/Pagination";
+  import Pagination from "../component/Pagination";
   export default {
     components: {
       BasePopup,
@@ -121,6 +122,7 @@
         list: [],   //分页数据
         total: 0,   //数据长度
         pageSize:15,  //分页大小
+        curPage: 1,  //第几页
 
         popSel: 0,
         pop: false,  //弹窗-查看
@@ -253,7 +255,8 @@
     },
     mounted(){
       this.loadCheckedList(0);
-      this.Bus.$on("changePage",(p)=>{
+      this.Bus.$on("onPageChange",(p)=>{
+        this.curPage=p;
         this.loadCheckedList(p-1);
       });
       this.Bus.$on("onDiChange",()=>{
@@ -262,7 +265,7 @@
     },
     destroyed(){
       this.Bus.$off("onDiChange");
-      this.Bus.$off("changePage");
+      this.Bus.$off("onPageChange");
     }
   }
 </script>

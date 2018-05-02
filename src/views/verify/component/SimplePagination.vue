@@ -1,32 +1,19 @@
 <template>
-  <div class="simplePage">
+  <div class="simplePage" v-if="total>pageSize">
     <p>第 {{curPage}}/{{totalPage}} 页</p>
     <ul>
-      <li class="prev" @click="clickPage(curPage - 1)"></li>
-      <li class="next" @click="clickPage(curPage + 1)"></li>
+      <li class="prev" @click="changePage(curPage - 1)" :class="{disabled:curPage<=1}"></li>
+      <li class="next" @click="changePage(curPage + 1)" :class="{disabled:curPage>=totalPage}"></li>
     </ul>
   </div>
 </template>
 <script>
 export default {
   props: {
-    total: {
-      type: Number,//数据总条数
-      default: 0
-    },
-    pageSize: {
-      type: Number,//每页展示数据条数
-      default: 15
-    },
-    onPageChange: {
-      type: String,//自定义事件名
-      default: "onPageChange"
-    }
-  },
-  data() {
-    return {
-      curPage: 1,
-    };
+    curPage:{type:Number,default:1,},
+    total: {type: Number, default: 0},
+    pageSize: {type: Number,default: 15},
+    onPageChange: {type: String, default: "onPageChange"}
   },
   computed: {
     totalPage() {
@@ -34,10 +21,9 @@ export default {
     }
   },
   methods: {
-    clickPage(i) {
-      if(i === 0 || i > this.totalPage) return;
-      this.curPage = i;
-      this.Bus.$emit(this.onPageChange, i);
+    changePage(p) {
+      if(p === 0 || p > this.totalPage) return;
+      this.Bus.$emit(this.onPageChange, p);
     }
   }
 };
@@ -85,13 +71,12 @@ export default {
       &.prev::before
         border-right-color #333
         border-left none
+      &.prev.disabled
+        pointer-events none
       &.next::after
         border-left-color #333
         border-right none
-
-
-
-
-
+      &.next.disabled
+        pointer-events none
 </style>
 

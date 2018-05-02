@@ -67,7 +67,7 @@
               <div class="ddxx"><p>{{e.orderType}}{{e.orderCoin}}</p></div>
               <div class="sqr">
                 <router-link :to="'/homepage?uid='+e.applyUid" tag="p" class="link">{{e.applyU}}</router-link>
-                <p @lcik="Bus.$emit('contactSomeone',{id:e.applyUid})" class="contact"><img src="/static/images/talk.png">联系他</p>
+                <p @click="Bus.$emit('contactSomeone',{id:e.applyUid})" class="contact"><img src="/static/images/talk.png">联系他</p>
               </div>
               <div class="sqdx">
                 <router-link :to="'/homepage?uid='+e.appliedUid" tag="p" class="link">{{e.appliedU}}</router-link>
