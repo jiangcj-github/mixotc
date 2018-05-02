@@ -201,11 +201,15 @@ export default {
   [types.initServiceData](state, { data }) {
     state.serviceData = data;
   },
+  // 获取左侧聊天人员具体信息
+  [types.getServiceNowtalk](state, { data }) {
+    state.serviceUser = data
+  },
   // 根据左边选择右边状态（对方的信息）
   [types.changeServiceNowtalk](state, { data }) {
     // 改变当前聊天
     state.serviceNow = data.id; // 聊天入口人的id
-    state.serviceNowOther = data.data //  聊天入口对方人的id
+    state.serviceNowOther = data.data //  聊天入口对方人的信息
   },
   // 双方人员置换
   [types.transformServiceUser](state, { data }) {
@@ -223,12 +227,7 @@ export default {
     // state.isLogin && !state.showChat && state.unreadNum++;
   },
   // 新增发送消息
-  [types.changeServiceMessages](
-    state,
-    {
-      data: { id, time, code }
-    }
-  ) {
+  [types.changeServiceMessages](state, {data: { id, time, code }}) {
     // 消息发送成功或失败
     let idx = 0;
     state.serviceMessage[id].forEach((item, index) => {
@@ -239,5 +238,14 @@ export default {
       }
     });
     state.serviceMessage = Object.assign({}, state.serviceMessage);
-  }
+  },
+  [types.changeServiceImgsrc](state, {data: {id, time, src}}) {
+    state.serviceMessage[id].forEach((item, index) => {
+      if (time === item.time) {
+        item.content = src;
+      }
+    });
+    state.serviceMessage = Object.assign({}, state.serviceMessage);
+  },
+
 };

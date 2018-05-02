@@ -67,7 +67,7 @@
     <BasePopup :width="470" :height="380" :top="50" :show="showPop1">
       <div class="pop">
         <h2>责任人</h2>
-        <div class="head"><img src="/static/images/default_avator.png"><span>李小蹦</span></div>
+        <div class="head"><img src="/static/images/default_avator.png"><span>{{(appl === 0 && recv === 0) ? this.serviceUser.appellant_name : this.otherInfo[0].name}}</span></div>
         <div class="textarea">
           <textarea placeholder="填写强制放币的理由" ref="pop1Text" v-model="pop1Text" @input="onPop1Input"></textarea>
           <p>{{pop1Text.length}}/50</p>
@@ -154,7 +154,7 @@
 
         // appl: 0, // 申诉人：0-买家,1-卖家
         recv: 0, // 收件人：0-买家,1-卖家
-        resp: 0, // 责任人：0-买家,2-卖家
+        // resp: 0, // 责任人：0-买家,2-卖家
         orderId: "",
 
         showPopImg: false,
@@ -177,6 +177,8 @@
         pop4Text: "", // 填写证明无效的理由
         pop4TextOld: "",
 
+
+
       }
     },
     computed: {
@@ -192,6 +194,9 @@
       serviceNow() { // 当前聊天人员id
         return this.$store.state.serviceNow
       },
+      serviceUser() { // 当前聊天人员具体信息
+        return this.$store.state.serviceUser
+      },
       serviceData() { // 左侧存储信息
         return this.$store.state.serviceData
       },
@@ -202,17 +207,35 @@
         this.startSwiper()
         return this.$store.state.serviceNowOther
       },
-      appl() { // 确定申述人是否为购买者
+      appl() {
         let applUser; //88607959879680   88607959879680
-        this.otherInfo.forEach(item => {
-          if (this.JsonBig.stringify(item.buyer_id) == this.serviceNow) {
+        // this.otherInfo.forEach(item => { // 确定申述人是否为购买者
+        //   console.log(item, this.JsonBig.stringify(item.buyer_id), this.serviceNow)
+        //   if (this.JsonBig.stringify(item.buyer_id) == this.serviceNow) {
+        //     applUser = 0
+        //     this.recv = 1
+        //   } else {
+        //     applUser = 1
+        //     this.recv = 0
+        //   }
+        // });
+        for (let v in this.serviceUser) { // 判断是否是申述者
+          if (v.indexOf('appellant_id') > -1) {
+            console.log(111)
             applUser = 0
-            this.recv = 1
-          } else {
-            applUser = 1
-            this.recv = 0
+            this.otherInfo.forEach(item => { // 确定申述人是否为购买者
+              this.recv = this.JsonBig.stringify(item.buyer_id) == this.serviceNow ?  1 : 0
+            });
+            console.log('applUser', applUser, this.recv)
+            return applUser
           }
-        })
+          console.log(222)
+          applUser = 1
+          this.otherInfo.forEach(item => { // 确定申述人是否为购买者
+            this.recv = this.JsonBig.stringify(item.buyer_id) == this.serviceNow ?  0 : 1
+          });
+        }
+        console.log('applUser', applUser, this.recv)
         return applUser
       }
     },
@@ -264,48 +287,11 @@
          new Swiper('.swiper-container', { // 调用轮播图
            nextButton: '.swiper-button-next',
            prevButton: '.swiper-button-prev',
-           // onSlideChangeEnd: function(swiper){
-           //   swiper.update(); //swiper更新
-           // }
+           onSlideChangeEnd: function(swiper){
+             swiper.update(); //swiper更新
+           }
          })
        },
-      // async uploadImage() {
-      //   let a = new FormData();
-      //   let chat = this.chat[this.index],
-      //     tid = this.JsonBig.parse(this.curChat),
-      //     file = this.$refs.up_img.files[0],
-      //     time = new Date() - 0;
-      //   a.append("uploadfile", file);
-      //   this.$refs.up_img.value = ''
-      //   this.sendImg(tid, time);
-      //   let icon = await fetch(`${this.HostUrl.http}file/`, {
-      //     method: 'Post',
-      //     body: a
-      //   }).then(res => res.text()).then(res => res).catch(error=>{
-      //     this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
-      //     return false;
-      //   })
-      //   if(!icon) return;
-      //   this.$store.commit({type: 'changeImgsrc', data:{id: tid, time: time, src: `${this.HostUrl.http}file/${icon}`}})
-      //   this.WsProxy.sendMessage({
-      //     gid: chat.group ? tid : 0,
-      //     tid: tid,
-      //     type: 'image',
-      //     data:{
-      //       uid: this.$store.state.userInfo.uid,
-      //       rid: chat.group ? tid : 0,
-      //       tid: tid,
-      //       type: 'image',
-      //       id: icon,
-      //       length: file.size,
-      //       ext: file.type,
-      //     }
-      //   }).then(data => {
-      //     this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0 }})
-      //   }).catch(error => {
-      //     this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
-      //   })
-      // },
       onCtrlEnter() { // 换行
         this.$refs.textarea.value += "\n";
       },
@@ -313,18 +299,18 @@
         let otherObj = {
           appellant_icon: this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : "/static/images/default_avator.png",
           appellant_name: this.otherInfo[index].name,
-          time: new Date().getTime().formatTime(),
+          time: new Date().getTime(),
           data: '',
-          appellant_id: ''
+          appellee_id: this.otherInfo[index].uid
         }
         this.$store.commit({type: 'transformServiceUser', data: otherObj})
-        this.recv = this.recv === 1 ? 0 : 1;
-        console.log('uid', index)
+        console.log('换人', this.appl, this.recv)
+        console.log('uid', index, this.otherInfo[index].uid)
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人对方资料
-          "appellee_id": this.otherInfo[index].uid
+          "appellee_id": this.JsonBig.parse(this.otherInfo[index].uid)
         }).then(data => {
           console.log('申述人', data);
-          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.uls[index].appellant_id})}) // 存储右边聊天人员
+          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.otherInfo[index].appellant_id})}) // 存储右边聊天人员
         }).catch(error=>{
           console.log('错误', error)
         })
@@ -341,20 +327,57 @@
         };
         this.$store.commit({type: 'addServiceMessages', data:{id: this.serviceNow, msg: obj }})
       },
-      chooseImage() { // 发送图片
+      async chooseImage() { // 发送图片
         this.sendFile = this.$refs.file.files[0];
-        let reader = new FileReader();
-        reader.readAsDataURL(this.sendFile);
-        reader.onload = ((e) => {
-          this.msgHis.push({
-            headimg: "/static/images/default_avator.png",
-            url: e.target.result,
-            type: 1, // 0: 发送文字, 1: 发送图片
-            isSend: 1, // 0: 接收信息, 1: 发送信息
-            err: 0, // 0: 发送成功, 1: 发送失败
-            loding: true
-          });
-        });
+        // let reader = new FileReader();
+        // reader.readAsDataURL(this.sendFile);
+        // reader.onload = ((e) => {
+        //   this.msgHis.push({
+        //     headimg: "/static/images/default_avator.png",
+        //     url: e.target.result,
+        //     type: 1, // 0: 发送文字, 1: 发送图片
+        //     isSend: 1, // 0: 接收信息, 1: 发送信息
+        //     err: 0, // 0: 发送成功, 1: 发送失败
+        //     loding: true
+        //   });
+        // });
+        let a = new FormData();
+        let file = this.$refs.file.files[0],
+            time = new Date() - 0;
+        a.append("uploadfile", file);
+        this.$refs.file.value = ''
+        this.sendImg(time);
+
+        let icon = await fetch(`${this.HostUrl.http}file/`, {
+          method: 'Post',
+          body: a
+        }).then(res => res.text()).then(res => res).catch(error=>{
+          this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:1 }})
+          return false;
+        })
+        if(!icon) return;
+       this.$store.commit({type: 'changeServiceImgsrc', data:{id: this.serviceNow, time: time, src: `${this.HostUrl.http}file/${icon}`}})
+        this.WsProxy.sendMessage({
+          // gid: chat.group ? tid : 0,
+          type: 'image',
+          tid: this.JsonBig.parse(this.serviceNow),
+          data:{
+            uid: this.$store.state.userInfo.uid,
+            rid: this.JsonBig.parse(this.serviceNow),
+            tid: this.JsonBig.parse(this.serviceNow),
+            type: 'image',
+            id: icon,
+            length: file.size,
+            ext: file.type,
+          }
+        }).then(data => {
+          this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:0 }})
+        }).catch(error => {
+          this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:1 }})
+        })
+      },
+      sendImg(time) { // 发送图片
+        this.addStoreMessages(1, '', time);
       },
       send() { // 发送消息
         if (/^\s*$/.test(this.sendMsg)) return;
@@ -398,7 +421,7 @@
       // 处理是否显示消息时间
       dealTime(time1, time2) {
         if(time2 - time1 < 180000) return false;
-        return time2.formatTime()
+        return time2
       },
       onClickM0() { // 点击上传付款证明按钮
         let text = MSGS.get(0, this.appl, this.recv);

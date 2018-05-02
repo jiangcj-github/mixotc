@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <div class="li" v-for="(e,i) in rates" :key="i">
+  <div v-if="err===0">
+    <div class="li" v-for="(e,i) in rates">
       <div class="p1">
         <p class="text">{{e.comment}}</p>
         <p class="time">{{e.date}}</p>
@@ -16,56 +16,38 @@
         <span>{{e.name}}</span>
       </div>
     </div>
-    <div class="empty" v-if="rates.length<=0">没有评价信息</div>
-    <Pagination :total="total" :pageSize="pageSize" emitValue="changePage" style="margin-top:20px" v-if="total>pageSize"></Pagination>
+    <Pagi :curPage="curPage" :pageSize="pageSize" :curPageSize="rates.length"></Pagi>
   </div>
+  <div class="err no-result" v-else-if="err===1">无相应的数据</div>
+  <div class="err load-failed" v-else-if="err===2">网络异常</div>
+  <div class="err net-error" v-else-if="err===3">加载失败</div>
+  <div class="err loading" v-else-if="err===4">数据加载中...</div>
+  <div class="err empty" v-else>没有评价数据</div>
 </template>
 <script>
-  import Pagination from '@/components/common/Pagination';
+  import Pagi from "../components/Pagi";
   export default {
-    props:{
-      onRatesTotalChange:{type: String ,default: "onRatesTotalChange"}
-    },
-    components: {
-      Pagination,
-    },
+    components:{Pagi},
     data() {
       return {
         uid: "",
 
-        ratesOrg:[],
-        total:0,
+        rates:[],
         pageSize:1,
-      }
-    },
-    computed:{
-      rates(){
-        let arr=[];
-        let _this=this;
-        this.ratesOrg && this.ratesOrg.forEach(function(item) {
-          arr.push({
-            comment: item.comment,
-            date: new Date(item.date).dateHandle("yyyy/MM/dd hh:mm:ss"),
-            credit: item.credit,
-            transit: {1:"差评",2:"中评",3:"好评"}[item.transit],
-            icon: _this.HostUrl.http+"image/"+item.icon,
-            name: item.name,
-          });
-        });
-        return arr;
-      }
-    },
-    watch:{
-      total:function(){
-        this.Bus.$emit(this.totalChange, this.total);
+        curPage: 1,
+        err: -1,
       }
     },
     mounted() {
       this.uid= this.JsonBig.parse(this.$route.query.uid) || "";
       this.loadRates();
-      this.Bus.$on('changePage',(p) => {
-        this.loadRates(p);
+      this.Bus.$on("onPageChange",(p)=>{
+        this.curPage=p;
+        this.loadRates(p-1);
       });
+    },
+    destroyed(){
+      this.Bus.$off("onPageChange");
     },
     methods: {
       loadRates(p=0){
@@ -73,21 +55,40 @@
           id:this.uid,
           origin:p
         }).then((data)=>{
-          this.ratesOrg=data.rates;
-          this.total=0;
-          this.pageSize=data.count;
+          if(p===0&&(!data||!data.rates||data.rates.length<=0)){
+            this.err=1;
+          }else{
+            this.err=0;
+            this.pageSize=data.count;
+            this.parseRates(data.rates);
+          }
         }).catch((msg)=>{
-          console.log(msg);
+          if(!msg){
+            this.err=2; //网络异常
+          }else if(msg.ret!==0){
+            this.err=3; //加载异常
+          }
         });
-      }
+      },
+      parseRates(data){
+        this.rates=[];
+        data && data.forEach((item)=>{
+          this.rates.push({
+            comment: item.comment || "暂无评价内容",
+            date: new Date(item.date).dateHandle("yyyy/MM/dd hh:mm:ss"),
+            credit: item.credit || 0,
+            transit: {1:"差评",2:"中评",3:"好评"}[item.transit],
+            icon: item.icon && this.HostUrl.http+"image/"+item.icon || "/static/images/default_avator.png",
+            name: item.name || "-",
+          });
+        });
+      },
     },
-    destroyed(){
-      this.Bus.$off('changePage');
-    }
   }
 </script>
 <style scoped lang="stylus">
-  @import "../../../stylus/base.styl";
+  @import "../../../stylus/base";
+  @import "../stylus/home";
   .li
     min-height 110px
     display flex
@@ -103,10 +104,13 @@
       flex-grow 1
       line-height 21px
       margin-right 20px
+      >p
+        min-height 22px
+        line-height 22px
       .text
         color #333333
       .time
-        margin-top 5px
+        margin-top 3px
         color #999999
     .p2
       display inline-flex
@@ -133,7 +137,6 @@
       >img
         width 45px
         height 45px
-        background-color #87ceeb
         border-radius 50%
       >span
         line-height 20px
@@ -141,15 +144,4 @@
         display inline-block
     &:first-of-type
       border-top none
-  .empty
-    background-color #fff
-    box-sizing border-box
-    background-repeat no-repeat
-    background-image url(/static/images/rectangle.png)
-    background-size 140px 140px
-    background-position center 30px
-    padding-top 170px
-    height 250px
-    text-align center
-    color #999
 </style>
