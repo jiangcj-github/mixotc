@@ -224,7 +224,7 @@ const RUN_APP = (App, config, plugin) => {
       store.commit({ type: "changeToken", data: "" });
     } else if (event.key == "sessionStorage" && !sessionStorage.length) {
       // 新开启的标签页会收到这个事件
-
+      console.log('新开启的标签页')
       let data = JsonBig.parse(event.newValue);
       // console.log(3, 'sessionStorage 0', event.newValue, data)
       for (let key in data) {

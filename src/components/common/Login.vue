@@ -154,7 +154,8 @@
             body:{
               action: 'send_code',
               phone: this.accType === "phone" ? this.account : "",
-              email: this.accType === "email" ? this.account : ""
+              email: this.accType === "email" ? this.account : "",
+              os: 3
             }
           }))
         }
@@ -175,7 +176,6 @@
               this.captcha = false;
               return;
             }
-
             this.showForm = false;
             this.loginSuccess = true;
             clearTimeout(this.timer);
@@ -207,7 +207,7 @@
               version: 1,
               mode: 0,
               device: '',
-              os: 1
+              os: 3
             }
           }))
         }

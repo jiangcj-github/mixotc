@@ -64,7 +64,7 @@
     <!-- 底部 -->
     <ol class="input-text clearfix">
       <li>
-        <input type="text" :disabled="curChat === 'system' || curChat === ''? true  : ((chat[index] && chat[index].exists === false) ?  true : false )" v-model="sendText" @keyup.enter="sendMs(sendText)">
+        <input type="text" :disabled="curChat === 'system' || curChat === '' ? true  : ((chat[index] && chat[index].exists === false) ?  true : false )" v-model="sendText" @keyup.enter="sendMs(sendText)">
       </li>
       <li @click="$refs.up_img.click()" class="send-image">
         <img src="/static/images/picture_icon.png"  title="发送图片">

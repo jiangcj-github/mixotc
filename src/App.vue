@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <Header></Header>
-    <router-view class="main-container" :key="$route.path + JsonBig.stringify($route.query)"/>
+    <router-view class="main-container" v-if="showView" :key="$route.path + JsonBig.stringify($route.query)"/>
     <Footer></Footer>
     <News></News>
   </div>
@@ -23,7 +23,7 @@
     data() {
       return {
         timer1: null,
-        timer2: null,
+        timer2: null
         // watchTokenFlag: true
       }
     },
@@ -42,6 +42,7 @@
           }
           ws.reConnectFlag = true;
           // console.log('setUserInfo',data.body.uid);
+          console.log(this.$store.state.userInfo, data.body)
           this.$store.commit({
             type: 'getUserInfo',
             data: data.body
@@ -89,8 +90,6 @@
       //退出登录逻辑
       logout() {
         // console.log('logout');
-        // 移除token
-        // sessionStorage.removeItem('otcToken');
         this.$store.commit({type: 'changeToken', data: ''});
         //改变vuex登录状态
         this.$store.commit({type: 'changeLogin', data: false});
@@ -99,13 +98,18 @@
         //websocket链接关闭
         this.WebSocket.close();
         //其他页面跳转至主页
-        if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) {
-            return;
-        }
+        if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) return;
         this.$router.push('transaction')
       }
     },
     computed: {
+      showView() {
+        if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) {
+          return true;
+        }
+        if(this.isLogin) return true;
+        return false
+      },
       isLogin() {
         return this.$store.state.isLogin;
       },
