@@ -56,7 +56,6 @@
       this.fetchAddress()//拉取收款地址
       this.listenChat()//监听消息
       this.reqFriend()//监听好友请求
-      this.beFriend()//监听被加好友
       this.beAddedGroup()//监听被加入群
       this.beKickGroup()//监听被踢出群
       document.querySelector('.news-info-left .happy-scroll-container').className = 'happy-scroll-container import';
@@ -102,20 +101,20 @@
         })
         //加工数据
         linkman && linkman.forEach(item => {
-          let length = 0;
+          let group = null;
           if (item.gid) {
-            this.$store.state.groupList.forEach(group => {
-              if (this.JsonBig.stringify(item.gid) === this.JsonBig.stringify(group.id)) {
-                length = group.members.length
-              }
-            })
+            group = this.$store.state.groupList.filter(group => {
+              return this.JsonBig.stringify(item.gid) === this.JsonBig.stringify(group.id)
+            })[0]
             result.push({
               id: this.JsonBig.stringify(item.gid),
               group: true,
-              length: length,
+              length: group.members.length,
               service: false,
               icon: "/static/images/groupChat_icon.png",
-              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.gid)}` : `${item.name}`,
+              nickName: !group.name ? group.members.map(item =>{
+                return item.name
+              }).join('、') : `${group.name}`,
               phone: false,
               email: false,
               unread: 0,
@@ -177,7 +176,9 @@
             length: group.members.length,
             service: false,
             icon: "/static/images/groupChat_icon.png",
-            nickName: (!group.name || group.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(group.id)}` : `${group.name}`,
+            nickName: !group.name ? group.members.map(item =>{
+              return item.name
+            }).join('、') : `${group.name}`,
             phone: false,
             email: false,
             unread: 0,
@@ -214,19 +215,6 @@
           }
         }
       },
-      // 监听被添加好友
-      beFriend(){
-        this.WebSocket.onMessage['add_friend'] = {
-          callback:async (res) => {
-            if (res.body && res.body.type === "add_fd") {
-              let {ack, id} = res.body.data;
-              if(ack) return;
-              await this.dealNewChat(this.JsonBig.stringify(id), 0)
-              this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
-            }
-          }
-        }
-      },
       // 监听被加入群聊
       beAddedGroup() {
         this.WebSocket.onMessage['add_g_notify'] = {
@@ -239,6 +227,7 @@
           }
         }
       },
+      //监听被踢出群
       beKickGroup() {
          this.WebSocket.onMessage['kick_g_notify'] = {
           callback:async (res) => {
@@ -396,7 +385,9 @@
               service: false,
               length: item.members.length,
               icon: "/static/images/groupChat_icon.png",
-              nickName: (!item.name || item.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(item.id)}` : `${item.name}`,
+              nickName: !item.name ? item.members.map(item =>{
+                return item.name
+              }).join('、') : `${item.name}`,
               phone: false,
               email: false,
               unread: 0,

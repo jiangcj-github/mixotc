@@ -23,7 +23,7 @@
             'have-select': ids.includes(JsonBig.stringify(content.id)) && !initIds.includes(JsonBig.stringify(content.id)),
             'disable-selected': initIds.includes(JsonBig.stringify(content.id))
             }" 
-          @click="checkContact(JsonBig.stringify(content.id), content.icon)"
+          @click="checkContact(JsonBig.stringify(content.id), content.icon, content.name)"
         ></b>
       </li>
     </ul>
@@ -61,11 +61,13 @@
         this.addList = [
           { 
             id : this.JsonBig.stringify(this.userInfo.uid),
-            icon: this.userInfo.icon ? `${this.HostUrl.http}image/${this.userInfo.icon}` : `/static/images/default_avator.png`
+            icon: this.userInfo.icon ? `${this.HostUrl.http}image/${this.userInfo.icon}` : `/static/images/default_avator.png`,
+            name: this.userInfo.name
           },
           {
             id : this.nowChat,
-            icon : this.chat[this.index].icon
+            icon : this.chat[this.index].icon,
+            name: this.chat[this.index].nickName
           }
         ]
         return;
@@ -77,7 +79,8 @@
       this.addList = this.groupInfo.members.reverse().map(item => {
         return { 
             id : this.JsonBig.stringify(item.id),
-            icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : `/static/images/default_avator.png`
+            icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : `/static/images/default_avator.png`,
+            name: item.name
           }
       })
     },
@@ -116,7 +119,12 @@
       }
     },
     methods: {
-       async fetchGroup() {
+      defaultName() {
+        return this.addList.map(item => {
+          return item.name
+        }).join('、')
+      },
+      async fetchGroup() {
         await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
           this.$store.commit({type: 'getGroupList', data})
         }).catch(error=>{
@@ -142,7 +150,7 @@
               length: array.length,
               service: false,
               icon: "/static/images/groupChat_icon.png",
-              nickName: `${this.JsonBig.stringify(data.id)}`,
+              nickName: this.defaultName(),
               phone: false,
               email: false,
               moreFlag: true,
@@ -177,12 +185,13 @@
       closeGroup() {
         this.$emit('offAddGroup', 'false')
       },
-      checkContact(id, icon) {
+      checkContact(id, icon, name) {
         if (this.initIds.includes(id)) return;
         if(!this.ids.includes(id)) {
           this.addList.unshift({
             id: id,
-            icon: icon ? `${this.HostUrl.http}image/${icon}` : `/static/images/default_avator.png`
+            icon: icon ? `${this.HostUrl.http}image/${icon}` : `/static/images/default_avator.png`,
+            name: name
           })
           return;
         }
@@ -195,9 +204,9 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl"
   .add-group-wrap
-    position fixed
+    position absolute
     right 125px
-    bottom 100px
+    bottom 0px
     width 300px
     height 420px
     background #F4F6FA

@@ -104,9 +104,9 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl"
   .delet-group-wrap
-    position fixed
-    right 125px
-    bottom 100px
+    position absolute
+    right 0px
+    bottom 0px
     width 300px
     height 420px
     background #FFF

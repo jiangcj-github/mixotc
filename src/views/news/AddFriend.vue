@@ -39,7 +39,7 @@
           width: '560px',
           height: '420px',
           right: 0,
-          bottom: '100px'
+          bottom: 0
         },
         timer: null
       }
@@ -90,9 +90,9 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl"
   .add-friend-wrap
-    position fixed
+    position absolute
     right 125px
-    bottom 100px
+    bottom 0px
     width 300px
     height 420px
     background #F4F6FA

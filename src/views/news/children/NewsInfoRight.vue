@@ -56,7 +56,7 @@
               <li>{{item.name}}</li>
               <li>{{item.info}}</li>
             </ul>
-            <button @click="addFriend(item.id)">同意</button>
+            <button @click="addFriend(item.id, item.info)">同意</button>
           </div>
         </div>
       </div>
@@ -172,7 +172,7 @@
           width: '560px',
           height: '420px',
           right: 0,
-          bottom: '100px'
+          bottom: 0
         },
         timer: null,
         sendText: '',
@@ -189,6 +189,8 @@
       HappyScroll
     },
     mounted() {
+      this.beFriend()//监听被加好友
+      //监听其他页面调用聊天窗口
       this.Bus.$on('contactSomeone',({id, msg})=> {
         this.contactSomeone(id, msg)
       });
@@ -266,6 +268,14 @@
       }
     },
     methods: {
+      async fetchFriendList() {
+         await this.WsProxy.send('control', 'friend_list', {uid: this.$store.state.userInfo.uid}).then(data => {
+          if(!data) data = []
+          this.$store.commit({type: 'getFriendList', data})
+        }).catch(error=>{
+          console.log(error)
+        })
+      },
       async contactSomeone(id, msg) {
         let flag = this.chatIds.indexOf(id);
         await this.dealNewChat(id, 0);
@@ -428,7 +438,9 @@
             length: group.members.length,
             service: false,
             icon: "/static/images/groupChat_icon.png",
-            nickName: (!group.name || group.name === this.$store.state.userInfo.name) ? `${this.JsonBig.stringify(group.id)}` : `${group.name}`,
+            nickName: !group.name ? group.members.map(item =>{
+              return item.name
+            }).join('、') : `${group.name}`,
             phone: false,
             email: false,
             unread: 0,
@@ -468,13 +480,54 @@
         this.sendText = '';
       },
       // 同意好友请求
-      async addFriend(id) {
+      async addFriend(id, info) {
         await this.WsProxy.send('control', 'add_friend', {
           ack: 0,
           id: this.JsonBig.parse(id)
         }).then(data => {})
         await this.dealNewChat(id, 0);
         this.$store.commit({type: 'changeCurChat', data: {id: id}})
+         let obj = {
+          from: id, 
+          to: this.JsonBig.stringify(this.$store.state.userInfo.uid),
+          icon: this.mapCurMembers[this.curChat],
+          msg:{
+            type: 0,
+            content: info
+          },
+          isLoding: false,
+          isFail: false,
+          time: new Date() - 0
+        }
+        this.$store.commit({type: 'addMessages', data:{id: id, msg: obj }})
+        this.fetchFriendList()
+      },
+       // 监听被添加好友
+      beFriend(){
+        this.WebSocket.onMessage['add_friend'] = {
+          callback:async (res) => {
+            if (res.body && res.body.type === "add_fd") {
+              let {ack, id} = res.body.data;
+              if(ack) return;
+              await this.dealNewChat(this.JsonBig.stringify(id), 0)
+              this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
+              let obj = {
+                from: this.JsonBig.stringify(id), 
+                to: this.JsonBig.stringify(this.$store.state.userInfo.uid),
+                icon: this.mapCurMembers[this.curChat],
+                msg:{
+                  type: 0,
+                  content: '已通过验证，开始对话吧'
+                },
+                isLoding: false,
+                isFail: false,
+                time: new Date() - 0
+              }
+              this.$store.commit({type: 'addMessages', data:{id: id, msg: obj }})
+              this.fetchFriendList();
+            }
+          }
+        }
       },
       openGroupInfo(id) {
         this.groupId = id;
