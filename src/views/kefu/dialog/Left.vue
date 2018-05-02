@@ -10,7 +10,7 @@
     <happy-scroll color="rgba(100,100,100,0.8)" size="5" resize hide-horizontal
                   bigger-move-h="start" smaller-move-h="start" class="scrollPane">
       <ul class="persons">
-        <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index, content.appellant_id)" :class="{active: JsonBig.stringify(content.appellant_id) === $store.state.serviceNow}">
+        <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index, content.appellant_id)" :class="{active: content.appellant_id === $store.state.serviceNow}">
           <img :src="content.appellant_icon ? `${HostUrl.http}image/${content.appellant_icon}` : `/static/images/default_avator.png`">
           <i v-if="content.unread">{{unreadNum}}</i>
           <div class="pinfo">
@@ -63,8 +63,8 @@
       onLiClick(index, id) { // 点击列表
         console.log('aaa', this.uls[index].appellant_id)
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人资料
-          "appellant_id": this.JsonBig.parse(this.uls[index].appellant_id),
-          //"appellee_id": this.JsonBig.parse(this.uls[index].appellee_id)
+          "appellant_id": this.uls[index].appellant_id && this.JsonBig.parse(this.uls[index].appellant_id),
+          "appellee_id": this.uls[index].appellee_id && this.JsonBig.parse(this.uls[index].appellee_id)
         }).then(data => {
           console.log('申述人', data);
           this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.JsonBig.stringify(this.uls[index].appellant_id)})}) // 存储右边聊天人员
