@@ -487,7 +487,8 @@
         }).then(data => {})
         await this.dealNewChat(id, 0);
         this.$store.commit({type: 'changeCurChat', data: {id: id}})
-         let obj = {
+        if(this.isFriend) return;
+        let obj = {
           from: id, 
           to: this.JsonBig.stringify(this.$store.state.userInfo.uid),
           icon: this.mapCurMembers[this.curChat],
@@ -511,6 +512,7 @@
               if(ack) return;
               await this.dealNewChat(this.JsonBig.stringify(id), 0)
               this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
+              if(this.isFriend) return;
               let obj = {
                 from: this.JsonBig.stringify(id), 
                 to: this.JsonBig.stringify(this.$store.state.userInfo.uid),

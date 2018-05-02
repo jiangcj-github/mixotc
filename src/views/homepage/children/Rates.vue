@@ -41,13 +41,14 @@
     computed:{
       rates(){
         let arr=[];
+        let _this=this;
         this.ratesOrg && this.ratesOrg.forEach(function(item) {
           arr.push({
             comment: item.comment,
             date: new Date(item.date).dateHandle("yyyy/MM/dd hh:mm:ss"),
             credit: item.credit,
             transit: {1:"差评",2:"中评",3:"好评"}[item.transit],
-            icon: item.icon,
+            icon: _this.HostUrl.http+"image/"+item.icon,
             name: item.name,
           });
         });
