@@ -201,11 +201,15 @@ export default {
   [types.initServiceData](state, { data }) {
     state.serviceData = data;
   },
+  // 获取左侧聊天人员具体信息
+  [types.getServiceNowtalk](state, { data }) {
+    state.serviceUser = data
+  },
   // 根据左边选择右边状态（对方的信息）
   [types.changeServiceNowtalk](state, { data }) {
     // 改变当前聊天
     state.serviceNow = data.id; // 聊天入口人的id
-    state.serviceNowOther = data.data //  聊天入口对方人的id
+    state.serviceNowOther = data.data //  聊天入口对方人的信息
   },
   // 双方人员置换
   [types.transformServiceUser](state, { data }) {

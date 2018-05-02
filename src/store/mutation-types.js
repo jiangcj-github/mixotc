@@ -29,6 +29,7 @@ const chatTop = "chatTop"; // 新增发送消息
  * 审核申述客服部分
  */
  const initServiceData = 'initServiceData'; // 初始化数据
+ const getServiceNowtalk = 'getServiceNowtalk'; // 获取左侧聊天人员具体信息
  const changeServiceNowtalk = 'changeServiceNowtalk'; // 根据左边选择右边人员
  const addServiceMessages = 'addServiceMessages' // 存储发送信息
  const changeServiceMessages = 'changeServiceMessages' // 新增发送消息
@@ -68,6 +69,7 @@ export {
    * 审核申述客服部分
    */
   initServiceData,
+  getServiceNowtalk,
   changeServiceNowtalk,
   addServiceMessages,
   changeServiceMessages,

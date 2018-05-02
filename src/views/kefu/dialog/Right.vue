@@ -67,7 +67,7 @@
     <BasePopup :width="470" :height="380" :top="50" :show="showPop1">
       <div class="pop">
         <h2>责任人</h2>
-        <div class="head"><img src="/static/images/default_avator.png"><span>李小蹦</span></div>
+        <div class="head"><img src="/static/images/default_avator.png"><span>{{(appl === 0 && recv === 0) ? this.serviceUser.appellant_name : this.otherInfo[0].name}}</span></div>
         <div class="textarea">
           <textarea placeholder="填写强制放币的理由" ref="pop1Text" v-model="pop1Text" @input="onPop1Input"></textarea>
           <p>{{pop1Text.length}}/50</p>
@@ -154,7 +154,7 @@
 
         // appl: 0, // 申诉人：0-买家,1-卖家
         recv: 0, // 收件人：0-买家,1-卖家
-        resp: 0, // 责任人：0-买家,2-卖家
+        // resp: 0, // 责任人：0-买家,2-卖家
         orderId: "",
 
         showPopImg: false,
@@ -177,6 +177,8 @@
         pop4Text: "", // 填写证明无效的理由
         pop4TextOld: "",
 
+
+
       }
     },
     computed: {
@@ -192,6 +194,9 @@
       serviceNow() { // 当前聊天人员id
         return this.$store.state.serviceNow
       },
+      serviceUser() { // 当前聊天人员具体信息
+        return this.$store.state.serviceUser
+      },
       serviceData() { // 左侧存储信息
         return this.$store.state.serviceData
       },
@@ -202,17 +207,35 @@
         this.startSwiper()
         return this.$store.state.serviceNowOther
       },
-      appl() { // 确定申述人是否为购买者
+      appl() {
         let applUser; //88607959879680   88607959879680
-        this.otherInfo.forEach(item => {
-          if (this.JsonBig.stringify(item.buyer_id) == this.serviceNow) {
+        // this.otherInfo.forEach(item => { // 确定申述人是否为购买者
+        //   console.log(item, this.JsonBig.stringify(item.buyer_id), this.serviceNow)
+        //   if (this.JsonBig.stringify(item.buyer_id) == this.serviceNow) {
+        //     applUser = 0
+        //     this.recv = 1
+        //   } else {
+        //     applUser = 1
+        //     this.recv = 0
+        //   }
+        // });
+        for (let v in this.serviceUser) { // 判断是否是申述者
+          if (v.indexOf('appellant_id') > -1) {
+            console.log(111)
             applUser = 0
-            this.recv = 1
-          } else {
-            applUser = 1
-            this.recv = 0
+            this.otherInfo.forEach(item => { // 确定申述人是否为购买者
+              this.recv = this.JsonBig.stringify(item.buyer_id) == this.serviceNow ?  1 : 0
+            });
+            console.log('applUser', applUser, this.recv)
+            return applUser
           }
-        })
+          console.log(222)
+          applUser = 1
+          this.otherInfo.forEach(item => { // 确定申述人是否为购买者
+            this.recv = this.JsonBig.stringify(item.buyer_id) == this.serviceNow ?  0 : 1
+          });
+        }
+        console.log('applUser', applUser, this.recv)
         return applUser
       }
     },
@@ -278,10 +301,10 @@
           appellant_name: this.otherInfo[index].name,
           time: new Date().getTime(),
           data: '',
-          appellee_id: this.JsonBig.stringify(this.otherInfo[index].uid)
+          appellee_id: this.otherInfo[index].uid
         }
         this.$store.commit({type: 'transformServiceUser', data: otherObj})
-        this.recv = this.recv === 1 ? 0 : 1;
+        console.log('换人', this.appl, this.recv)
         console.log('uid', index, this.otherInfo[index].uid)
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人对方资料
           "appellee_id": this.JsonBig.parse(this.otherInfo[index].uid)

@@ -67,6 +67,13 @@
           "appellee_id": this.uls[index].appellee_id && this.JsonBig.parse(this.uls[index].appellee_id)
         }).then(data => {
           console.log('申述人', data);
+          data.forEach(v => {
+            v.buyer_id = this.JsonBig.stringify(v.buyer_id)
+            v.seller_id = this.JsonBig.stringify(v.seller_id)
+            v.sid = this.JsonBig.stringify(v.sid)
+            v.uid = this.JsonBig.stringify(v.uid)
+          })
+          this.$store.commit({type: 'getServiceNowtalk', data: this.uls[index]}) // 存储右边聊天人
           this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.JsonBig.stringify(this.uls[index].appellant_id)})}) // 存储右边聊天人员
         }).catch(error=>{
           console.log('错误', error)

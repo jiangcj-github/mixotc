@@ -24,5 +24,6 @@ export default {
   serviceData: [], // 左侧聊天内容
   serviceNow: '', // 当前客服聊天
   serviceNowOther: {}, // 对方聊天信息
+  serviceUser: {}, // 聊天人员信息
   serviceMessage: {} // 聊天信息
 };
