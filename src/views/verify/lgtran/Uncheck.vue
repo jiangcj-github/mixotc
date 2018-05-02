@@ -11,7 +11,7 @@
           <p>{{o.nickname}}</p><p class="account">{{o.account}}</p>
         </li>
       </ul>
-      <SimplePagination :total="candTotal" :pageSize="candPageSize" v-if="candTotal>candPageSize"></SimplePagination>
+      <SimplePagination :total="total" :pageSize="pageSize" :curPage="curPage"></SimplePagination>
     </div>
     <UploadInfo :infos="infos" :err="infoErr"></UploadInfo>
   </div>
@@ -28,8 +28,10 @@
       return {
         srchText: "",
 
-        candTotal: 0,
-        candPageSize: 15,
+
+        curPage: 1,
+        total: 0,
+        pageSize: 15,
         cands: [],
         candSel: 0,
 
@@ -56,9 +58,9 @@
           type:2,
           keyword:srchKey,
           page:p,
-          count:this.candPageSize
+          count:this.pageSize
         }).then((data)=>{
-          this.candTotal=data.amount;
+          this.total=data.amount;
           this.candSel=-1;
           this.parseCands(data.users);
         }).catch((msg)=>{
@@ -125,6 +127,7 @@
       //ws-获取待审核列表
       this.loadUncheckList();
       this.Bus.$on("onPageChange",(p)=>{
+        this.curPage=p;
         this.loadUncheckList(p-1);
       });
       this.Bus.$on("onSubmit",(info)=>{
