@@ -1,6 +1,6 @@
 <template>
   <div class="right">
-    <div class="h1">{{user}}</div>
+    <div class="h1">{{user}}({{isBuyer}})</div>
 
     <!-- 对话框展示 -->
     <div class="swiper-container">
@@ -11,7 +11,7 @@
             <img src="/static/images/default_avator.png" @click="changeUser(index)">
             <span class="i1" @click="changeUser(index)">{{content.name}}</span>
             <span class="i2">已标记付款</span>
-            <span class="i3">{{content.update}}分钟</span>
+            <span class="i3">{{updateTime}}分钟</span>
           </div>
           <div class="mf2">
             <span class="i1">已被申诉{{content.times}}次</span>
@@ -41,6 +41,7 @@
         </div>
       </div>
     </happy-scroll>
+
     <!-- 下方发送消息 -->
     <div class="sendBox">
       <div class="menu">
@@ -150,12 +151,14 @@
       return {
         sendFile: "", // 发送图片用
         sendMsg: "", // 发送消息内容
+        updateTime: "", // 标记时间
         // msgHis: [],
 
         // appl: 0, // 申诉人：0-买家,1-卖家
         recv: 0, // 收件人：0-买家,1-卖家
         // resp: 0, // 责任人：0-买家,2-卖家
         orderId: "",
+        isBuyer: "", // 显示买卖家
 
         showPopImg: false,
         popImgSrc: "",
@@ -227,6 +230,7 @@
             applUser = 0
             this.otherInfo.forEach(item => { // 确定申述人是否为购买者
               this.recv = item.buyer_id == this.serviceNow ?  1 : 0
+              this.isBuyer = item.buyer_id == this.serviceNow ?  "买家" : "卖家"
             });
             console.log('applUser', applUser, this.recv)
             return applUser
@@ -235,6 +239,7 @@
           applUser = 1
           this.otherInfo.forEach(item => { // 确定申述人是否为购买者
             this.recv = item.buyer_id == this.serviceNow ?  0 : 1
+            this.isBuyer = item.buyer_id == this.serviceNow ?  "买家" : "卖家"
           });
         }
         console.log('applUser', applUser, this.recv)
@@ -268,6 +273,10 @@
     },
     mounted() {
       this.startSwiper();
+      // 获取标记时间
+      this.otherInfo.forEach(v => {
+        this.updateTime = Math.floor(((new Date().getTime() / 1000) - v.update) / 60)
+      })
       // 获取聊天消息
       let _this = this;
       //聊天信息监听
@@ -469,11 +478,12 @@
       },
       onClickM0() { // 点击上传付款证明按钮
         let text = MSGS.get(0, this.appl, this.recv);
+        text = text.replace(/orderId/, this.otherInfo[0].sid).replace(/付款码/, this.otherInfo[0].trade_code);
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
       },
       onClickM1() { // 点击通知放币按钮
-        let text = MSGS.get(4, this.appl, this.recv);
+        let text = MSGS.get(4, this.appl, this.recv).replace(/orderId/, this.otherInfo[0].sid);
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
       },
@@ -535,8 +545,8 @@
       },
       onPop1Ok() { // 强制放币确认
         this.showPop1 = false
-        let text = MSGS.get(5, this.appl, this.recv).replace(/reason/, this.pop1TextOld);
-        this.$refs.textarea.value = text;
+        let text = MSGS.get(5, this.appl, this.recv).replace(/orderId/, this.otherInfo[0].sid).replace(/reason/, this.pop1TextOld);
+        this.sendMsg = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_send_order',
           Object.assign(this.forceIconObj, {"info": this.pop1TextOld})
@@ -548,8 +558,8 @@
       },
       onPop2Ok() { // 驳回申述确认
         this.showPop2 = false
-        let text = MSGS.get(2, this.appl, this.recv).replace(/reason/, this.pop2TextOld);
-        this.$refs.textarea.value = text;
+        let text = MSGS.get(2, this.appl, this.recv).replace(/orderId/, this.otherInfo[0].sid).replace(/reason/, this.pop2TextOld);
+        this.sendMsg = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_reject_appeal',
           Object.assign(this.rejectAppealObj, {"type": 1}) // 1: 交易, 2: 担保转账
@@ -561,8 +571,8 @@
       },
       onPop3Ok() { // 终止交易确认
         this.showPop3 = false
-        let text = MSGS.get(7, this.appl, this.recv).replace(/reason/, this.pop3TextOld);
-        this.$refs.textarea.value = text;
+        let text = MSGS.get(7, this.appl, this.recv).replace(/orderId/, this.otherInfo[0].sid).replace(/reason/, this.pop3TextOld);
+        this.sendMsg = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_terminate_order',
           Object.assign(this.stopTradeObj, {
@@ -577,9 +587,11 @@
       },
       onPop4Ok() { // 证明无效确认
         this.showPop4 = false;
-        let text = MSGS.get(1, this.appl, this.recv).replace(/reason/, this.pop4TextOld);
-        this.$refs.textarea.value = text;
+        let text = MSGS.get(1, this.appl, this.recv);
+        text = text.replace(/reason/, this.pop4TextOld).replace(/trade_code/, this.otherInfo[0].trade_code);
+        this.sendMsg= text;
         this.$refs.textarea.focus();
+
       },
       onClickImg(item) { // 点击放大图片
         this.showPopImg = true;
@@ -966,6 +978,15 @@
   .swiper-container, swiper-container-horizontal
     width 610px
     margin 0 20px
+  .swiper-button-next, .swiper-button-prev
+    background-image none
+    width: 40px;
+    height: 40px;
+    border-top: 5px solid #999;
+    border-right: 5px solid #999;
+    transform: rotate(45deg)
+  .swiper-button-prev
+    transform: rotate(-135deg)
 
 
 </style>

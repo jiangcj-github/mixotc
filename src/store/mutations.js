@@ -213,7 +213,6 @@ export default {
   },
   // 双方人员置换
   [types.transformServiceUser](state, { data }) {
-
     state.serviceData.unshift(data)
   },
 
