@@ -108,7 +108,7 @@
         display inline-block
         max-width 80px
         font-size $fz13
-        color #333
+        color #999
         cursor pointer
         overflow hidden
         white-space nowrap
@@ -116,7 +116,7 @@
       i
         position absolute
         top 8px
-        triangle_down(#333)
+        triangle_down(#999)
         margin-left 5px
 
     ul

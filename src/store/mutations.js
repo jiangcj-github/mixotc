@@ -213,6 +213,7 @@ export default {
   },
   // 双方人员置换
   [types.transformServiceUser](state, { data }) {
+
     state.serviceData.unshift(data)
   },
 
@@ -224,7 +225,6 @@ export default {
     });
     !state.serviceMessage[data.id] && (state.serviceMessage[data.id] = []); //对话记录不存在时创建
     state.serviceMessage[data.id].push(data.msg);
-    // state.isLogin && !state.showChat && state.unreadNum++;
   },
   // 新增发送消息
   [types.changeServiceMessages](state, {data: { id, time, code }}) {
@@ -233,12 +233,13 @@ export default {
     state.serviceMessage[id].forEach((item, index) => {
       if (time === item.time) {
         item.isLoding = false;
-        code && (item.err = true);
+        code && (item.err = 1);
         idx = index;
       }
     });
     state.serviceMessage = Object.assign({}, state.serviceMessage);
   },
+  // 发送图片
   [types.changeServiceImgsrc](state, {data: {id, time, src}}) {
     state.serviceMessage[id].forEach((item, index) => {
       if (time === item.time) {
@@ -247,5 +248,10 @@ export default {
     });
     state.serviceMessage = Object.assign({}, state.serviceMessage);
   },
-
+  // 查看更多消息
+  [types.moreServiceMessage](state, {data}) {
+    !state.serviceMessage[state.serviceNow] && (state.serviceMessage[state.serviceNow] = []);
+    state.serviceMessage[state.serviceNow] = data.reverse().concat(state.serviceMessage[state.serviceNow]);
+    state.serviceMessage = Object.assign({}, state.serviceMessage);
+  },
 };

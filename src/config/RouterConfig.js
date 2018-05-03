@@ -63,6 +63,11 @@ const ROUTES = [
     path: "/order/evaluate",
     name: "MyOrderEvaluate",
     component: resolve => require(['@/views/myOrder/MyOrderEvaluate'], resolve) // 我的订单评价
+  },
+  {
+    path: "/verify/service",
+    name: "Service",
+    component: resolve => require(['@/views/kefu/Dialog'], resolve) // 我的订单评价
   }
 ];
 

@@ -35,6 +35,7 @@ const chatTop = "chatTop"; // 新增发送消息
  const changeServiceMessages = 'changeServiceMessages' // 新增发送消息
  const transformServiceUser = 'transformServiceUser' // 双方人员身份转换
  const changeServiceImgsrc = 'changeServiceImgsrc' // 改变图片
+ const moreServiceMessage = 'moreServiceMessage' // 添加更多消息
 
 
 
@@ -74,5 +75,6 @@ export {
   addServiceMessages,
   changeServiceMessages,
   transformServiceUser,
-  changeServiceImgsrc // 改变图片
+  changeServiceImgsrc, // 改变图片
+  moreServiceMessage
 };

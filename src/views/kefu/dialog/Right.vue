@@ -15,9 +15,9 @@
           </div>
           <div class="mf2">
             <span class="i1">已被申诉{{content.times}}次</span>
-            <button class="i2" @click="showPop1 = true">强制放币</button>
-            <button class="i3" @click="showPop3 = true">终止交易</button>
-            <button class="i3" @click="showPop2 = true" v-if="(appl === 0 && recv === 0) || (appl === 1 && recv === 1)">驳回申诉</button>
+            <button class="i2" @click="forceIcon(index)">强制放币</button>
+            <button class="i3" @click="stopTrade(index)">终止交易</button>
+            <button class="i3" @click="rejectAppeal(index)" v-if="(appl === 0 && recv === 0) || (appl === 1 && recv === 1)">驳回申诉</button>
           </div>
         </div>
       </div>
@@ -28,15 +28,15 @@
     <!-- 聊天-->
     <happy-scroll color="rgba(200,200,200,0.8)" size="5" bigger-move-h="end" resize hide-horizontal class="scrollPane">
       <div class="msgBox">
-        <p class="check-more" @click="checkMore">查看更多</p>
+        <p class="check-more" @click="checkMore(10)">查看更多</p>
         <div v-for="(item, index) in msgHis" :key="index" class="message">
-          <div class="tline" v-if="index > 0 && dealTime(msgHis[index-1].time, item.time)"><i>12月19日 12:12</i></div>
+          <div class="tline" v-if="index > 0 && dealTime(msgHis[index-1].time, item.time)"><i>{{dealTime(msgHis[index-1].time, item.time)}}</i></div>
           <p :class="{al: item.isSend !== JsonBig.stringify($store.state.userInfo.uid), ar: item.isSend == JsonBig.stringify($store.state.userInfo.uid)}">
             <img :src="item.headimg"/>
             <span v-if="item.type === 0">{{item.content}}</span>
-            <span v-else-if="item.type === 1" class="img-wrap"><img :src="item.url" @click="onClickImg(item)"/></span>
-            <i class="err" title="发送失败" v-if="!item.loding && item.err === 1" @click="resend(item)"></i>
-            <img src="/static/images/loding.png" class="lodingFlag" v-if="item.loding">
+            <span v-else-if="item.type === 1" class="img-wrap"><img :src="item.content" @click="onClickImg(item)"/></span>
+            <i class="err" title="发送失败" v-if="!item.isLoding && item.err" @click="resend(item)"></i>
+            <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding">
           </p>
         </div>
       </div>
@@ -67,7 +67,7 @@
     <BasePopup :width="470" :height="380" :top="50" :show="showPop1">
       <div class="pop">
         <h2>责任人</h2>
-        <div class="head"><img src="/static/images/default_avator.png"><span>{{(appl === 0 && recv === 0) ? this.serviceUser.appellant_name : this.otherInfo[0].name}}</span></div>
+        <div class="head"><img src="/static/images/default_avator.png"><span>{{forceIconName}}</span></div>
         <div class="textarea">
           <textarea placeholder="填写强制放币的理由" ref="pop1Text" v-model="pop1Text" @input="onPop1Input"></textarea>
           <p>{{pop1Text.length}}/50</p>
@@ -98,12 +98,12 @@
         <div class="head2">
           <div class="hi" @click="pop3Radio = 0">
             <img src="/static/images/default_avator.png">
-            <span>李小蹦</span>
+            <span>{{stopTradeUser}}</span>
             <span class="radio" :class="{check:pop3Radio === 0}"></span>
           </div>
           <div class="hi" @click="pop3Radio = 1">
             <img src="/static/images/default_avator.png">
-            <span>王华华</span>
+            <span>{{stopTradeOther}}</span>
             <span class="radio" :class="{check:pop3Radio === 1}"></span>
           </div>
         </div>
@@ -177,18 +177,31 @@
         pop4Text: "", // 填写证明无效的理由
         pop4TextOld: "",
 
+        forceIconName: "", // 强制放币弹窗
+        forceIconObj: {}, // 强制放币弹窗所用参数
 
+        rejectAppealObj: {}, // 驳回申述弹窗所用参数
+
+        stopTradeUser: "", // 终止交易发起人
+        stopTradeOther: "", // 终止交易发起人对方
+        stopTradePerson: 0, // 终止交易发起责任人
+        stopTradeObj: {} // 终止交易弹窗所用参数
 
       }
     },
     computed: {
       user() { // 监听右侧当前聊天人员
+        // console.log('当前', this.$store.state.serviceNow)
         let result = '';
         this.$store.state.serviceData.forEach(item => {
-          if (this.JsonBig.stringify(item.appellant_id) === this.$store.state.serviceNow) {
+          // console.log('当前', item)
+          if (item.appellant_id === this.$store.state.serviceNow || item.appellee_id === this.$store.state.serviceNow) {
             result = item.appellant_name
           }
         });
+        this.startSwiper() // 轮播图切换
+        this.stopTradeUser = this.serviceUser && this.serviceUser.appellant_name // 终止交易发起人名
+        this.stopTradeOther = this.otherInfo && this.otherInfo[0].name // 终止交易发起对方人名
         return result
       },
       serviceNow() { // 当前聊天人员id
@@ -204,39 +217,53 @@
         return this.$store.state.serviceMessage[this.serviceNow] ? this.$store.state.serviceMessage[this.serviceNow] : []
       },
       otherInfo() { // 对方信息
-        this.startSwiper()
         return this.$store.state.serviceNowOther
       },
       appl() {
         let applUser; //88607959879680   88607959879680
-        // this.otherInfo.forEach(item => { // 确定申述人是否为购买者
-        //   console.log(item, this.JsonBig.stringify(item.buyer_id), this.serviceNow)
-        //   if (this.JsonBig.stringify(item.buyer_id) == this.serviceNow) {
-        //     applUser = 0
-        //     this.recv = 1
-        //   } else {
-        //     applUser = 1
-        //     this.recv = 0
-        //   }
-        // });
         for (let v in this.serviceUser) { // 判断是否是申述者
           if (v.indexOf('appellant_id') > -1) {
-            console.log(111)
+            //console.log(111)
             applUser = 0
             this.otherInfo.forEach(item => { // 确定申述人是否为购买者
-              this.recv = this.JsonBig.stringify(item.buyer_id) == this.serviceNow ?  1 : 0
+              this.recv = item.buyer_id == this.serviceNow ?  1 : 0
             });
             console.log('applUser', applUser, this.recv)
             return applUser
           }
-          console.log(222)
+          //console.log(222)
           applUser = 1
           this.otherInfo.forEach(item => { // 确定申述人是否为购买者
-            this.recv = this.JsonBig.stringify(item.buyer_id) == this.serviceNow ?  0 : 1
+            this.recv = item.buyer_id == this.serviceNow ?  0 : 1
           });
         }
         console.log('applUser', applUser, this.recv)
         return applUser
+      },
+      userIdArr() { // 去重id数组
+        let userIdResult = []
+        this.$store.state.serviceData.filter(v => {
+          return v.appellant_id
+        }).map(v => {
+          userIdResult.push(v.appellant_id)
+        })
+        this.$store.state.serviceData.filter(v => {
+          return v.appellee_id
+        }).map(v => {
+          userIdResult.push(v.appellee_id)
+        })
+        return userIdResult
+      }
+    },
+    watch: { // 默认显示三条数据
+      serviceNow:{
+        handler(curvalue){
+          let serviceMessage = this.$store.state.serviceMessage[curvalue];
+          if (!serviceMessage || serviceMessage && serviceMessage.length === 0) {
+            this.checkMore(3)
+          }
+        },
+        immediate: true
       }
     },
     mounted() {
@@ -257,7 +284,7 @@
                 headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                 type: 0, // 0: 发送文字, 1: 发送图片
                 isLoding: true, // 加载中
-                err: 0, // 0: 发送成功, 1: 发送失败
+                err: false, // 0: 发送成功, 1: 发送失败
                 content: data.msg,
                 time: new Date() - 0
               };
@@ -269,7 +296,7 @@
               headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
               type: 1, // 0: 发送文字, 1: 发送图片
               isLoding: true, // 加载中
-              err: 0, // 0: 发送成功, 1: 发送失败
+              err: false, // 0: 发送成功, 1: 发送失败
               content: `${_this.HostUrl.http}file/${data.id}`,
               time: new Date() - 0
             };
@@ -277,7 +304,6 @@
           }
         }
       };
-
       this.Bus.$on("onIpClose", () => {
         this.showPopImg = false;
       });
@@ -287,7 +313,9 @@
          new Swiper('.swiper-container', { // 调用轮播图
            nextButton: '.swiper-button-next',
            prevButton: '.swiper-button-prev',
-           onSlideChangeEnd: function(swiper){
+           observer: true, //修改swiper自己或子元素时，自动初始化swiper
+           observeParents: true,//修改swiper的父元素时，自动初始化swiper
+           onSlideChangeEnd(swiper) {
              swiper.update(); //swiper更新
            }
          })
@@ -303,9 +331,15 @@
           data: '',
           appellee_id: this.otherInfo[index].uid
         }
+        if (this.userIdArr.indexOf(this.JsonBig.stringify(this.otherInfo[index].uid)) > -1) {
+          console.log(1111)
+          return
+        } else {
+          console.log(2222)
+        }
+        console.log('this.userIdArr', this.userIdArr)
         this.$store.commit({type: 'transformServiceUser', data: otherObj})
         console.log('换人', this.appl, this.recv)
-        console.log('uid', index, this.otherInfo[index].uid)
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人对方资料
           "appellee_id": this.JsonBig.parse(this.otherInfo[index].uid)
         }).then(data => {
@@ -322,25 +356,13 @@
           type: type, // 0: 发送文字, 1: 发送图片
           content: content,
           isLoding: true, // 加载中
-          err: 0, // 0: 发送成功, 1: 发送失败
+          err: false, // 0: 发送成功, 1: 发送失败
           time: time
         };
         this.$store.commit({type: 'addServiceMessages', data:{id: this.serviceNow, msg: obj }})
       },
-      async chooseImage() { // 发送图片
+      async chooseImage() { // 上传图片
         this.sendFile = this.$refs.file.files[0];
-        // let reader = new FileReader();
-        // reader.readAsDataURL(this.sendFile);
-        // reader.onload = ((e) => {
-        //   this.msgHis.push({
-        //     headimg: "/static/images/default_avator.png",
-        //     url: e.target.result,
-        //     type: 1, // 0: 发送文字, 1: 发送图片
-        //     isSend: 1, // 0: 接收信息, 1: 发送信息
-        //     err: 0, // 0: 发送成功, 1: 发送失败
-        //     loding: true
-        //   });
-        // });
         let a = new FormData();
         let file = this.$refs.file.files[0],
             time = new Date() - 0;
@@ -401,27 +423,49 @@
         });
         this.$refs.textarea.value = '';
       },
-      resend(item) { // 发送失败
-        item.err = 0;
-        setTimeout(() => {
-          item.err = 1;
-        }, 2000);
-      },
-      checkMore(num) { // 查看更多消息
-        // this.WsProxy.send('control', 'get_history_msgs', {
-        //   peer_id: this.chat[this.index].group ? 0 : this.JsonBig.parse(this.curChat),
-        //   group_id: this.chat[this.index].group ? this.JsonBig.parse(this.curChat) : 0,
-        //   last_msg_id: this.messages[0] && this.messages[0].id ? messages[0].id : 0,
-        //   is_peer_admin: this.chat[this.index].service ? 1 : 0,
-        //   count: num
-        // }).then(data=>{
-        //   (!data.msgs || data.msgs.length <= 10) && this.morFlag
-        // })
+      // resend(item) { // 发送失败
+      //   item.err = 0;
+      //   setTimeout(() => {
+      //     item.err = 1;
+      //   }, 2000);
+      // },
+      async checkMore(num) { // 查看更多消息
+        console.log(this.serviceNow, this.JsonBig.parse(this.serviceNow))
+        let result = [];
+        await this.WsProxy.send('control', 'get_history_msgs', {
+          peer_id: this.JsonBig.parse(this.serviceNow),
+          group_id: 0,
+          last_msg_id: this.msgHis[0] && this.msgHis[0].id ? this.JsonBig.parse(this.msgHis[0].id) : 0,
+          is_peer_admin: 1,
+          count: num
+        }).then(data => {
+          console.log('更多', data)
+          //(!data.msgs || data.msgs.length < num) && this.$store.commit({type: 'changeServiceMoreFlag', data:{id: this.serviceNow, flag: false }})
+          if (!data.msgs) return;
+          let uid = this.JsonBig.stringify(this.$store.state.userInfo.uid)
+          //   icon = this.$store.state.userInfo.icon;
+          //
+          data.msgs.forEach(item => {
+            let sender_id = this.JsonBig.stringify(item.sender_id),
+              create_time = item.create_time * 1000;
+            result.push({
+              id: this.JsonBig.stringify(item.id),
+              isSend: this.JsonBig.stringify(this.$store.state.userInfo.uid),
+              headimg: sender_id === uid ? `/static/images/kefu/kefu.png` : `${this.HostUrl.http}image/${this.serviceUser.appellant_icon}`,
+              type: item.type === 'image' ? 1 : 0,
+              content: item.type === 'image' ? `${this.HostUrl.http}file/${item.data.id}` : item.data.msg,
+              isLoding: item.type === 'image' ? true : false,
+              err: false,
+              time: create_time
+            })
+          })
+        })
+        this.$store.commit({type: 'moreServiceMessage', data:result })
       },
       // 处理是否显示消息时间
       dealTime(time1, time2) {
         if(time2 - time1 < 180000) return false;
-        return time2
+        return time2.formatTime()
       },
       onClickM0() { // 点击上传付款证明按钮
         let text = MSGS.get(0, this.appl, this.recv);
@@ -433,7 +477,6 @@
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
       },
-
       onPop1Input() { // 填写强制放币理由(责任人已定)
         if (this.pop1Text.length > 50) {
           this.pop1Text = this.pop1TextOld;
@@ -466,18 +509,38 @@
           this.pop4TextOld = this.pop4Text;
         }
       },
+      forceIcon(index) { // 强制放币弹窗
+        this.showPop1 = true
+        this.forceIconName = this.appl === 0 ? this.otherInfo[index].name : this.serviceUser.appellant_name
+        this.forceIconObj = {
+          "id": this.JsonBig.parse(this.otherInfo[index].sid),
+          "seller": this.JsonBig.parse(this.otherInfo[index].seller_id),
+          "buyer": this.JsonBig.parse(this.otherInfo[index].buyer_id),
+          "responsible": this.JsonBig.parse(this.otherInfo[index].seller_id),
+        }
+      },
+      rejectAppeal(index) { // 驳回申述弹窗
+        this.showPop2 = true
+        this.rejectAppealObj = {
+          "id": this.JsonBig.parse(this.otherInfo[index].sid),
+        }
+      },
+      stopTrade(index) { // 终止交易弹窗
+        this.showPop3 = true
+        this.stopTradePerson = this.pop3Radio === 0 ? this.serviceUser.appellant_id : this.otherInfo[index].uid
+        this.stopTradeObj = {
+          "id": this.JsonBig.parse(this.otherInfo[index].sid), // this.otherInfo
+          "responsible": this.JsonBig.parse(this.stopTradePerson), // this.otherInfo
+        }
+      },
       onPop1Ok() { // 强制放币确认
         this.showPop1 = false
         let text = MSGS.get(5, this.appl, this.recv).replace(/reason/, this.pop1TextOld);
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
-        this.WsProxy.send('control', 'a_send_order',{
-          "id": this.JsonBig.parse("209038372436447232"),  // this.otherInfo
-          "seller": this.JsonBig.parse("203973913955278848"), // this.otherInfo
-          "buyer": this.JsonBig.parse("197129593973379072"), // this.otherInfo
-          "responsible": this.JsonBig.parse("203973913955278848"),
-          "info": this.pop1TextOld
-        }).then((data)=>{
+        this.WsProxy.send('control', 'a_send_order',
+          Object.assign(this.forceIconObj, {"info": this.pop1TextOld})
+        ).then((data)=>{
           console.log('强制放币', data)
         }).catch((msg)=>{
           console.log(msg);
@@ -488,10 +551,9 @@
         let text = MSGS.get(2, this.appl, this.recv).replace(/reason/, this.pop2TextOld);
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
-        this.WsProxy.send('control', 'a_reject_appeal',{
-          "id": this.JsonBig.parse("209038372436447232"), // this.otherInfo
-          "type": 1  // 1: 交易, 2: 担保转账
-        }).then((data)=>{
+        this.WsProxy.send('control', 'a_reject_appeal',
+          Object.assign(this.rejectAppealObj, {"type": 1}) // 1: 交易, 2: 担保转账
+        ).then((data)=>{
           console.log('驳回申述', data)
         }).catch((msg)=>{
           console.log(msg);
@@ -502,12 +564,12 @@
         let text = MSGS.get(7, this.appl, this.recv).replace(/reason/, this.pop3TextOld);
         this.$refs.textarea.value = text;
         this.$refs.textarea.focus();
-        this.WsProxy.send('control', 'a_terminate_order',{
-          "id": this.JsonBig.parse("209038372436447232"), // this.otherInfo
-          "type": 1, // 1: 订单, 2: 担保
-          "responsible": this.JsonBig.parse("197113900708139008"), // this.otherInfo
-          "info": this.pop3TextOld
-        }).then((data)=>{
+        this.WsProxy.send('control', 'a_terminate_order',
+          Object.assign(this.stopTradeObj, {
+            "type": 1, // 1: 订单, 2: 担保
+            "info": this.pop3TextOld
+          })
+        ).then((data)=>{
           console.log('终止交易', data)
         }).catch((msg)=>{
           console.log(msg);
@@ -521,7 +583,7 @@
       },
       onClickImg(item) { // 点击放大图片
         this.showPopImg = true;
-        this.popImgSrc = item.url;
+        this.popImgSrc = item.content;
       }
     }
   }
@@ -630,13 +692,14 @@
     .msgBox
       padding 20px
       box-sizing border-box
-      .lodingFlag
-        width 16px
-        height 16px
-        margin 0 10px
-        align-self center
-        animation mymove 1.5s linear infinite;
-        -webkit-animation mymove 1.5s linear infinite;
+      .message
+        .lodingFlag
+          width 16px
+          height 16px
+          margin 0 10px
+          align-self center
+          animation mymove 1.5s linear infinite;
+          -webkit-animation mymove 1.5s linear infinite;
       .check-more
         font-size 11px
         color #ff794c
@@ -681,7 +744,7 @@
               border-radius 2px
               cursor pointer
           > span.img-wrap
-            padding 0
+            /*padding 0*/
           > i.err
             display inline-block
             width 16px
@@ -730,10 +793,10 @@
               position absolute
               right -8px
               top 15px
-          > span.img-wrap
-            background transparent
-            &:before
-              display none
+          /*> span.img-wrap*/
+            /*background transparent*/
+            /*&:before*/
+              /*display none*/
     .sendBox
       height 160px
       border-top 1px solid #D8D8D8

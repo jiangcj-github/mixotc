@@ -45,7 +45,7 @@ let MSGS = {
     if (type === 4 && p1 === 0 && p2 === 1) {
       return this.m7;
     }
-    if (type === 5 && p1 === 0 && p2 === 0) {
+    if (type === 5) {
       return this.m8;
     }
     if (type === 6 && p1 === 0 && p2 === 1) {

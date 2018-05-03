@@ -25,7 +25,7 @@
       width 140px
       height 140px
       margin 100px auto 30px
-      background rgba(216,216,216,0.69)
+      /*background rgba(216,216,216,0.69)*/
     p
       color #909090
       a

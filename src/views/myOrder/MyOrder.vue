@@ -216,7 +216,7 @@
         tradeCode: '',
         trader: '',
         contentTabIndex: 1, // 控制tab切换
-        num: 0, // 控制时间选择Tab active类
+        num: 4, // 控制时间选择Tab active类
 
         showPayment: false, // 标记已付款弹窗
         showReleaseCoin: false,
