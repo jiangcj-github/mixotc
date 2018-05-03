@@ -1,9 +1,9 @@
 <template>
   <div class="pagi" v-if="isValid">
-    <button class="b1 first" @click="goPage(1)" :class="{disabled:curPage===1}"></button>
-    <button class="b2 prev" @click="goPage(curPage-1)" :class="{disabled:curPage===1}"></button>
-    <button class="b2 next" @click="goPage(curPage+1)" :class="{disabled:curPageSize<pageSize}"></button>
-    <button class="b1 last disabled"></button>
+    <a class="b1 first" @click="goPage(1)" :class="{disabled:curPage===1}"></a>
+    <a class="b2 prev" @click="goPage(curPage-1)" :class="{disabled:curPage===1}"></a>
+    <a class="b2 next" @click="goPage(curPage+1)" :class="{disabled:curPageSize<pageSize}"></a>
+    <a class="b1 last disabled"></a>
   </div>
 </template>
 <script>
@@ -28,12 +28,13 @@
   };
 </script>
 <style lang="stylus">
+  *{box-sizing:border-box;}
   .pagi{display:flex;justify-content:center;width:100%;height:40px;margin-top:20px;}
 
-  .pagi button{width:40px;height:40px;position:relative;cursor:pointer;margin:0 5px;border-radius:2px;
+  .pagi>a{width:40px;height:40px;position:relative;cursor:pointer;margin:0 5px;border-radius:2px;
     background:#fff;border:1px solid #E1E1E1;}
-  .pagi button.disabled{pointer-events:none;background:#e1e1e1;}
-  .pagi button:hover{background:#ffb422;border-color:#ffb422;}
+  .pagi>a.disabled{pointer-events:none;background:#e1e1e1;}
+  .pagi>a:hover{background:#ffb422;border-color:#ffb422;}
 
   .pagi .b1:before{position:absolute;left:50%;top:50%;width:2px;height:10px;background:#999;content:"";}
   .pagi .b1:after{position:absolute;left:50%;top:50%;border:5px solid transparent;content:"";}
