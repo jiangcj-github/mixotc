@@ -6,7 +6,7 @@
       <span class="nickname" @click="toHomePage(data.sid)">{{data.trader}}</span>
       <span class="trust" v-if="trustArray.includes(JsonBig.stringify(data.sid))">信任</span>
     </div>
-    <div class="title deal-volume">1+BTC</div>
+    <div class="title deal-volume">{{typeof data.volume === 'number' ? data.volume : JsonBig.stringify(data.volume)}}</div>
     <div class="title order-volume">{{data.trade ? data.trade : '-'}}</div>
     <div class="title good-reputation">{{data.rate ? `${data.rate}%` : '-'}}</div>
     <div class="title limit-price">{{`${data.min}-${data.max}`}}</div>
