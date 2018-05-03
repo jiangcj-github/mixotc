@@ -75,7 +75,7 @@
       <NothingContent v-show="!result"></NothingContent>
 
       <!--<Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>-->
-      <div class="page-btn" v-if="result">
+      <div class="page-btn" v-if="result.length >= 20">
         <button @click="clickPre" :class="{'unable-btn': filte.page === 0}" :disabled="filte.page === 0">上一页</button>
         <button @click="clickNext" :class="{'unable-btn': result && result.length < 20}" :disabled="result && result.length < 20">下一页</button>
       </div>

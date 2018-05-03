@@ -41,7 +41,7 @@
                     @click="showBigPicture(!item.isLoding && !item.isFail, item.msg.content)"
                   >
                 </span>
-                <span v-if="item.msg.type === 0" v-html="item.msg.content"></span>
+                <span v-if="item.msg.type === 0" v-html="item.msg.content" class="msg-text"></span>
                 <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding">
                 <img src="/static/images/hint.png" class="failFlag" v-if="!item.isLoding && item.isFail">
               </p>
@@ -195,6 +195,11 @@
       HappyScroll
     },
     mounted() {
+      this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('211634663708430336') , id: this.JsonBig.parse('197154964416499712')}).then(data => {
+         console.log('del_friend', data)
+        }).catch(error=>{
+          console.log(error)
+        })
       this.beFriend()//监听被加好友
       //监听其他页面调用聊天窗口
       this.Bus.$on('contactSomeone',({id, msg})=> {
@@ -739,6 +744,7 @@
             padding 5px
             border-radius 2px
             margin-top 2px
+            word-wrap break-word
             &.images
               width 90px
               height 60px
