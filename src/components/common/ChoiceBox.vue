@@ -86,7 +86,7 @@
       display inline-block
       width 70px
       font-size $fz13
-      color #333
+      color #999
       position relative
       cursor pointer
       &:after
@@ -96,7 +96,7 @@
         /*width 11px*/
         /*height 5px*/
         content ''
-        triangle_down(#333)
+        triangle_down(#999)
         //background url(/static/images/triangle_black.png) no-repeat
         /*background-size 11px 5px*/
     ul

@@ -10,13 +10,13 @@
     <happy-scroll color="rgba(100,100,100,0.8)" size="5" resize hide-horizontal
                   bigger-move-h="start" smaller-move-h="start" class="scrollPane">
       <ul class="persons">
-        <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index, content.appellant_id)" :class="{active: content.appellant_id === $store.state.serviceNow}">
-          <img :src="content.appellant_icon ? `${HostUrl.http}image/${content.appellant_icon}` : `/static/images/default_avator.png`">
+        <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index, content.appellant_id)" :class="{active: content.appellant_id ? content.appellant_id === $store.state.serviceNow : content.appellee_id === $store.state.serviceNow}">
+          <img :src="content.appellant_icon ? `${HostUrl.http}image/${content.appellant_icon}` : `/static/images/default_avator.png`" alt="">
           <i v-if="content.unread">{{unreadNum}}</i>
           <div class="pinfo">
             <p class="p1">
               <span class="s1">{{content.appellant_name}}</span>
-              <span class="s2">{{content.time}}</span>
+              <span class="s2">{{(content.time * 1000).formatTime()}}</span>
             </p>
             <p class="p2">{{content.data}}</p>
           </div>
@@ -39,8 +39,12 @@
         unreadNum: 1
       }
     },
+    computed: {
+
+    },
     mounted(){
       this.parseUls();
+      this.userIdArr;
       this.initData()
       // this.$store.state.serviceData.length ? this.uls =  this.ulsBuf = this.$store.state.serviceData : this.initData() //初始化列表数据
     },
@@ -61,7 +65,7 @@
         })
       },
       onLiClick(index, id) { // 点击列表
-        console.log('aaa', this.uls[index].appellant_id)
+        console.log('aaa', this.uls[index].appellant_id, this.uls[index].appellee_id)
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人资料
           "appellant_id": this.uls[index].appellant_id && this.JsonBig.parse(this.uls[index].appellant_id),
           "appellee_id": this.uls[index].appellee_id && this.JsonBig.parse(this.uls[index].appellee_id)
@@ -74,11 +78,10 @@
             v.uid = this.JsonBig.stringify(v.uid)
           })
           this.$store.commit({type: 'getServiceNowtalk', data: this.uls[index]}) // 存储右边聊天人
-          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.JsonBig.stringify(this.uls[index].appellant_id)})}) // 存储右边聊天人员
+          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.uls[index].appellant_id ? this.uls[index].appellant_id : this.uls[index].appellee_id})}) // 存储右边聊天人员
         }).catch(error=>{
           console.log('错误', error)
         })
-
       },
       parseUls() { // 搜索输入框
         this.uls = [];

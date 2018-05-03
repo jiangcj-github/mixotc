@@ -33,10 +33,10 @@
               <p>
                 <i></i>
                 <span v-if="item.msg.type === 1" class="images">
-                  <img 
-                    :src="item.msg.content" 
-                    alt="" 
-                    @load="imgLoad(curChat, item.time)" 
+                  <img
+                    :src="item.msg.content"
+                    alt=""
+                    @load="imgLoad(curChat, item.time)"
                     @error="imgError(curChat, item.time, item.msg.content)"
                     @click="showBigPicture(!item.isLoding && !item.isFail, item.msg.content)"
                   >
@@ -79,10 +79,10 @@
         <span>图片</span>
       </li>
       <li>
-        <div 
-          class="money-address" 
-          v-show="showAddress" 
-          @click="showAddress = false"  
+        <div
+          class="money-address"
+          v-show="showAddress"
+          @click="showAddress = false"
           v-clickoutside="()=>{showAddress && (this.showAddress = false)}"
           >
           <p v-for="(item, index) of mapAddress" :key="index" @click="sendAddress(item.sendText)">
@@ -96,11 +96,11 @@
     <!-- 大图展示 -->
     <div class="big-img" v-if="showBig">
       <span>
-        <img 
-          src="/static/images/close_btn_tr.png" 
-          ref="bigPic" 
-          alt="" 
-          @click="()=>{this.showBigSrc = ''; this.showBig = false}" 
+        <img
+          src="/static/images/close_btn_tr.png"
+          ref="bigPic"
+          alt=""
+          @click="()=>{this.showBigSrc = ''; this.showBig = false}"
           >
         </span>
       <div class="picture">
@@ -108,9 +108,9 @@
       </div>
     </div>
     <!-- 添加好友弹窗 -->
-    <AddFriend 
-      v-if="showAddFriend" 
-      :addFriendShow="showAddFriend" 
+    <AddFriend
+      v-if="showAddFriend"
+      :addFriendShow="showAddFriend"
       @offAddFriend="openAddFriend"
       :id="curChat"
       :name="chat[index].nickName"
@@ -118,9 +118,9 @@
       >
     </AddFriend>
     <!-- 添加群聊弹窗 -->
-    <AddGroup 
-      v-if="showAddGroup" 
-      :addGroupShow="showAddGroup" 
+    <AddGroup
+      v-if="showAddGroup"
+      :addGroupShow="showAddGroup"
       @offAddGroup="openAddGroup"
       :curChat="curChat"
       :isNewGroup="true"
@@ -145,10 +145,10 @@
     >暂无收款地址
     </BasePopup>
     <!-- 群信息 -->
-    <GroupInfo 
-      v-if="showCheckGroup" 
+    <GroupInfo
+      v-if="showCheckGroup"
       :id="groupId"
-      :checkGroupShow="showCheckGroup" 
+      :checkGroupShow="showCheckGroup"
       @offCheckGroup="openCheckGroup"
     ></GroupInfo>
   </div>
@@ -353,7 +353,7 @@
                 create_time = item.create_time * 1000;
             result.push({
               id: this.JsonBig.stringify(item.id),
-              from: sender_id === uid ? uid : sender_id, 
+              from: sender_id === uid ? uid : sender_id,
               to: sender_id === uid ? this.curChat : uid,
               icon: sender_id === uid ? (icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png") : this.mapCurMembers[sender_id],
               msg:{
@@ -376,14 +376,14 @@
       //发送增加本地消息记录
       addStoreMessages(tid, type, content, time) {
         let obj = {
-          from: this.JsonBig.stringify(this.$store.state.userInfo.uid), 
+          from: this.JsonBig.stringify(this.$store.state.userInfo.uid),
           to: tid,
           icon: this.$store.state.userInfo.icon ? `${this.HostUrl.http}image/${this.$store.state.userInfo.icon}` : "/static/images/default_avator.png",
           msg:{
             type: type,
             content: content
           },
-          isLoding: true, 
+          isLoding: true,
           isFail: false,
           time: time
         }
@@ -505,7 +505,7 @@
         this.$store.commit({type: 'changeCurChat', data: {id: id}})
         if(this.isFriend) return;
         let obj = {
-          from: id, 
+          from: id,
           to: this.JsonBig.stringify(this.$store.state.userInfo.uid),
           icon: this.mapCurMembers[this.curChat],
           msg:{
@@ -530,7 +530,7 @@
               this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
               if(this.isFriend) return;
               let obj = {
-                from: this.JsonBig.stringify(id), 
+                from: this.JsonBig.stringify(id),
                 to: this.JsonBig.stringify(this.$store.state.userInfo.uid),
                 icon: this.mapCurMembers[this.curChat],
                 msg:{
@@ -583,8 +583,8 @@
       },
       openBeliveLayer(id) {
         this.WsProxy.send('otc','new_trust',{
-            uid:this.$store.state.userInfo.uid, 
-            id: this.JsonBig.parse(id), 
+            uid:this.$store.state.userInfo.uid,
+            id: this.JsonBig.parse(id),
             trust:1
           }).then((data)=>{
           this.beliveLayer = true
