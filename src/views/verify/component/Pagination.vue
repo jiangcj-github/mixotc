@@ -78,7 +78,7 @@
   .pagi>ul>li.arrow.disabled{pointer-events:none;}
   .pagi>ul>li.arrow:before{position:absolute;content:"";width:0;height:0;left:50%;top:50%;border:5px solid transparent;}
   .pagi>ul>li.arrow.right:before{border-left-color:#999;margin-left:-2px;margin-top:-5px;}
-  .pagi>ul>li.arrow.left:before{border-right-color:#999;margin-left:-7px;margin-top:-5px;}
+  .pagi>ul>li.arrow.left:before{border-right-color:#999;margin-left:-8px;margin-top:-5px;}
 
   .pagi input{box-sizing:border-box;width:50px;height:40px;margin:0 5px;border:1px solid #e1e1e1;border-radius:2px;text-align:center;}
   .pagi input:focus{border-color:#fea350;outline:none;}

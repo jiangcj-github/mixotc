@@ -25,12 +25,12 @@
 .textarea>textarea{ resize:none; border:none; background:transparent; outline:none; flex-grow:1; padding:10px;}
 .textarea .indicator{text-align:right; font-size:13px; color:#999999; letter-spacing:0; line-height:24px; padding 0 6px;}
 
-.checkbox{ font-size:13px; color:#333333; letter-spacing:0.27; display:inline-block; padding-left:23px;
+.checkbox{ font-size:13px; color:#333333; letter-spacing:0.27px; display:inline-block; padding-left:23px;
   cursor:pointer; background url(/static/images/rules_unchecked.png) no-repeat 3px center;}
 .checkbox.check{ background-image:url(/static/images/rules_checked.png);}
 .checkbox:hover{ color:#666;}
 
-.radio{ font-size:13px; color:#333333; letter-spacing:0.27; display:inline-block; padding-left:27px; cursor:pointer;
+.radio{ font-size:13px; color:#333333; letter-spacing:0.27px; display:inline-block; padding-left:27px; cursor:pointer;
   background  url(/static/images/unselect.png) no-repeat 3px center;}
 .radio.check{ background-image:url(/static/images/selected.png);}
 .radio:hover{ color:#666;}
@@ -45,3 +45,5 @@
 .err.net-error{background-image:url(/static/images/verify/err_net_error.png);}
 .err.empty{background-image:url(/static/images/rectangle.png);}
 .err.loading{}
+
+::placeholder{color:#999;font-size:13px;}

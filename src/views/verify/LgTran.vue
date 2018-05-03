@@ -8,7 +8,7 @@
       <div class="right">
         <ul class="tab">
           <li :class="{active:tab===1}" @click="tab=1">待审核<i>({{uncheckNum}})</i></li>
-          <li :class="{active:tab===2}" @click="tab=2">已审核</li>
+          <li :class="{active:tab===2}" @click="tab=2">已审核<i>({{checkNum}})</i></li>
         </ul>
         <Uncheck v-if="tab===1"></Uncheck>
         <Check v-else-if="tab===2"></Check>
@@ -29,13 +29,16 @@
     data() {
       return {
         uncheckNum: 0,
+        checkNum: 0,
         tab:1,  //1-待审核，2-已审核
       }
     },
     mounted(){
       this.loadUncheckTotal();
+      this.loadCheckTotal();
       this.Bus.$on("onSubmit2",(info)=>{
         this.loadUncheckTotal();
+        this.loadCheckTotal();
       });
     },
     destroyed(){
@@ -49,7 +52,17 @@
         }).then((data)=>{
           this.uncheckNum=data.amount;
         }).catch((msg)=>{
-          console.log(msg);
+          alert(JSON.stringify(msg));
+        });
+      },
+      loadCheckTotal(){
+        this.WsProxy.send("control","a_get_identity_amount",{
+          type:2,
+          state:2
+        }).then((data)=>{
+          this.checkNum=data.amount;
+        }).catch((msg)=>{
+          alert(JSON.stringify(msg));
         });
       }
     }

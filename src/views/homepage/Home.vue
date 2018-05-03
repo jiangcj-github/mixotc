@@ -30,19 +30,19 @@
         <div class="unit"><label>{{info.securedNum}}</label><span>担保</span></div>
       </div>
     </div>
-    <div v-if="isLogin" @click="showUntrustPop=false">
+    <div v-if="isLogin" @click="pop=false">
       <!--菜单项tab-->
       <ul class="menu-tab">
-        <li :class="{active:tab==0}" @click="tab=0">他的发布</li>
-        <li :class="{active:tab==1}" @click="tab=1">收到的评价</li>
+        <li :class="{active:tab===0}" @click="tab=0">他的发布</li>
+        <li :class="{active:tab===1}" @click="tab=1">收到的评价</li>
       </ul>
       <!--发布列表-->
       <Sales :uid="uid" v-show="tab==0"></Sales>
       <!--评价列表-->
       <Rates :uid="uid" v-show="tab==1"></Rates>
-      <!--取消信任弹框-->
-      <BasePopup :show="showUntrustPop">
-        <div class="pop">取消信任成功</div>
+      <!--信任操作弹框-->
+      <BasePopup :show="pop">
+        <div class="pop">{{popArr[info.isTrust]}}</div>
       </BasePopup>
     </div>
   </div>
@@ -66,7 +66,8 @@
         info:{},
 
         tab:0,  //他的发布，他的评价
-        showUntrustPop:false,
+        pop:false,
+        popArr:["取消信任成功","加入信任成功"],
       }
     },
     computed:{
@@ -91,7 +92,8 @@
     methods: {
       joinTrust(){
         this.WsProxy.send('otc','new_trust',{uid:this.loginUid, id:this.uid, trust:1}).then((data)=>{
-          this.info.isTrust=true;
+          this.showPop();
+          this.info.isTrust=1;
           this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(this.uid)});
         }).catch((msg)=>{
           alert(JSON.stringify(msg));
@@ -99,12 +101,9 @@
       },
       cancelTrust(){
         this.WsProxy.send('otc','new_trust',{uid:this.loginUid, id:this.uid, trust:0}).then((data)=>{
-          this.showUntrustPop=true;
+          this.showPop();
+          this.info.isTrust=0;
           this.$store.commit({type:"delTrust",data:this.JsonBig.stringify(this.uid)});
-          setTimeout(()=>{
-            this.showUntrustPop=false;
-          },3000);
-          this.info.isTrust=false;
         }).catch((msg)=>{
           alert(JSON.stringify(msg));
         });
@@ -137,9 +136,13 @@
           trustedNum: data.trusted || 0,
           trustNum: data.trust || 0,
           securedNum: data.secured || 0,
-          isTrust: data.is_trust || false,
+          isTrust: data.is_trust || 0,
         }
-      }
+      },
+      showPop(){
+        this.pop=true;
+        setTimeout(()=>{this.pop=false;},3000);
+      },
     },
   }
 </script>
@@ -217,15 +220,18 @@
             margin-right 40px
             cursor pointer
             img
-              width 20px
-              height 20px
+              width 18px
+              height auto
+              align-self center
             i
-              margin-left 10px
+              margin-left 7px
               line-height 20px
               letter-spacing 0.23px
-              fz11()
+              font-size 12px
             &.isTrust
               color #FFB422
+              &:hover
+                color #fea350
           .join-trust
             background: #FFB422
             border-radius: 2px

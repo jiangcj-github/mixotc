@@ -6,57 +6,51 @@
       <Left :leftBar="4"></Left>
       <!--右侧-->
       <div class="right">
-        <div class="head">
-          <div class="filter">
-            <div class="f1">
-              <div class="search">
-                <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">搜索{{srchUls[srchUlSel].text}}</span>
-                <ul v-show="srchUlShow" class="srch-ul">
-                  <li v-for="(e,i) in srchUls" :key="i" @click="srchUlSel=i">{{e.text}}</li>
-                </ul>
-                <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput">
-                <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
-                <a href="javascript:void(0)" @click="search"></a>
-                <ul v-show="srchTipShow && tips.length>0" class="tip-ul">
-                  <li v-for="(e,i) in tips" :key="i" @click="search">
-                    <div v-if="e.resType===0" @mousedown="srchText=e.nickname">
-                      <span class="sp1">{{e.nickname}}</span><span class="sp2">{{e.account}}</span>
-                    </div>
-                    <div class="" v-else="" @mousedown="srchText=e.orderId">
-                      <span class="sp1">{{e.orderId}}</span>
-                    </div>
-                  </li>
-                </ul>
-              </div>
+        <div class="filter">
+          <div class="f1">
+            <div class="search" :class="{disabled:srchText.length<=0}">
+              <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">搜索{{srchUls[srchUlSel].text}}</span>
+              <ul v-show="srchUlShow">
+                <li v-for="(e,i) in srchUls" :key="i" @click="srchUlSel=i">{{e.text}}</li>
+              </ul>
+              <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput">
+              <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
+              <a href="javascript:void(0)" @click="search"></a>
+              <ul v-show="srchTipShow && tips.length>0">
+                <li v-for="(e,i) in tips" :key="i" @click="search">
+                  <div v-if="e.resType===0" @mousedown="srchText=e.nickname">
+                    <span>{{e.nickname}}</span><span class="gray">{{e.account}}</span>
+                  </div>
+                  <div v-else="" @mousedown="srchText=e.orderId">
+                    <span>{{e.orderId}}</span>
+                  </div>
+                </li>
+              </ul>
             </div>
-            <div class="f2">
-              <DateInterval ref="di" onDiChange="onDiChange"></DateInterval>
-            </div>
-            <div class="f3">
-              <a href="javascript:void(0)" :class="{active:days===1}" @click="days=1">今天</a>
-              <a href="javascript:void(0)" :class="{active:days===3}" @click="days=3">三天</a>
-              <a href="javascript:void(0)" :class="{active:days===7}" @click="days=7">七天</a>
-            </div>
+          </div>
+          <div class="f2">
+            <DateInterval ref="di" onDiChange="onDiChange"></DateInterval>
+          </div>
+          <div class="f3">
+            <a href="javascript:void(0)" :class="{active:days===1}" @click="days=1">今天</a>
+            <a href="javascript:void(0)" :class="{active:days===3}" @click="days=3">三天</a>
+            <a href="javascript:void(0)" :class="{active:days===7}" @click="days=7">七天</a>
           </div>
         </div>
         <div class="tb-head">
-        <span class="tjsj sortable" @click="sort=(sort+1)%2">
-          提交时间<i class="sort" :class="{up:sort===0,down:sort===1}"></i>
-        </span>
+          <span class="tjsj sortable" @click="sort=(sort+1)%2">提交时间<i class="sort" :class="{up:sort===0,down:sort===1}"></i></span>
           <span class="ddxx">订单信息</span>
           <span class="sqr">申诉人</span>
           <span class="sqdx">被申诉人</span>
-          <span class="zcr">仲裁人</span>
+          <span class="zcr">处理人</span>
           <span class="wcsj">完成时间</span>
-          <span class="ys sortable" @click="sort=(sort+1)%2+2">
-          用时<i class="sort" :class="{up:sort===2,down:sort===3}"></i>
-        </span>
+          <span class="ys sortable" @click="sort=(sort+1)%2+2">用时<i class="sort" :class="{up:sort===2,down:sort===3}"></i></span>
           <span class="jg drop">
-          <a href="javascript:void(0)" v-clickoutside="()=>{resUlShow=false}" @click="resUlShow=!resUlShow">{{resUls[resUlSel].text}}</a>
-          <ul v-show="resUlShow">
-            <li @click="resUlSel=i" v-for="(e,i) in resUls" :key="i">{{e.text}}</li>
-          </ul>
-        </span>
+            <a href="javascript:void(0)" v-clickoutside="()=>{resUlShow=false}" @click="resUlShow=!resUlShow">{{resUls[resUlSel].text}}</a>
+            <ul v-show="resUlShow">
+              <li @click="resUlSel=i" v-for="(e,i) in resUls" :key="i">{{e.text}}</li>
+            </ul>
+          </span>
           <span class="zrr">责任人</span>
           <span class="cz">操作</span>
         </div>
@@ -66,25 +60,24 @@
               <div class="tjsj"><p>{{e.createTime1}}</p><p>{{e.createTime2}}</p></div>
               <div class="ddxx"><p>{{e.orderType}}{{e.orderCoin}}</p></div>
               <div class="sqr">
-                <router-link :to="'/homepage?uid='+e.applyUid" tag="p" class="link">{{e.applyU}}</router-link>
-                <p @click="Bus.$emit('contactSomeone',{id:e.applyUid})" class="contact"><img src="/static/images/talk.png">联系他</p>
+                <p><a :href="'#/homepage?uid='+e.applyUid" target="_blank" class="link">{{e.applyU}}</a></p>
+                <p><a href="#/verify/service" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
               </div>
               <div class="sqdx">
-                <router-link :to="'/homepage?uid='+e.appliedUid" tag="p" class="link">{{e.appliedU}}</router-link>
-                <p @click="Bus.$emit('contactSomeone',{id:e.appliedUid})" class="contact"><img src="/static/images/talk.png">联系他</p>
+                <p><a :href="'/homepage?uid='+e.appliedUid" target="_blank" class="link">{{e.appliedU}}</a></p>
+                <p><a href="#/verify/service" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
               </div>
               <div class="zcr"><p>{{e.dealU}}</p></div>
               <div class="wcsj"><p>{{e.finishTime1}}</p><p>{{e.finishTime2}}</p></div>
               <div class="ys"><p>{{e.spend}}</p></div>
               <div class="jg"><p>{{e.result}}</p></div>
               <div class="zrr"><p>{{e.respU1}}</p><p>{{e.respU2}}</p></div>
-              <div class="cz"><p><a href="javascript:void(0)" class="ck" @click="">查看</a></p></div>
+              <div class="cz"><p><a href="javascript:void(0)" class="ck disabled" @click="">沟通记录</a></p></div>
             </div>
             <div class="division"></div>
             <div class="remark">备注：{{e.remark}}</div>
           </div>
-          <Pagination :total="arbiTotal" :pageSize="arbiPageSize"
-                      emitValue="onPageChange" style="width:1000px;margin-top:20px" v-show="arbiTotal>arbiPageSize"></Pagination>
+          <Pagi :curPageSize="arbis.length" :pageSize="pageSize" :curPage="curPage"></Pagi>
         </div>
         <div v-else-if="err===1">
           <div class="err no-result">没有对应的数据</div>
@@ -99,20 +92,20 @@
           <div class="err net-error">数据加载中...</div>
         </div>
         <div v-else>
-          <div class="err empty">没有仲裁数据</div>
+          <div class="err empty">没有申诉数据</div>
         </div>
       </div>
     </div>
   </div>
 </template>
 <script>
-  import Pagination from "@/components/common/Pagination";
   import DateInterval from "@/components/common/DateInterval";
   import Left from "./layout/Left";
+  import Pagi from "../homepage/components/Pagi";
   export default {
     components: {
       Left,
-      Pagination,
+      Pagi,
       DateInterval,
     },
     data() {
@@ -130,12 +123,12 @@
         srchTipShow: false,
         srchText: "",
 
-        tips: [1,3,4,5,5,5,5],
+        tips: [],
         tipsCount: 10,
 
         days: 0,
 
-        sort: 0, //0-提交时间升序，1-提交时间降序，2-用时升序，3-用时降序
+        sort: 1, //0-提交时间升序，1-提交时间降序，2-用时升序，3-用时降序
 
         resUlShow: false,
         resUlSel: 0,
@@ -150,8 +143,8 @@
 
         err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败,4-加载中
         arbis: [],
-        arbiTotal: 0,
-        arbiPageSize: 15,
+        pageSize: 15,
+        curPage: 1,
       }
     },
     watch:{
@@ -169,6 +162,7 @@
     mounted(){
       this.loadArbiLists();
       this.Bus.$on("onPageChange",(p) => {
+        this.curPage=p;
         this.loadArbiLists(p-1);
       });
       this.Bus.$on("onDiChange",()=>{
@@ -224,7 +218,7 @@
           duration: sortByDuration,
           create: sortByCreate,
           origin: p,
-          count: this.arbiPageSize,
+          count: this.pageSize,
         }).then((data)=>{
           if(!data||!data.appeals||data.appeals.length<=0){
             this.err=1; //无数据
@@ -296,10 +290,13 @@
             orderCoin: e.currency || "-",
             applyU: e.appellant_name || "-",
             applyUid: e.appellant_id,
+            applyUid_str: this.JsonBig.stringify(e.appellant_id),
             appliedU: e.appellee_name || "-",
             appliedUid: e.appellee_id,
+            appliedUid_str: this.JsonBig.stringify(e.appellee_id),
             dealU: e.handler_name || "-",
             dealUid: e.handler_id,
+            dealUid_str: this.JsonBig.stringify(e.handler_id),
             finishTime: new Date(e.update*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
             finishTime1: new Date(e.update*1000).dateHandle("yyyy/MM/dd"),
             finishTime2: new Date(e.update*1000).dateHandle("HH:mm"),
@@ -308,6 +305,7 @@
             respU1: e.responsible_name || "-",
             respU2: e.responsible_account || "-",
             respUid: e.responsible_id,
+            respUid_str: this.JsonBig.stringify(e.responsible_id),
             remark: e.info,
           });
         });

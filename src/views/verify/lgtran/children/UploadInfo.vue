@@ -93,6 +93,7 @@
         }else{
           this.canSubmit=false;
         }
+
       },
       isValidateRemark(){
         if(this.formRemark.length>50){
