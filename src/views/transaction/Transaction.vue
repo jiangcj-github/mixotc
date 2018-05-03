@@ -72,7 +72,7 @@
         </ul>
       </div>
 
-      <NothingContent v-show="!result"></NothingContent>
+      <NothingContent v-show="result.length === 0"></NothingContent>
 
       <!--<Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>-->
       <div class="page-btn" v-if="result.length >= 20">
@@ -177,7 +177,7 @@ import NothingContent from '@/components/common/NothingContent';
       //拉取广告数据
       fetchData(params) {
         this.Proxy.sales(params).then(res=>{
-          this.result = res.data.sales;
+          this.result = res.data.sales ? res.data.sales : [];
           console.log('广告', res)
         })
       },

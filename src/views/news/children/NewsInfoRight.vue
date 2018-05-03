@@ -9,7 +9,7 @@
           <i></i>
           <ul>
             <li @click="openAddFriend" v-if="!isFriend">+好友</li>
-            <li @click="openBeliveLayer(chat[index].id)" v-if="!isTrust">+信任</li>
+            <li @click="openBeliveLayer(chat[index].uid)" v-if="!isTrust">+信任</li>
             <li @click="openAddGroup">+建群</li>
           </ul>
         </div>
@@ -56,7 +56,7 @@
               <li>{{item.name}}</li>
               <li>{{item.info}}</li>
             </ul>
-            <button @click="addFriend(item.id, item.info)">同意</button>
+            <button @click="addFriend(item.id, item.info ? item.info : `我是${item.name},申请添加你为好友`)">同意</button>
           </div>
         </div>
       </div>
@@ -184,7 +184,8 @@
         sendText: '',
         sendFile: '',
         showBig: false,
-        showBigSrc: ''
+        showBigSrc: '',
+        userId: this.JsonBig.stringify(this.$store.state.userInfo.uid)
       }
     },
     components: {
@@ -195,11 +196,11 @@
       HappyScroll
     },
     mounted() {
-      this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('211634663708430336') , id: this.JsonBig.parse('197154964416499712')}).then(data => {
-         console.log('del_friend', data)
-        }).catch(error=>{
-          console.log(error)
-        })
+      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('212012803970568192') , id: this.JsonBig.parse('197115833745412096')}).then(data => {
+      //     console.log('del_friend', data)
+      //   }).catch(error=>{
+      //     console.log(error)
+      //   })
       this.beFriend()//监听被加好友
       //监听其他页面调用聊天窗口
       this.Bus.$on('contactSomeone',({id, msg})=> {
@@ -239,12 +240,12 @@
       isFriend() {
         let result = false;
         this.$store.state.friendList.forEach(item => {
-          this.JsonBig.stringify(item.id) === this.curChat && (result = true)
+          this.JsonBig.stringify(item.id) === this.chat[this.index].uid && (result = true)
         })
         return result
       },
       isTrust() {
-        return this.$store.state.trustList.includes(this.curChat)
+        return this.$store.state.trustList.includes(this.chat[this.index].uid)
       },
       messages() {
         return this.$store.state.messages[this.curChat] ? this.$store.state.messages[this.curChat] : []
@@ -279,7 +280,25 @@
               return {text: `${item.bank + '****' + (item.number.slice(-4))}`, sendText: `收款人：${item.name}<br>银行卡号:${item.number}<br> 开户行:${item.bank}`}
             }
         })
-      }
+      },
+      friendIds() {
+        return this.$store.state.friendList.map(item => {
+          return this.JsonBig.stringify(item.id)
+        })
+      },
+      friendGid() {
+        let obj = {};
+        this.$store.state.groupList.forEach( item =>{
+          if(item.type !== 0) return; 
+          item.members.forEach(itm=>{
+            let id = this.JsonBig.stringify(itm.id);
+            if(id !== this.JsonBig.stringify(this.$store.state.userInfo.uid)) {
+              obj[id] = this.JsonBig.stringify(item.id);
+            }
+          })
+        })
+        return obj
+      },
     },
     methods: {
       async fetchFriendList() {
@@ -291,14 +310,16 @@
         })
       },
       async contactSomeone(id, msg) {
-        let flag = this.chatIds.indexOf(id);
-        console.log(id)
-        await this.dealNewChat(id, 0);
+        let flag = this.chatIds.indexOf(id),
+            friendFlag = false;
+        await this.fetchFriendList();
+        friendFlag = this.friendIds.includes(id);
+        await this.dealNewChat(id, friendFlag ? 1 : 0);
         this.$store.commit({type: 'changeChatBox', data: true})
         if (flag !== -1 ) {
           this.$store.commit({type: 'chatTop', data: flag})
         };
-        this.$store.commit({type: 'changeCurChat', data: {id: id}})
+        this.$store.commit({type: 'changeCurChat', data: {id: friendFlag ? this.friendGid[id] : id }})
         if (msg) this.sendMs(msg);
         
       },
@@ -336,9 +357,10 @@
       async fetchMore(num) {
         if(this.index === '') return;
         let result = [];
+        let chat = this.chat[this.index]
         await this.WsProxy.send('control', 'get_history_msgs', {
-          peer_id:  this.chat[this.index].group ? 0 : this.JsonBig.parse(this.curChat),
-          group_id: this.chat[this.index].group ? this.JsonBig.parse(this.curChat) : 0,
+          peer_id:  chat.group || chat.isSingle ? 0 : this.JsonBig.parse(this.curChat),
+          group_id: chat.group || chat.isSingle ? this.JsonBig.parse(this.curChat) : 0,
           last_msg_id: this.messages[0] && this.messages[0].id ? this.JsonBig.parse(this.messages[0].id) : 0,
           is_peer_admin: this.chat[this.index].service ? 1 : 0,
           count: num
@@ -409,12 +431,12 @@
         if(!icon) return;
         this.$store.commit({type: 'changeImgsrc', data:{id: tid, time: time, src: `${this.HostUrl.http}file/${icon}`}})
         this.WsProxy.sendMessage({
-            gid: chat.group ? tid : 0,
+            gid: chat.group || chat.isSingle ? tid : 0,
             tid: tid,
             type: 'image',
             data:{
               uid: this.$store.state.userInfo.uid,
-              rid: chat.group ? tid : 0,
+              rid: chat.group || chat.isSingle ? tid : 0,
               tid: tid,
               type: 'image',
               id: icon,
@@ -445,26 +467,47 @@
         // console.log(this.chatIds.includes(id));
         flag && !this.chatIds.includes(id) && await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
           this.$store.commit({type: 'getGroupList', data})
+          console.log(this.friendGid[id])
           let group = this.$store.state.groupList.filter(item => {
-            return id === this.JsonBig.stringify(item.id)
+            return this.friendGid[id] === this.JsonBig.stringify(item.id)
           })[0]
-          this.$store.commit({type: 'newChat', data:{
-            id: id,
-            group: true,
-            length: group.members.length,
-            service: false,
-            icon: "/static/images/groupChat_icon.png",
-            nickName: !group.name ? group.members.map(item =>{
-              return item.name
-            }).join('、') : `${group.name}`,
-            phone: false,
-            email: false,
-            unread: 0,
-            moreFlag: true,
-            exists: true
-          }})
+          if(group.type === 1){
+              this.$store.commit({type: 'newChat', data:{
+                id: this.JsonBig.stringify(group.id),
+                group: true,
+                length: group.members.length,
+                service: false,
+                icon: "/static/images/groupChat_icon.png",
+                nickName: !group.name ? group.members.map(item =>{
+                  return item.name
+                }).join('、') : `${group.name}`,
+                phone: false,
+                email: false,
+                unread: 0,
+                moreFlag: true,
+                exists: true
+              }})
+            }else {
+              let other = group.members.filter( item => {
+                return this.JsonBig.stringify(item.id) !== this.userId
+              })[0]
+              let uid = this.JsonBig.stringify(other.id)
+              this.$store.commit({type: 'newChat', data:{
+                id: this.friendGid[uid],
+                uid: uid,
+                isSingle: true,
+                group: false,
+                service: false,
+                icon: other.icon ? `${this.HostUrl.http}image/${other.icon}` : "/static/images/default_avator.png",
+                nickName: other.name,
+                phone: other.phone,
+                email: other.email,
+                moreFlag: true,
+                unread: 0
+              }})
+            }
           }).catch(error=>{
-          console.log(error)
+            console.log(error)
         })
       },
       sendImg(tid, time) {
@@ -480,11 +523,11 @@
         this.addStoreMessages(tid, 0, text, time)
         // 发消息
         this.WsProxy.sendMessage({
-          gid: chat.group ? tid : 0,
+          gid: chat.group || chat.isSingle ? tid : 0,
           tid: tid,
           data:{
             uid: this.$store.state.userInfo.uid,
-            rid: chat.group ? tid : 0,
+            rid: chat.group || chat.isSingle ? tid : 0,
             tid: tid,
             msg: text
           }

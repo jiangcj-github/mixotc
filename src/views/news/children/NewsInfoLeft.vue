@@ -48,7 +48,8 @@
       return {
         search: false,
         searchText: '',
-        searchRange: []
+        searchRange: [],
+        userId: this.JsonBig.stringify(this.$store.state.userInfo.uid)
       }
     },
     mounted() {
@@ -67,6 +68,24 @@
       chatIds() {
         return this.$store.state.chat.map(item => {
           return item.id
+        })
+      },
+      friendGid() {
+        let obj = {};
+        this.$store.state.groupList.forEach( item =>{
+          if(item.type !== 0) return;
+          item.members.forEach(itm=>{
+            let id = this.JsonBig.stringify(itm.id);
+            if(id !== this.JsonBig.stringify(this.$store.state.userInfo.uid)) {
+              obj[id] = this.JsonBig.stringify(item.id);
+            }
+          })
+        })
+        return obj
+      },
+      friendIds() {
+        return this.$store.state.friendList.map(item => {
+          return this.JsonBig.stringify(item.id)
         })
       }
     },
@@ -106,21 +125,41 @@
             group = this.$store.state.groupList.filter(group => {
               return this.JsonBig.stringify(item.gid) === this.JsonBig.stringify(group.id)
             })[0]
-            result.push({
-              id: this.JsonBig.stringify(item.gid),
-              group: true,
-              length: group.members.length,
-              service: false,
-              icon: "/static/images/groupChat_icon.png",
-              nickName: !group.name ? group.members.map(item =>{
-                return item.name
-              }).join('、') : `${group.name}`,
-              phone: false,
-              email: false,
-              unread: 0,
-              moreFlag: true,
-              exists: true//踢出群聊的标志
-            });
+            if(group.type === 1){
+              result.push({
+                id: this.JsonBig.stringify(item.gid),
+                group: true,
+                length: group.members.length,
+                service: false,
+                icon: "/static/images/groupChat_icon.png",
+                nickName: !group.name ? group.members.map(item =>{
+                  return item.name
+                }).join('、') : `${group.name}`,
+                phone: false,
+                email: false,
+                unread: 0,
+                moreFlag: true,
+                exists: true//踢出群聊的标志
+              });
+            }else {
+              let other = group.members.filter( item => {
+                return this.JsonBig.stringify(item.id) !== this.userId
+              })[0]
+              let uid = this.JsonBig.stringify(other.id)
+              result.push({
+                id: this.friendGid[uid],
+                uid: uid,
+                isSingle: true,
+                group: false,
+                service: false,
+                icon: other.icon ? `${this.HostUrl.http}image/${other.icon}` : "/static/images/default_avator.png",
+                nickName: other.name,
+                phone: other.phone,
+                email: other.email,
+                moreFlag: true,
+                unread: 0
+              }); 
+            }
           }else if (item.is_peer_admin){
             result.push({
               id: this.JsonBig.stringify(item.uid),
@@ -134,8 +173,10 @@
               unread: 0
             }); 
           }else {
+            let id = this.JsonBig.stringify(item.uid);
             result.push({
-              id: this.JsonBig.stringify(item.uid),
+              id: id,
+              uid: id,
               group: false,
               service: false,
               icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
@@ -167,26 +208,47 @@
         // console.log(this.chatIds.includes(id));
         flag && !this.chatIds.includes(id) && await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
           this.$store.commit({type: 'getGroupList', data})
+          console.log(this.friendGid[id])
           let group = this.$store.state.groupList.filter(item => {
-            return id === this.JsonBig.stringify(item.id)
+            return this.friendGid[id] === this.JsonBig.stringify(item.id)
           })[0]
-          this.$store.commit({type: 'newChat', data:{
-            id: id,
-            group: true,
-            length: group.members.length,
-            service: false,
-            icon: "/static/images/groupChat_icon.png",
-            nickName: !group.name ? group.members.map(item =>{
-              return item.name
-            }).join('、') : `${group.name}`,
-            phone: false,
-            email: false,
-            unread: 0,
-            moreFlag: true,
-            exists: true
-          }})
+          if(group.type === 1){
+              this.$store.commit({type: 'newChat', data:{
+                id: this.JsonBig.stringify(group.id),
+                group: true,
+                length: group.members.length,
+                service: false,
+                icon: "/static/images/groupChat_icon.png",
+                nickName: !group.name ? group.members.map(item =>{
+                  return item.name
+                }).join('、') : `${group.name}`,
+                phone: false,
+                email: false,
+                unread: 0,
+                moreFlag: true,
+                exists: true
+              }})
+            }else {
+              let other = group.members.filter( item => {
+                return this.JsonBig.stringify(item.id) !== this.userId
+              })[0]
+              let uid = this.JsonBig.stringify(other.id)
+              this.$store.commit({type: 'newChat', data:{
+                id: this.friendGid[uid],
+                uid: uid,
+                isSingle: true,
+                group: false,
+                service: false,
+                icon: other.icon ? `${this.HostUrl.http}image/${other.icon}` : "/static/images/default_avator.png",
+                nickName: other.name,
+                phone: other.phone,
+                email: other.email,
+                moreFlag: true,
+                unread: 0
+              }})
+            }
           }).catch(error=>{
-          console.log(error)
+            console.log(error)
         })
       },
       // 拉取收款地址数据
@@ -360,10 +422,12 @@
         })
         //好友
         this.$store.state.friendList.forEach(item => {
-          if (this.chatIds.includes(this.JsonBig.stringify(item.id)) || item.type === 0) return;
+          if (this.chatIds.includes(this.JsonBig.stringify(item.id))) return;
           if (item.name.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText)) {
             result.push({
-              id: this.JsonBig.stringify(item.id),
+              id: this.friendGid[this.JsonBig.stringify(item.id)],
+              uid: this.JsonBig.stringify(item.id),
+              isSingle: true,
               group: false,
               service: false,
               icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
@@ -378,7 +442,7 @@
         //群组
         this.$store.state.groupList.forEach(item => {
           if (this.chatIds.includes(this.JsonBig.stringify(item.id))) return;
-          if (item.name.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText) || this.JsonBig.stringify(item.id).includes(this.searchText)) {
+          if ( item.type === 1 && (item.name.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText) || this.JsonBig.stringify(item.id).includes(this.searchText))) {
             result.push({
               id: this.JsonBig.stringify(item.id),
               group: true,

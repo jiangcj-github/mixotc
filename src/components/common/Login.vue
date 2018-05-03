@@ -30,7 +30,7 @@
       <div class="yhxy">
         <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
         <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
-        <p>我已阅读并同意 <a href="http://localhost:8080/#/transaction/tradeRules?source=4" target="_blank">用户协议</a></p>
+        <p>我已阅读并同意 <a href="/#/transaction/tradeRules?source=4" target="_blank">用户协议</a></p>
       </div>
 
       <span :class="{'hide-tips':agree,'yhxy-tips':!agree}"><img src="/static/images/hint.png" alt="">&nbsp;&nbsp;<b>请勾选用户协议</b></span>
@@ -71,7 +71,8 @@
         time:'',
         interval: null,
         timer: null,
-        sendCodeText: '发送验证码'
+        sendCodeText: '发送验证码',
+        href: ''
       }
 
     },
@@ -215,7 +216,6 @@
       hideLoginForm() {
         this.$store.commit({type: 'changeLoginForm', data: false});
       }
-
     },
     mounted() {
       let otcAccount = this.Storage.otcAccount.get()

@@ -57,7 +57,7 @@
     mounted() {
       //新建群
       if (this.isNewGroup) {
-        this.initIds = [this.JsonBig.stringify(this.userInfo.uid), this.nowChat];
+        this.initIds = [this.JsonBig.stringify(this.userInfo.uid), this.chat[this.index].uid];
         this.addList = [
           { 
             id : this.JsonBig.stringify(this.userInfo.uid),
@@ -65,7 +65,7 @@
             name: this.userInfo.name
           },
           {
-            id : this.nowChat,
+            id : this.chat[this.index].uid,
             icon : this.chat[this.index].icon,
             name: this.chat[this.index].nickName
           }
