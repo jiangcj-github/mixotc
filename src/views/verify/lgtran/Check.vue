@@ -3,7 +3,7 @@
   <div class="check">
     <div class="filter">
       <div class="f1" :class="{disabled:srchText.length<=0}">
-        <input type="text" placeholder="搜索商家昵称/账号" v-model="srchText" v-clickoutside="clickOutside" @input="fuzzyInput">
+        <input type="text" placeholder="搜索用户昵称/账号" v-model="srchText" v-clickoutside="clickOutside" @input="fuzzyInput">
         <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
         <a href="javascript:void(0)" @click="search"></a>
         <ul v-show="srchShowTip && tips.length>0">
@@ -46,7 +46,7 @@
             <p>{{e.submitTime1}}</p>
             <p>{{e.submitTime2}}</p>
           </div>
-          <div class="yh"><router-link tag="a" :to="'/homepage?uid='+e.uid">{{e.nickname}}</router-link></div>
+          <div class="yh"><a :href="'#/homepage?uid='+e.uid" target="_blank">{{e.nickname}}</a></div>
           <div class="shr">{{e.nicknameCk}}</div>
           <div class="shsj">
             <p>{{e.checkTime1}}</p>
@@ -232,7 +232,7 @@
             checkTime2: new Date(e.update*1000).dateHandle("HH:mm"),
             spend: (e.used && e.used.formatSecord()) || "-",
             checkResult: (e.state && ["待审核","通过","未通过","恶意上传"][e.state-1]) || "-",
-            checkRemark: e.info,
+            checkRemark: e.info||"无",
             name: e.name || "-",
             bankcard: e.number || "-",
             bank: e.bank_name || "-",

@@ -81,6 +81,7 @@
             icon: item.icon && this.HostUrl.http+"image/"+item.icon || "/static/images/default_avator.png",
             name: item.name || "-",
           });
+          this.rates.push({});
         });
       },
     },

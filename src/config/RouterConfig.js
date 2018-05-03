@@ -45,11 +45,6 @@ const ROUTES = [
     component: resolve => require(['@/views/verify/LgTran'], resolve) // 审核中心-大额交易审核
   },
   {
-    path: "/verify/sensitiveLexicon",
-    name: "sensitiveLexicon",
-    component: resolve => require(['@/views/verify/SensLex'], resolve) // 审核中心-敏感词汇
-  },
-  {
     path: "/verify/arbitrationRecord",
     name: "arbitrationRecord",
     component: resolve => require(['@/views/verify/ArbiRec'], resolve) // 审核中心-仲裁记录
@@ -67,7 +62,7 @@ const ROUTES = [
   {
     path: "/verify/service",
     name: "Service",
-    component: resolve => require(['@/views/kefu/Dialog'], resolve) // 我的订单评价
+    component: resolve => require(['@/views/kefu/Dialog'], resolve) // 客服交易对话框
   }
 ];
 
