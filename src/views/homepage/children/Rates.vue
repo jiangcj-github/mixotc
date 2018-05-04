@@ -6,7 +6,7 @@
         <p class="time">{{e.date}}</p>
       </div>
       <div class="p2">
-        <span class="judge">{{e.transit}}</span>
+        <span class="judge">{{e.credit_str}}</span>
         <span class="heart-wrap">
         <img src="/static/images/evaluate_red.png" v-for="i in e.credit">
       </span>
@@ -77,11 +77,10 @@
             comment: item.comment || "暂无评价内容",
             date: new Date(item.date).dateHandle("yyyy/MM/dd hh:mm:ss"),
             credit: item.credit || 0,
-            transit: {1:"差评",2:"中评",3:"好评"}[item.transit],
+            credit_str: ["差评","差评","中评","好评","好评"][item.credit-1] || "-",
             icon: item.icon && this.HostUrl.http+"image/"+item.icon || "/static/images/default_avator.png",
             name: item.name || "-",
           });
-          this.rates.push({});
         });
       },
     },
@@ -143,6 +142,10 @@
         line-height 20px
         margin-top 5px
         display inline-block
+        max-width 100px
+        text-overflow ellipsis
+        overflow hidden
+        white-space nowrap
     &:first-of-type
       border-top none
 </style>

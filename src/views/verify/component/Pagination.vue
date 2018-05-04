@@ -65,7 +65,7 @@
     }
   };
 </script>
-<style lang="stylus">
+<style lang="stylus" scoped>
   .pagi{display:flex;justify-content:center;width:100%;height:40px;margin-top:20px;}
   .pagi>p{font-size:13px;color:#333;letter-spacing:0.15px;line-height:40px;}
 
@@ -75,7 +75,7 @@
   .pagi>ul>li:hover{border-color:#fea350;}
   .pagi>ul>li.active{background:#fea350;border-color:#fea350;color:#fff;pointer-events:none;cursor:default;}
   .pagi>ul>li.arrow{position:relative;}
-  .pagi>ul>li.arrow.disabled{pointer-events:none;}
+  .pagi>ul>li.arrow.disabled{pointer-events:none;background:#e1e1e1;}
   .pagi>ul>li.arrow:before{position:absolute;content:"";width:0;height:0;left:50%;top:50%;border:5px solid transparent;}
   .pagi>ul>li.arrow.right:before{border-left-color:#999;margin-left:-2px;margin-top:-5px;}
   .pagi>ul>li.arrow.left:before{border-right-color:#999;margin-left:-8px;margin-top:-5px;}
@@ -85,6 +85,6 @@
   .pagi button{width:65px;height:40px;margin-left:20px;color:#fff;letter-spacing:0.15px;background:#ffb4222;
     border-radius:2px;border:none;cursor:pointer;background:#ffb422;}
   .pagi button:hover{background:#fea350;}
-  .pagi button.disabled{pointer-events:none;background:#999;}
+  .pagi button.disabled{pointer-events:none;background:#e1e1e1;}
 </style>
 

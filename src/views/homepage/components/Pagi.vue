@@ -27,7 +27,7 @@
     }
   };
 </script>
-<style lang="stylus">
+<style lang="stylus" scoped>
   *{box-sizing:border-box;}
   .pagi{display:flex;justify-content:center;width:100%;height:40px;margin-top:20px;}
 

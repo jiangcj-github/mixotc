@@ -64,7 +64,7 @@
                 <p><a href="#/verify/service" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
               </div>
               <div class="sqdx">
-                <p><a :href="'/homepage?uid='+e.appliedUid" target="_blank" class="link">{{e.appliedU}}</a></p>
+                <p><a :href="'#/homepage?uid='+e.appliedUid" target="_blank" class="link">{{e.appliedU}}</a></p>
                 <p><a href="#/verify/service" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
               </div>
               <div class="zcr"><p>{{e.dealU}}</p></div>
