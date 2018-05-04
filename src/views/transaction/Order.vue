@@ -6,7 +6,7 @@
       <div class="counterparty clearfix">
         <div class="info">
           <div class="avatar">
-            <img src="" alt="">
+            <img :src="contentData.icon ? `${HostUrl.http}image/${contentData.icon}` : `/static/images/default_avator.png`" alt="">
           </div>
           <span class="nickname">{{contentData.trader}}</span>
         </div>
@@ -71,8 +71,7 @@
           <img src="/static/images/huansuan.png" alt="">
           <div>
             <input type="number" :placeholder="`输入${copy.type[type]}数量`" v-model="amount"  @input="changeAmount" @keydown="checkAmount(amount)">
-            <!--<b>{{contentData.currency && contentData.currency.toUpperCase()}}</b>-->
-            <b>BTC</b>
+            <b>{{contentData.currency && contentData.currency.toUpperCase()}}</b>
           </div>
         </div>
         <p class="charge" v-if="!type">手续费：0.2% 0BTC</p>
@@ -154,7 +153,6 @@
       BasePopup
     },
     mounted() {
-      console.log('ddddddd', this.$route.query.id)
       this.WsProxy.send('otc','sale_detail',{
         id: this.JsonBig.parse(this.$route.query.id)
       }).then((data)=>{
@@ -278,7 +276,11 @@
             height 45px
             margin-right 20px
             border-radius 50%
-            background-color skyblue
+            img
+              width 45px
+              height 45px
+              border-radius 50%
+              vertical-align middle
         .contact
           float left
           line-height 45px

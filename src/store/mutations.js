@@ -205,11 +205,6 @@ export default {
   [types.getServiceNowtalk](state, { data }) {
     state.serviceUser = data
   },
-  // 第一次聊天人员状态
-  [types.initServiceNowtalk](state, { data }) {
-    // 改变当前聊天
-    state.serviceNow = data.id; // 聊天入口人的id
-  },
   // 根据左边选择右边状态（对方的信息）
   [types.changeServiceNowtalk](state, { data }) {
     // 改变当前聊天
@@ -229,6 +224,7 @@ export default {
     });
     !state.serviceMessage[data.id] && (state.serviceMessage[data.id] = []); //对话记录不存在时创建
     state.serviceMessage[data.id].push(data.msg);
+    state.serviceData[idex].unread++;
   },
   // 新增发送消息
   [types.changeServiceMessages](state, {data: { id, time, code }}) {

@@ -1,9 +1,9 @@
 <template>
   <div id="app">
-    <Header></Header>
+    <Header v-show="$route.meta.headerShow"></Header>
     <router-view class="main-container" v-if="showView" :key="$route.path + JsonBig.stringify($route.query)"/>
-    <Footer></Footer>
-    <News></News>
+    <Footer v-show="$route.meta.footerShow"></Footer>
+    <News v-show="$route.meta.newsShow"></News>
   </div>
 </template>
 

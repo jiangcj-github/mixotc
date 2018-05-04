@@ -33,6 +33,7 @@
     align-items center
     justify-content center
     height 100%
+    margin-top -100px
     .dialog
       height 600px
       width 900px
