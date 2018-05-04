@@ -11,7 +11,8 @@
         <input 
           type="text" 
           v-model="groupName" 
-          :placeholder="(!groupInfo || !groupInfo.name || groupInfo.name === $store.state.userInfo.name) ? '群聊' : groupInfo.name"
+          :placeholder="(!groupInfo || !groupInfo.name || groupInfo.name === $store.state.userInfo.name) ? '编辑群名称' : groupInfo.name"
+          @input="inputDeal"
           @blur="updateGroup"
         />
       </li>
@@ -111,6 +112,9 @@
     async created() {
       await this.fetchGroup()
     },
+    mounted() {
+      this.groupName = this.groupInfo.name
+    },
     computed: {
       isOwner() {
         if (!this.owner)  return false;
@@ -176,6 +180,18 @@
         }).catch(error=>{
           console.log(error)
         })
+      },
+      inputDeal() {
+        let arr = this.groupName.split(''), length = 0, index = 0;
+        for (let i = 0; i < arr.length; i++) {
+           /[\u4e00-\u9fa5]/.test(arr[i]) && (length += 2)
+          !(/[\u4e00-\u9fa5]/.test(arr[i])) && (length += 1)
+          if(length > 20 ) {
+            index = i;
+            break;
+          } 
+        }
+        index > 0 && (this.groupName = arr.slice(0, index).join(''))
       },
       closeGroup() {
         this.$emit('offCheckGroup', 'false')

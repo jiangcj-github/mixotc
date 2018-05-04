@@ -218,7 +218,6 @@
           !group && (group = this.$store.state.groupList.filter(item => {
             return id === this.JsonBig.stringify(item.id)
           })[0])
-          console.log(group)
           if(group.type === 1){
               this.$store.commit({type: 'newChat', data:{
                 id: this.JsonBig.stringify(group.id),

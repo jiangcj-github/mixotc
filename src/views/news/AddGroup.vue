@@ -144,19 +144,6 @@
             ids: array,
             uid: this.userInfo.uid
           }).then(data => {
-            let newChat = {
-              id: this.JsonBig.stringify(data.id),
-              group: true,
-              length: array.length,
-              service: false,
-              icon: "/static/images/groupChat_icon.png",
-              nickName: this.defaultName(),
-              phone: false,
-              email: false,
-              moreFlag: true,
-              unread: 0
-            }
-            this.$store.commit({'type':'newChat', data: newChat})
             this.closeGroup()
           })
           return;

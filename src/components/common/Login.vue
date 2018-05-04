@@ -1,6 +1,7 @@
 <template>
   <div class="wrap">
-    <div class="login" v-mousedownOutside="hideLoginForm" v-if="showForm">
+    <div class="login" v-if="showForm">
+      <img src="/static/images/close_btn.png" alt="" class="close-btn" @click="hideLoginForm">
       <h2 class="title">登录/注册</h2>
 
       <div :class="{'hide-tip1':type,'show-tip1':!type}">请输入正确的手机号/邮箱</div>
@@ -9,8 +10,8 @@
         手机号/邮箱
         <input type="text" value="" v-model="account" @focus="accountCancel = true"  v-clickoutside="accountBlur">
         <img src="/static/images/cancel_icon.png" alt="" v-if="accountCancel" @click="account = ''">
-        <ul class="account-history" v-if="accountCancel && accountHistory.length">
-          <li v-for="(item, index) of accountHistory" :key="index" @click="changeAccount(item)">{{item}}</li>
+        <ul class="account-history" v-if="accountCancel && accountSearch.length">
+          <li v-for="(item, index) of accountSearch" :key="index" @click="changeAccount(item)">{{item}}</li>
         </ul>
       </div>
 
@@ -79,6 +80,13 @@
     components: {
       Slider,
       BasePopup
+    },
+    computed: {
+      accountSearch() {
+        return this.accountHistory.filter(item => {
+          return item.includes(this.account)
+        })
+      }
     },
     methods: {
       hidePopup() {
@@ -234,27 +242,6 @@
       this.Bus.$off(this.slideStatus);
       clearInterval(this.interval);
       clearTimeout(this.timer);
-    },
-    directives: {
-      mousedownOutside: {
-        bind: function (el, binding, vode) {
-          function documentHandler(e) {
-            if (el.contains(e.target)) {
-              return false
-            }
-            if (binding.expression) {
-              binding.value(e);
-            }
-          }
-
-          el.wfy = documentHandler;
-          document.addEventListener('mousedown', documentHandler)
-        },
-        unbind: function (el, binding) {
-          document.removeEventListener('mousedown', el.wfy);
-          delete el.wfy
-        }
-      }
     }
   }
 </script>
@@ -281,7 +268,13 @@
       padding 40px 0
       background-color: #fff
       z-index 999
-
+      .close-btn
+        position absolute
+        right 20px
+        top 20px
+        width 10px
+        height 10px
+        cursor pointer
       .show-tip1, .show-tip2
         position absolute
         padding 0 9px
