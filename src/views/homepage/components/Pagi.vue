@@ -3,7 +3,7 @@
     <a class="b1 first" @click="goPage(1)" :class="{disabled:curPage===1}"></a>
     <a class="b2 prev" @click="goPage(curPage-1)" :class="{disabled:curPage===1}"></a>
     <a class="b2 next" @click="goPage(curPage+1)" :class="{disabled:curPageSize<pageSize}"></a>
-    <a class="b1 last disabled"></a>
+    <a class="b1 last disabled" ></a>
   </div>
 </template>
 <script>

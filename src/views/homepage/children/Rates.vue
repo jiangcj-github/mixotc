@@ -90,7 +90,7 @@
   @import "../../../stylus/base";
   @import "../stylus/home";
   .li
-    min-height 110px
+    min-height 100px
     display flex
     align-items center
     padding 0 30px
