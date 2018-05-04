@@ -3,7 +3,8 @@
   <div class="check">
     <div class="filter">
       <div class="f1" :class="{disabled:srchText.length<=0}">
-        <input type="text" placeholder="搜索用户昵称/账号" v-model="srchText" v-clickoutside="clickOutside" @input="fuzzyInput">
+        <input type="text" placeholder="搜索用户昵称/账号" v-model="srchText" v-clickoutside="()=>{srchShowTip=false}"
+               @focus="fuzzyInput" @input="fuzzyInput">
         <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
         <a href="javascript:void(0)" @click="search"></a>
         <ul v-show="srchShowTip && tips.length>0">
@@ -13,7 +14,7 @@
         </ul>
       </div>
       <div class="f2">
-        <DateInterval ref="di" onDiChange="onDiChange1"></DateInterval>
+        <DateInterval ref="di"></DateInterval>
       </div>
       <div class="f3">
         <a href="javascript:void(0)" :class="{active:days===1}" @click="days=1">今天</a>
@@ -32,7 +33,7 @@
           用时<i class="sort" :class="{up:sort===2,down:sort===3}"></i>
         </span>
       <span class="zt drop">
-          <a href="javascript:void(0)" v-clickoutside="clickStatusOutside" @click="statusDropShow=!statusDropShow">{{status[statusDropSel].text}}</a>
+          <a href="javascript:void(0)" v-clickoutside="()=>{statusDropShow=false}" @click="statusDropShow=!statusDropShow">{{status[statusDropSel].text}}</a>
           <ul v-show="statusDropShow">
             <li @click="statusDropSel=i" v-for="(e,i) in status" :key="i">{{e.text}}</li>
           </ul>
@@ -116,12 +117,13 @@
           {text:"全部状态",value:0},
           {text:"通过",value:1},
           {text:"不通过",value:2},
+          {text:"恶意上传",value:3},
         ],
 
         err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败
         list: [],   //分页数据
         total: 0,   //数据长度
-        pageSize:15,  //分页大小
+        pageSize:20,  //分页大小
         curPage: 1,  //第几页
 
         popSel: 0,
@@ -142,17 +144,15 @@
     },
     methods: {
       fuzzyInput(){
-        this.srchShowTip=true;
-        this.loadTips();
+        if(this.srchText.length<=0){
+          this.srchShowTip=false;
+        }else{
+          this.srchShowTip=true;
+          this.loadTips();
+        }
       },
       search(){
         this.loadCheckedList();
-      },
-      clickOutside(){
-        this.srchShowTip=false;
-      },
-      clickStatusOutside(){
-        this.statusDropShow=false;
       },
       showPop(id){
         this.popSel=id;
@@ -221,7 +221,7 @@
             id: e.id,
             submitTime: new Date(e.create*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
             submitTime1: new Date(e.create*1000).dateHandle("yyyy/MM/dd"),
-            submitTime2: new Date(e.create*1000).dateHandle("HH:mm"),
+            submitTime2: new Date(e.create*1000).dateHandle("HH:mm:ss"),
             uid: e.uid,
             nickname: e.nick || "-",
             account: e.phone || e.email || "-",
@@ -229,9 +229,9 @@
             accountCk: e.verify_phone || e.verify_email || "-",
             checkTime: new Date(e.update*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
             checkTime1: new Date(e.update*1000).dateHandle("yyyy/MM/dd"),
-            checkTime2: new Date(e.update*1000).dateHandle("HH:mm"),
+            checkTime2: new Date(e.update*1000).dateHandle("HH:mm:ss"),
             spend: (e.used && e.used.formatSecord()) || "-",
-            checkResult: (e.state && ["待审核","通过","未通过","恶意上传"][e.state-1]) || "-",
+            checkResult: (e.state && ["待审核","通过","不通过","恶意上传"][e.state-1]) || "-",
             checkRemark: e.info||"无",
             name: e.name || "-",
             bankcard: e.number || "-",
@@ -254,7 +254,7 @@
       }
     },
     mounted(){
-      this.loadCheckedList(0);
+      this.loadCheckedList();
       this.Bus.$on("onPageChange",(p)=>{
         this.curPage=p;
         this.loadCheckedList(p-1);

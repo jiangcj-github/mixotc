@@ -18,12 +18,12 @@
             <span class="checkbox" :class="{check:formResult===1}" @click="checkPass">审核通过</span>
             <span class="checkbox" :class="{check:formResult===0}" @click="checkRefuse" style="margin-left:20px">审核不通过</span>
           </p>
-          <div class="textarea">
+          <div class="textarea" :class="{disabled:formResult!==0}">
             <textarea placeholder="不通过原因：字数限制0～50个字符。" v-model="formRemark" @input="inputRemark" ref="textarea"></textarea>
             <p class="indicator">{{formRemark.length}}/50</p>
           </div>
           <div class="mali">
-            <span class="radio" :class="{check:formMali}" @click="checkMali">是否恶意上传认证</span>
+            <span class="radio" :class="{check:formMali,disabled:formResult!==0}" @click="checkMali">是否恶意上传认证</span>
             <ul>
               <li>恶意认证提交后，封锁该用户3天认证功能</li>
               <li>3次恶意认证后，永久封锁认证功能</li>
@@ -71,6 +71,7 @@
     methods: {
       checkPass(){
         this.formResult=1;
+        this.formRemark="";
         this.isValidSubmit();
       },
       checkRefuse(){
@@ -93,7 +94,6 @@
         }else{
           this.canSubmit=false;
         }
-
       },
       isValidateRemark(){
         if(this.formRemark.length>50){
@@ -118,7 +118,7 @@
         }).then((data)=>{
           this.Bus.$emit("onSubmit",this.infos);
         }).catch((msg)=>{
-          alert(msg);
+          alert(JSON.stringify(msg));
         });
       }
     },

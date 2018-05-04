@@ -37,9 +37,9 @@
         <li :class="{active:tab===1}" @click="tab=1">收到的评价</li>
       </ul>
       <!--发布列表-->
-      <Sales :uid="uid" v-show="tab==0"></Sales>
+      <Sales :uid="uid" v-if="tab===0"></Sales>
       <!--评价列表-->
-      <Rates :uid="uid" v-show="tab==1"></Rates>
+      <Rates :uid="uid" v-if="tab===1"></Rates>
       <!--信任操作弹框-->
       <BasePopup :show="pop">
         <div class="pop">{{popArr[info.isTrust]}}</div>
@@ -59,7 +59,6 @@
     },
     data() {
       return {
-        loginUid: "",
         uid: "",
 
         isOnline: true,
@@ -78,20 +77,16 @@
       },
       isLogin(){
         return this.$store.state.isLogin;
-      }
+      },
     },
     mounted() {
-      //是否登录
-      if(this.isLogin){
-        this.loginUid= this.$store.state.userInfo.uid || "";
-      }
-      //
       this.uid= this.JsonBig.parse(this.$route.query.uid) || "";
       this.loadTraderInfo();
     },
     methods: {
       joinTrust(){
-        this.WsProxy.send('otc','new_trust',{uid:this.loginUid, id:this.uid, trust:1}).then((data)=>{
+        let loginUid=this.$store.state.userInfo.uid;
+        this.WsProxy.send('otc','new_trust',{uid:loginUid, id:this.uid, trust:1}).then((data)=>{
           this.showPop();
           this.info.isTrust=1;
           this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(this.uid)});
@@ -100,7 +95,8 @@
         });
       },
       cancelTrust(){
-        this.WsProxy.send('otc','new_trust',{uid:this.loginUid, id:this.uid, trust:0}).then((data)=>{
+        let loginUid=this.$store.state.userInfo.uid;
+        this.WsProxy.send('otc','new_trust',{uid:loginUid, id:this.uid, trust:0}).then((data)=>{
           this.showPop();
           this.info.isTrust=0;
           this.$store.commit({type:"delTrust",data:this.JsonBig.stringify(this.uid)});
@@ -110,7 +106,8 @@
       },
       loadTraderInfo(){
         if(this.isLogin){
-          this.WsProxy.send("otc","trader_info",{id:this.uid, uid:this.loginUid}).then((data)=>{
+          let loginUid=this.$store.state.userInfo.uid;
+          this.WsProxy.send("otc","trader_info",{id:this.uid, uid:loginUid}).then((data)=>{
             this.parseInfo(data);
           }).catch((msg)=>{
             alert(JSON.stringify(msg));

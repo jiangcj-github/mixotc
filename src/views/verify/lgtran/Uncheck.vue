@@ -31,7 +31,7 @@
 
         curPage: 1,
         total: 0,
-        pageSize: 15,
+        pageSize: 20,
         cands: [],
         candSel: 0,
 
@@ -64,7 +64,7 @@
           this.candSel=-1;
           this.parseCands(data.users);
         }).catch((msg)=>{
-          console.log(msg);
+          alert(JSON.stringify(msg));
         });
       },
       loadUncheckByUid(id){
@@ -119,7 +119,7 @@
           });
         });
         this.infos.his.sort((a,b)=>{
-          return a.submitTime<b.submitTime?-1:1;
+          return a.submitTime<b.submitTime?1:-1;
         });
       },
     },

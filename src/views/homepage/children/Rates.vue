@@ -45,9 +45,13 @@
         this.curPage=p;
         this.loadRates(p-1);
       });
+      this.Bus.$on("onLastPage",(p)=>{
+        this.loadRates(-1);
+      });
     },
     destroyed(){
       this.Bus.$off("onPageChange");
+      this.Bus.$off("onLastPage");
     },
     methods: {
       loadRates(p=0){
@@ -75,7 +79,7 @@
         data && data.forEach((item)=>{
           this.rates.push({
             comment: item.comment || "暂无评价内容",
-            date: new Date(item.date).dateHandle("yyyy/MM/dd hh:mm:ss"),
+            date: new Date(item.date*1000).dateHandle("yyyy/MM/dd hh:mm:ss"),
             credit: item.credit || 0,
             credit_str: ["差评","差评","中评","好评","好评"][item.credit-1] || "-",
             icon: item.icon && this.HostUrl.http+"image/"+item.icon || "/static/images/default_avator.png",
@@ -90,7 +94,7 @@
   @import "../../../stylus/base";
   @import "../stylus/home";
   .li
-    min-height 110px
+    min-height 100px
     display flex
     align-items center
     padding 0 30px
