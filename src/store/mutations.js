@@ -214,6 +214,7 @@ export default {
   // 双方人员置换
   [types.transformServiceUser](state, { data }) {
     state.serviceData.unshift(data)
+    state.serviceNow = data.appellee_id; // 聊天入口人的id
   },
 
   // 接收到消息和发送消息时的处理

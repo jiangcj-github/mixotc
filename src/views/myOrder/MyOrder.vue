@@ -104,7 +104,6 @@
         <p class="order-content-extre clearfix">
           <span>订单号：{{JsonBig.stringify(content.id)}}</span>
           <span>备注：{{content.info}}</span>
-          <!--<span  class="reset-time" v-if="content.state == 1">还剩{{minute}}分钟{{second}}秒</span>-->
           <CountDown :endTime="endTime" class="reset-time" v-if="content.state == 1"></CountDown>
         </p>
       </div>
@@ -422,7 +421,7 @@
               }
               v.operationList = operationListObject[v.state]
               //可申诉时间到计时
-              v.timeToAppeal=30*60-(Math.floor(Date.now()/1000)-v.paytime);
+              v.timeToAppeal = 30 * 60 - (Math.floor(Date.now() / 1000) - v.paytime);
               this.appealTimer(v);
             })
           },
@@ -481,6 +480,7 @@
       },
       selectStatus(type) { // Tab切换
         this.contentTabIndex = type;
+        this.$store.state.newOrder = false;
         this.clickUp = 20;
         this.clickDown = 20;
 
@@ -784,6 +784,7 @@
               position relative
               padding-left 30px
               color #FFB422
+              cursor pointer
               &:before
                 position absolute
                 top 0
@@ -793,8 +794,8 @@
                 content ''
                 background url(/static/images/talk.png) no-repeat
                 background-size 18px 18px
-
-
+              &:hover
+                color #FF794C
 
           .text-g
             color $col100

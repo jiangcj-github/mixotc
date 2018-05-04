@@ -51,10 +51,10 @@ let MSGS = {
     if (type === 6 && p1 === 0 && p2 === 1) {
       return this.m9;
     }
-    if (type === 7 && p1 === 0 && p2 === 0) {
+    if (type === 7 && p1 === 0 && p2 === 1) {
       return this.m10;
     }
-    if (type === 8 && p1 === 0 && p2 === 2) {
+    if (type === 8 && p1 === 1 && p2 === 1) {
       return this.m11;
     }
   }

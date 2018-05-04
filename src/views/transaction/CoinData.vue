@@ -86,11 +86,11 @@
           url: {
             host: '47.74.244.196',
             port: '8081',
-            path: '/v1/home/searchTips/'
+            path: '/v1/home/searchTips'
           },
           data: {
             method: 'get',
-            params: {word: this.selectValue}
+            params: {word: this.selectValue, app: 0}
           },
         }).then(res => {
           console.log('搜索结果', res)

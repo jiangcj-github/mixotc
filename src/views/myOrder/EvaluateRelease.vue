@@ -107,7 +107,7 @@
               "receiver": this.receiver,  // 被评论者ID
               "type": this.type,    // 1 交易; 2 担保
               "credit": this.score,  // 信誉度 1,2,3 好评3 差评1
-              "transit": 2,  // 发货速度 1,2,3
+              "transit": this.score,  // 发货速度 1,2,3
               "comment": this.comment // 文字说明
             }
           }

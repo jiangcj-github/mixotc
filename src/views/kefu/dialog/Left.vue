@@ -43,12 +43,48 @@
 
     },
     mounted(){
+      this.listenNews();
       this.parseUls();
       this.userIdArr;
       this.initData()
       // this.$store.state.serviceData.length ? this.uls =  this.ulsBuf = this.$store.state.serviceData : this.initData() //初始化列表数据
     },
     methods: {
+      listenNews() { //聊天信息监听
+        this.WebSocket.onMessage['sms']={
+          async callback(res){
+            // console.log('聊天消息', res)
+            // op为7单人聊天信息，对象类型
+            if (res.op && res.op === 7) {
+              let {id, uid, icon, name, data, type } = res.body;
+              let obj = {};
+              if (type === 'text') { // 文字
+                obj = {
+                  isSend:  _this.JsonBig.stringify(uid),
+                  headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                  type: 0, // 0: 发送文字, 1: 发送图片
+                  isLoding: true, // 加载中
+                  err: false, // 0: 发送成功, 1: 发送失败
+                  content: data.msg,
+                  time: new Date() - 0
+                };
+                _this.$store.commit({type: 'addServiceMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
+                return;
+              }
+              obj = { // 图片
+                isSend:  _this.JsonBig.stringify(uid),
+                headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                type: 1, // 0: 发送文字, 1: 发送图片
+                isLoding: true, // 加载中
+                err: false, // 0: 发送成功, 1: 发送失败
+                content: `${_this.HostUrl.http}file/${data.id}`,
+                time: new Date() - 0
+              };
+              _this.$store.commit({type: 'addServiceMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
+            }
+          }
+        };
+      },
       initData() { // 初始化列表数据
         this.WsProxy.send('control', 'a_get_appeal_users', {
           "id": this.$store.state.userInfo.uid

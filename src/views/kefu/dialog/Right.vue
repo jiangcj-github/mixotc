@@ -8,10 +8,10 @@
         <div class="fixed swiper-slide" v-for="(content, index) in otherInfo" >
           <h3>{{(appl === 0 && recv === 0) || (appl === 1 && recv === 1) ? '申诉人' : '被申诉人'}}</h3>
           <div class="mf1">
-            <img src="/static/images/default_avator.png" @click="changeUser(index)">
+            <img :src="content.icon ? `${HostUrl.http}image/${content.icon}` : `/static/images/default_avator.png`" @click="changeUser(index)">
             <span class="i1" @click="changeUser(index)">{{content.name}}</span>
             <span class="i2">已标记付款</span>
-            <span class="i3">{{updateTime}}分钟</span>
+            <span class="i3">{{Math.floor(((new Date().getTime() / 1000) - content.update) / 60)}}分钟</span>
           </div>
           <div class="mf2">
             <span class="i1">已被申诉{{content.times}}次</span>
@@ -68,10 +68,10 @@
     <BasePopup :width="470" :height="380" :top="50" :show="showPop1">
       <div class="pop">
         <h2>责任人</h2>
-        <div class="head"><img src="/static/images/default_avator.png"><span>{{forceIconName}}</span></div>
+        <div class="head"><img :src="forceIconNameIcon"><span>{{forceIconName}}</span></div>
         <div class="textarea">
           <textarea placeholder="填写强制放币的理由" ref="pop1Text" v-model="pop1Text" @input="onPop1Input"></textarea>
-          <p>{{pop1Text.length}}/50</p>
+          <p>{{pop1Text.length}}/50</p >
         </div>
         <div class="btns">
           <button class="b1" @click="onPop1Ok">确认</button>
@@ -93,24 +93,24 @@
       </div>
     </BasePopup>
     <!--终止交易-->
-    <BasePopup :width="470" :height="430" :top="50" :show="showPop3">
+    <BasePopup :width="470" :height="402" :top="50" :show="showPop3">
       <div class="pop">
         <h2>选择终止交易的责任人</h2>
         <div class="head2">
-          <div class="hi" @click="pop3Radio = 0">
-            <img src="/static/images/default_avator.png">
+          <div class="hi" @click="seletPop3Radio(0)">
+            <span class="radio" :class="{check: pop3Radio === 0}"></span>
+            <img :src="stopTradeUserIcon">
             <span>{{stopTradeUser}}</span>
-            <span class="radio" :class="{check:pop3Radio === 0}"></span>
           </div>
-          <div class="hi" @click="pop3Radio = 1">
-            <img src="/static/images/default_avator.png">
-            <span>{{stopTradeOther}}</span>
-            <span class="radio" :class="{check:pop3Radio === 1}"></span>
+          <div class="hi" @click="seletPop3Radio(1)">
+            <span class="radio" :class="{check: pop3Radio === 1}"></span>
+            <span class="pop1Text">双方协议，无责任人</span>
           </div>
         </div>
+        <p class="pop1Remind">责任用户取消交易权限3天。仲裁3次，永久关闭交易权限</p>
         <div class="textarea">
           <textarea placeholder="填写强制放币的理由" ref="pop3Text" v-model="pop3Text" @input="onPop3Input"></textarea>
-          <p>{{pop3Text.length}}/50</p>
+          <p>{{pop1Text.length}}/50</p>
         </div>
         <div class="btns">
           <button class="b1" @click="onPop3Ok">确认</button>
@@ -118,6 +118,31 @@
         </div>
       </div>
     </BasePopup>
+    <!--<BasePopup :width="470" :height="430" :top="50" :show="showPop3">-->
+      <!--<div class="pop">-->
+        <!--<h2>选择终止交易的责任人</h2>-->
+        <!--<div class="head2">-->
+          <!--<div class="hi hi-left" @click="pop3Radio = 0">-->
+            <!--<img :src="stopTradeUserIcon">-->
+            <!--<span>{{stopTradeUser}}</span>-->
+            <!--<span class="radio" :class="{check: pop3Radio === 0}"></span>-->
+          <!--</div>-->
+          <!--<div class="hi hi-right" @click="pop3Radio = 1">-->
+            <!--<img :src="stopTradeOtherIcon">-->
+            <!--<span>{{stopTradeOther}}</span>-->
+            <!--<span class="radio" :class="{check: pop3Radio === 1}"></span>-->
+          <!--</div>-->
+        <!--</div>-->
+        <!--<div class="textarea">-->
+          <!--<textarea placeholder="填写强制放币的理由" ref="pop3Text" v-model="pop3Text" @input="onPop3Input"></textarea>-->
+          <!--<p>{{pop3Text.length}}/50</p>-->
+        <!--</div>-->
+        <!--<div class="btns">-->
+          <!--<button class="b1" @click="onPop3Ok">确认</button>-->
+          <!--<button class="b2" @click="showPop3 = false">我再想想</button>-->
+        <!--</div>-->
+      <!--</div>-->
+    <!--</BasePopup>-->
     <!--证明无效弹窗-->
     <BasePopup :width="470" :height="280" :top="50" :show="showPop4">
       <div class="pop">
@@ -151,7 +176,8 @@
       return {
         sendFile: "", // 发送图片用
         sendMsg: "", // 发送消息内容
-        updateTime: "", // 标记时间
+        popIndex: 0,
+        // updateTime: "", // 标记时间
         // msgHis: [],
 
         // appl: 0, // 申诉人：0-买家,1-卖家
@@ -181,12 +207,15 @@
         pop4TextOld: "",
 
         forceIconName: "", // 强制放币弹窗
+        forceIconNameIcon: "", // 强制放币头像
         forceIconObj: {}, // 强制放币弹窗所用参数
 
         rejectAppealObj: {}, // 驳回申述弹窗所用参数
 
         stopTradeUser: "", // 终止交易发起人
         stopTradeOther: "", // 终止交易发起人对方
+        stopTradeUserIcon: "", // 终止交易发起人头像
+        stopTradeOtherIcon: "", // 终止交易发起人对方头像
         stopTradePerson: 0, // 终止交易发起责任人
         stopTradeObj: {} // 终止交易弹窗所用参数
 
@@ -203,8 +232,6 @@
           }
         });
         this.startSwiper() // 轮播图切换
-        this.stopTradeUser = this.serviceUser && this.serviceUser.appellant_name // 终止交易发起人名
-        this.stopTradeOther = this.otherInfo && this.otherInfo[0].name // 终止交易发起对方人名
         return result
       },
       serviceNow() { // 当前聊天人员id
@@ -273,46 +300,8 @@
     },
     mounted() {
       this.startSwiper();
-      // 获取标记时间
-      this.otherInfo.forEach(v => {
-        this.updateTime = Math.floor(((new Date().getTime() / 1000) - v.update) / 60)
-      })
       // 获取聊天消息
       let _this = this;
-      //聊天信息监听
-      this.WebSocket.onMessage['sms']={
-        async callback(res){
-          // console.log('聊天消息', res)
-          // op为7单人聊天信息，对象类型
-          if (res.op && res.op === 7) {
-            let {id, uid, icon, name, data, type } = res.body;
-            let obj = {};
-            if (type === 'text') { // 文字
-              obj = {
-                isSend:  _this.JsonBig.stringify(uid),
-                headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                type: 0, // 0: 发送文字, 1: 发送图片
-                isLoding: true, // 加载中
-                err: false, // 0: 发送成功, 1: 发送失败
-                content: data.msg,
-                time: new Date() - 0
-              };
-              _this.$store.commit({type: 'addServiceMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
-              return;
-            }
-            obj = { // 图片
-              isSend:  _this.JsonBig.stringify(uid),
-              headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-              type: 1, // 0: 发送文字, 1: 发送图片
-              isLoding: true, // 加载中
-              err: false, // 0: 发送成功, 1: 发送失败
-              content: `${_this.HostUrl.http}file/${data.id}`,
-              time: new Date() - 0
-            };
-            _this.$store.commit({type: 'addServiceMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
-          }
-        }
-      };
       this.Bus.$on("onIpClose", () => {
         this.showPopImg = false;
       });
@@ -334,7 +323,7 @@
       },
       changeUser(index) { // 点击切换身份
         let otherObj = {
-          appellant_icon: this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : "/static/images/default_avator.png",
+          appellant_icon: this.otherInfo[index].icon ? `${this.otherInfo[index].icon}` : "/static/images/default_avator.png",
           appellant_name: this.otherInfo[index].name,
           time: new Date().getTime(),
           data: '',
@@ -345,10 +334,14 @@
           return
         } else {
           console.log(2222)
+          this.userIdArr.push(this.otherInfo[index].uid)
         }
-        console.log('this.userIdArr', this.userIdArr)
+        console.log('this.userIdArr1', this.userIdArr)
         this.$store.commit({type: 'transformServiceUser', data: otherObj})
+        console.log('serviceNow', this.serviceNow)
+        console.log('this.userIdArr2', this.userIdArr)
         console.log('换人', this.appl, this.recv)
+        console.log('换人id', this.otherInfo[index].uid)
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人对方资料
           "appellee_id": this.JsonBig.parse(this.otherInfo[index].uid)
         }).then(data => {
@@ -522,6 +515,7 @@
       forceIcon(index) { // 强制放币弹窗
         this.showPop1 = true
         this.forceIconName = this.appl === 0 ? this.otherInfo[index].name : this.serviceUser.appellant_name
+        this.forceIconNameIcon = this.otherInfo[0].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : `/static/images/default_avator.png`
         this.forceIconObj = {
           "id": this.JsonBig.parse(this.otherInfo[index].sid),
           "seller": this.JsonBig.parse(this.otherInfo[index].seller_id),
@@ -535,13 +529,26 @@
           "id": this.JsonBig.parse(this.otherInfo[index].sid),
         }
       },
-      stopTrade(index) { // 终止交易弹窗
-        this.showPop3 = true
-        this.stopTradePerson = this.pop3Radio === 0 ? this.serviceUser.appellant_id : this.otherInfo[index].uid
+      seletPop3Radio(num) { // 终止交易弹窗单选按钮
+        this.pop3Radio = num
+        this.stopTradePerson = this.pop3Radio === 0 ? this.serviceUser.appellant_id : 0
+        console.log('this.popIndex', this.popIndex)
+        this.comfirmStopTradeObj(this.popIndex)
+      },
+      comfirmStopTradeObj(index) { // 定义终止交易弹窗对象
         this.stopTradeObj = {
           "id": this.JsonBig.parse(this.otherInfo[index].sid), // this.otherInfo
           "responsible": this.JsonBig.parse(this.stopTradePerson), // this.otherInfo
         }
+      },
+      stopTrade(index) { // 终止交易弹窗
+        this.popIndex = index
+        this.stopTradeUser = this.serviceUser && this.serviceUser.appellant_name // 终止交易发起人名
+        this.stopTradeOther = this.otherInfo && this.otherInfo[index].name // 终止交易发起对方人名
+        this.stopTradeUserIcon = this.serviceUser.appellant_icon ? `${this.HostUrl.http}image/${this.serviceUser.appellant_icon}` : `/static/images/default_avator.png`
+        this.stopTradeOtherIcon = this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : `/static/images/default_avator.png`
+        this.showPop3 = true
+        this.comfirmStopTradeObj(index)
       },
       onPop1Ok() { // 强制放币确认
         this.showPop1 = false
@@ -823,14 +830,14 @@
           flex-grow 1
         > button
           font-size 12px
-          color #FF794C
+          color #FEA350
           letter-spacing 0
           border-radius 77px
           padding 6px 9px
           cursor pointer
           background #FFE4D3
           &:hover
-            color #fea350
+            color #FF794C
           &:not(:first-of-type)
             margin-left 10px
       .textarea
@@ -863,6 +870,10 @@
 
   .pop
     padding 30px 60px
+    .pop1Remind
+      font-size 12px
+      color #FF794C
+      margin-bottom 10px
     > h2
       height 30px
       padding-left 5px
@@ -890,6 +901,7 @@
       > img
         width 40px
         height 40px
+        border-radius 50%
       > span
         margin-left 10px
         font-size 14px
@@ -897,35 +909,67 @@
         letter-spacing 0.29px
     .head2
       display flex
-      justify-content center
       align-items center
-      height 130px
+      justify-content space-between
+      margin 30px 0 20px
+      .hi:first-child
+        width 200px
+      .hi:last-child
+        .pop1Text
+          font-size 12px
+          color #333
       .hi
         display flex
-        flex-direction column
-        cursor pointer
-        margin 0 50px
-        font-size 14px
-        letter-spacing 0.29px
-        &:hover
-          color #666
-        .radio
-          margin-top 5px
+        align-items center
+        > img
           width 40px
-          height 20px
+          height 40px
+          margin-right  10px
+          border-radius 50%
+        .radio
+          width 16px
+          height 16px
+          margin-right 10px
           font-size 13px
-          color #333333
+          color #333
           letter-spacing 0.27px
           display inline-block
           cursor pointer
           background url(/static/images/unselect.png) no-repeat center center
           &.check
             background-image url(/static/images/selected.png)
-        > img
-          width 40px
-          height 40px
-        > span
-          margin-top 5px
+    /*.head2*/
+      /*display flex*/
+      /*justify-content center*/
+      /*align-items center*/
+      /*height 130px*/
+      /*.hi*/
+        /*display flex*/
+        /*flex-direction column*/
+        /*cursor pointer*/
+        /*margin 0 50px*/
+        /*font-size 14px*/
+        /*letter-spacing 0.29px*/
+        /*&:hover*/
+          /*color #666*/
+        /*.radio*/
+          /*margin-top 5px*/
+          /*width 40px*/
+          /*height 20px*/
+          /*font-size 13px*/
+          /*color #333*/
+          /*letter-spacing 0.27px*/
+          /*display inline-block*/
+          /*cursor pointer*/
+          /*background url(/static/images/unselect.png) no-repeat center center*/
+          /*&.check*/
+            /*background-image url(/static/images/selected.png)*/
+        /*> img*/
+          /*width 40px*/
+          /*height 40px*/
+          /*border-radius 50%*/
+        /*> span*/
+          /*margin-top 5px*/
     .textarea
       width 350px
       height 150px
@@ -980,13 +1024,14 @@
     margin 0 20px
   .swiper-button-next, .swiper-button-prev
     background-image none
-    width: 40px;
-    height: 40px;
-    border-top: 5px solid #999;
-    border-right: 5px solid #999;
-    transform: rotate(45deg)
+    width 20px
+    height 20px
+    border-top 2px solid #999
+    border-right 2px solid #999
+    transform rotate(45deg)
+    margin-top -7px
   .swiper-button-prev
-    transform: rotate(-135deg)
+    transform rotate(-135deg)
 
 
 </style>

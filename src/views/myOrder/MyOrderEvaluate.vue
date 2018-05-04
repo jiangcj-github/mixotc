@@ -75,7 +75,6 @@
       this.userId = this.JsonBig.stringify(this.$store.state.userInfo.uid)
       this.showContent = Number(this.$route.query.type)
       this.orderList = this.$route.query.data
-      console.log('orderList', this.orderList)
       this.icon = this.orderList.icon
       this.name = this.orderList.name
       this.currency = `${this.JsonBig.stringify(this.orderList.buyer) == this.userId ? '购买' : '出售'}${this.orderList.currency.toUpperCase()}`
