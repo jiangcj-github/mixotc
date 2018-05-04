@@ -57,7 +57,6 @@
       this.fetchAddress()//拉取收款地址
       this.listenChat()//监听消息
       this.reqFriend()//监听好友请求
-      this.beAddedGroup()//监听被加入群
       this.beKickGroup()//监听被踢出群
       document.querySelector('.news-info-left .happy-scroll-container').className = 'happy-scroll-container import';
     },
@@ -127,6 +126,7 @@
             })[0]
             if(group.type === 1){
               result.push({
+                mid: item.mid ? this.JsonBig.stringify(item.mid) : 0,
                 id: this.JsonBig.stringify(item.gid),
                 group: true,
                 length: group.members.length,
@@ -147,6 +147,7 @@
               })[0]
               let uid = this.JsonBig.stringify(other.id)
               result.push({
+                mid: item.mid ? this.JsonBig.stringify(item.mid) : 0,
                 id: this.friendGid[uid],
                 uid: uid,
                 isSingle: true,
@@ -162,6 +163,7 @@
             }
           }else if (item.is_peer_admin){
             result.push({
+              mid: item.mid ? this.JsonBig.stringify(item.mid) : 0,
               id: this.JsonBig.stringify(item.uid),
               group: false,
               service: true,
@@ -174,7 +176,9 @@
             }); 
           }else {
             let id = this.JsonBig.stringify(item.uid);
+            // if (this.friendIds.includes(id)) return;
             result.push({
+              mid: item.mid ? this.JsonBig.stringify(item.mid) : 0,
               id: id,
               uid: id,
               group: false,
@@ -201,17 +205,20 @@
               nickName: name,
               phone: phone,
               email: email,
-              moreFlag: true,
+              moreFlag: false,
               unread: 0
            }})
         })
         // console.log(this.chatIds.includes(id));
         flag && !this.chatIds.includes(id) && await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
           this.$store.commit({type: 'getGroupList', data})
-          console.log(this.friendGid[id])
           let group = this.$store.state.groupList.filter(item => {
             return this.friendGid[id] === this.JsonBig.stringify(item.id)
           })[0]
+          !group && (group = this.$store.state.groupList.filter(item => {
+            return id === this.JsonBig.stringify(item.id)
+          })[0])
+          console.log(group)
           if(group.type === 1){
               this.$store.commit({type: 'newChat', data:{
                 id: this.JsonBig.stringify(group.id),
@@ -225,7 +232,7 @@
                 phone: false,
                 email: false,
                 unread: 0,
-                moreFlag: true,
+                moreFlag: false,
                 exists: true
               }})
             }else {
@@ -243,7 +250,7 @@
                 nickName: other.name,
                 phone: other.phone,
                 email: other.email,
-                moreFlag: true,
+                moreFlag: false,
                 unread: 0
               }})
             }
@@ -277,18 +284,6 @@
           }
         }
       },
-      // 监听被加入群聊
-      beAddedGroup() {
-        this.WebSocket.onMessage['add_g_notify'] = {
-          callback:async (res) => {
-            if (res.body && ["add_g", "cre_g"].includes(res.body.type)) {
-              let {id} = res.body.data;
-              await this.dealNewChat(this.JsonBig.stringify(id), 1)
-              this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
-            }
-          }
-        }
-      },
       //监听被踢出群
       beKickGroup() {
          this.WebSocket.onMessage['kick_g_notify'] = {
@@ -311,13 +306,13 @@
             if (res.op && res.op === 7) {
               let {id, uid, icon, name, data, type } = res.body;
               let obj = {}
-              await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
+              
               // 文字
               if (type === 'text') {
                 obj = {
                   id: _this.JsonBig.stringify(id),
                   from: _this.JsonBig.stringify(uid), 
-                  to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
+                  to: _this.userId,
                   icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                   msg:{
                     type: 0,
@@ -328,13 +323,14 @@
                   time: new Date() - 0
                 }
                 _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
+                await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
                 return;
               }
               // 图片
               obj = {
                   id: _this.JsonBig.stringify(id),
                   from: _this.JsonBig.stringify(uid), 
-                  to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
+                  to: _this.userId,
                   icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                   msg:{
                     type: 1,
@@ -345,15 +341,14 @@
                   time: new Date() - 0
                 }
                 _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
+                await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
             };
             // 群聊
             if (Array.isArray(res) && res[0].op === 6) { 
               let {id, uid, gid, name, data, type } = res[0].body;
               let obj = {};
 
-              if (_this.JsonBig.stringify(_this.$store.state.userInfo.uid) === _this.JsonBig.stringify(uid)) return;
-            await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
-              
+            if (_this.userId === _this.JsonBig.stringify(uid)) return;
               let icon = _this.$store.state.groupList.filter(item => {
                 return _this.JsonBig.stringify(gid) === _this.JsonBig.stringify(item.id)
               })[0].members.filter(item => {
@@ -363,7 +358,7 @@
                 obj = {
                   id: _this.JsonBig.stringify(id),
                   from: _this.JsonBig.stringify(uid), 
-                  to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
+                  to: _this.userId,
                   icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                   msg:{
                     type: 0,
@@ -374,13 +369,14 @@
                   time: new Date() - 0
                 }
                 _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
+                await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
                 return;
               }
               //图片
               obj = {
                   id: _this.JsonBig.stringify(id),
                   from: _this.JsonBig.stringify(uid), 
-                  to: _this.JsonBig.stringify(_this.$store.state.userInfo.uid),
+                  to: _this.userId,
                   icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                   msg:{
                     type: 1,
@@ -391,6 +387,7 @@
                   time: new Date() - 0
                 }
                 _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
+                await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
             }
           }
         }
@@ -422,7 +419,6 @@
         })
         //好友
         this.$store.state.friendList.forEach(item => {
-          if (this.chatIds.includes(this.JsonBig.stringify(item.id))) return;
           if (item.name.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText)) {
             result.push({
               id: this.friendGid[this.JsonBig.stringify(item.id)],
@@ -434,7 +430,7 @@
               nickName: item.name,
               phone: item.phone,
               email: item.email,
-              moreFlag: true,
+              moreFlag: false,
               unread: 0
             });
           }
@@ -455,7 +451,7 @@
               phone: false,
               email: false,
               unread: 0,
-              moreFlag: true,
+              moreFlag: false,
               exists: true
             });
           }

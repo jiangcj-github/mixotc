@@ -229,6 +229,8 @@
         height 100%
         .avator
           float left
+          width 45px
+          height 45px
           margin 12.5px 13px 0 0
         .name
           position relative
