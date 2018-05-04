@@ -104,7 +104,7 @@
           alert(JSON.stringify(msg));
         });
       },
-      loadTraderInfo(){console.log("dd");
+      loadTraderInfo(){
         if(this.isLogin){
           let loginUid=this.$store.state.userInfo.uid;
           this.WsProxy.send("otc","trader_info",{id:this.uid, uid:loginUid}).then((data)=>{
