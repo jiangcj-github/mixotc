@@ -123,7 +123,7 @@
         err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败
         list: [],   //分页数据
         total: 0,   //数据长度
-        pageSize:15,  //分页大小
+        pageSize:20,  //分页大小
         curPage: 1,  //第几页
 
         popSel: 0,
@@ -230,7 +230,7 @@
             checkTime: new Date(e.update*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
             checkTime1: new Date(e.update*1000).dateHandle("yyyy/MM/dd"),
             checkTime2: new Date(e.update*1000).dateHandle("HH:mm:ss"),
-            spend: (e.used && e.used.formatSecordExt()) || "-",
+            spend: (e.used && e.used.formatSecord()) || "-",
             checkResult: (e.state && ["待审核","通过","不通过","恶意上传"][e.state-1]) || "-",
             checkRemark: e.info||"无",
             name: e.name || "-",

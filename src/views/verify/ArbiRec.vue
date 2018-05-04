@@ -117,7 +117,7 @@
         srchUls: [
           {text: "申诉人", key:0,},
           {text: "被申诉人",key:1},
-          {text: "受理人",key:2},
+          {text: "处理人",key:2},
           {text: "责任人",key:3},
           {text: "订单号",key:4},
         ],
@@ -146,7 +146,7 @@
 
         err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败,4-加载中
         arbis: [],
-        pageSize: 15,
+        pageSize: 20,
         curPage: 1,
       }
     },
@@ -308,14 +308,14 @@
             dealU: e.handler_name || "-",
             dealUid: e.handler_id,
             dealUid_str: this.JsonBig.stringify(e.handler_id),
-            finishTime: new Date(e.update*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
-            finishTime1: new Date(e.update*1000).dateHandle("yyyy/MM/dd"),
-            finishTime2: new Date(e.update*1000).dateHandle("HH:mm:ss"),
-            spend: (e.update-e.create).formatSecord() || "-",
+            finishTime: (e.result===1?"-":new Date(e.update*1000).dateHandle("yyyy/MM/dd HH:mm:ss")),
+            finishTime1: (e.result===1?"-":new Date(e.update*1000).dateHandle("yyyy/MM/dd")),
+            finishTime2: (e.result===1?"":new Date(e.update*1000).dateHandle("HH:mm:ss")),
+            spend: (e.result===1?"-":(e.update-e.create).formatSecord()),
             result: e.result && ["申诉中","撤回申诉","驳回申诉","强制放币","终止交易"][e.result-1],
             resultFlag: e.result-1,
             respU1: e.responsible_name || "-",
-            respU2: e.responsible_account || "-",
+            respU2: e.responsible_account || "",
             respUid: e.responsible_id,
             respUid_str: this.JsonBig.stringify(e.responsible_id),
             remark: e.info||"无",

@@ -31,7 +31,7 @@
 
         curPage: 1,
         total: 0,
-        pageSize: 15,
+        pageSize: 20,
         cands: [],
         candSel: 0,
 
