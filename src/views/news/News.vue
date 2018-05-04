@@ -74,7 +74,7 @@
   @import "../../stylus/base.styl"
   .news-wrap
     position fixed
-    right 0px
+    right 6px
     bottom 8px
     cursor pointer
     -webkit-box-shadow: -3px 0 3px 0 rgba(0,0,0,0.1), 0 -3px 3px 0 rgba(0,0,0,0.1)

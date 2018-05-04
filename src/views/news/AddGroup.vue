@@ -293,7 +293,6 @@
         span
           font-size 12px
           letter-spacing 0.14px
-          margin-right 120px
         b
           float right
           margin 14px 10px 0 0
