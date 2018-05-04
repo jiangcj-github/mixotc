@@ -61,11 +61,11 @@
               <div class="ddxx"><p>{{e.orderType}}{{e.orderCoin}}</p></div>
               <div class="sqr">
                 <p><a :href="'#/homepage?uid='+e.applyUid" target="_blank" class="link">{{e.applyU}}</a></p>
-                <p><a :href="'#/verify/service?uid='+e.applyUid" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
+                <p v-if="!e.resultFlag"><a :href="'#/verify/service?uid='+e.applyUid" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
               </div>
               <div class="sqdx">
                 <p><a :href="'#/homepage?uid='+e.appliedUid" target="_blank" class="link">{{e.appliedU}}</a></p>
-                <p><a :href="'#/verify/service?uid='+e.appliedUid" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
+                <p v-if="!e.resultFlag"><a :href="'#/verify/service?uid='+e.appliedUid" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
               </div>
               <div class="zcr"><p>{{e.dealU}}</p></div>
               <div class="wcsj"><p>{{e.finishTime1}}</p><p>{{e.finishTime2}}</p></div>
@@ -75,7 +75,10 @@
               <div class="cz"><p><a href="javascript:void(0)" class="ck disabled" @click="">沟通记录</a></p></div>
             </div>
             <div class="division"></div>
-            <div class="remark">备注：{{e.remark}}</div>
+            <div class="bottom">
+              <span class="orderId">订单号：{{e.orderId}}</span>
+              <span class="remark">备注：{{e.remark}}</span>
+            </div>
           </div>
           <Pagi :curPageSize="arbis.length" :pageSize="pageSize" :curPage="curPage"></Pagi>
         </div>
@@ -165,19 +168,26 @@
         this.curPage=p;
         this.loadArbiLists(p-1);
       });
+      this.Bus.$on("onLastPage",()=>{
+        this.loadArbiLists(-1);
+      });
       this.Bus.$on("onDiChange",()=>{
         this.loadArbiLists();
       });
     },
     methods: {
       fuzzyInput(){
-        this.srchTipShow=true;
-        this.loadTips();
+        if(this.srchText.length<=0){
+          this.srchTipShow=false;
+        }else{
+          this.srchTipShow=true;
+          this.loadTips();
+        }
       },
       search(){
         this.loadArbiLists();
       },
-      loadArbiLists(p){
+      loadArbiLists(p=0){
         //
         let srchKey1=null;  //申诉人
         let srchKey2=null;  //被申诉人
@@ -283,9 +293,10 @@
         data && data.forEach((e)=>{
           this.arbis.push({
             id: e.id,
+            orderId: e.sid && e.sid.toString(),
             createTime: new Date(e.create*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
             createTime1: new Date(e.create*1000).dateHandle("yyyy/MM/dd"),
-            createTime2: new Date(e.create*1000).dateHandle("HH:mm"),
+            createTime2: new Date(e.create*1000).dateHandle("HH:mm:ss"),
             orderType: e.type && ["出售","购买","担保"][e.type-1],
             orderCoin: e.currency || "-",
             applyU: e.appellant_name || "-",
@@ -299,20 +310,22 @@
             dealUid_str: this.JsonBig.stringify(e.handler_id),
             finishTime: new Date(e.update*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
             finishTime1: new Date(e.update*1000).dateHandle("yyyy/MM/dd"),
-            finishTime2: new Date(e.update*1000).dateHandle("HH:mm"),
+            finishTime2: new Date(e.update*1000).dateHandle("HH:mm:ss"),
             spend: (e.update-e.create).formatSecord() || "-",
             result: e.result && ["申诉中","撤回申诉","驳回申诉","强制放币","终止交易"][e.result-1],
+            resultFlag: e.result-1,
             respU1: e.responsible_name || "-",
             respU2: e.responsible_account || "-",
             respUid: e.responsible_id,
             respUid_str: this.JsonBig.stringify(e.responsible_id),
-            remark: e.info,
+            remark: e.info||"无",
           });
         });
       }
     },
     destroyed(){
       this.Bus.$off("onPageChange");
+      this.Bus.$off("onLastPage");
       this.Bus.$off("onDiChange");
     }
   }

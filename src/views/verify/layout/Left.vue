@@ -5,7 +5,7 @@
         <i>身份审核</i><img src="/static/images/verify/sfsh.png" alt="">
       </router-link>
       <router-link tag="li" :class="{active:leftBar===2}" to="/verify/largeTransaction">
-        <i>大额交易申请</i><img src="/static/images/verify/dejy.png" alt="">
+        <i>大额交易审核</i><img src="/static/images/verify/dejy.png" alt="">
       </router-link>
       <router-link tag="li" :class="{active:leftBar===4}" to="/verify/arbitrationRecord">
         <i>申诉记录</i><img src="/static/images/verify/zcjl.png" alt="">

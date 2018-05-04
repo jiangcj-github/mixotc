@@ -3,7 +3,7 @@
     <a class="b1 first" @click="goPage(1)" :class="{disabled:curPage===1}"></a>
     <a class="b2 prev" @click="goPage(curPage-1)" :class="{disabled:curPage===1}"></a>
     <a class="b2 next" @click="goPage(curPage+1)" :class="{disabled:curPageSize<pageSize}"></a>
-    <a class="b1 last disabled" ></a>
+    <a class="b1 last" @click="goLastPage()" :class="{disabled:curPageSize<pageSize}"></a>
   </div>
 </template>
 <script>
@@ -13,6 +13,7 @@
       curPageSize:{type:Number,default:1},
       pageSize: {type: Number,default:10},
       onPageChange:{type:String,default:"onPageChange"},
+      onLastPage:{type:String,default:"onLastPage"},
     },
     computed:{
       isValid:function(){
@@ -23,6 +24,9 @@
       goPage(p){
         if(p<1) return;
         this.Bus.$emit(this.onPageChange,p);
+      },
+      goLastPage(){
+        this.Bus.$emit(this.onLastPage);
       }
     }
   };

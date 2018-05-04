@@ -18,10 +18,10 @@ String.prototype.shearStr = function(number, suffix = "...") {
   return this.slice(0, number) + suffix;
 };
 
-//格式化秒
+//格式化秒-短格式
 /*
  * 传入：124
- * 返回：2min4s
+ * 返回：2min
  */
 Number.prototype.formatSecord=function(){
   let h,m,s;
@@ -39,6 +39,29 @@ Number.prototype.formatSecord=function(){
     return h+"h";
   }
 };
+
+//格式化秒-长格式
+/*
+ * 传入：124
+ * 返回：2min4s
+ */
+Number.prototype.formatSecordExt=function(){
+  let h,m,s;
+  if(this<60){
+    s=this;
+    return s+"s";
+  }else if(this>=60&&this<3600){
+    let m=Math.floor(this/60);
+    let s=this-m*60;
+    return m+"min"+s+"s";
+  }else{
+    let h=Math.floor(this/3600);
+    let m=Math.floor((this-h*3600)/60);
+    let s=this-h*3600-m*60;
+    return h+"h"+m+"min";
+  }
+};
+
 // xxxx-yy-zz, hh:mm:ss
 /**
  * {

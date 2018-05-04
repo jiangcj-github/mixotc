@@ -1,6 +1,6 @@
 <template>
   <div class="pagi" v-if="total>pageSize">
-    <p>共 {{totalPage}} 页</p>
+    <p>共 {{total}} 条</p>
     <ul>
       <li class="arrow left" @click="changePage(curPage-1)" :class="{disabled:curPage<=1}"></li>
       <li :class="{active:e===curPage}" v-for="e of pageArr" @click="changePage(e)">

@@ -63,7 +63,7 @@
           this.candSel=-1;
           this.parseCands(data.users);
         }).catch((msg)=>{
-          console.log(msg);
+          alert(JSON.stringify(msg));
         });
       },
       loadUncheckByUid(id){
@@ -117,7 +117,7 @@
           });
         });
         this.infos.his.sort((a,b)=>{
-          return a.submitTime<b.submitTime?-1:1;
+          return a.submitTime<b.submitTime?1:-1;
         });
       },
     },

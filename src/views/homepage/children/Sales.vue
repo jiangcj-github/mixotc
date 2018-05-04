@@ -105,9 +105,13 @@
         this.curPage=p;
         this.loadSales(p-1);
       });
+      this.Bus.$on("onLastPage",(p)=>{
+        this.loadSales(-1);
+      });
     },
     destroyed(){
-      this.Bus.$on("onPageChange");
+      this.Bus.$off("onPageChange");
+      this.Bus.$off("onLastPage");
     },
     watch:{
       fltTypeSel:function () {
@@ -141,7 +145,7 @@
         this.sales=[];
         data && data.forEach((item)=>{
           this.sales.push({
-            create: new Date(item.create).dateHandle("yyyy/MM/dd hh:mm:ss"),
+            create: new Date(item.create*1000).dateHandle("yyyy/MM/dd hh:mm:ss"),
             type: {1:"购买",2:"出售"}[item.type+""],
             isBuy:{1:true,2:false}[item.type+""],
             currency: item.currency.toUpperCase(),
