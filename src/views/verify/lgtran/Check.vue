@@ -114,7 +114,7 @@
         statusDropShow: false,    //审核结果下拉框
         statusDropSel: 0,
         status:[
-          {text:"全部状态",value:0},
+          {text:"全部结果",value:0},
           {text:"通过",value:1},
           {text:"不通过",value:2},
           {text:"恶意上传",value:3},
