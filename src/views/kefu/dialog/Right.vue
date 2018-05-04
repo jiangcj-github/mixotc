@@ -6,7 +6,7 @@
     <div class="swiper-container">
       <div class="swiper-wrapper">
         <div class="fixed swiper-slide" v-for="(content, index) in otherInfo" >
-          <h3>{{(appl === 0 && recv === 0) || (appl === 1 && recv === 1) ? '申诉人' : '被申诉人'}}</h3>
+          <h3>{{appl === 1 ? '申诉人' : '被申诉人'}}</h3>
           <div class="mf1">
             <img :src="content.icon ? `${HostUrl.http}image/${content.icon}` : `/static/images/default_avator.png`" @click="changeUser(index)">
             <span class="i1" @click="changeUser(index)">{{content.name}}</span>
@@ -17,7 +17,7 @@
             <span class="i1">已被申诉{{content.times}}次</span>
             <button class="i2" @click="forceIcon(index)">强制放币</button>
             <button class="i3" @click="stopTrade(index)">终止交易</button>
-            <button class="i3" @click="rejectAppeal(index)" v-if="(appl === 0 && recv === 0) || (appl === 1 && recv === 1)">驳回申诉</button>
+            <button class="i3" @click="rejectAppeal(index)" v-if="appl === 0">驳回申诉</button>
           </div>
         </div>
       </div>
@@ -30,13 +30,13 @@
       <div class="msgBox">
         <p class="check-more" @click="checkMore(10)">查看更多</p>
         <div v-for="(item, index) in msgHis" :key="index" class="message">
-          <div class="tline" v-if="index > 0 && dealTime(msgHis[index-1].time, item.time)"><i>{{dealTime(msgHis[index-1].time, item.time)}}</i></div>
+          <div class="tline" v-if="index> 0 && dealTime(msgHis[index-1].time, item.time)"><i>{{dealTime(msgHis[index-1].time, item.time)}}</i></div>
           <p :class="{al: item.isSend !== JsonBig.stringify($store.state.userInfo.uid), ar: item.isSend == JsonBig.stringify($store.state.userInfo.uid)}">
-            <img :src="item.headimg"/>
-            <span v-if="item.type === 0">{{item.content}}</span>
+            <img :src="item.headimg" alt=""/>
+            <span v-if="item.type === 0" v-html="item.content"></span>
             <span v-else-if="item.type === 1" class="img-wrap"><img :src="item.content" @click="onClickImg(item)"/></span>
             <i class="err" title="发送失败" v-if="!item.isLoding && item.err" @click="resend(item)"></i>
-            <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding">
+            <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding" alt="">
           </p>
         </div>
       </div>
@@ -52,11 +52,11 @@
         <button class="b2" @click="showPop4 = true">证明无效</button>
         <button class="b3" @click="onClickM1">通知放币</button>
       </div>
-      <textarea ref="textarea" class="textarea" title=""
-                v-model="sendMsg"
+      <div contenteditable="true" ref="textarea" class="textarea" title=""
+                v-html="sendMsg"
                 @keydown.enter.exact="send"
                 @keydown.ctrl.enter="onCtrlEnter">
-      </textarea>
+      </div>
       <div class="bottom">
         <span>按下Enter发送内容/Ctrl+Enter换行</span>
         <button @click="send">发送</button>
@@ -227,8 +227,8 @@
         let result = '';
         this.$store.state.serviceData.forEach(item => {
           // console.log('当前', item)
-          if (item.appellant_id === this.$store.state.serviceNow || item.appellee_id === this.$store.state.serviceNow) {
-            result = item.appellant_name
+          if (item.user_id === this.$store.state.serviceNow) {
+            result = item.user_name
           }
         });
         this.startSwiper() // 轮播图切换
@@ -250,41 +250,20 @@
         return this.$store.state.serviceNowOther
       },
       appl() {
-        let applUser; //88607959879680   88607959879680
-        for (let v in this.serviceUser) { // 判断是否是申述者
-          if (v.indexOf('appellant_id') > -1) {
-            //console.log(111)
-            applUser = 0
-            this.otherInfo.forEach(item => { // 确定申述人是否为购买者
-              this.recv = item.buyer_id == this.serviceNow ?  1 : 0
-              this.isBuyer = item.buyer_id == this.serviceNow ?  "买家" : "卖家"
-            });
-            console.log('applUser', applUser, this.recv)
-            return applUser
+        let applUser; //197113900708139008
+        this.otherInfo.forEach(v => {
+          if (v.appellant_id == this.serviceUser.user_id) { // 是否为申述人 0 申诉 1 被申诉
+            applUser = 0;
+            this.recv = v.buyer_id == this.serviceNow ?  0 : 1; // 是否为买家 0 买 1 卖
+            this.isBuyer = v.buyer_id == this.serviceNow ?  "买家" : "卖家";
+          } else {
+            applUser = 1;
+            this.recv = v.buyer_id == this.serviceNow ?  0 : 1; // 是否为买家 0 买 1 卖
+            this.isBuyer = v.buyer_id == this.serviceNow ?  "买家" : "卖家";
           }
-          //console.log(222)
-          applUser = 1
-          this.otherInfo.forEach(item => { // 确定申述人是否为购买者
-            this.recv = item.buyer_id == this.serviceNow ?  0 : 1
-            this.isBuyer = item.buyer_id == this.serviceNow ?  "买家" : "卖家"
-          });
-        }
+        })
         console.log('applUser', applUser, this.recv)
         return applUser
-      },
-      userIdArr() { // 去重id数组
-        let userIdResult = []
-        this.$store.state.serviceData.filter(v => {
-          return v.appellant_id
-        }).map(v => {
-          userIdResult.push(v.appellant_id)
-        })
-        this.$store.state.serviceData.filter(v => {
-          return v.appellee_id
-        }).map(v => {
-          userIdResult.push(v.appellee_id)
-        })
-        return userIdResult
       }
     },
     watch: { // 默认显示三条数据
@@ -322,31 +301,12 @@
         this.$refs.textarea.value += "\n";
       },
       changeUser(index) { // 点击切换身份
-        let otherObj = {
-          appellant_icon: this.otherInfo[index].icon ? `${this.otherInfo[index].icon}` : "/static/images/default_avator.png",
-          appellant_name: this.otherInfo[index].name,
-          time: new Date().getTime(),
-          data: '',
-          appellee_id: this.otherInfo[index].uid
-        }
-        if (this.userIdArr.indexOf(this.JsonBig.stringify(this.otherInfo[index].uid)) > -1) {
-          console.log(1111)
-          return
-        } else {
-          console.log(2222)
-          this.userIdArr.push(this.otherInfo[index].uid)
-        }
-        console.log('this.userIdArr1', this.userIdArr)
-        this.$store.commit({type: 'transformServiceUser', data: otherObj})
-        console.log('serviceNow', this.serviceNow)
-        console.log('this.userIdArr2', this.userIdArr)
-        console.log('换人', this.appl, this.recv)
-        console.log('换人id', this.otherInfo[index].uid)
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人对方资料
-          "appellee_id": this.JsonBig.parse(this.otherInfo[index].uid)
+          "user_id": this.appl == 0 ? this.JsonBig.parse(this.otherInfo[index].appellee_id) : this.JsonBig.parse(this.otherInfo[index].appellant_id)
         }).then(data => {
-          console.log('申述人', data);
-          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.otherInfo[index].appellant_id})}) // 存储右边聊天人员
+          console.log('反转申述人', data);
+          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.appl == 0 ? this.JsonBig.stringify(this.otherInfo[index].appellee_id) : this.JsonBig.stringify(this.otherInfo[index].appellant_id)})}) // 存储右边聊天人员
+          this.$store.commit({type: 'transformServiceUser', data: {id: this.appl == 0 ? this.JsonBig.stringify(this.otherInfo[index].appellee_id) : this.JsonBig.stringify(this.otherInfo[index].appellant_id)}}) // 存储右边聊天人员
         }).catch(error=>{
           console.log('错误', error)
         })
@@ -404,9 +364,9 @@
         this.addStoreMessages(1, '', time);
       },
       send() { // 发送消息
-        if (/^\s*$/.test(this.sendMsg)) return;
+        if (/^\s*$/.test(this.$refs.textarea.innerHTML)) return;
         let time = new Date() - 0;
-        this.addStoreMessages(0, this.sendMsg, time)
+        this.addStoreMessages(0, this.$refs.textarea.innerHTML, time)
         // 发送消息
         this.WsProxy.sendMessage({
           type: 'text',
@@ -416,14 +376,14 @@
             uid: this.$store.state.userInfo.uid,
             rid: this.JsonBig.parse(this.serviceNow),
             tid: this.JsonBig.parse(this.serviceNow),
-            msg: this.sendMsg
+            msg: this.$refs.textarea.innerHTML
           }
         }).then(data => { // 发送消息成功后更改原保存信息
           this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:0 }})
         }).catch(error => {
           this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:1 }})
         });
-        this.$refs.textarea.value = '';
+        this.$refs.textarea.innerHTML = '';
       },
       // resend(item) { // 发送失败
       //   item.err = 0;
@@ -445,18 +405,17 @@
           //(!data.msgs || data.msgs.length < num) && this.$store.commit({type: 'changeServiceMoreFlag', data:{id: this.serviceNow, flag: false }})
           if (!data.msgs) return;
           let uid = this.JsonBig.stringify(this.$store.state.userInfo.uid)
-          //   icon = this.$store.state.userInfo.icon;
-          //
           data.msgs.forEach(item => {
             let sender_id = this.JsonBig.stringify(item.sender_id),
-              create_time = item.create_time * 1000;
+                create_time = item.create_time * 1000;
             result.push({
               id: this.JsonBig.stringify(item.id),
-              isSend: this.JsonBig.stringify(this.$store.state.userInfo.uid),
-              headimg: sender_id === uid ? `/static/images/kefu/kefu.png` : `${this.HostUrl.http}image/${this.serviceUser.appellant_icon}`,
+              isSend: sender_id === uid ? uid : sender_id,
+              headimg: sender_id === uid ? `/static/images/kefu/kefu.png` : (this.serviceUser.appellant_icon ? `${this.HostUrl.http}image/${this.serviceUser.appellant_icon}` : `/static/images/default_avator.png`),
               type: item.type === 'image' ? 1 : 0,
               content: item.type === 'image' ? `${this.HostUrl.http}file/${item.data.id}` : item.data.msg,
-              isLoding: item.type === 'image' ? true : false,
+              // isLoding: item.type === 'image' ? true : false,
+              isLoding: false,
               err: false,
               time: create_time
             })
@@ -471,13 +430,13 @@
       },
       onClickM0() { // 点击上传付款证明按钮
         let text = MSGS.get(0, this.appl, this.recv);
-        text = text.replace(/orderId/, this.otherInfo[0].sid).replace(/付款码/, this.otherInfo[0].trade_code);
-        this.$refs.textarea.value = text;
+        text = text.replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`);
+        this.$refs.textarea.innerHTML = text;
         this.$refs.textarea.focus();
       },
       onClickM1() { // 点击通知放币按钮
-        let text = MSGS.get(4, this.appl, this.recv).replace(/orderId/, this.otherInfo[0].sid);
-        this.$refs.textarea.value = text;
+        let text = MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`);
+        this.$refs.textarea.innerHTML = text;
         this.$refs.textarea.focus();
       },
       onPop1Input() { // 填写强制放币理由(责任人已定)
@@ -552,7 +511,7 @@
       },
       onPop1Ok() { // 强制放币确认
         this.showPop1 = false
-        let text = MSGS.get(5, this.appl, this.recv).replace(/orderId/, this.otherInfo[0].sid).replace(/reason/, this.pop1TextOld);
+        let text = MSGS.get(5, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/reason/, this.pop1TextOld);
         this.sendMsg = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_send_order',
@@ -565,7 +524,7 @@
       },
       onPop2Ok() { // 驳回申述确认
         this.showPop2 = false
-        let text = MSGS.get(2, this.appl, this.recv).replace(/orderId/, this.otherInfo[0].sid).replace(/reason/, this.pop2TextOld);
+        let text = MSGS.get(2, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/reason/, this.pop2TextOld);
         this.sendMsg = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_reject_appeal',
@@ -578,7 +537,7 @@
       },
       onPop3Ok() { // 终止交易确认
         this.showPop3 = false
-        let text = MSGS.get(7, this.appl, this.recv).replace(/orderId/, this.otherInfo[0].sid).replace(/reason/, this.pop3TextOld);
+        let text = MSGS.get(7, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/reason/, this.pop3TextOld);
         this.sendMsg = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_terminate_order',
@@ -595,7 +554,7 @@
       onPop4Ok() { // 证明无效确认
         this.showPop4 = false;
         let text = MSGS.get(1, this.appl, this.recv);
-        text = text.replace(/reason/, this.pop4TextOld).replace(/trade_code/, this.otherInfo[0].trade_code);
+        text = text.replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<span style="color:#FF794C">[${this.otherInfo[0].trade_code}]</span>`);
         this.sendMsg= text;
         this.$refs.textarea.focus();
 
@@ -754,8 +713,8 @@
             position relative
             box-sizing border-box
             min-height 40px
-            display inline-flex
-            align-items center
+            /*display inline-flex*/
+            /*align-items center*/
             max-width 340px
             > img
               max-width 100px
@@ -783,6 +742,7 @@
           > span
             background #E1E1E1
             margin-left 18px
+            margin-bottom 10px
             &:before
               content ""
               height 2px
@@ -802,6 +762,7 @@
           > span
             background #FFB422
             margin-right 18px
+            margin-bottom 10px
             &:before
               content ""
               height 2px
@@ -841,9 +802,10 @@
           &:not(:first-of-type)
             margin-left 10px
       .textarea
-        padding 5px 10px
         height 90px
         width 100%
+        padding 5px 10px
+        font-size 12px
         resize none
         border none
         outline none

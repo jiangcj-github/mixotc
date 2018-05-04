@@ -61,11 +61,11 @@
               <div class="ddxx"><p>{{e.orderType}}{{e.orderCoin}}</p></div>
               <div class="sqr">
                 <p><a :href="'#/homepage?uid='+e.applyUid" target="_blank" class="link">{{e.applyU}}</a></p>
-                <p><a href="#/verify/service" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
+                <p><a :href="'#/verify/service?uid='+e.applyUid" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
               </div>
               <div class="sqdx">
                 <p><a :href="'#/homepage?uid='+e.appliedUid" target="_blank" class="link">{{e.appliedU}}</a></p>
-                <p><a href="#/verify/service" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
+                <p><a :href="'#/verify/service?uid='+e.appliedUid" target="_blank" class="contact"><img src="/static/images/talk.png">联系他</a></p>
               </div>
               <div class="zcr"><p>{{e.dealU}}</p></div>
               <div class="wcsj"><p>{{e.finishTime1}}</p><p>{{e.finishTime2}}</p></div>

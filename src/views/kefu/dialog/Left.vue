@@ -10,15 +10,15 @@
     <happy-scroll color="rgba(100,100,100,0.8)" size="5" resize hide-horizontal
                   bigger-move-h="start" smaller-move-h="start" class="scrollPane">
       <ul class="persons">
-        <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index, content.appellant_id)" :class="{active: content.appellant_id ? content.appellant_id === $store.state.serviceNow : content.appellee_id === $store.state.serviceNow}">
-          <img :src="content.appellant_icon ? `${HostUrl.http}image/${content.appellant_icon}` : `/static/images/default_avator.png`" alt="">
+        <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index, content.user_id)" :class="{active: content.user_id === $store.state.serviceNow}">
+          <img :src="content.user_icon ? `${HostUrl.http}image/${content.user_icon}` : `/static/images/default_avator.png`" alt="">
           <i v-if="content.unread">{{unreadNum}}</i>
           <div class="pinfo">
             <p class="p1">
-              <span class="s1">{{content.appellant_name}}</span>
-              <span class="s2">{{(content.time * 1000).formatTime()}}</span>
+              <span class="s1">{{content.user_name}}</span>
+              <span class="s2">{{(content.msg_time * 1000).formatTime()}}</span>
             </p>
-            <p class="p2">{{content.data}}</p>
+            <p class="p2">{{content.msg_data}}</p>
           </div>
         </li>
       </ul>
@@ -46,16 +46,18 @@
       this.listenNews();
       this.parseUls();
       this.userIdArr;
-      this.initData()
+      this.initData();
+      this.selectNowUser()
+      console.log('1111', this.$route.query.uid)
       // this.$store.state.serviceData.length ? this.uls =  this.ulsBuf = this.$store.state.serviceData : this.initData() //初始化列表数据
     },
     methods: {
       listenNews() { //聊天信息监听
         this.WebSocket.onMessage['sms']={
           async callback(res){
-            // console.log('聊天消息', res)
             // op为7单人聊天信息，对象类型
             if (res.op && res.op === 7) {
+              console.log('聊天消息', res)
               let {id, uid, icon, name, data, type } = res.body;
               let obj = {};
               if (type === 'text') { // 文字
@@ -92,29 +94,44 @@
           console.log('对话列表', data);
           this.uls =  this.ulsBuf = data;
           data.forEach(v => {
-            v.appellant_id = this.JsonBig.stringify(v.appellant_id)
-            v.id = this.JsonBig.stringify(v.id)
+            v.user_id = this.JsonBig.stringify(v.user_id)
           })
           this.$store.commit({type: 'initServiceData', data: data}); // 获取列表数据存储到vuex中
         }).catch(error=>{
           console.log('错误', error)
         })
       },
+      selectNowUser() {
+        this.WsProxy.send('control', 'a_get_user_appeals', { // 初始化页面获得联系人
+          "user_id": this.$route.query.uid ? this.JsonBig.parse(this.$route.query.uid) : this.JsonBig.parse(this.uls[0].user_id),
+        }).then(data => {
+          console.log('第一次申述人', data);
+          data.forEach(v => {
+            v.buyer_id = this.JsonBig.stringify(v.buyer_id) // 买家
+            v.seller_id = this.JsonBig.stringify(v.seller_id) // 卖家
+            v.sid = this.JsonBig.stringify(v.sid) // 订单
+            v.appellant_id = this.JsonBig.stringify(v.appellant_id) // 申述人
+            v.appellee_id = this.JsonBig.stringify(v.appellee_id) // 被申述人
+          })
+          this.$store.commit({type: 'initServiceNowtalk', data: {id: this.$route.query.uid}}) // 存储右边聊天人员
+        }).catch(error=>{
+          console.log('错误', error)
+        })
+      },
       onLiClick(index, id) { // 点击列表
-        console.log('aaa', this.uls[index].appellant_id, this.uls[index].appellee_id)
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人资料
-          "appellant_id": this.uls[index].appellant_id && this.JsonBig.parse(this.uls[index].appellant_id),
-          "appellee_id": this.uls[index].appellee_id && this.JsonBig.parse(this.uls[index].appellee_id)
+          "user_id": this.JsonBig.parse(this.uls[index].user_id),
         }).then(data => {
           console.log('申述人', data);
           data.forEach(v => {
-            v.buyer_id = this.JsonBig.stringify(v.buyer_id)
-            v.seller_id = this.JsonBig.stringify(v.seller_id)
-            v.sid = this.JsonBig.stringify(v.sid)
-            v.uid = this.JsonBig.stringify(v.uid)
+            v.buyer_id = this.JsonBig.stringify(v.buyer_id) // 买家
+            v.seller_id = this.JsonBig.stringify(v.seller_id) // 卖家
+            v.sid = this.JsonBig.stringify(v.sid) // 订单
+            v.appellant_id = this.JsonBig.stringify(v.appellant_id) // 申述人
+            v.appellee_id = this.JsonBig.stringify(v.appellee_id) // 被申述人
           })
-          this.$store.commit({type: 'getServiceNowtalk', data: this.uls[index]}) // 存储右边聊天人
-          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.uls[index].appellant_id ? this.uls[index].appellant_id : this.uls[index].appellee_id})}) // 存储右边聊天人员
+          this.$store.commit({type: 'getServiceNowtalk', data: this.uls[index]}) // 存储左边聊天人
+          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.uls[index].user_id})}) // 存储右边聊天人员
         }).catch(error=>{
           console.log('错误', error)
         })
