@@ -7,10 +7,10 @@
 .f1>input{padding:0 10px;flex-grow:1;}
 .f1>img{align-self:center; margin-right:10px;}
 .f1>img:hover{cursor:pointer; opacity:0.8;}
-.f1>a{display:inline-block; flex-shrink:0; width:72px;background:url(/static/images/search.png) no-repeat center center #ffb422;}
-.f1>a:hover{background-color:#fea350;}
-.f1.disabled{border-color:#e1e1e1;}
-.f1.disabled>a{pointer-events:none;background-color:#e1e1e1;}
+.f1>button{display:inline-block; flex-shrink:0; width:72px;user-select:none;cursor:pointer;
+  background:url(/static/images/search.png) no-repeat center center #ffb422;}
+.f1>button:hover{background-color:#fea350;}
+
 .f1>ul{border:1px solid #e1e1e1; border-top:none; background:#fff; position:absolute; top:29px; left:-1px; right:71px;z-index:100;}
 .f1>ul>li{padding 0 10px; line-height:30px; cursor:pointer;}
 .f1>ul>li:hover{background:#fff3eb;}

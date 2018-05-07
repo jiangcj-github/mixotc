@@ -55,12 +55,12 @@
         date2: "",
         opt1: {
           disabledDate: (time) => {
-            return time.getTime() > this.max || time.getTime() < this.min || (this.date2 && time > this.date2)
+            return time.getTime() > this.max || time.getTime() < this.min || (this.date2 && time >= this.date2)
           }
         },
         opt2: {
           disabledDate: (time) => {
-            return time.getTime() > this.max || time.getTime() < this.min || (this.date1 && time < this.date1);
+            return time.getTime() > this.max || time.getTime() < this.min || (this.date1 && time <= this.date1);
           }
         },
       };
