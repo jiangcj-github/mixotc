@@ -115,8 +115,13 @@
     watch: {
       path: {
          handler(curVal, oldValue) {
-           curVal === '/order' && (this.newOrder = 0);
-         }
+          curVal === '/order' && (this.newOrder = 0);
+          // if (["/verify", "/verify/identifyAuth", "/verify/largeTransaction", "/verify/arbitrationRecord", "/verify/service"].includes(this.$route.path) && this.$store.state.userInfo && !this.$store.state.userInfo.is_admin) {
+          //   console.log(9999)
+          //   this.$router.push('/transaction');
+          // }
+         },
+        //  immediate: true
       }
     }
   }

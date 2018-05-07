@@ -59,7 +59,7 @@
           if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) {
             return;
           }
-          this.$router.push('transaction');
+          this.$router.push('/transaction');
           return;
         }
         ws.send(sendConfig('login', {
@@ -104,6 +104,10 @@
     computed: {
       showView() {
         if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) {
+          return true;
+        }
+        if (["/verify", "/verify/identifyAuth", "/verify/largeTransaction", "/verify/arbitrationRecord", "/verify/service"].includes(this.$route.path) && this.$store.state.userInfo && !this.$store.state.userInfo.is_admin) {
+          this.$router.push('/transaction');
           return true;
         }
         if(this.isLogin) return true;
