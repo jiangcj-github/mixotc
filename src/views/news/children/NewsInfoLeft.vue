@@ -175,7 +175,7 @@
             }); 
           }else {
             let id = this.JsonBig.stringify(item.uid);
-            if (this.friendIds.includes(id)) return;
+            if (this.friendIds.includes(id) || this.userId === id) return;
             result.push({
               mid: item.mid ? this.JsonBig.stringify(item.mid) : 0,
               id: id,
@@ -334,20 +334,21 @@
             };
             // 群聊
             if (Array.isArray(res) && res[0].op === 6) { 
-              let {id, uid, gid, name, data, type } = res[0].body;
+              let {id, uid, gid, data, type } = res[0].body;
               let obj = {};
-
             if (_this.userId === _this.JsonBig.stringify(uid)) return;
-              let icon = _this.$store.state.groupList.filter(item => {
+              let other = _this.$store.state.groupList.filter(item => {
                 return _this.JsonBig.stringify(gid) === _this.JsonBig.stringify(item.id)
               })[0].members.filter(item => {
                 return _this.JsonBig.stringify(uid) === _this.JsonBig.stringify(item.id)
-              })[0].icon
+              })[0]
+              let {icon, name} = other;
               if (type === 'text') {
                 obj = {
                   id: _this.JsonBig.stringify(id),
                   from: _this.JsonBig.stringify(uid), 
                   to: _this.userId,
+                  name: name,
                   icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                   msg:{
                     type: 0,

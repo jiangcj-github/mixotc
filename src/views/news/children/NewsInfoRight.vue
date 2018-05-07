@@ -26,12 +26,13 @@
         <div class="news-info-talk clearfix" v-if="title && curChat !== 'system'">
           <p class="more-info" v-if="chat[index].moreFlag" @click="fetchMore(10, 1)">查看更多消息</p>
           <p class="more-info" v-else></p>
-          <div class="messages clearfix" v-for="(item, index) of messages" :key="item.id ? item.id :item.time">
-            <p class="time-info" v-if="index > 0 && dealTime(messages[index-1].time, item.time)">{{dealTime(messages[index-1].time, item.time)}}</p>
+          <div class="messages clearfix" v-for="(item, idx) of messages" :key="item.id ? item.id :item.time">
+            <p class="time-info" v-if="idx > 0 && dealTime(messages[idx-1].time, item.time)">{{dealTime(messages[idx-1].time, item.time)}}</p>
             <div :class="{'left-people': item.from !== JsonBig.stringify($store.state.userInfo.uid), 'right-people': item.from === JsonBig.stringify($store.state.userInfo.uid)}">
               <img class="avator" :src="item.icon" alt="" @click="toHomepage(item.from)">
               <p>
-                <i></i>
+                <i :class="{name: chat[index].group && userId !== item.from}"></i>
+                <b v-if="chat[index].group && userId !== item.from">{{item.name}}</b>
                 <span v-if="item.msg.type === 1" class="images">
                   <img
                     :src="item.msg.content"
@@ -273,7 +274,10 @@
         this.$store.state.groupList.filter(item => {
           return this.curChat === this.JsonBig.stringify(item.id)
         })[0].members.forEach(item => {
-          obj[this.JsonBig.stringify(item.id)] = item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png"
+          obj[this.JsonBig.stringify(item.id)] = {
+            icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
+            name: item.name
+          }
         })
         return obj
       },
@@ -301,7 +305,7 @@
           if(item.type !== 0) return; 
           item.members.forEach(itm=>{
             let id = this.JsonBig.stringify(itm.id);
-            if(id !== this.JsonBig.stringify(this.$store.state.userInfo.uid)) {
+            if(id !== this.userId) {
               obj[id] = this.JsonBig.stringify(item.id);
             }
           })
@@ -329,6 +333,10 @@
       },
       //其余页面入口-联系他
       async contactSomeone(id, msg) {
+        if(this.userId === id) {
+          alert('不能和自己聊天')
+          return;
+        }
         let flag = this.chatIds.indexOf(id),
             friendFlag = false;
         await this.fetchFriendList();
@@ -360,7 +368,7 @@
         }).then(data => {
           (!data.msgs || data.msgs.length < num) && this.$store.commit({type: 'changeMoreFlag', data:{id: this.curChat, flag: false }})
           if (!data.msgs) return;
-          let uid = this.JsonBig.stringify(this.$store.state.userInfo.uid),
+          let uid = this.userId,
               icon = this.$store.state.userInfo.icon;
 
           data.msgs.forEach(item => {
@@ -370,7 +378,8 @@
               id: this.JsonBig.stringify(item.id),
               from: sender_id === uid ? uid : sender_id,
               to: sender_id === uid ? this.curChat : uid,
-              icon: sender_id === uid ? (icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png") : this.mapCurMembers[sender_id],
+              name: sender_id === uid ? this.$store.state.userInfo.name : this.mapCurMembers[sender_id].name,
+              icon: sender_id === uid ? (icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png") : this.mapCurMembers[sender_id].icon,
               msg:{
                 type: item.type === 'image' ? 1 : 0,
                 content: item.type === 'image' ? `${this.HostUrl.http}file/${item.data.id}` : item.data.msg
@@ -422,8 +431,9 @@
       //发送增加本地消息记录
       addStoreMessages(tid, type, content, time) {
         let obj = {
-          from: this.JsonBig.stringify(this.$store.state.userInfo.uid),
+          from: this.userId,
           to: tid,
+          name: this.$store.state.userInfo.name,
           icon: this.$store.state.userInfo.icon ? `${this.HostUrl.http}image/${this.$store.state.userInfo.icon}` : "/static/images/default_avator.png",
           msg:{
             type: type,
@@ -841,6 +851,10 @@
             border-style solid dashed dashed
             font-size 0
             line-height 0
+            &.name
+              top 25px
+          b 
+            display block
       .messages
         width 100%
         margin 0

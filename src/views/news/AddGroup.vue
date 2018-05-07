@@ -140,7 +140,7 @@
             return this.JsonBig.parse(item)
           })
           this.WsProxy.send('control', 'create_group',{
-            name: '',
+            name: this.defaultName(),
             intro: '',
             ids: array,
             uid: this.userInfo.uid
