@@ -231,6 +231,10 @@ export default {
     // 改变当前聊天
     state.serviceNow = data.id; // 聊天入口人的id
     state.serviceNowOther = data.data; //  聊天入口对方人的信息
+    state.serviceData.forEach((item, index) => {
+      item.user_id === data.id && (item.unread = 0);
+    });
+
   },
   // 双方人员置换
   [types.transformServiceUser](state, { data }) {
@@ -245,7 +249,8 @@ export default {
     });
     !state.serviceMessage[data.id] && (state.serviceMessage[data.id] = []); //对话记录不存在时创建
     state.serviceMessage[data.id].push(data.msg);
-    state.serviceData[idex].unread++;
+    state.serviceNow !== data.id && state.serviceData[idex].unread++;
+    state.serviceMessage = Object.assign({}, state.serviceMessage);
   },
   // 新增发送消息
   [types.changeServiceMessages](

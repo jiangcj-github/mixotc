@@ -753,10 +753,7 @@
               position absolute
               left -8px
               top 15px
-          > span.img-wrap
-            background transparent
-            &:before
-              display none
+
         > p.ar
           flex-direction row-reverse
           > span
@@ -773,10 +770,6 @@
               position absolute
               right -8px
               top 15px
-          /*> span.img-wrap*/
-            /*background transparent*/
-            /*&:before*/
-              /*display none*/
     .sendBox
       height 160px
       border-top 1px solid #D8D8D8
