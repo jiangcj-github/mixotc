@@ -38,7 +38,6 @@ const initState = "initState"; // 改变登陆用户时初始化必要的state
  const transformServiceUser = 'transformServiceUser' // 双方人员身份转换
  const changeServiceImgsrc = 'changeServiceImgsrc' // 改变图片
  const moreServiceMessage = 'moreServiceMessage' // 添加更多消息
- const initServiceNowtalk = 'initServiceNowtalk'
 
 
 
@@ -81,6 +80,5 @@ export {
   changeServiceMessages,
   transformServiceUser,
   changeServiceImgsrc, // 改变图片
-  moreServiceMessage,
-  initServiceNowtalk
+  moreServiceMessage
 };

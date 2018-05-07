@@ -18,7 +18,7 @@
               <span class="s1">{{content.user_name}}</span>
               <span class="s2">{{(content.msg_time * 1000).formatTime()}}</span>
             </p>
-            <p class="p2">{{content.msg_data}}</p>
+            <p class="p2">{{content.msg_data ? (content.msg_type === "image" ? '[图片]' : content.msg_data.msg) : ''}}</p>
           </div>
         </li>
       </ul>
@@ -48,8 +48,6 @@
       this.userIdArr;
       this.initData();
       this.selectNowUser()
-      console.log('1111', this.$route.query.uid)
-      // this.$store.state.serviceData.length ? this.uls =  this.ulsBuf = this.$store.state.serviceData : this.initData() //初始化列表数据
     },
     methods: {
       listenNews() { //聊天信息监听
@@ -105,7 +103,6 @@
         this.WsProxy.send('control', 'a_get_user_appeals', { // 初始化页面获得联系人
           "user_id": this.$route.query.uid ? this.JsonBig.parse(this.$route.query.uid) : this.JsonBig.parse(this.uls[0].user_id),
         }).then(data => {
-          console.log('第一次申述人', data);
           data.forEach(v => {
             v.buyer_id = this.JsonBig.stringify(v.buyer_id) // 买家
             v.seller_id = this.JsonBig.stringify(v.seller_id) // 卖家
@@ -113,7 +110,7 @@
             v.appellant_id = this.JsonBig.stringify(v.appellant_id) // 申述人
             v.appellee_id = this.JsonBig.stringify(v.appellee_id) // 被申述人
           })
-          this.$store.commit({type: 'initServiceNowtalk', data: {id: this.$route.query.uid}}) // 存储右边聊天人员
+          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.$route.query.uid ? this.$route.query.uid : this.uls[0].user_id})}) // 存储右边聊天人员
         }).catch(error=>{
           console.log('错误', error)
         })
@@ -122,7 +119,7 @@
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人资料
           "user_id": this.JsonBig.parse(this.uls[index].user_id),
         }).then(data => {
-          console.log('申述人', data);
+          // console.log('申述人', data);
           data.forEach(v => {
             v.buyer_id = this.JsonBig.stringify(v.buyer_id) // 买家
             v.seller_id = this.JsonBig.stringify(v.seller_id) // 卖家
@@ -139,7 +136,7 @@
       parseUls() { // 搜索输入框
         this.uls = [];
         this.ulsBuf.forEach((v) => {
-          if (new RegExp("^.*"+this.srchText+".*$").test(v.appellant_name)) {
+          if (new RegExp("^.*"+this.srchText+".*$").test(v.user_name)) {
             this.uls.push(v);
           }
         });

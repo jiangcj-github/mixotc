@@ -252,7 +252,7 @@
       appl() {
         let applUser; //197113900708139008
         this.otherInfo.forEach(v => {
-          if (v.appellant_id == this.serviceUser.user_id) { // 是否为申述人 0 申诉 1 被申诉
+          if (v.appellant_id == this.serviceNow) { // 是否为申述人 0 申诉 1 被申诉
             applUser = 0;
             this.recv = v.buyer_id == this.serviceNow ?  0 : 1; // 是否为买家 0 买 1 卖
             this.isBuyer = v.buyer_id == this.serviceNow ?  "买家" : "卖家";
@@ -411,7 +411,7 @@
             result.push({
               id: this.JsonBig.stringify(item.id),
               isSend: sender_id === uid ? uid : sender_id,
-              headimg: sender_id === uid ? `/static/images/kefu/kefu.png` : (this.serviceUser.appellant_icon ? `${this.HostUrl.http}image/${this.serviceUser.appellant_icon}` : `/static/images/default_avator.png`),
+              headimg: sender_id === uid ? `/static/images/kefu/kefu.png` : (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : `/static/images/default_avator.png`),
               type: item.type === 'image' ? 1 : 0,
               content: item.type === 'image' ? `${this.HostUrl.http}file/${item.data.id}` : item.data.msg,
               // isLoding: item.type === 'image' ? true : false,
@@ -435,7 +435,7 @@
         this.$refs.textarea.focus();
       },
       onClickM1() { // 点击通知放币按钮
-        let text = MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`);
+        let text = MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`);
         this.$refs.textarea.innerHTML = text;
         this.$refs.textarea.focus();
       },
@@ -473,7 +473,7 @@
       },
       forceIcon(index) { // 强制放币弹窗
         this.showPop1 = true
-        this.forceIconName = this.appl === 0 ? this.otherInfo[index].name : this.serviceUser.appellant_name
+        this.forceIconName = this.appl === 0 ? this.otherInfo[index].name : this.serviceUser.user_name
         this.forceIconNameIcon = this.otherInfo[0].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : `/static/images/default_avator.png`
         this.forceIconObj = {
           "id": this.JsonBig.parse(this.otherInfo[index].sid),
@@ -490,7 +490,7 @@
       },
       seletPop3Radio(num) { // 终止交易弹窗单选按钮
         this.pop3Radio = num
-        this.stopTradePerson = this.pop3Radio === 0 ? this.serviceUser.appellant_id : 0
+        this.stopTradePerson = this.pop3Radio === 0 ? this.serviceUser.user_id : 0
         console.log('this.popIndex', this.popIndex)
         this.comfirmStopTradeObj(this.popIndex)
       },
@@ -502,16 +502,16 @@
       },
       stopTrade(index) { // 终止交易弹窗
         this.popIndex = index
-        this.stopTradeUser = this.serviceUser && this.serviceUser.appellant_name // 终止交易发起人名
+        this.stopTradeUser = this.serviceUser && this.serviceUser.user_name // 终止交易发起人名
         this.stopTradeOther = this.otherInfo && this.otherInfo[index].name // 终止交易发起对方人名
-        this.stopTradeUserIcon = this.serviceUser.appellant_icon ? `${this.HostUrl.http}image/${this.serviceUser.appellant_icon}` : `/static/images/default_avator.png`
+        this.stopTradeUserIcon = this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : `/static/images/default_avator.png`
         this.stopTradeOtherIcon = this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : `/static/images/default_avator.png`
         this.showPop3 = true
         this.comfirmStopTradeObj(index)
       },
       onPop1Ok() { // 强制放币确认
         this.showPop1 = false
-        let text = MSGS.get(5, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/reason/, this.pop1TextOld);
+        let text = MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/reason/, this.pop1TextOld);
         this.sendMsg = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_send_order',
@@ -537,7 +537,7 @@
       },
       onPop3Ok() { // 终止交易确认
         this.showPop3 = false
-        let text = MSGS.get(7, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/reason/, this.pop3TextOld);
+        let text = MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/reason/, this.pop3TextOld);
         this.sendMsg = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_terminate_order',
