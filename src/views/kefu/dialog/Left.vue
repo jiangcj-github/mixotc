@@ -18,7 +18,8 @@
               <span class="s1">{{content.user_name}}</span>
               <span class="s2">{{(content.msg_time * 1000).formatTime()}}</span>
             </p>
-            <p class="p2">{{content.msg_data ? (content.msg_type === "image" ? '[图片]' : content.msg_data.msg) : ''}}</p>
+            <!--<p class="p2">{{content.msg_data ? (content.msg_type === "image" ? '[图片]' : content.msg_data.msg) : ''}}</p>-->
+            <p class="p2">{{serviceMessage[content.user_id] ? ((serviceMessage[content.user_id])[serviceMessage[content.user_id].length - 1].type === 1 ? '[图片]' : (serviceMessage[content.user_id])[serviceMessage[content.user_id].length - 1].content) : (content.msg_data ? (content.msg_type === "image" ? '[图片]' : content.msg_data.msg) : (content.msg_data ? (content.msg_type === "image" ? '[图片]' : content.msg_data.msg) : ''))}}</p>
           </div>
         </li>
       </ul>
@@ -34,12 +35,16 @@
     data() {
       return {
         srchText: "",
-        uls: [],
-        ulsBuf: [],
+        searchList: [],
       }
     },
     computed: {
-
+      uls() {
+        return this.searchList.length ? this.searchList : this.$store.state.serviceData
+      },
+      serviceMessage() {
+        return this.$store.state.serviceMessage
+      }
     },
     mounted(){
       this.listenNews();
@@ -56,7 +61,7 @@
             // op为7单人聊天信息，对象类型
             if (res.op && res.op === 7) {
               console.log('聊天消息', res)
-              let {id, uid, icon, name, data, type } = res.body;
+              let {id, uid, icon, data, type } = res.body;
               let obj = {};
               if (type === 'text') { // 文字
                 obj = {
@@ -90,10 +95,11 @@
           "id": this.$store.state.userInfo.uid
         }).then(data => {
           console.log('对话列表', data);
-          this.uls =  this.ulsBuf = data;
+          //this.ulsBuf = data;
           data.forEach(v => {
             v.user_id = this.JsonBig.stringify(v.user_id)
             v.unread = 0
+            console.log('111', v.user_id)
           })
           this.$store.commit({type: 'initServiceData', data: data}); // 获取列表数据存储到vuex中
         }).catch(error=>{
@@ -135,12 +141,12 @@
         })
       },
       parseUls() { // 搜索输入框
-        this.uls = [];
-        this.ulsBuf.forEach((v) => {
+        this.searchList = [];
+        this.$store.state.serviceData.forEach(v => {
           if (new RegExp("^.*"+this.srchText+".*$").test(v.user_name)) {
-            this.uls.push(v);
+            this.searchList.push(v);
           }
-        });
+        })
       }
     }
   }
