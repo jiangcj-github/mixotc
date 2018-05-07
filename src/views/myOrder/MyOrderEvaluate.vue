@@ -7,8 +7,8 @@
     </h1>
     <div class="evaluate-content">
       <p>
-        <img :src="`http://192.168.113.26/image/${icon}`" alt="">
-        <em>{{name}}</em>
+        <img :src="orderList.icon ? `${HostUrl.http}image/${orderList.icon}` : `/static/images/default_avator.png`"  alt="">
+        <em>{{orderList.name}}</em>
         <router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(orderList.buyer) == userId ? orderList.seller : orderList.buyer}}">访问TA的主页</router-link>
       </p>
       <div class="content-info clearfix">
@@ -17,14 +17,14 @@
           <li v-for="content in titleList">{{content}}</li>
         </ul>
         <ol>
-          <li>{{currency}}</li>
-          <li>{{price}}</li>
-          <li>{{num}}</li>
-          <li>{{amountc}}</li>
-          <li>{{create}}</li>
-          <li>{{id}}</li>
-          <li>{{limit}}</li>
-          <li>{{info}}</li>
+          <li>{{orderList.currency && `${JsonBig.stringify(orderList.buyer) == userId ? '购买' : '出售'}${orderList.currency.toUpperCase()}`}}</li>
+          <li>{{`${orderList.price} CNY`}}</li>
+          <li>{{orderList.currency && `${orderList.amountc} ${orderList.currency.toUpperCase()}`}}</li>
+          <li>{{`${orderList.amountm} CNY`}}</li>
+          <li>{{(Number(orderList.create)).toDate('yyyy/MM/dd HH:mm:ss')}}</li>
+          <li>{{Number(orderList.id)}}</li>
+          <li>{{ `${orderList.limit}min`}}</li>
+          <li>{{orderList.info === '' ? '无' : orderList.info}}</li>
         </ol>
       </div>
       <EvaluateRelease v-if="showContent === 0"
@@ -49,20 +49,10 @@
       return {
         showContent: 0,
         titleList: ['订单类型', '购买单价', '购买数量', '购买金额', '创建时间', '订单编号', '订单期限', '订单备注'],
-        name: '',
-        currency: '',
-        price: '',
-        num: '',
-        amountc: '',
-        create: '',
-        id: '',
-        limit: '',
-        info: '',
         propsId: '',
         propsReceiver: '',
         propsSid: '',
         propsType: '',
-        icon: '',
         userId: '',
         orderList: ''
       }
@@ -72,23 +62,14 @@
       EvaluateResult
     },
     mounted() {
-      this.userId = this.JsonBig.stringify(this.$store.state.userInfo.uid)
-      this.showContent = Number(this.$route.query.type)
-      this.orderList = this.$route.query.data
-      this.icon = this.orderList.icon
-      this.name = this.orderList.name
-      this.currency = `${this.JsonBig.stringify(this.orderList.buyer) == this.userId ? '购买' : '出售'}${this.orderList.currency.toUpperCase()}`
-      this.price = `${this.orderList.price} CNY`
-      this.num = `${this.orderList.amountc} ${this.orderList.currency.toUpperCase()}`
-      this.amountc = `${this.orderList.amountm} CNY`
-      this.create = (Number(this.orderList.create)).toDate('yyyy/MM/dd HH:mm:ss')
-      this.id = this.JsonBig.stringify(this.orderList.id)
-      this.limit = `${this.orderList.limit}min`
-      this.info = this.orderList.info
-      this.propsId = this.orderList.id
-      this.propsType = this.orderList.type
-      this.propsSid = this.orderList.sid
-      this.propsReceiver = this.JsonBig.stringify(this.orderList.buyer) == this.userId ? this.orderList.seller : this.orderList.buyer
+      this.userId = this.JsonBig.stringify(this.$store.state.userInfo.uid);
+      this.showContent = Number(this.$route.query.type);
+      this.orderList = this.$store.state.evaluateOrderResult;
+      this.propsId = this.orderList.id;
+      this.propsType = this.orderList.type;
+      this.propsSid = this.orderList.sid;
+      this.propsReceiver = this.JsonBig.stringify(this.orderList.buyer) == this.userId ? this.orderList.seller : this.orderList.buyer;
+
       this.Bus.$on('showReult', data => { // 接收订单完成后的变量提示，变为订单结果
         this.showContent = data
       })

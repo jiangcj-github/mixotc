@@ -14,6 +14,9 @@ export default {
     //存入用户登陆后返回的信息
     state.userInfo = data;
   },
+  [types.evaluateOrder](state, { data }) {  // 订单评论结果
+    state.evaluateOrderResult = data
+  },
   [types.changeChatBox](state, { data }) {
     // 控制右下方消息框显示
     if (data) state.unreadNumber = 0;
@@ -236,9 +239,9 @@ export default {
 
   // 接收到消息和发送消息时的处理
   [types.addServiceMessages](state, { data }) {
-    let idex = false;
+    let idex;
     state.serviceData.forEach((item, index) => {
-      item.id === data.id && (idex = index);
+      item.user_id === data.id && (idex = index);
     });
     !state.serviceMessage[data.id] && (state.serviceMessage[data.id] = []); //对话记录不存在时创建
     state.serviceMessage[data.id].push(data.msg);

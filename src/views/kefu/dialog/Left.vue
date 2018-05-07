@@ -12,7 +12,7 @@
       <ul class="persons">
         <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index, content.user_id)" :class="{active: content.user_id === $store.state.serviceNow}">
           <img :src="content.user_icon ? `${HostUrl.http}image/${content.user_icon}` : `/static/images/default_avator.png`" alt="">
-          <i v-if="content.unread">{{unreadNum}}</i>
+          <i v-if="content.unread">{{content.unread}}</i>
           <div class="pinfo">
             <p class="p1">
               <span class="s1">{{content.user_name}}</span>
@@ -36,7 +36,6 @@
         srchText: "",
         uls: [],
         ulsBuf: [],
-        unreadNum: 1
       }
     },
     computed: {
@@ -51,6 +50,7 @@
     },
     methods: {
       listenNews() { //聊天信息监听
+        let _this = this;
         this.WebSocket.onMessage['sms']={
           async callback(res){
             // op为7单人聊天信息，对象类型
@@ -63,10 +63,10 @@
                   isSend:  _this.JsonBig.stringify(uid),
                   headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                   type: 0, // 0: 发送文字, 1: 发送图片
-                  isLoding: true, // 加载中
+                  isLoding: false, // 加载中
                   err: false, // 0: 发送成功, 1: 发送失败
                   content: data.msg,
-                  time: new Date() - 0
+                  time: new Date() - 0,
                 };
                 _this.$store.commit({type: 'addServiceMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
                 return;
@@ -75,10 +75,10 @@
                 isSend:  _this.JsonBig.stringify(uid),
                 headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                 type: 1, // 0: 发送文字, 1: 发送图片
-                isLoding: true, // 加载中
+                isLoding: false, // 加载中
                 err: false, // 0: 发送成功, 1: 发送失败
                 content: `${_this.HostUrl.http}file/${data.id}`,
-                time: new Date() - 0
+                time: new Date() - 0,
               };
               _this.$store.commit({type: 'addServiceMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
             }
@@ -93,6 +93,7 @@
           this.uls =  this.ulsBuf = data;
           data.forEach(v => {
             v.user_id = this.JsonBig.stringify(v.user_id)
+            v.unread = 0
           })
           this.$store.commit({type: 'initServiceData', data: data}); // 获取列表数据存储到vuex中
         }).catch(error=>{

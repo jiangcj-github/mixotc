@@ -2,7 +2,7 @@
   <div class="rule-wrap inner">
     <h1>
       <router-link to="">mixOTC帮助中心</router-link> -
-      <router-link to="">交易规则</router-link>
+      <span v-for="(item,index) in titleList" v-if="showActive == index"> {{item}}</span>
     </h1>
     <div class="clearfix">
       <ul class="title-ul">
