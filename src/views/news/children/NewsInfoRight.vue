@@ -207,6 +207,7 @@
       //   }).catch(error=>{
       //     console.log(error)
       //   })
+      this.fetchAddress()//拉取收款地址
       this.beFriend()//监听被加好友
       this.beAddedGroup()//监听被加入群
       //监听其他页面调用聊天窗口
@@ -285,7 +286,7 @@
               return {text: `微信:${item.number}`, sendText: `收款人:${item.name}<br>微信账号:${item.number}`};
             }
             if(item.type === 4) {
-              return {text: `${item.bank + '****' + (item.number.slice(-4))}`, sendText: `收款人：${item.name}<br>银行卡号:${item.number}<br> 开户行:${item.bank}`}
+              return {text: `银行卡:${item.bank + '****' + (item.number.slice(-4))}`, sendText: `收款人：${item.name}<br>银行卡号:${item.number}<br> 开户行:${item.bank}`}
             }
         })
       },
@@ -309,6 +310,15 @@
       },
     },
     methods: {
+      // 拉取收款地址数据
+      async fetchAddress() {
+        await this.WsProxy.send('wallet', 'my_accounts', {
+          uid: this.$store.state.userInfo.uid,
+          origin: 0
+        }).then(data => {
+          data.accounts && this.$store.commit({type: 'moneyAddress', data: data.accounts})
+        }).catch(error=>{})
+      },
       async fetchFriendList() {
          await this.WsProxy.send('control', 'friend_list', {uid: this.$store.state.userInfo.uid}).then(data => {
           if(!data) data = []
@@ -381,8 +391,9 @@
       sendAddress(item) {
         this.sendMs(item)
       },
-      foldAddress() {
+      async foldAddress() {
         if(this.isDisable) return;
+        await this.fetchAddress();
         if(this.mapAddress.length === 0) {
           this.addressLayer = true;
           clearTimeout(this.timer)

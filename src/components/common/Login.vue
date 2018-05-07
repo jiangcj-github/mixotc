@@ -126,10 +126,9 @@
         return /^\d{6}$/.test(code);
       },
       sendCode(){
-        if (this.isSend) {
-        // console.log(9999999999);
-        return
-      };
+        if (this.isSend){
+          return
+        };
        this.type = this.checkAccount(this.account);
         let accType = this.checkAccount(this.account);
         if (!this.type) return;
@@ -215,7 +214,7 @@
               country: 'CN',
               version: 1,
               mode: 0,
-              device: '',
+              device: this.getExplorerInfo(),
               os: 3
             }
           }))
@@ -223,6 +222,26 @@
       },
       hideLoginForm() {
         this.$store.commit({type: 'changeLoginForm', data: false});
+      },
+      getExplorerInfo() {
+        let explorer = window.navigator.userAgent.toLowerCase();
+        //ie 
+        if (explorer.indexOf("msie") >= 0) {
+          var ver = explorer.match(/msie ([\d.]+)/)[1];
+          return "IE" + ver;
+        }else if (explorer.indexOf("firefox") >= 0) {
+          var ver = explorer.match(/firefox\/([\d.]+)/)[1];
+          return "Firefox" + ver;
+        }else if (explorer.indexOf("chrome") >= 0) {
+          var ver = explorer.match(/chrome\/([\d.]+)/)[1];
+          return "Chrome" + ver;
+        }else if (explorer.indexOf("opera") >= 0) {
+          var ver = explorer.match(/opera.([\d.]+)/)[1];
+          return "Opera" + ver;
+        }else if (explorer.indexOf("Safari") >= 0) {
+          var ver = explorer.match(/version\/([\d.]+)/)[1];
+           return "Safari" + ver;
+          }
       }
     },
     mounted() {

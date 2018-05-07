@@ -54,7 +54,6 @@
     },
     mounted() {
       this.initData()
-      this.fetchAddress()//拉取收款地址
       this.listenChat()//监听消息
       this.reqFriend()//监听好友请求
       this.beKickGroup()//监听被踢出群
@@ -256,15 +255,6 @@
           }).catch(error=>{
             console.log(error)
         })
-      },
-      // 拉取收款地址数据
-      async fetchAddress() {
-        await this.WsProxy.send('wallet', 'my_accounts', {
-          uid: this.$store.state.userInfo.uid,
-          origin: 0
-        }).then(data => {
-          data.accounts && this.$store.commit({type: 'moneyAddress', data: data.accounts})
-        }).catch(error=>{})
       },
       // 监听系统消息(请求加好友)
       reqFriend(){
