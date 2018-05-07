@@ -60,7 +60,7 @@ Number.prototype.formatTime = function() {
   let time = new Date(this);
   let ms = `${time.getHours() > 9 ? time.getHours() : "0" + time.getHours()}:${time.getMinutes() > 9 ? time.getMinutes() : "0" + time.getMinutes()}`;
   if (this < new Date() - 0 && time.getDate() !== new Date().getDate()) {
-    return time.getMonth() + "月" + time.getDate() + "日" + ms;
+    return (time.getMonth() + 1) + "月" + time.getDate() + "日" + ms;
   }
   return ms;
 };

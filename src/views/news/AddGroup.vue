@@ -65,7 +65,7 @@
             name: this.userInfo.name
           },
           {
-            id : this.chat[this.index].uid,
+            id : this.chat[this.index].id,
             icon : this.chat[this.index].icon,
             name: this.chat[this.index].nickName
           }
@@ -135,6 +135,7 @@
         let array = [];
       //新建群
         if(this.isNewGroup) {
+          console.log(this.addList)
           array = this.ids.map(item => {
             return this.JsonBig.parse(item)
           })

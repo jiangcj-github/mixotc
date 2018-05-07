@@ -176,7 +176,7 @@
             }); 
           }else {
             let id = this.JsonBig.stringify(item.uid);
-            // if (this.friendIds.includes(id)) return;
+            if (this.friendIds.includes(id)) return;
             result.push({
               mid: item.mid ? this.JsonBig.stringify(item.mid) : 0,
               id: id,
@@ -249,7 +249,7 @@
                 nickName: other.name,
                 phone: other.phone,
                 email: other.email,
-                moreFlag: false,
+                moreFlag: this.$store.state.messages[uid] ?  (this.$store.state.messages[uid].length === 0 ? false : true): false,
                 unread: 0
               }})
             }

@@ -23,6 +23,8 @@ const moneyAddress = "moneyAddress";
 const newSystemMes = "newSystemMes";
 const beKick = 'beKick' // 新增发送消息
 const chatTop = "chatTop"; // 新增发送消息
+const delStranger = "delStranger"; // 加好友后删除之前陌生人对话
+const initState = "initState"; // 改变登陆用户时初始化必要的state
 
 
 /**
@@ -66,6 +68,8 @@ export {
   newSystemMes,
   beKick,// 被踢出群
   chatTop,
+  delStranger,
+  initState,//改变登陆用户时初始化必要的state
 
   /**
    * 审核申述客服部分

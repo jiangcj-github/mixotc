@@ -192,7 +192,25 @@ export default {
     });
   },
 
-
+  [types.delStranger](state, { data: {id, index} }) {
+    //加好友后删除之前陌生人对话
+    state.chat.splice(index, 1);
+    delete state.messages[id];
+    state.messages = Object.assign({}, state.messages);
+  },
+  [types.delStranger](state) {
+    //改变登陆用户时初始化必要的state
+    state.trustList = [];
+    state.friendList= [];
+    state.groupList = [];
+    state.unreadNumber = 0;
+    state.curChat = ''; //当前聊天
+    state.systemMessage = 0; //未读系统消息
+    state.token = "";
+    state.chat = [];
+    state.moneyAddress = [];
+    state.messages = { system: [] };
+  },
   /**
    * 审核申述客服部分
    */
@@ -203,7 +221,7 @@ export default {
   },
   // 获取左侧聊天人员具体信息
   [types.getServiceNowtalk](state, { data }) {
-    state.serviceUser = data
+    state.serviceUser = data;
   },
   // 第一次聊天人员状态
   [types.initServiceNowtalk](state, { data }) {
@@ -214,7 +232,7 @@ export default {
   [types.changeServiceNowtalk](state, { data }) {
     // 改变当前聊天
     state.serviceNow = data.id; // 聊天入口人的id
-    state.serviceNowOther = data.data //  聊天入口对方人的信息
+    state.serviceNowOther = data.data; //  聊天入口对方人的信息
   },
   // 双方人员置换
   [types.transformServiceUser](state, { data }) {
@@ -231,7 +249,12 @@ export default {
     state.serviceMessage[data.id].push(data.msg);
   },
   // 新增发送消息
-  [types.changeServiceMessages](state, {data: { id, time, code }}) {
+  [types.changeServiceMessages](
+    state,
+    {
+      data: { id, time, code }
+    }
+  ) {
     // 消息发送成功或失败
     let idx = 0;
     state.serviceMessage[id].forEach((item, index) => {
@@ -244,7 +267,12 @@ export default {
     state.serviceMessage = Object.assign({}, state.serviceMessage);
   },
   // 发送图片
-  [types.changeServiceImgsrc](state, {data: {id, time, src}}) {
+  [types.changeServiceImgsrc](
+    state,
+    {
+      data: { id, time, src }
+    }
+  ) {
     state.serviceMessage[id].forEach((item, index) => {
       if (time === item.time) {
         item.content = src;
@@ -253,9 +281,12 @@ export default {
     state.serviceMessage = Object.assign({}, state.serviceMessage);
   },
   // 查看更多消息
-  [types.moreServiceMessage](state, {data}) {
-    !state.serviceMessage[state.serviceNow] && (state.serviceMessage[state.serviceNow] = []);
-    state.serviceMessage[state.serviceNow] = data.reverse().concat(state.serviceMessage[state.serviceNow]);
+  [types.moreServiceMessage](state, { data }) {
+    !state.serviceMessage[state.serviceNow] &&
+      (state.serviceMessage[state.serviceNow] = []);
+    state.serviceMessage[state.serviceNow] = data
+      .reverse()
+      .concat(state.serviceMessage[state.serviceNow]);
     state.serviceMessage = Object.assign({}, state.serviceMessage);
-  },
+  }
 };

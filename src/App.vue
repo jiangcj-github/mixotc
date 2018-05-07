@@ -41,8 +41,6 @@
             return;
           }
           ws.reConnectFlag = true;
-          // console.log('setUserInfo',data.body.uid);
-          console.log(this.$store.state.userInfo, data.body)
           this.$store.commit({
             type: 'getUserInfo',
             data: data.body

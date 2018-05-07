@@ -242,6 +242,7 @@
         return idx
       },
       isDisable() {
+        if(!this.chatIds.includes(this.curChat)) return true;
         return this.curChat === 'system' || this.curChat === '' ? true  : ((this.chat[this.index] && this.chat[this.index].exists === false) ?  true : false )
       },
       isFriend() {
@@ -316,49 +317,20 @@
           console.log(error)
         })
       },
+      //其余页面入口-联系他
       async contactSomeone(id, msg) {
         let flag = this.chatIds.indexOf(id),
             friendFlag = false;
         await this.fetchFriendList();
         friendFlag = this.friendIds.includes(id);
+        if(friendFlag) id = this.friendGid[id];
         await this.dealNewChat(id, friendFlag ? 1 : 0);
         this.$store.commit({type: 'changeChatBox', data: true})
         if (flag !== -1 ) {
           this.$store.commit({type: 'chatTop', data: flag})
         };
-        this.$store.commit({type: 'changeCurChat', data: {id: friendFlag ? this.friendGid[id] : id }})
+        this.$store.commit({type: 'changeCurChat', data: {id: id }})
         if (msg) this.sendMs(msg);
-        
-      },
-      showBigPicture(flag, src) {
-        if (!flag) return;
-        this.showBigSrc = src;
-        this.showBig = true;
-      },
-      sendAddress(item) {
-        this.sendMs(item)
-      },
-      foldAddress() {
-        if(this.isDisable) return;
-        if(this.mapAddress.length === 0) {
-          this.addressLayer = true;
-          clearTimeout(this.timer)
-          this.timer = setTimeout(() => {
-            this.addressLayer = false
-          }, 3000)
-          return;
-        }
-        this.showAddress = true;
-      },
-      toHomepage(id) {
-        this.$router.push({ name: 'homepage', query: { uid: id }})
-      },
-      imgLoad(tid, time) {
-        this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0 }})
-      },
-      imgError(tid, time, src) {
-        if (src === '') return;
-        this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
       },
       //更多消息
       async fetchMore(num, flag) {
@@ -400,6 +372,36 @@
           })
         })
         this.$store.commit({type: 'moreMessage', data:result })
+      },
+      showBigPicture(flag, src) {
+        if (!flag) return;
+        this.showBigSrc = src;
+        this.showBig = true;
+      },
+      sendAddress(item) {
+        this.sendMs(item)
+      },
+      foldAddress() {
+        if(this.isDisable) return;
+        if(this.mapAddress.length === 0) {
+          this.addressLayer = true;
+          clearTimeout(this.timer)
+          this.timer = setTimeout(() => {
+            this.addressLayer = false
+          }, 3000)
+          return;
+        }
+        this.showAddress = true;
+      },
+      toHomepage(id) {
+        this.$router.push({ name: 'homepage', query: { uid: id }})
+      },
+      imgLoad(tid, time) {
+        this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0 }})
+      },
+      imgError(tid, time, src) {
+        if (src === '') return;
+        this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
       },
       // 处理是否显示消息时间
       dealTime(time1, time2) {
@@ -475,10 +477,9 @@
               unread: 0
            }})
         })
-        // console.log(this.chatIds.includes(id));
         flag && !this.chatIds.includes(id) && await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
           this.$store.commit({type: 'getGroupList', data})
-          console.log(this.friendGid[id])
+          // console.log(this.friendGid[id])
           let group = this.$store.state.groupList.filter(item => {
             return this.friendGid[id] === this.JsonBig.stringify(item.id)
           })[0]
@@ -506,6 +507,7 @@
                 return this.JsonBig.stringify(item.id) !== this.userId
               })[0]
               let uid = this.JsonBig.stringify(other.id)
+              console.log(uid, this.$store.state.messages)
               this.$store.commit({type: 'newChat', data:{
                 id: this.friendGid[uid],
                 uid: uid,
@@ -516,7 +518,7 @@
                 nickName: other.name,
                 phone: other.phone,
                 email: other.email,
-                moreFlag: false,
+                moreFlag: this.$store.state.messages[uid] ?  (this.$store.state.messages[uid].length === 0 ? false : true): false,
                 unread: 0
               }})
             }
@@ -529,7 +531,7 @@
       },
       //发送消息
       sendMs(text) {
-        if (text === '') return;
+        if (text.trim() === '') return;
         // 本地store更新消息
         let tid = this.JsonBig.parse(this.curChat),
             chat= this.chat[this.index],
@@ -581,10 +583,21 @@
               let {id, aid, type, members} = res.body.data;
               await this.dealNewChat(this.JsonBig.stringify(id), 1)
               if(type === 0) {
-                let icon = members.filter(item => {
+                let other = members.filter(item => {
                   return this.JsonBig.stringify(item.id) !== this.userId
-                })[0].icon;
+                })[0];
+                //处理加好友后的陌生人对话框
+                let idx = '', otherId = this.JsonBig.stringify(other.id);
+                this.chat.forEach((item, index)=>{
+                  if (item.id === otherId) idx = index;
+                })
+                if(idx !== '') {
+                  this.$store.commit({type: 'delStranger', data:{id: otherId, index: idx }})
+                }
+                //加好友后的处理
+                let icon = other.icon;
                 let obj = {
+                  id: 0,
                   from: this.JsonBig.stringify(id),
                   to: this.userId,
                   icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
