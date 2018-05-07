@@ -81,7 +81,7 @@
     },
     watch:{
       isLogin:{
-        handler(){
+        handler(){console.log("ee");
           this.loadTraderInfo();
         },
         immediate: true
