@@ -264,7 +264,7 @@
           origin: 0
         }).then(data => {
           data.accounts && this.$store.commit({type: 'moneyAddress', data: data.accounts})
-        })
+        }).catch(error=>{})
       },
       // 监听系统消息(请求加好友)
       reqFriend(){
@@ -418,9 +418,11 @@
         })
         //好友
         this.$store.state.friendList.forEach(item => {
+          let id = this.friendGid[this.JsonBig.stringify(item.id)]
+          if (this.chatIds.includes(id)) return;
           if (item.name.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText)) {
             result.push({
-              id: this.friendGid[this.JsonBig.stringify(item.id)],
+              id: id,
               uid: this.JsonBig.stringify(item.id),
               isSingle: true,
               group: false,
@@ -429,7 +431,7 @@
               nickName: item.name,
               phone: item.phone,
               email: item.email,
-              moreFlag: false,
+              moreFlag: true,
               unread: 0
             });
           }

@@ -344,7 +344,7 @@
         await this.WsProxy.send('control', 'get_history_msgs', {
           peer_id:  chat.group || chat.isSingle ? 0 : this.JsonBig.parse(this.curChat),
           group_id: chat.group || chat.isSingle ? this.JsonBig.parse(this.curChat) : 0,
-          last_msg_id: this.messages[0] && this.messages[0].id ? this.JsonBig.parse(this.messages[0].id) : (chat.mid ? this.JsonBig.parse(chat.mid) : 0),
+          last_msg_id: this.messages[0] && this.messages[0].id ? this.JsonBig.parse(this.messages[0].id) : 0,
           is_peer_admin: this.chat[this.index].service ? 1 : 0,
           count: num
         }).then(data => {

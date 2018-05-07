@@ -41,6 +41,7 @@
             return;
           }
           ws.reConnectFlag = true;
+          
           this.$store.commit({
             type: 'getUserInfo',
             data: data.body
