@@ -28,7 +28,6 @@
       return {
         srchText: "",
 
-
         curPage: 1,
         total: 0,
         pageSize: 20,
@@ -49,11 +48,13 @@
         this.loadUncheckByUid(item.uid);
       },
       search(){
-        this.candSel=-1;
         this.loadUncheckList();
       },
       loadUncheckList(p=0){
         let srchKey=this.srchText;
+        //更新未审核数量
+        this.Bus.$emit("onUpdateUncheck");
+        //
         this.WsProxy.send("control","a_get_waiting_identity_user_list",{
           type:2,
           keyword:srchKey,
@@ -61,14 +62,12 @@
           count:this.pageSize
         }).then((data)=>{
           this.total=data.amount;
-          this.candSel=-1;
           this.parseCands(data.users);
         }).catch((msg)=>{
           alert(JSON.stringify(msg));
         });
       },
       loadUncheckByUid(id){
-        this.infoErr=4;
         this.WsProxy.send("control","a_get_user_identity",{
           type: 2,
           uid: id,
@@ -99,6 +98,14 @@
             account:e.phone || e.email || "-",
           });
         });
+        //默认选择
+        if(this.cands.length>0){
+          this.candSel=0;
+          this.loadUncheckByUid(this.cands[0].uid);
+        }else{
+          this.candSel=-1;
+          this.infoErr=-1;
+        }
       },
       parseInfos(data){
         //返回结果时间降序
@@ -131,9 +138,6 @@
         this.loadUncheckList(p-1);
       });
       this.Bus.$on("onSubmit",(info)=>{
-        this.Bus.$emit("onSubmit2",info);
-        this.infoErr=-1;
-        this.candSel=-1;
         this.loadUncheckList();
       });
     },

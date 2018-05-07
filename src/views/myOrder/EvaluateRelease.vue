@@ -12,7 +12,7 @@
       </span>
       <b>{{rateText}}</b>
     </div>
-    <textarea placeholder="评价对方：字数限制0～50个字符" v-model="comment"></textarea>
+    <textarea placeholder="评价对方：字数限制0～50个字符" v-model.trim="comment" @input="evaluateInput" ref="comment"></textarea>
     <button @click="release">发布</button>
   </div>
 </template>
@@ -29,18 +29,19 @@
         flagCache: 0,
         scoreCache: 0,
         comment: '',
-        rateText:''
+        rateText:'',
+        commentOld: ''
       }
     },
     mounted() {
-      console.log('11111', this.id, this.receiver, this.type)
+      // console.log('11111', this.id, this.receiver, this.type)
     },
     computed: { //计算属性
       imgList() {
         this.score > 5 ? this.score = 5 : this.score;
         let result = [];
-        console.log('result', result)
-        console.log('score', this.score)
+        // console.log('result', result)
+        // console.log('score', this.score)
         for (let i = 0; i < this.score; i++) {
           result.push({item: 'on', flag: this.flagCache});
         }
@@ -51,7 +52,7 @@
       }
     },
     methods: {
-      rateStandard() {
+      rateStandard() { // 评分标准
         if (this.score < 3) {
           this.rateText = '差评'
         } else if (this.score >= 3 && this.score < 4) {
@@ -60,35 +61,45 @@
           this.rateText = '好评'
         }
       },
-      changeRate(index) {
-        this.flagCache = 1
-        this.score = index + 1
-        this.scoreCache = index + 1
-        console.log('click', this.score, this.flagCache, this.scoreCache)
-        console.log('this.imgList', this.imgList)
+      changeRate(index) { // 点击评价
+        this.flagCache = 1;
+        this.score = index + 1;
+        this.scoreCache = index + 1;
+        // console.log('click', this.score, this.flagCache, this.scoreCache)
+        // console.log('this.imgList', this.imgList)
         this.rateStandard()
       },
-      inRate(evt, item, index) {
+      inRate(evt, item, index) { // 移入评价
         if (evt.target.className.indexOf('off') && (item.flag == 0)) {
-          this.flagCache = 0
+          this.flagCache = 0;
           this.score = index + 1
         }
-        console.log('hover1', this.score, this.flagCache, )
-        console.log('hoverthis.imgList', this.imgList)
+        // console.log('hover1', this.score, this.flagCache, )
+        // console.log('hoverthis.imgList', this.imgList)
         this.rateStandard()
       },
-      outRate(evt, item, index) {
+      outRate(evt, item, index) { // 移出评价
         if (evt.target.className.indexOf('on') && (item.flag == 0)) {
           this.flagCache = 1
           this.score = this.scoreCache
           this.rateText = ''
-          console.log('hover2', this.score, this.flagCache, this.scoreCache)
+          // console.log('hover2', this.score, this.flagCache, this.scoreCache)
         }
         if (this.score) {
           this.rateStandard()
         }
       },
-      release() {
+      evaluateInput() { // 控制评价输入框字数
+        // console.log('this.comment', this.comment.length)
+        if (this.comment.length > 50) {
+          this.comment = this.commentOld;
+          this.$refs.comment.value = this.commentOld;
+        } else {
+          this.commentOld = this.comment;
+        }
+      },
+      release() { // 发布评价
+        if (this.comment === '') return
         let ws = this.WebSocket; // 创建websocket连接
         let seq = ws.seq;
         ws.onMessage[seq] = { // 监听
@@ -103,8 +114,8 @@
           body:{
             "action": "new_rate",
             data: {
-              "id": this.id,    // 订单ID
-              "receiver": this.receiver,  // 被评论者ID
+              "id": this.JsonBig.parse(this.id),    // 订单ID
+              "receiver": this.JsonBig.parse(this.receiver),  // 被评论者ID
               "type": this.type,    // 1 交易; 2 担保
               "credit": this.score,  // 信誉度 1,2,3 好评3 差评1
               "transit": this.score,  // 发货速度 1,2,3
@@ -165,4 +176,5 @@
       background #FFB422
       color #FFF
       border-radius 2px
+      cursor pointer
 </style>

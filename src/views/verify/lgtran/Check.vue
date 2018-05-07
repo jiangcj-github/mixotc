@@ -2,11 +2,11 @@
   <!--已审核-->
   <div class="check">
     <div class="filter">
-      <div class="f1" :class="{disabled:srchText.length<=0}">
+      <div class="f1">
         <input type="text" placeholder="搜索用户昵称/账号" v-model="srchText" v-clickoutside="()=>{srchShowTip=false}"
                @focus="fuzzyInput" @input="fuzzyInput">
         <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
-        <a href="javascript:void(0)" @click="search"></a>
+        <button @click="search"></button>
         <ul v-show="srchShowTip && tips.length>0">
           <li v-for="(o,i) in tips" @mousedown="srchText=o.nickname" @click="search">
             <span class="sp1">{{o.nickname}}</span><span class="sp2">{{o.account}}</span>
@@ -114,7 +114,7 @@
         statusDropShow: false,    //审核结果下拉框
         statusDropSel: 0,
         status:[
-          {text:"全部状态",value:0},
+          {text:"全部结果",value:0},
           {text:"通过",value:1},
           {text:"不通过",value:2},
           {text:"恶意上传",value:3},
@@ -138,8 +138,9 @@
         this.loadCheckedList();
       },
       days:function(){
-        this.$refs.di.date1=new Date(Date.now()-24*60*60*1000*this.days);
-        this.$refs.di.date2=new Date();
+        let date2=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000);
+        this.$refs.di.date2=date2;
+        this.$refs.di.date1=new Date(date2.getTime()-24*60*60*1000*this.days);
       },
     },
     methods: {
@@ -174,6 +175,8 @@
           case 3:sort=2;break;
           default:sort=0;break;
         }
+        //更新已审核数量
+        this.Bus.$emit("onUpdateCheck");
         //
         this.WsProxy.send("control","a_get_identity_list",{
           type:2,

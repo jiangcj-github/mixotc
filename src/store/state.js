@@ -3,6 +3,7 @@ export default {
   isLogin: false,
   userInfo: null,
   showChat: false,
+  evaluateOrderResult: {}, // 订单评论结果
   newOrder: false,
   trustList: [],
   friendList: [],

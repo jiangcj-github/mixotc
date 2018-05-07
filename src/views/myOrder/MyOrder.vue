@@ -18,7 +18,7 @@
                    class="order-choice-search">
       </SearchInput>
       <div class="order-choice-time clearfix" v-if="contentTabIndex === 2">
-        <DateInterval class="date-group" :endEmitValue="endValue" :startEmitValue="startValue"></DateInterval>
+        <DateInterval class="date-group" :max="Date.parse(new Date())" ref="di"></DateInterval>
         <ul class="clearfix">
           <li v-for="(item, index) in timeList" :class="{'time-active': index == num}" @click="selectTime(index)">{{item}}</li>
         </ul>
@@ -75,7 +75,7 @@
           <li>{{content.price}}</li>
           <li>
             <p :class="JsonBig.stringify(content.buyer) == userId ? 'text-g' : 'text-r'">{{JsonBig.stringify(content.buyer) == userId ? `+${content.amountc}${content.currency.toUpperCase()}` : `-${content.amountc}${content.currency.toUpperCase()}`}}</p>
-            <p>{{content.fee}}</p>
+            <p>{{Number(content.fee).toFixed(10)}}</p>
           </li>
           <li>{{content.amountm}}</li>
           <li>{{content.trade_code}}</li>
@@ -235,8 +235,8 @@
         updateUid: '',
         updateTradeCode: '', // 标记弹窗所用资金码
 
-        startValue: 'startValueDate',
-        endValue: 'endValueDate',
+        startValueDate: null,
+        endValueDate: null,
 
         timeList: ['今天', '三天', '七天'], // 时间Tab切换title
 
@@ -344,16 +344,13 @@
         console.log('searchResult', data)
       });
       // this.Bus.$on('offTime', data => this.showTime = data);
-      // 时间框开始值
-      this.Bus.$on(this.startValue, (data) => {
-        this.startValueDate = new Date(data).getTime()
-        console.log('this.startValue', this.startValueDate)
-      });
-      // 时间框结束值
-      this.Bus.$on(this.endValue, (data) => {
-        this.endValueDate = new Date(data).getTime()
-        console.log('this.endValue', this.endValueDate)
-        this.initData()
+      // 时间框值
+      this.Bus.$on("onDiChange",()=>{
+        this.startValueDate = this.$refs.di.date1 ? Math.floor(new Date(this.$refs.di.date1).getTime() / 1000) : null;
+        this.endValueDate = this.$refs.di.date2 ? Math.floor(new Date(this.$refs.di.date2).getTime() / 1000) : null;
+        if (this.startValueDate && this.endValueDate) {
+          this.initData()
+        }
       });
     },
     destroyed() {
@@ -361,8 +358,7 @@
       this.Bus.$off(this.currencyValue);
       this.Bus.$off(this.allStatusValue);
       this.Bus.$off(this.searchValue);
-      this.Bus.$off(this.startValue);
-      this.Bus.$off(this.endValue);
+      this.Bus.$off(this.onDiChange);
     },
     methods: {
       appealTimer(item){
@@ -441,8 +437,8 @@
               "amount": this.amount,// 电子币数量排序 1降序 2升序
               "money": this.money,// 法币金额排序 1降序 2升序
               "currency": this.selectCurrency,// 币种筛选
-              "start": Math.floor(Number(this.startValueDate) / 1000), // 开始时间
-              "end": Math.floor(Number(this.endValueDate) / 1000),// 结束时间
+              "start": this.startValueDate, // 开始时间
+              "end": this.endValueDate,// 结束时间
               "order_id": this.orderId,
               "trade_code": this.tradeCode,
               "trader": this.trader
@@ -497,28 +493,30 @@
       },
       selectTime(index) { // 时间切换
         this.num = index;
+        this.endValueDate = new Date().getTime()
+        this.$refs.di.date2 = new Date();
         if (index === 0) {
-          this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 1000)
-          this.endValueDate = new Date().getTime()
+          //this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 1000)
+          this.$refs.di.date1 = new Date(Date.now() - (24 * 60 * 60 * 1000))
         }
         if (index === 1) {
-          this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 3 * 1000)
-          this.endValueDate = new Date().getTime()
-          // console.log('this.startValueDate', this.startValueDate, this.endValueDate)
+          //this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 3 * 1000)
+          this.$refs.di.date1 = new Date(Date.now() - (24 * 60 * 60 * 3 * 1000))
         }
         if (index === 2) {
-          this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 7 * 1000)
-          this.endValueDate = new Date().getTime()
+          //this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 7 * 1000)
+          this.$refs.di.date1 = new Date(Date.now() - (24 * 60 * 60 * 7 * 1000))
         }
         this.initData()
       },
       showOperation(index) { // 去评价
-        // console.log('this.contentList[index].operationList.flag', this.contentList[index].operationList.flag)
         if (this.contentList[index].operationList[0].flag == 1) { // 去评价
-          this.$router.push({path: '/order/evaluate', query: {type: '0', data: this.contentList[index]}})
+          this.$router.push({path: '/order/evaluate', query: {type: '0'}});
+          this.$store.commit({type: 'evaluateOrder', data: this.contentList[index]}) // 存储当前订单信息
         }
         if (this.contentList[index].operationList[0].flag == 2) { // 查看评价
-          this.$router.push({path: '/order/evaluate', query: {type: '1', data: this.contentList[index]}})
+          this.$router.push({path: '/order/evaluate', query: {type: '1'}});
+          this.$store.commit({type: 'evaluateOrder', data: this.contentList[index]}) // 存储当前订单信息
         }
       },
       openPayment(st, index) { // 控制标记已付款弹窗

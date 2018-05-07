@@ -33,14 +33,14 @@
     },
     mounted() {
       this.WsProxy.send('otc', 'get_order_rate', {
-        id: this.id, // 广告id
+        id: this.JsonBig.parse(this.id), // 广告id
       }).then((data)=>{
-        let rateArr = ['差评', '差评', '中评', '好评', '好评']
-        console.log('评价结果', data)
-        this.content = data.comment
-        this.rate = rateArr[data.credit - 1]
-        this.imgList = this.imgList.slice(0, data.credit)
-        this.date = data.date.toDate('yyyy/MM/dd HH:mm:ss')
+        let rateArr = ['差评', '差评', '中评', '好评', '好评'];
+        console.log('评价结果', data);
+        this.content = data.comment;
+        this.rate = rateArr[data.credit - 1];
+        this.imgList = this.imgList.slice(0, data.credit);
+        this.date = data.date.toDate('yyyy/MM/dd HH:mm:ss');
         this.flag = data.state
       }).catch((msg)=>{
         console.log(msg);
@@ -49,7 +49,7 @@
     methods: {
       delOrder() { // 删除评价
         this.WsProxy.send('otc', 'del_order_rate', {
-          id: this.id, // 广告id
+          id: this.JsonBig.parse(this.id), // 广告id
         }).then((data)=>{
           console.log('删除评价', data)
         }).catch((msg)=>{

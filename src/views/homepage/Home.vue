@@ -79,14 +79,22 @@
         return this.$store.state.isLogin;
       },
     },
+    watch:{
+      isLogin:{
+        handler(){
+          this.loadTraderInfo();
+        },
+        immediate: true
+      }
+    },
     mounted() {
       this.uid= this.JsonBig.parse(this.$route.query.uid) || "";
-      this.loadTraderInfo();
     },
     methods: {
       joinTrust(){
+        let uid= this.JsonBig.parse(this.$route.query.uid) || "";
         let loginUid=this.$store.state.userInfo.uid;
-        this.WsProxy.send('otc','new_trust',{uid:loginUid, id:this.uid, trust:1}).then((data)=>{
+        this.WsProxy.send('otc','new_trust',{uid:loginUid, id:uid, trust:1}).then((data)=>{
           this.showPop();
           this.info.isTrust=1;
           this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(this.uid)});
@@ -95,8 +103,9 @@
         });
       },
       cancelTrust(){
+        let uid= this.JsonBig.parse(this.$route.query.uid) || "";
         let loginUid=this.$store.state.userInfo.uid;
-        this.WsProxy.send('otc','new_trust',{uid:loginUid, id:this.uid, trust:0}).then((data)=>{
+        this.WsProxy.send('otc','new_trust',{uid:loginUid, id:uid, trust:0}).then((data)=>{
           this.showPop();
           this.info.isTrust=0;
           this.$store.commit({type:"delTrust",data:this.JsonBig.stringify(this.uid)});
@@ -105,15 +114,16 @@
         });
       },
       loadTraderInfo(){
+        let uid= this.JsonBig.parse(this.$route.query.uid) || "";
         if(this.isLogin){
           let loginUid=this.$store.state.userInfo.uid;
-          this.WsProxy.send("otc","trader_info",{id:this.uid, uid:loginUid}).then((data)=>{
+          this.WsProxy.send("otc","trader_info",{id:uid, uid:loginUid}).then((data)=>{
             this.parseInfo(data);
           }).catch((msg)=>{
             alert(JSON.stringify(msg));
           });
         }else{
-          this.Proxy.hp_tradeInfo({id:this.uid}).then((data)=>{
+          this.Proxy.hp_tradeInfo({id:uid}).then((data)=>{
             this.parseInfo(data.data);
           }).catch((msg)=>{
             alert(JSON.stringify(msg));

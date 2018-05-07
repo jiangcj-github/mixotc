@@ -134,7 +134,7 @@
           type: ['出售', '购买'],
           // rate: [`可用余额1.242342BTC`, `${cnyPrice} CNY = ${btcPrice} BTC` ]
         },
-        errorText: ['请输入交易金额', '交易量不能超过最大限额', '交易量不能超过可交易量'],
+        errorText: ['请输入交易金额', '交易量不能超过最大限额', '交易量不能低于最小限额', '交易量不能超过可交易量'],
         errorFlag: 5,
         contentData: {},
         showOrderLayer: false, // 控制购买弹窗显示隐藏
@@ -197,33 +197,37 @@
       },
       openOrderLayer(st) { // 弹窗提示
         if (this.money == '') { // 无内容提示
-          this.errorFlag = 0
+          this.errorFlag = 0;
           return
         }
         if (this.money > this.contentData.max) { // 超过交易额
           this.errorFlag = 1;
           return
         }
+        if (this.money < this.contentData.min) { // 低于最小交易额
+          this.errorFlag = 2;
+          return
+        }
         if (this.amount > this.contentData.tradeable) { // 超过交易量
-          this.errorFlag = 2
+          this.errorFlag = 3;
           return
         }
         // if (this.money > 100000) { // 大额交易
         //   this.bigAmountLayer = true
         // }
         if (this.agree == false) { // 提示勾选
-          this.remindLayer = true
+          this.remindLayer = true;
           return
         }
         // 购买提示框
         if (st == false) {
           this.showOrderLayer = false
         } else {
-          this.showOrderLayer = true
-          this.priceLayer = this.contentData.price // 弹窗价格
-          this.layerId = this.contentData.id // 弹窗id
-          this.currencyLayer = this.amount
-          this.moneyLayer = this.money
+          this.priceLayer = this.contentData.price; // 弹窗价格
+          this.layerId = this.contentData.id; // 弹窗id
+          this.currencyLayer = this.amount;
+          this.moneyLayer = this.money;
+          this.showOrderLayer = true;
         }
       },
       closeLayer() { // 关闭提示勾选弹窗

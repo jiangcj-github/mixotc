@@ -8,7 +8,7 @@
       <div class="right">
         <div class="filter">
           <div class="f1">
-            <div class="search" :class="{disabled:srchText.length<=0}">
+            <div class="search">
               <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">搜索{{srchUls[srchUlSel].text}}</span>
               <ul v-show="srchUlShow">
                 <li v-for="(e,i) in srchUls" :key="i" @click="srchUlSel=i">{{e.text}}</li>
@@ -111,7 +111,8 @@
       Pagi,
       DateInterval,
     },
-    data() {
+
+      data() {
       return {
 
         srchUls: [

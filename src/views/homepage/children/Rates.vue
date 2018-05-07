@@ -146,7 +146,6 @@
         line-height 20px
         margin-top 5px
         display inline-block
-        max-width 100px
         text-overflow ellipsis
         overflow hidden
         white-space nowrap

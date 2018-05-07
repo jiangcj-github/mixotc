@@ -36,16 +36,21 @@
     mounted(){
       this.loadUncheckTotal();
       this.loadCheckTotal();
-      this.Bus.$on("onSubmit2",(info)=>{
+      this.Bus.$on("onUpdateCheck",(info)=>{
+        this.loadUncheckTotal();
+        this.loadCheckTotal();
+      });
+      this.Bus.$on("onUpdateUncheck",(info)=>{
         this.loadUncheckTotal();
         this.loadCheckTotal();
       });
     },
     destroyed(){
-      this.Bus.$off("onSubmit2");
+      this.Bus.$off("onUpdateCheck");
+      this.Bus.$off("onUpdateUncheck");
     },
     methods:{
-      loadUncheckTotal(state){
+      loadUncheckTotal(){
         this.WsProxy.send("control","a_get_identity_amount",{
           type:1, state:1,
         }).then((data)=>{
