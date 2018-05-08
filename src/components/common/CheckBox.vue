@@ -1,6 +1,6 @@
 <template>
   <div class="choice-box" v-clickoutside="closeSelect">
-    <span><b @click="showChoice()">{{items}}</b><i></i></span>
+    <span @click="showChoice()"><b>{{items}}</b><i></i></span>
     <ul v-show="contentShow"  :style="{width: `${width}px`}">
       <li @click="allCheck" :class="{selected: checkAll}" v-show="isAll">{{allName}}</li>
       <li v-for="(content, index) in checkBoxList" :key="index" :class="{selected: content.state}" @click.stop="checkContent(content)"><span>{{content.type}}</span></li>

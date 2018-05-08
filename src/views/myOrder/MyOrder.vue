@@ -118,7 +118,7 @@
     <!--</Pagination >-->
     <div class="page-btn" v-if="contentList">
       <button @click="clickPre" :class="{'unable-btn': page === 0}" :disabled="page === 0">上一页</button>
-      <button @click="clickNext" :class="{'unable-btn': contentList && contentList.length < 10}" :disabled="contentList && contentList.length < 10">下一页</button>
+      <button @click="clickNext" :class="{'unable-btn': contentList && contentList.length < 15}" :disabled="contentList && contentList.length < 15">下一页</button>
     </div>
 
 
@@ -258,10 +258,10 @@
           {type: '申诉中', state: false, code: '3'},
         ], // 进行中状态下拉显示
         allStatusCom: [ // (126) 12310 (12678) (126789) (124) 12311 (15)
-          {type: '成功', state: false, code: '6'},
+          {type: '成功', state: false, code: '6,7,8,9'},
           {type: '成功-强制放币', state: false, code: '10'},
-          {type: '成功-未评价', state: false, code: '7,8'},
-          {type: '成功-已评价', state: false, code: '9'},
+          {type: '成功-未评价', state: false, code: ''},
+          {type: '成功-已评价', state: false, code: ''},
           {type: '失败-取消', state: false, code: '4'},
           {type: '失败-终止', state: false, code: '11'},
           {type: '失败-超时', state: false, code: '5'},
@@ -319,7 +319,9 @@
       });
       // 监听搜索框值
       this.Bus.$on('changeInputContent', ({type, data}) => {
-        console.log(this.type, type)
+        this.result.forEach(v => {
+          data = v.name === data ? v.name : this.result[0].name
+        });
         if (type == 'order_id') {
           this.orderId = data
         } else if (type == 'order_tradecode') {
@@ -336,7 +338,7 @@
           keyword: data
         }).then((data)=>{
           data.results.forEach(v => {
-            this.result.push(v.Result)
+            this.result.push({name:v.Result})
           })
         }).catch((msg)=>{
           console.log(msg);
@@ -389,9 +391,7 @@
             this.contentList && this.contentList.forEach(v => {
               // 倒计时数据
               if (v.state == 1) {
-                // limit - (now - create) 秒 2018-04-23 16:12:04  1524471124000 1524471379606
                 this.endTime = (v.limit - (Math.floor(new Date().getTime() / 1000) - v.create * 1) / 60) * 60000
-                // console.log('this.endTime', this.endTime)
               }
               // 状态数组
               let stateListObject = {
@@ -419,9 +419,12 @@
                 9: [{name: '查看评价', flag: 2}]
               }
               v.operationList = operationListObject[v.state]
-              //可申诉时间到计时
+              // 可申诉时间到计时
               v.timeToAppeal = 30 * 60 - (Math.floor(Date.now() / 1000) - v.paytime);
               this.appealTimer(v);
+              // 判断操作数组的code值
+              this.JsonBig.stringify(v.buyer) == this.userId ? this.allStatusCom[2].code = '6,8' : '6,7'
+              this.JsonBig.stringify(v.buyer) == this.userId ? this.allStatusCom[3].code = '7,9' : '8,9'
             })
           },
           date:new Date()
@@ -435,6 +438,7 @@
               "type": this.selectOrder, // 1 买; 2 卖; 3 全部  <-state=0
               "state": this.selectState, // 订单状态
               "origin": this.page, // 分页
+              "count": 15, // 每页多少条数据
               "date": this.dateSort,// 时间排序 1降序 2升序
               "price": this.price,// 单价排序 1降序 2升序
               "amount": this.amount,// 电子币数量排序 1降序 2升序
@@ -496,21 +500,17 @@
       },
       selectTime(index) { // 时间切换
         this.num = index;
-        this.endValueDate = new Date().getTime()
-        this.$refs.di.date2 = new Date();
+        let date2 = new Date(new Date(new Date().toLocaleDateString()).getTime() + 24 * 60 * 60 * 1000);
+        this.$refs.di.date2 = date2;
         if (index === 0) {
-          //this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 1000)
-          this.$refs.di.date1 = new Date(Date.now() - (24 * 60 * 60 * 1000))
+          this.$refs.di.date1 = new Date(date2.getTime() - (24 * 60 * 60 * 1000))
         }
         if (index === 1) {
-          //this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 3 * 1000)
-          this.$refs.di.date1 = new Date(Date.now() - (24 * 60 * 60 * 3 * 1000))
+          this.$refs.di.date1 = new Date(date2.getTime() - (24 * 60 * 60 * 3 * 1000))
         }
         if (index === 2) {
-          //this.startValueDate = new Date().getTime() - (24 * 60 * 60 * 7 * 1000)
-          this.$refs.di.date1 = new Date(Date.now() - (24 * 60 * 60 * 7 * 1000))
+          this.$refs.di.date1 = new Date(date2.getTime() - (24 * 60 * 60 * 7 * 1000))
         }
-        this.initData()
       },
       showOperation(index) { // 去评价
         if (this.contentList[index].operationList[0].flag == 1) { // 去评价

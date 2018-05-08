@@ -9,9 +9,9 @@
             <i class="online" :class="{active:isOnline}"></i>
           </div>
           <span class="nickname">{{info.nickname}}</span>
-          <span class="tran_num" v-if="isLogin">和他交易过{{info.tradeWidthNum}}次</span>
+          <span class="tran_num" v-if="isLogin && !isSelf">和他交易过{{info.tradeWidthNum}}次</span>
         </div>
-        <div v-if="isLogin">
+        <div v-if="isLogin && !isSelf">
           <div class="trust clearfix">
             <span class="contact isTrust" @click="Bus.$emit('contactSomeone',{id:info.id_str})">
               <img src="/static/images/talk.png" alt=""><i>联系TA</i>
@@ -60,7 +60,6 @@
     data() {
       return {
         uid: "",
-
         isOnline: true,
         info:{},
 
@@ -78,6 +77,12 @@
       isLogin(){
         return this.$store.state.isLogin;
       },
+      isSelf(){
+        return this.JsonBig.stringify(this.$store.state.userInfo.uid)===this.$route.query.uid;
+      },
+    },
+    mounted(){
+      this.uid=this.$route.query.uid;
     },
     watch:{
       isLogin:{
@@ -87,9 +92,6 @@
         immediate: true
       }
     },
-    mounted() {
-      this.uid= this.JsonBig.parse(this.$route.query.uid) || "";
-    },
     methods: {
       joinTrust(){
         let uid= this.JsonBig.parse(this.$route.query.uid) || "";
@@ -97,7 +99,7 @@
         this.WsProxy.send('otc','new_trust',{uid:loginUid, id:uid, trust:1}).then((data)=>{
           this.showPop();
           this.info.isTrust=1;
-          this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(this.uid)});
+          this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(uid)});
         }).catch((msg)=>{
           alert(JSON.stringify(msg));
         });
@@ -108,7 +110,7 @@
         this.WsProxy.send('otc','new_trust',{uid:loginUid, id:uid, trust:0}).then((data)=>{
           this.showPop();
           this.info.isTrust=0;
-          this.$store.commit({type:"delTrust",data:this.JsonBig.stringify(this.uid)});
+          this.$store.commit({type:"delTrust",data:this.JsonBig.stringify(uid)});
         }).catch((msg)=>{
           alert(JSON.stringify(msg));
         });

@@ -203,11 +203,6 @@
       HappyScroll
     },
     mounted() {
-      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('212274182791106560') , id: this.JsonBig.parse('208353226179743744')}).then(data => {
-      //     console.log('del_friend', data)
-      //   }).catch(error=>{
-      //     console.log(error)
-      //   })
       this.fetchAddress()//拉取收款地址
       this.beFriend()//监听被加好友
       this.beAddedGroup()//监听被加入群
@@ -271,7 +266,7 @@
           obj[this.curChat] = this.chat[this.index].icon
           return obj;
         }
-        this.$store.state.groupList.filter(item => {
+        this.$store.state.groupList.length && this.$store.state.groupList.filter(item => {
           return this.curChat === this.JsonBig.stringify(item.id)
         })[0].members.forEach(item => {
           obj[this.JsonBig.stringify(item.id)] = {

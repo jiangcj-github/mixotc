@@ -17,7 +17,7 @@
       </ul>
       <ul class="search-result" v-if="showResult && inputContent">
         <li v-if="!result.length">暂无搜索结果</li>
-        <li v-for="item of result" :key="item" @click="selectInputContent(item)">{{item}}</li>
+        <li v-for="(item, index) of result" :key="index" @click="selectInputContent(item)">{{item.name}}<i v-if="item.cname">（{{item.cname}}）</i></li>
       </ul>
       <img src="/static/images/cancel_icon.png" alt="" v-show="showCancel" @click="inputContent = ''">
     </div>
@@ -92,7 +92,7 @@ export default {
       this.Bus.$emit(this.emitValue2, {type: this.type, data: this.inputContent});
     },
     selectInputContent(item) {
-      this.inputContent = item;
+      this.inputContent = item.name;
       this.changeInputContent();
     },
     hideSelect() {
@@ -172,6 +172,7 @@ export default {
     top 10px
     right 10px
     cursor pointer
+
 button
   position relative
   width 72px

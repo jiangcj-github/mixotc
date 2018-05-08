@@ -83,7 +83,7 @@
 
     </div>
 
-    
+
     <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="popupClick(toPath)">
       <slot>
         <p><span>{{popupTip}}</span></p>
@@ -93,7 +93,7 @@
 </template>
 
 <script>
-import TopSearch from './children/TopSearch';
+  import TopSearch from './children/TopSearch';
 import ResultListItem from './children/ResultListItem';
 import Pagination from '@/components/common/Pagination';
 import BasePopup from '@/components/common/BasePopup';

@@ -32,8 +32,17 @@
         let cur=this.curPage;
         let total=this.totalPage;
         let arr=[];
-        for(let i=-2;i<=2;i++){
-          if(cur+i>=1 && cur+i<=total){
+        if(cur<=2){
+          for(let i=1;i<=5&&i<=total;i++){
+            arr.push(i);
+          }
+        }else if(cur+2>=total){
+          for(let i=total-4;i<=total;i++){
+            if(i<=0) continue;
+            arr.push(i);
+          }
+        }else{
+          for(let i=-2;i<=2;i++){
             arr.push(cur+i);
           }
         }

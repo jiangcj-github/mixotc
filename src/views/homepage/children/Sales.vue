@@ -47,7 +47,6 @@
         <div class="division"></div>
         <div class="remark">备注：{{e.info}}</div>
       </div>
-      <Pagi :curPage="curPage" :pageSize="pageSize" :curPageSize="sales.length"></Pagi>
     </div>
     <div class="err no-result" v-else-if="err===1">无相应的数据</div>
     <div class="err load-failed" v-else-if="err===2">网络异常</div>
@@ -57,18 +56,12 @@
   </div>
 </template>
 <script>
-  import Pagi from "../components/Pagi";
   export default {
-    components: {
-      Pagi,
-    },
     data() {
       return {
         uid: "",
 
         sales:[],
-        pageSize:1,
-        curPage: 1,
         err: -1,
 
         fltTypes:[
@@ -101,13 +94,6 @@
     mounted() {
       this.uid= this.JsonBig.parse(this.$route.query.uid) || "";
       this.loadSales();
-      this.Bus.$on("onPageChange",(p) => {
-        this.curPage=p;
-        this.loadSales(p-1);
-      });
-      this.Bus.$on("onLastPage",(p)=>{
-        this.loadSales(-1);
-      });
     },
     destroyed(){
       this.Bus.$off("onPageChange");
@@ -130,7 +116,6 @@
             this.err=1;
           }else{
             this.err=0;
-            this.pageSize=data.count;
             this.parseSales(data.sales);
           }
         }).catch((msg)=>{

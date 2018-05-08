@@ -80,7 +80,7 @@
               <span class="remark">备注：{{e.remark}}</span>
             </div>
           </div>
-          <Pagi :curPageSize="arbis.length" :pageSize="pageSize" :curPage="curPage"></Pagi>
+          <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
         </div>
         <div v-else-if="err===1">
           <div class="err no-result">没有对应的数据</div>
@@ -104,11 +104,11 @@
 <script>
   import DateInterval from "@/components/common/DateInterval";
   import Left from "./layout/Left";
-  import Pagi from "../homepage/components/Pagi";
+  import Pagination from "./component/Pagination";
   export default {
     components: {
       Left,
-      Pagi,
+      Pagination,
       DateInterval,
     },
 
@@ -149,6 +149,7 @@
         arbis: [],
         pageSize: 20,
         curPage: 1,
+        total: 0,
       }
     },
     watch:{
@@ -168,9 +169,6 @@
       this.Bus.$on("onPageChange",(p) => {
         this.curPage=p;
         this.loadArbiLists(p-1);
-      });
-      this.Bus.$on("onLastPage",()=>{
-        this.loadArbiLists(-1);
       });
       this.Bus.$on("onDiChange",()=>{
         this.loadArbiLists();
@@ -215,7 +213,9 @@
           case 2: sortByDuration=2;break;
           case 3: sortByDuration=1;break;
         }
-        //
+        //获取总数
+        this.loadArbiTotal();
+        //获取列表
         this.WsProxy.send("control","a_get_appeal_list",{
           sid: srchKey5,
           appellant: srchKey1,
@@ -235,15 +235,35 @@
             this.err=1; //无数据
           }else{
             this.err=0;
-            //this.arbiTotal=data.amount;
             this.parseArbis(data.appeals);
           }
-        }).catch((msg)=>{console.log(msg);
+        }).catch((msg)=>{
           if(!msg){
             this.err=2; //网络异常
           }else if(msg.ret!==0){
             this.err=3; //加载异常
           }
+        });
+      },
+      loadArbiTotal(){
+        this.WsProxy.send("control","a_get_appeal_list",{
+          sid: null,
+          appellant: null,
+          appellee: null,
+          handler: null,
+          responsible: null,
+          type: 0,
+          result: 0,
+          start: null,
+          end: null,
+          duration: null,
+          create: null,
+          origin: -1,
+          count: this.pageSize,
+        }).then((data)=>{
+          this.total=data.origin*this.pageSize+data.appeals.length;
+        }).catch((msg)=>{
+          console.log(msg);
         });
       },
       loadTips(){

@@ -79,21 +79,11 @@
       closeGroup() {
         this.$emit('offDelGroup', 'false')
       },
-      async fetchGroup() {
-        await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
-          this.$store.commit({type: 'getGroupList', data})
-          this.$store.commit({'type':'updateGroupInfo', data: {id: this.curChat }})
-        }).catch(error=>{
-          console.log(error)
-        })
-      },
       async doDelete() {
         await this.WsProxy.send('control', 'del_g_member',{
           id: this.JsonBig.parse(this.curChat),
           ids: this.deleteArray
         }).then(data => {})
-        await this.fetchGroup()
-        this.$store.commit({'type':'updateGroupInfo', data: {id: this.curChat }})
         this.closeGroup()
       }
     }

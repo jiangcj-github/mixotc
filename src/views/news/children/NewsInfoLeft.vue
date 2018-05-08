@@ -95,6 +95,7 @@
       async fetchGroup() {
         await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
           if(!data) data = []
+          console.log('qqq', 2)
           this.$store.commit({type: 'getGroupList', data})
         }).catch(error=>{
           console.log(error)
@@ -296,10 +297,10 @@
         this.WebSocket.onMessage['quit_group'] = {
           callback:async (res) => {
             if (res.body && res.body.type === 'quit_g') {
-              let {id, uid} = res.body.data;
+              let {gid, uid} = res.body.data;
               if(this.JsonBig.stringify(uid) === this.userId) return;
               await this.fetchGroup();
-              this.$store.commit({type: 'updateGroupInfo', data: this.JsonBig.stringify(id)})
+              this.$store.commit({type: 'updateGroupInfo', data: { id :this.JsonBig.stringify(gid)}})
             }
           }
         }

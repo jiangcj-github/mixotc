@@ -78,7 +78,7 @@
         <div class="rules">
           <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
           <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
-          <router-link to="/transaction/tradeRules" tag="span">我已阅读《OTC购买流程规则》</router-link>
+          <a href="#/transaction/tradeRules" target="_blank">我已阅读《OTC购买流程规则》</a>
         </div>
       </div>
       <!--:disabled="agree"-->
@@ -410,7 +410,7 @@
         img
           margin-right 5px
           cursor pointer
-        span
+        a
           display inline-block
           letter-spacing 0.23px
           color #57A100

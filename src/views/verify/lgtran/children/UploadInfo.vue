@@ -2,7 +2,7 @@
   <div class="upload-info" v-if="err===0">
     <h3>{{infos.nickname}}<small>{{infos.account}}</small></h3>
     <div v-for="(e,i) in infos.his">
-      <sup>第{{i+1}}次认证</sup>
+      <sup>第{{infos.his.length-i}}次认证</sup>
       <div v-if="e.flag===1">
         <p class="inf-li"><label>提交时间</label><span>{{e.submitTime}}</span></p>
         <p class="inf-li"><label>真实姓名</label><span>{{e.name}}</span></p>

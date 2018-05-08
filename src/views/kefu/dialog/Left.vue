@@ -12,7 +12,7 @@
       <ul class="persons">
         <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index, content.user_id)" :class="{active: content.user_id === $store.state.serviceNow}">
           <img :src="content.user_icon ? `${HostUrl.http}image/${content.user_icon}` : `/static/images/default_avator.png`" alt="">
-          <i v-if="content.unread">{{content.unread}}</i>
+          <i v-show="content.unreadShow">{{content.unread}}</i>
           <div class="pinfo">
             <p class="p1">
               <span class="s1">{{content.user_name}}</span>
@@ -98,6 +98,7 @@
           //this.ulsBuf = data;
           data.forEach(v => {
             v.user_id = this.JsonBig.stringify(v.user_id)
+            v.unreadShow = false
             v.unread = 0
             console.log('111', v.user_id)
           })
