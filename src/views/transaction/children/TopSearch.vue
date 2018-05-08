@@ -53,12 +53,10 @@ export default {
     this.Bus.$on(this.emitValue3, ({type, data}) => {
       // 输入时，根据输入内容拉取数据，结果替换result
       type === 'currency' && (type = 'coin')
-      console.log('111', type, data)
       this.result = []
       this.Proxy[`${type}Search`]({keyword: data}).then(res => {
-        console.log(res)
         res.data.coins && res.data.coins.forEach(v => {
-          this.result.push(v.currency)
+          this.result.push(v.currency, v.name)
           console.log(v.currency)
         })
         res.data.users && res.data.users.forEach(v => {
