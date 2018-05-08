@@ -16,7 +16,7 @@
         <span>{{e.name}}</span>
       </div>
     </div>
-    <Pagi :curPage="curPage" :pageSize="pageSize" :curPageSize="rates.length"></Pagi>
+    <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
   </div>
   <div class="err no-result" v-else-if="err===1">无相应的数据</div>
   <div class="err load-failed" v-else-if="err===2">网络异常</div>
@@ -25,9 +25,9 @@
   <div class="err empty" v-else>没有评价数据</div>
 </template>
 <script>
-  import Pagi from "../components/Pagi";
+  import Pagination from "../../verify/component/Pagination";
   export default {
-    components:{Pagi},
+    components:{Pagination},
     data() {
       return {
         uid: "",
@@ -35,6 +35,7 @@
         rates:[],
         pageSize:1,
         curPage: 1,
+        total: 0,
         err: -1,
       }
     },
@@ -45,16 +46,29 @@
         this.curPage=p;
         this.loadRates(p-1);
       });
-      this.Bus.$on("onLastPage",(p)=>{
-        this.loadRates(-1);
-      });
     },
     destroyed(){
       this.Bus.$off("onPageChange");
-      this.Bus.$off("onLastPage");
     },
     methods: {
+      loadRatesTotal(){
+        this.WsProxy.send('otc','rates',{
+          id:this.uid,
+          origin:-1
+        }).then((data)=>{
+            this.pageSize=data.count;
+            this.total=data.origin*this.pageSize;
+            if(data.rates){
+              this.total+=data.rates.length;
+            }
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
       loadRates(p=0){
+        //获取总数
+        this.loadRatesTotal();
+        //获取列表
         this.WsProxy.send('otc','rates',{
           id:this.uid,
           origin:p
@@ -63,7 +77,6 @@
             this.err=1;
           }else{
             this.err=0;
-            this.pageSize=data.count;
             this.parseRates(data.rates);
           }
         }).catch((msg)=>{

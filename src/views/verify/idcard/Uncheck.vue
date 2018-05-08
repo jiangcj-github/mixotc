@@ -125,7 +125,7 @@
           });
         });
         this.infos.his.sort((a,b)=>{
-          return a.submitTime<b.submitTime?-1:1;
+          return a.submitTime<b.submitTime?1:-1;
         });
       },
     },
