@@ -59,6 +59,7 @@
     },
     data() {
       return {
+        uid: "",
         isOnline: true,
         info:{},
 
@@ -80,6 +81,9 @@
         return this.JsonBig.stringify(this.$store.state.userInfo.uid)===this.$route.query.uid;
       },
     },
+    mounted(){
+      this.uid=this.$route.query.uid;
+    },
     watch:{
       isLogin:{
         handler(){
@@ -95,7 +99,7 @@
         this.WsProxy.send('otc','new_trust',{uid:loginUid, id:uid, trust:1}).then((data)=>{
           this.showPop();
           this.info.isTrust=1;
-          this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(this.uid)});
+          this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(uid)});
         }).catch((msg)=>{
           alert(JSON.stringify(msg));
         });
@@ -106,7 +110,7 @@
         this.WsProxy.send('otc','new_trust',{uid:loginUid, id:uid, trust:0}).then((data)=>{
           this.showPop();
           this.info.isTrust=0;
-          this.$store.commit({type:"delTrust",data:this.JsonBig.stringify(this.uid)});
+          this.$store.commit({type:"delTrust",data:this.JsonBig.stringify(uid)});
         }).catch((msg)=>{
           alert(JSON.stringify(msg));
         });
