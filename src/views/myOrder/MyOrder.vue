@@ -260,8 +260,8 @@
         allStatusCom: [ // (126) 12310 (12678) (126789) (124) 12311 (15)
           {type: '成功', state: false, code: '6,7,8,9'},
           {type: '成功-强制放币', state: false, code: '10'},
-          {type: '成功-未评价', state: false, code: ''},
-          {type: '成功-已评价', state: false, code: ''},
+          {type: '成功-未评价', state: false, code: 1},
+          {type: '成功-已评价', state: false, code: 1},
           {type: '失败-取消', state: false, code: '4'},
           {type: '失败-终止', state: false, code: '11'},
           {type: '失败-超时', state: false, code: '5'},
@@ -386,6 +386,7 @@
             if (this.$store.state.newOrder) {
               this.updateTradeCode = this.contentList[0].trade_code
               this.showPayment = true
+              this.$store.state.newOrder = false
             }
             // 根据状态进行判断
             this.contentList && this.contentList.forEach(v => {
@@ -448,19 +449,29 @@
               "end": this.endValueDate,// 结束时间
               "order_id": this.orderId,
               "trade_code": this.tradeCode,
-              "trader": this.trader
+              "trader": this.trader,
+              "111": this.selectState,
+              "bbb": this.selectState
             }
           }
         }))
       },
       getCompleteData() {
-        // let ws = this.WebSocket; // 创建websocket连接
-        // ws.onMessage['upd_ord'] = { // 完成状态的action
-        //   callback: (data) => {
-        //     if(!data || data.body.ret !== 0) return;
-        //     // console.log('我完成了', data.body.data)
-        //   },
-        // };
+        let ws = this.WebSocket; // 创建websocket连接
+        ws.onMessage['upd_ord'] = { // 完成状态的action
+          callback: (res) => {
+            if (res.op && res.op === 24) {
+              this.contentList.forEach(v => {
+                if (this.JsonBig.stringify(v.id) == res.body.data.order) {
+                  v.state = 6
+                  this.selectState = "4,5,6,7,8,9,10,11"
+                  this.conductNum = this.conductNum - 1
+                  this.completeNum = this.completeNum + 1
+                }
+              })
+            }
+          },
+        };
       },
       getInitNum() {
         // 获取进行中和已完成数量

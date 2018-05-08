@@ -1,45 +1,8 @@
 <template>
   <div>
     <div class="transacation inner">
-      <!--头部搜索栏-->
-      <div class="header">
-        <h2>{{filte.currency && "购买"+filte.currency || "所有广告"}}</h2>
-        <div class="f1">
-          <div class="search">
-            <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">搜索{{srchUls[srchUlSel].title}}</span>
-            <ul v-show="srchUlShow">
-              <li v-for="(e,i) in srchUls" @click="srchUlSel=i">{{e.title}}</li>
-            </ul>
-            <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput">
-            <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
-            <a href="javascript:void(0)" @click="searchStr"></a>
-            <!--币种模糊搜索结果-->
-            <ul v-show="srchTipShow && coinTips.length>0" v-if="this.srchType===0">
-              <li v-for="e in coinTips" @click="search">
-                <div @mousedown="srchText=e.name">
-                  <img class="coin" :src="e.icon"/><span>{{e.name}}</span><span class="gray">{{e.cname}}</span>
-                </div>
-              </li>
-            </ul>
-            <!--商家模糊搜索结果-->
-            <ul v-show="srchTipShow && userTips.length>0" v-else-if="this.srchType===1">
-              <li v-for="e in userTips" @click="search">
-                <div @mousedown="srchText=e.name">
-                  <span>{{e.name}}</span><span class="gray">{{e.account}}</span>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <ul class="top5">
-          <li class="eth tuijian" @click="filte.currency='eth'">ETH</li>
-          <li class="btc tuijian" @click="filte.currency='btc'">BTC</li>
-          <li class="ada tuijian" @click="filte.currency='ada'">ADA</li>
-          <li class="bat" @click="filte.currency='bat'">BAT</li>
-          <li class="ltc" @click="filte.currency='ltc'">LTC</li>
-        </ul>
-      </div>
-      <!--筛选栏-->
+      <TopSearch :topList="['ETH', 'BTC', 'ADA', 'BAT', 'LTC']" ></TopSearch>
+
       <div class="filtrate">
         <div class="select" @click.stop="switchPayment">
           <i :class="{'select-item': payTitle !== '选择支付方式' }">{{payTitle}}</i>
@@ -51,7 +14,7 @@
           <img src="/static/images/cancel_icon.png" alt="" v-if="paymentScore !== 0" @click.stop="clearPayment">
         </div>
         <div class="price">
-          <b v-if="tip" class="err-tip"><img src="/static/images/hint.png">最大限额不能低于最小限额，且最小限额为200</b>
+          <b :class="{tip}">!最大限额不能低于最小限额，且最小限额为200</b>
           <input type="number" class="min" @blur="filte.min = min" @keyup.enter="filte.min = min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
           <input type="number" class="max" @blur="filte.max = max" @keyup.enter="filte.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
         </div>
@@ -104,27 +67,19 @@
             <span @click="sort('price')">价格(CNY)</span>
           </p>
         </div>
-        <ul v-if="err===0">
-          <li is='ResultListItem' :emitValue="emitValue" v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
+        <ul>
+          <li is='ResultListItem' :trustArray="trustArray ? trustArray : []" :emitValue="emitValue" v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
         </ul>
-        <div v-else-if="err===1">
-          <div class="err no-result">无相应的数据</div>
-        </div>
-        <div v-else-if="err===2">
-          <div class="err load-failed">网络异常</div>
-        </div>
-        <div v-else-if="err===3">
-          <div class="err net-error">加载失败</div>
-        </div>
-        <div v-else-if="err===4">
-          <div class="err loading">加载中...</div>
-        </div>
       </div>
+
+      <NothingContent v-show="result.length === 0"></NothingContent>
+
       <!--<Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>-->
       <div class="page-btn" v-if="result.length >= 20">
         <button @click="clickPre" :class="{'unable-btn': filte.page === 0}" :disabled="filte.page === 0">上一页</button>
         <button @click="clickNext" :class="{'unable-btn': result && result.length < 20}" :disabled="result && result.length < 20">下一页</button>
       </div>
+
 
     </div>
 
@@ -138,15 +93,15 @@
 </template>
 
 <script>
-  import SearchInput from '@/components/common/SearchInput'
-  import ResultListItem from './children/ResultListItem';
-  import Pagination from '@/components/common/Pagination';
-  import BasePopup from '@/components/common/BasePopup';
-  import NothingContent from '@/components/common/NothingContent';
+  import TopSearch from './children/TopSearch';
+import ResultListItem from './children/ResultListItem';
+import Pagination from '@/components/common/Pagination';
+import BasePopup from '@/components/common/BasePopup';
+import NothingContent from '@/components/common/NothingContent';
 
   export default {
     components: {
-      SearchInput,
+      TopSearch,
       ResultListItem,
       Pagination,
       BasePopup,
@@ -154,19 +109,6 @@
     },
     data() {
       return {
-
-        srchUls: [
-          {title: "币种", type:0},
-          {title: "商家昵称/账号",type:1},
-        ],
-        srchUlSel: 0,
-        srchUlShow: false,
-        srchTipShow: false,
-        srchText: "",
-
-        coinTips: [],
-        userTips: [],
-
         tip: false,//限额错误文案提示
         showPayment: false,
         payment:[{type: '支付宝', score: 1, state: true}, {type: '微信', score: 2, state: true}, {type: '银行卡', score:4, state: true}],
@@ -175,7 +117,7 @@
         filte:{
           type: 1,// 1出售，2购买
           payment: '',//1支付宝，2微信，4银行卡，可相加，共6种
-          currency: '',//字符串
+          currency: 'btc',//字符串
           money: 'CNY',//货币类型CNY
           min: 200,
           max: 9007199254741,
@@ -197,15 +139,26 @@
         toPath: '',
         timer: null,
         emitValue: 'popup',
-
-        result: [],
-        err: 1, //数据加载结果：0-正常，1-无数据，2-网络异常，3-加载失败，4-加载中
+        result: []
       }
     },
     created() {
+      //获取信任人员列表
+    //  if (this.isLogin) {
+    //     this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
+    //       data && this.$store.commit('changeTrustList', {data: data.ids})
+    //       !data && this.$store.commit('changeTrustList', {data: []})
+    //     })
+    //   }
       this.fetchData({type: 1, count: 20, page: 0 })
     },
     mounted() {
+      // this.Bus.$on('changePage',data => {
+      //   this.filte.page = data - 1 ;
+      // });
+      this.Bus.$on('changeCurrency', data => {
+        this.filte.currency = data.toLowerCase()
+      });
       this.Bus.$on('changeInputContent', ({type, data}) => {
         type === 'currency' && (this.filte.user = '')
         this.filte[type] = data;
@@ -215,110 +168,23 @@
       });
     },
     destroyed() {
+      // this.Bus.$off('changePage');
+      this.Bus.$off('changeCurrency');
       this.Bus.$off('changeInputContent');
       this.Bus.$off(this.emitValue);
     },
     methods: {
-      fuzzyInput(){
-        if(this.srchText.length<=0){
-          this.srchTipShow=false;
-        }else{
-          this.srchTipShow=true;
-          this.loadTips();
-        }
-      },
-      //列表项搜索
-      search(){
-        if(this.srchType===0){
-          this.filte.user="";
-          this.filte.currency=this.srchText;
-        }else{
-          this.filte.currency="";
-          this.filte.user=this.srchText;
-        }
-      },
-      //按钮搜索，不存在的币种，默认给模糊搜索结果第一条
-      searchStr(){
-        if(this.srchType===0 && this.srchText.length>0){
-          let exist=0;
-          this.coinTips.forEach(e=>{
-            if(e.name.toLowerCase()===this.srchText.toLowerCase()) exist++;
-          });
-          if(exist<=0){
-            this.srchText=this.coinTips[0] && this.coinTips[0].name || "";
-          }
-        }
-        this.search();
-      },
-      loadTips(){
-        let srchKey=this.srchText;
-        if(this.srchType===0){
-          this.coinTips=[];
-          this.Proxy["coinSearch"]({keyword: srchKey}).then(res => {
-            res.data.coins && res.data.coins.forEach(v => {
-              this.coinTips.push({
-                name: v.currency || "-",
-                cname: v.cname || "-",
-                icon: this.HostUrl.http+"/image/"+v.icon,
-                type:0
-              });
-            });
-          });
-        }else{
-          this.userTips=[];
-          this.Proxy["userSearch"]({keyword: srchKey}).then(res => {
-            res.data.users && res.data.users.forEach(v => {
-              this.userTips.push({
-                name: v.name || "-",
-                account:v.phone || v.email || "-",
-                type:1
-              });
-            });
-          });
-        }
-      },
       //拉取广告数据
       fetchData(params) {
-        this.Proxy.sales(params).then(res => {
-          if (!res || !res.data || !res.data.sales || res.data.sales.length <= 0)
-            this.err = 1; //无数据
-          else{
-            this.err=0;
-            this.parseResult(res.data.sales);
-          }
-        }).catch((msg) => {console.log(msg);
-          if (!msg)
-            this.err = 2; //网络异常
-          else if (msg.ret !== 0)
-            this.err = 3; //加载失败
-        });
-      },
-      parseResult(data){
-        this.result=[];
-        data.forEach(e => {
-          this.result.push({
-            sid: e.sid,
-            sid_str: this.JsonBig.stringify(data.sid),
-            headimg: e.icon && this.HostUrl.http+"/image/"+e.icon || "/static/images/default_avator.png",
-            nickname: e.trader || "-",
-            isTrust: this.trustArray.includes(this.JsonBig.stringify(e.sid)),
-            dealVolume: (e.volume+"").substr(0, (e.volume+"").indexOf(".")+6),
-            orderVolume: e.trade || "-",
-            rate: e.rate && e.rate+"%" || "-",
-            priceMin: e.min,
-            priceMax: e.max,
-            pay_zfb: e.payments %2 === 1,
-            pay_wx: [2, 3, 6, 7].includes(e.payments),
-            pay_yhk: [4, 5, 6, 7].includes(e.payments),
-            amount: (e.tradeable+"").substr(0, (e.tradeable+"").indexOf(".")+6),
-            price: e.price,
-          });
-        });
+        this.Proxy.sales(params).then(res=>{
+          this.result = res.data.sales ? res.data.sales : [];
+          console.log('广告', res)
+        })
       },
       //最小限额输入处理
       inputDealMin(max) {
         let num = Number(this.min),
-          str = this.min;
+            str = this.min;
         if(!/^[0-9]+$/.test(str) || (this.max === '' ? false : num > this.max) || num < 1){
           this.min = str.substring(0, str.length - 1);
           this.$refs.min.value = str.substring(0, str.length - 1);
@@ -327,7 +193,7 @@
       //最大限额输入处理
       inputDealMax(min){
         let num = Number(this.max),
-          str = this.max;
+            str = this.max;
         if(!/^[0-9]+$/.test(str) || num < 1){
           this.max = str.substring(0, str.length - 1);
           this.$refs.max.value = str.substring(0, str.length - 1);
@@ -425,14 +291,11 @@
       isLogin() {
         return this.$store.state.isLogin
       },
-      srchType(){
-        return this.srchUls[this.srchUlSel].type;
-      },
       payTitle() {
         let title = this.payment.filter(item => {
-          return item.state;
+            return item.state;
         }).map(item => {
-          return item.type;
+            return item.type;
         })
         if(title.length === 0) return '选择支付方式'
         return title.join('/');
@@ -454,7 +317,7 @@
       filte: {
         handler(curVal) {
           let min = Number(curVal.min),
-            max = Number(curVal.max);
+              max = Number(curVal.max);
           curVal.min === '' && (curVal.min = 200);
           curVal.min === '' && (curVal.min = 9007199254741);
           if ((min > max && curVal.min !== '' && curVal.max !== '') || curVal.min < 200) {
@@ -476,8 +339,8 @@
           if (curVal) {
             this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
               data.ids && this.$store.commit('changeTrustList', {data: data.ids.map(item => {
-                  return this.JsonBig.stringify(item.Id);
-                })})
+                return this.JsonBig.stringify(item.Id);
+              })})
               !data && this.$store.commit('changeTrustList', {data: []})
             })
             return
@@ -491,9 +354,7 @@
 </script>
 
 <style scoped lang="stylus">
-  @import "../../stylus/base";
-  @import "stylus/topSearch";
-  @import "stylus/transaction";
+@import "../../stylus/base.styl";
   .transacation
     margin-top 40px
     margin-bottom 40px
@@ -578,11 +439,14 @@
         width 260px
         height 50px
         b
+          display none
           position absolute
           left 0
           top 32px
           color $col422
           fz11()
+          &.tip
+            display block
         input
           position relative
           float left

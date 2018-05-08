@@ -31,18 +31,19 @@ const agreeAddFriend = "agreeAddFriend";
 const evaluateOrder = "evaluateOrder"; // 订单评论结果
 
 
+
 /**
  * 审核申述客服部分
  */
  const initServiceData = 'initServiceData'; // 初始化数据
  const getServiceNowtalk = 'getServiceNowtalk'; // 获取左侧聊天人员具体信息
  const changeServiceNowtalk = 'changeServiceNowtalk'; // 根据左边选择右边人员
- const addServiceMessages = 'addServiceMessages' // 存储发送信息
- const changeServiceMessages = 'changeServiceMessages' // 新增发送消息
- const transformServiceUser = 'transformServiceUser' // 双方人员身份转换
- const changeServiceImgsrc = 'changeServiceImgsrc' // 改变图片
- const moreServiceMessage = 'moreServiceMessage' // 添加更多消息
-
+ const addServiceMessages = 'addServiceMessages'; // 存储发送信息
+ const changeServiceMessages = 'changeServiceMessages'; // 新增发送消息
+ const transformServiceUser = 'transformServiceUser'; // 双方人员身份转换
+ const changeServiceImgsrc = 'changeServiceImgsrc'; // 改变图片
+ const moreServiceMessage = 'moreServiceMessage'; // 添加更多消息
+ const stopTrade = 'stopTrade'; // 终止交易
 
 
 export {
@@ -78,6 +79,7 @@ export {
   evaluateOrder,
 
 
+
   /**
    * 审核申述客服部分
    */
@@ -88,5 +90,7 @@ export {
   changeServiceMessages,
   transformServiceUser,
   changeServiceImgsrc, // 改变图片
-  moreServiceMessage
+  moreServiceMessage,
+  stopTrade
+
 };

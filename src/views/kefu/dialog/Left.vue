@@ -10,16 +10,17 @@
     <happy-scroll color="rgba(100,100,100,0.8)" size="5" resize hide-horizontal
                   bigger-move-h="start" smaller-move-h="start" class="scrollPane">
       <ul class="persons">
-        <li v-for="(content, index) in uls" :key="index" @click="onLiClick(index, content.user_id)" :class="{active: content.user_id === $store.state.serviceNow}">
+        <li v-for="(content, index) in srchText ? searchList : uls" :key="index" @click="onLiClick(index, content.user_id)" :class="{active: content.user_id === $store.state.serviceNow}">
           <img :src="content.user_icon ? `${HostUrl.http}image/${content.user_icon}` : `/static/images/default_avator.png`" alt="">
-          <i v-show="content.unreadShow">{{content.unread}}</i>
+          <i v-show="content.unread">{{content.unread}}</i>
           <div class="pinfo">
             <p class="p1">
               <span class="s1">{{content.user_name}}</span>
-              <span class="s2">{{(content.msg_time * 1000).formatTime()}}</span>
+              <!--<span class="s2">{{(content.msg_time * 1000).formatTime()}}</span>-->
+              <span class="s2">{{serviceMessage[content.user_id] && serviceMessage[content.user_id].length ? (serviceMessage[content.user_id])[serviceMessage[content.user_id].length - 1].time.formatTime() : (content.msg_time * 1000).formatTime()}}</span>
             </p>
             <!--<p class="p2">{{content.msg_data ? (content.msg_type === "image" ? '[图片]' : content.msg_data.msg) : ''}}</p>-->
-            <p class="p2">{{serviceMessage[content.user_id] ? ((serviceMessage[content.user_id])[serviceMessage[content.user_id].length - 1].type === 1 ? '[图片]' : (serviceMessage[content.user_id])[serviceMessage[content.user_id].length - 1].content) : (content.msg_data ? (content.msg_type === "image" ? '[图片]' : content.msg_data.msg) : (content.msg_data ? (content.msg_type === "image" ? '[图片]' : content.msg_data.msg) : ''))}}</p>
+            <p class="p2">{{serviceMessage[content.user_id] && serviceMessage[content.user_id].length ? ((serviceMessage[content.user_id])[serviceMessage[content.user_id].length - 1].type === 1 ? '[图片]' : (serviceMessage[content.user_id])[serviceMessage[content.user_id].length - 1].content) : (content.msg_data ? (content.msg_type === "image" ? '[图片]' : content.msg_data.msg) : (content.msg_data ? (content.msg_type === "image" ? '[图片]' : content.msg_data.msg) : ''))}}</p>
           </div>
         </li>
       </ul>
@@ -40,7 +41,7 @@
     },
     computed: {
       uls() {
-        return this.searchList.length ? this.searchList : this.$store.state.serviceData
+        return this.$store.state.serviceData
       },
       serviceMessage() {
         return this.$store.state.serviceMessage
@@ -98,7 +99,6 @@
           //this.ulsBuf = data;
           data.forEach(v => {
             v.user_id = this.JsonBig.stringify(v.user_id)
-            v.unreadShow = false
             v.unread = 0
             console.log('111', v.user_id)
           })
@@ -243,4 +243,7 @@
             overflow hidden
             text-overflow ellipsis
             white-space nowrap
+
+
+
 </style>

@@ -1,0 +1,38 @@
+/*TopSearch样式*/
+.header{margin-bottom:50px;display:flex;}
+
+.header>h2{ float:left; width:129px; height:30px; line-height:30px; letter-spacing:0.23px; font-size:$fz20; font-weight:bold; color $col333}
+.header>h2:before{position:relative; top:2px; left:0; display:inline-block; content:''; width:3px;
+  height:20px; margin-right:10px; background-color:#ffb422;}
+
+/*搜索框*/
+.header .f1{flex-grow:1; height:30px;}
+.header .f1 .search{width:456px;border:1px solid #ffb422;border-radius:2px;display:inline-flex;position:relative;background:#fff;}
+.search>span{ font-size:13px; color:#999; line-height:28px; padding:0 15px 0 10px; position:relative;cursor:pointer;}
+.search>span:after{content:"";border:5px solid transparent; border-top-color:#ffb422;position:absolute; top:13px; right:0;}
+.search>ul{position:absolute;left:-1px;right:-1px;top:29px;background:#fff;border:1px solid #e1e1e1;border-top:none;z-index:100;}
+.search>ul>li{padding:0 10px; line-height:30px; cursor:pointer; color:#333; font-size:13px;}
+.search>ul>li:hover{background:#fff3eb;}
+.search ul>li .gray{ margin-left:15px; color:#999; font-size:12px;}
+.search ul>li .coin{width:20px;height:20px;vertical-align:-5px;margin-right:10px;}
+.search>img{align-self:center;margin-right:10px;}
+.search>img:hover{cursor:pointer; opacity:0.8;}
+.search>input{ padding:0 10px; flex-grow:1;}
+.search>a{width:72px; background:url(/static/images/search.png) no-repeat center center; background-color:#ffb422;}
+.search>a:hover{background-color:#fea350;}
+
+.header .top5{display:inline-block;}
+.top5 li{position:relative; float:left; width:80px; height:30px; margin-right:20px; text-align:center; line-height:30px;
+  font-size:13px; color:$col422; letter-spacing:0.15px; box-shadow:0 2px 4px 0 #e1e1e1;
+  border-radius:2px; cursor pointer}
+.top5 li:last-child{margin-right:0;}
+.top5 li.tuijian{color:#FFF;}
+.top5 li.tuijian:before{ position:absolute; left:10px; top:10px; content:''; width:6px; height:9px;
+  background:url(/static/images/recommend_.png) no-repeat;}
+.top5 li.tuijian:hover{box-shadow:none;}
+
+.top5 .btc{background:#FFB422;}
+.top5 .eth{background:#FF914C;}
+.top5 .ada{background:#FFCE16;}
+.top5 .bat{background:#fff;}
+.top5 .ltc{background:#fff;}

@@ -14,11 +14,16 @@
     </div>
     <textarea placeholder="评价对方：字数限制0～50个字符" v-model.trim="comment" @input="evaluateInput" ref="comment"></textarea>
     <button @click="release">发布</button>
+    <!-- 弹窗 -->
+    <BasePopup class="remind-layer" :show="remindLayer">
+      <span v-clickoutside="closeLayer">为TA的服务态度打分</span>
+    </BasePopup>
   </div>
 </template>
 
 <script>
   import sendConfig from '@/api/SendConfig.js'// 引入websocket发送包
+  import BasePopup from '@/components/common/BasePopup' // 引入弹窗
 
   export default {
     props:['id', 'receiver', 'type'],
@@ -30,11 +35,15 @@
         scoreCache: 0,
         comment: '',
         rateText:'',
-        commentOld: ''
+        commentOld: '',
+        remindLayer: false
       }
     },
+    components: {
+      BasePopup
+    },
     mounted() {
-      // console.log('11111', this.id, this.receiver, this.type)
+
     },
     computed: { //计算属性
       imgList() {
@@ -99,7 +108,11 @@
         }
       },
       release() { // 发布评价
-        if (this.comment === '') return
+        if (this.score === 0) {
+          this.remindLayer = true
+          return
+        }
+
         let ws = this.WebSocket; // 创建websocket连接
         let seq = ws.seq;
         ws.onMessage[seq] = { // 监听
@@ -119,12 +132,15 @@
               "type": this.type,    // 1 交易; 2 担保
               "credit": this.score,  // 信誉度 1,2,3 好评3 差评1
               "transit": this.score,  // 发货速度 1,2,3
-              "comment": this.comment // 文字说明
+              "comment": this.comment ? this.comment : '无' // 文字说明
             }
           }
         }))
         // 发送改变状态值，显示评论结果
         this.Bus.$emit('showReult', 1);
+      },
+      closeLayer() { // 关闭提示勾选弹窗
+        this.remindLayer = false
       }
     }
   }
@@ -177,4 +193,7 @@
       color #FFF
       border-radius 2px
       cursor pointer
+  .remind-layer
+    text-align center
+    line-height 94px
 </style>

@@ -2,20 +2,20 @@
   <li class="item clearfix">
     <div class="title merchant">
       <!-- <img class="whole" src="/static/images/whole_icon2.png" alt="" > -->
-      <img class="avatar" @click="toHomePage(data.sid)" :src="data.icon ? `${HostUrl.http}image/${data.icon}` : `/static/images/default_avator.png`" alt="">
-      <span class="nickname" @click="toHomePage(data.sid)">{{data.trader}}</span>
-      <span class="trust" v-if="trustArray.includes(JsonBig.stringify(data.sid))">信任</span>
+      <img class="avatar" @click="toHomePage(data.sid)" :src="data.headimg" alt="">
+      <span class="nickname" @click="toHomePage(data.sid)">{{data.nickname}}</span>
+      <span class="trust" v-if="data.isTrust">信任</span>
     </div>
-    <div class="title deal-volume">{{typeof data.volume === 'number' ? data.volume : JsonBig.stringify(data.volume)}}</div>
-    <div class="title order-volume">{{data.trade ? data.trade : '-'}}</div>
-    <div class="title good-reputation">{{data.rate ? `${data.rate}%` : '-'}}</div>
-    <div class="title limit-price">{{`${data.min}-${data.max}`}}</div>
+    <div class="title deal-volume">{{data.dealVolume}}</div>
+    <div class="title order-volume">{{data.orderVolume}}</div>
+    <div class="title good-reputation">{{data.rate}}</div>
+    <div class="title limit-price">{{data.priceMin}}-{{data.priceMax}}</div>
     <div class="title payment">
-      <img src="/static/images/OTC_zhifubao.png" alt="" v-if="data.payments %2 === 1">
-      <img src="/static/images/OTC_wechat.png" alt="" v-if="[2, 3, 6, 7].includes(data.payments)">
-      <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(data.payments)">
+      <img src="/static/images/OTC_zhifubao.png" alt="" v-if="data.pay_zfb">
+      <img src="/static/images/OTC_wechat.png" alt="" v-if="data.pay_wx">
+      <img src="/static/images/OTC_Bankcard.png" alt="" v-if="data.pay_yhk">
     </div>
-    <div class="title amount">{{typeof data.tradeable === 'number' ? data.tradeable : JsonBig.stringify(data.tradeable)}}</div>
+    <div class="title amount">{{data.amount}}</div>
     <div class="title price">{{data.price}}</div>
     <div class="title button">
       <button @click="_toOrder(data)">购买</button>
@@ -25,7 +25,7 @@
 
 <script>
 export default {
-  props: ['data','emitValue','trustArray'],
+  props: ['data','emitValue'],
   mounted() {
     // console.log(this.trustArray);
   },
@@ -111,6 +111,7 @@ export default {
 
 <style scoped lang="stylus">
 @import '../../../stylus/base.styl';
+@import "../stylus/transaction"
 .item
   div
     position relative
