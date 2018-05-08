@@ -104,19 +104,27 @@
             <span @click="sort('price')">价格(CNY)</span>
           </p>
         </div>
-        <ul>
-          <li is='ResultListItem' :trustArray="trustArray ? trustArray : []" :emitValue="emitValue" v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
+        <ul v-if="err===0">
+          <li is='ResultListItem' :emitValue="emitValue" v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
         </ul>
+        <div v-else-if="err===1">
+          <div class="err no-result">无相应的数据</div>
+        </div>
+        <div v-else-if="err===2">
+          <div class="err load-failed">网络异常</div>
+        </div>
+        <div v-else-if="err===3">
+          <div class="err net-error">加载失败</div>
+        </div>
+        <div v-else-if="err===4">
+          <div class="err loading">加载中...</div>
+        </div>
       </div>
-
-      <NothingContent v-show="result.length === 0"></NothingContent>
-
       <!--<Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>-->
       <div class="page-btn" v-if="result.length >= 20">
         <button @click="clickPre" :class="{'unable-btn': filte.page === 0}" :disabled="filte.page === 0">上一页</button>
         <button @click="clickNext" :class="{'unable-btn': result && result.length < 20}" :disabled="result && result.length < 20">下一页</button>
       </div>
-
 
     </div>
 
@@ -189,7 +197,9 @@
         toPath: '',
         timer: null,
         emitValue: 'popup',
-        result: []
+
+        result: [],
+        err: 1, //数据加载结果：0-正常，1-无数据，2-网络异常，3-加载失败，4-加载中
       }
     },
     created() {
@@ -269,10 +279,41 @@
       },
       //拉取广告数据
       fetchData(params) {
-        this.Proxy.sales(params).then(res=>{
-          this.result = res.data.sales ? res.data.sales : [];
-          console.log('广告', res)
-        })
+        this.Proxy.sales(params).then(res => {
+          if (!res || !res.data || !res.data.sales || res.data.sales.length <= 0)
+            this.err = 1; //无数据
+          else{
+            this.err=0;
+            this.parseResult(res.data.sales);
+          }
+        }).catch((msg) => {console.log(msg);
+          if (!msg)
+            this.err = 2; //网络异常
+          else if (msg.ret !== 0)
+            this.err = 3; //加载失败
+        });
+      },
+      parseResult(data){
+        this.result=[];
+        data.forEach(e => {
+          this.result.push({
+            sid: e.sid,
+            sid_str: this.JsonBig.stringify(data.sid),
+            headimg: e.icon && this.HostUrl.http+"/image/"+e.icon || "/static/images/default_avator.png",
+            nickname: e.trader || "-",
+            isTrust: this.trustArray.includes(this.JsonBig.stringify(e.sid)),
+            dealVolume: (e.volume+"").substr(0, (e.volume+"").indexOf(".")+6),
+            orderVolume: e.trade || "-",
+            rate: e.rate && e.rate+"%" || "-",
+            priceMin: e.min,
+            priceMax: e.max,
+            pay_zfb: e.payments %2 === 1,
+            pay_wx: [2, 3, 6, 7].includes(e.payments),
+            pay_yhk: [4, 5, 6, 7].includes(e.payments),
+            amount: (e.tradeable+"").substr(0, (e.tradeable+"").indexOf(".")+6),
+            price: e.price,
+          });
+        });
       },
       //最小限额输入处理
       inputDealMin(max) {
