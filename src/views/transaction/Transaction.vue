@@ -1,6 +1,7 @@
 <template>
   <div>
     <div class="transacation inner">
+      <!--头部搜索栏-->
       <div class="header">
         <h2>{{filte.currency && "购买"+filte.currency || "所有广告"}}</h2>
         <div class="f1">
@@ -38,7 +39,7 @@
           <li class="ltc" @click="filte.currency='ltc'">LTC</li>
         </ul>
       </div>
-
+      <!--筛选栏-->
       <div class="filtrate">
         <div class="select" @click.stop="switchPayment">
           <i :class="{'select-item': payTitle !== '选择支付方式' }">{{payTitle}}</i>
@@ -50,7 +51,7 @@
           <img src="/static/images/cancel_icon.png" alt="" v-if="paymentScore !== 0" @click.stop="clearPayment">
         </div>
         <div class="price">
-          <b :class="{tip}">!最大限额不能低于最小限额，且最小限额为200</b>
+          <b v-if="tip" class="err-tip"><img src="/static/images/hint.png">最大限额不能低于最小限额，且最小限额为200</b>
           <input type="number" class="min" @blur="filte.min = min" @keyup.enter="filte.min = min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
           <input type="number" class="max" @blur="filte.max = max" @keyup.enter="filte.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
         </div>
@@ -451,6 +452,7 @@
 <style scoped lang="stylus">
   @import "../../stylus/base";
   @import "stylus/topSearch";
+  @import "stylus/transaction";
   .transacation
     margin-top 40px
     margin-bottom 40px
@@ -535,14 +537,11 @@
         width 260px
         height 50px
         b
-          display none
           position absolute
           left 0
           top 32px
           color $col422
           fz11()
-          &.tip
-            display block
         input
           position relative
           float left
