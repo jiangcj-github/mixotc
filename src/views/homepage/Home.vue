@@ -9,9 +9,9 @@
             <i class="online" :class="{active:isOnline}"></i>
           </div>
           <span class="nickname">{{info.nickname}}</span>
-          <span class="tran_num" v-if="isLogin">和他交易过{{info.tradeWidthNum}}次</span>
+          <span class="tran_num" v-if="isLogin && !isSelf">和他交易过{{info.tradeWidthNum}}次</span>
         </div>
-        <div v-if="isLogin">
+        <div v-if="isLogin && !isSelf">
           <div class="trust clearfix">
             <span class="contact isTrust" @click="Bus.$emit('contactSomeone',{id:info.id_str})">
               <img src="/static/images/talk.png" alt=""><i>联系TA</i>
@@ -59,8 +59,6 @@
     },
     data() {
       return {
-        uid: "",
-
         isOnline: true,
         info:{},
 
@@ -78,6 +76,9 @@
       isLogin(){
         return this.$store.state.isLogin;
       },
+      isSelf(){
+        return this.JsonBig.stringify(this.$store.state.userInfo.uid)===this.$route.query.uid;
+      },
     },
     watch:{
       isLogin:{
@@ -86,9 +87,6 @@
         },
         immediate: true
       }
-    },
-    mounted() {
-      this.uid= this.JsonBig.parse(this.$route.query.uid) || "";
     },
     methods: {
       joinTrust(){
