@@ -260,6 +260,17 @@
           return item.id;
         })
       },
+      membersInfo() {
+        let obj = {}
+        this.messages.forEach(item => {
+          if(!obj[item.from]) return;
+          obj[item.from] = {
+            icon: item.icon,
+            name: item.name
+          }
+        })
+        return obj;
+      },
       mapCurMembers() {
         let obj = {}
         if(!this.chat[this.index].group && !this.chat[this.index].isSingle) {
@@ -366,15 +377,16 @@
           let uid = this.userId,
               icon = this.$store.state.userInfo.icon;
 
-          data.msgs.forEach(item => {
+          let length = data.msgs.length
+          data.msgs.forEach(async (item, index) => {
             let sender_id = this.JsonBig.stringify(item.sender_id),
                 create_time = item.create_time * 1000;
             result.push({
               id: this.JsonBig.stringify(item.id),
               from: sender_id === uid ? uid : sender_id,
               to: sender_id === uid ? this.curChat : uid,
-              name: sender_id === uid ? this.$store.state.userInfo.name : this.mapCurMembers[sender_id].name,
-              icon: sender_id === uid ? (icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png") : this.mapCurMembers[sender_id].icon,
+              name: sender_id === uid ? this.$store.state.userInfo.name : (await this.historyIcon(sender_id)),
+              icon: sender_id === uid ? (icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png") : (this.mapCurMembers[sender_id] && this.mapCurMembers[sender_id].icon ? this.mapCurMembers[sender_id].icon : "/static/images/default_avator.png"),
               msg:{
                 type: item.type === 'image' ? 1 : 0,
                 content: item.type === 'image' ? `${this.HostUrl.http}file/${item.data.id}` : item.data.msg
@@ -385,7 +397,15 @@
             })
           })
         })
-        this.$store.commit({type: 'moreMessage', data:result })
+        this.$store.commit({type: 'moreMessage', data: result})
+      },
+      async historyIcon(id) {
+        // console.log(this.mapCurMembers, this.membersInfo)
+        if(this.mapCurMembers[id] && this.mapCurMembers[id].name) return this.mapCurMembers[id].name;
+        if(this.membersInfo[id] && this.membersInfo[id].name) return this.membersInfo[id].name;
+        let name = await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(id)}).then(data => data.name);
+        // console.log(name)
+        return name;
       },
       showBigPicture(flag, src) {
         if (!flag) return;
@@ -616,7 +636,7 @@
                 let icon = other.icon;
                 let obj = {
                   id: 0,
-                  from: this.JsonBig.stringify(id),
+                  from: otherId,
                   to: this.userId,
                   icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                   msg:{

@@ -182,16 +182,7 @@
         })
       },
       inputDeal() {
-        let arr = this.groupName.split(''), length = 0, index = 0;
-        for (let i = 0; i < arr.length; i++) {
-           /[\u4e00-\u9fa5]/.test(arr[i]) && (length += 2)
-          !(/[\u4e00-\u9fa5]/.test(arr[i])) && (length += 1)
-          if(length > 20 ) {
-            index = i;
-            break;
-          } 
-        }
-        index > 0 && (this.groupName = arr.slice(0, index).join(''))
+        this.groupName = this.groupName.limit(20)
       },
       closeGroup() {
         this.$emit('offCheckGroup', 'false')

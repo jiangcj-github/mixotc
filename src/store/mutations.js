@@ -89,11 +89,15 @@ export default {
   [types.updateGroupInfo](state, { data }) {
     //更新群信息
     state.curChat = data.id;
-    let obj = state.groupList.filter(item => {
-      return JsonBig.stringify(item.id) === data.id;
-    })[0];
     let target = state.chat.filter((item, index) => {
       return item.id === data.id;
+    })[0];
+    if (data.name) {
+      target.nickName = data.name;
+      return;
+    }
+    let obj = state.groupList.filter(item => {
+      return JsonBig.stringify(item.id) === data.id;
     })[0];
     target.length = obj.members.length;
     target.nickName = obj.name;
@@ -167,10 +171,9 @@ export default {
 
   [types.moreMessage](state, { data }) {
     // 查看更多消息
+    // data =JSON.parse(JSON.stringify(data));
     !state.messages[state.curChat] && (state.messages[state.curChat] = []);
-    state.messages[state.curChat] = data
-      .reverse()
-      .concat(state.messages[state.curChat]);
+    state.messages[state.curChat] = data.reverse().concat(state.messages[state.curChat]);
     state.messages = Object.assign({}, state.messages);
   },
 

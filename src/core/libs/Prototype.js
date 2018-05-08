@@ -18,6 +18,23 @@ String.prototype.shearStr = function(number, suffix = "...") {
   return this.slice(0, number) + suffix;
 };
 
+String.prototype.limit = function (number) {
+  let arr = this.split(""),
+    length = 0,
+    index = 0;
+  for (let i = 0; i < arr.length; i++) {
+    /[\u4e00-\u9fa5]/.test(arr[i]) && (length += 2);
+    !/[\u4e00-\u9fa5]/.test(arr[i]) && (length += 1);
+    if (length > number) {
+      index = i;
+      break;
+    }
+  }
+  if(index > 0) {
+    return arr.slice(0, index).join("");
+  }
+  return this;
+}
 //格式化秒-短格式
 /*
  * 传入：124

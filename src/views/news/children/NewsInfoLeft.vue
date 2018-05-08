@@ -53,6 +53,7 @@
       }
     },
     mounted() {
+      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('213797500157431808'), id: this.JsonBig.parse('211635337816973312') }).then(data => {})
       this.initData()
       this.listenChat()//监听消息
       this.reqFriend()//监听好友请求
