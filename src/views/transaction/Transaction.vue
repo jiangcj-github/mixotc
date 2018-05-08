@@ -2,7 +2,7 @@
   <div>
     <div class="transacation inner">
       <div class="header">
-        <h2>购买{{filte.currency}}</h2>
+        <h2>{{filte.currency && "购买"+filte.currency || "所有广告"}}</h2>
         <div class="f1">
           <div class="search">
             <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">搜索{{srchUls[srchUlSel].title}}</span>
@@ -12,12 +12,18 @@
             <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput">
             <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
             <a href="javascript:void(0)" @click="searchStr"></a>
-            <ul v-show="srchTipShow && tips.length>0">
-              <li v-for="e in tips" @click="search">
-                <div v-if="e.type===0" @mousedown="srchText=e.name">
+            <!--币种模糊搜索结果-->
+            <ul v-show="srchTipShow && coinTips.length>0" v-if="this.srchType===0">
+              <li v-for="e in coinTips" @click="search">
+                <div @mousedown="srchText=e.name">
                   <img class="coin" :src="e.icon"/><span>{{e.name}}</span><span class="gray">{{e.cname}}</span>
                 </div>
-                <div v-else-if="e.type===1" @mousedown="srchText=e.name">
+              </li>
+            </ul>
+            <!--商家模糊搜索结果-->
+            <ul v-show="srchTipShow && userTips.length>0" v-else-if="this.srchType===1">
+              <li v-for="e in userTips" @click="search">
+                <div @mousedown="srchText=e.name">
                   <span>{{e.name}}</span><span class="gray">{{e.account}}</span>
                 </div>
               </li>
@@ -141,15 +147,16 @@
       return {
 
         srchUls: [
-          {title: "币种", type:"coin"},
-          {title: "商家昵称/账号",type:"user"},
+          {title: "币种", type:0},
+          {title: "商家昵称/账号",type:1},
         ],
         srchUlSel: 0,
         srchUlShow: false,
         srchTipShow: false,
         srchText: "",
 
-        tips: [],
+        coinTips: [],
+        userTips: [],
 
         tip: false,//限额错误文案提示
         showPayment: false,
@@ -159,7 +166,7 @@
         filte:{
           type: 1,// 1出售，2购买
           payment: '',//1支付宝，2微信，4银行卡，可相加，共6种
-          currency: 'btc',//字符串
+          currency: '',//字符串
           money: 'CNY',//货币类型CNY
           min: 200,
           max: 9007199254741,
@@ -211,41 +218,34 @@
       },
       //列表项搜索
       search(){
-        if(this.srchText.length<=0) return;
-        let type=this.srchUls[this.srchUlSel].type;
-        if(type==="coin"){
+        if(this.srchType===0){
+          this.filte.user="";
           this.filte.currency=this.srchText;
-        }else if(type==="user"){
+        }else{
+          this.filte.currency="";
           this.filte.user=this.srchText;
         }
       },
       //按钮搜索，不存在的币种，默认给模糊搜索结果第一条
       searchStr(){
-        if(this.srchText.length<=0) return;
-        let type=this.srchUls[this.srchUlSel].type;
-        if(type==="coin"){
-          if(this.tips.length<=0) return;
+        if(this.srchType===0 && this.srchText.length>0){
           let exist=0;
-          this.tips.forEach(e=>{
-            if(e.name===this.srchText.toLowerCase()) exist++;
+          this.coinTips.forEach(e=>{
+            if(e.name.toLowerCase()===this.srchText.toLowerCase()) exist++;
           });
           if(exist<=0){
-            this.filte.currency=this.tips[0].name;
-          }else{
-            this.filte.currency=this.srchText;
+            this.srchText=this.coinTips[0] && this.coinTips[0].name || "";
           }
-        }else if(type==="user"){
-          this.filte.user=this.srchText;
         }
+        this.search();
       },
       loadTips(){
-        let type=this.srchUls[this.srchUlSel].type;
         let srchKey=this.srchText;
-        this.tips = [];
-        if(type==="coin"){
+        if(this.srchType===0){
+          this.coinTips=[];
           this.Proxy["coinSearch"]({keyword: srchKey}).then(res => {
             res.data.coins && res.data.coins.forEach(v => {
-              this.tips.push({
+              this.coinTips.push({
                 name: v.currency || "-",
                 cname: v.cname || "-",
                 icon: this.HostUrl.http+"/image/"+v.icon,
@@ -253,10 +253,11 @@
               });
             });
           });
-        }else if(type==="user"){
+        }else{
+          this.userTips=[];
           this.Proxy["userSearch"]({keyword: srchKey}).then(res => {
             res.data.users && res.data.users.forEach(v => {
-              this.tips.push({
+              this.userTips.push({
                 name: v.name || "-",
                 account:v.phone || v.email || "-",
                 type:1
@@ -265,7 +266,6 @@
           });
         }
       },
-
       //拉取广告数据
       fetchData(params) {
         this.Proxy.sales(params).then(res=>{
@@ -382,6 +382,9 @@
     computed: {
       isLogin() {
         return this.$store.state.isLogin
+      },
+      srchType(){
+        return this.srchUls[this.srchUlSel].type;
       },
       payTitle() {
         let title = this.payment.filter(item => {
