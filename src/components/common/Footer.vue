@@ -92,12 +92,13 @@
         position relative
         margin-bottom 20px
         line-height 14px
-        cursor pointer
-        &:hover
-          a
+        a
+          cursor pointer
+          color $col333
+          &:hover
             color $col422
-            &:active
-              color $col350
+          &:active
+            color $col350
         &::before
           position absolute
           top 0

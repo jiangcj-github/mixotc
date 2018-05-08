@@ -45,6 +45,9 @@ export default {
       this.title = data
     })
     this.Bus.$on('changeInputContent', ({type, data}) => {
+      // this.result.forEach(v => {
+      //   data = v.name === data ? v.name : this.result[0].name
+      // });
       if (type === 'currency') {
         data === '' && (data = 'btc')
         this.currency = data.toUpperCase()
@@ -56,14 +59,13 @@ export default {
       this.result = []
       this.Proxy[`${type}Search`]({keyword: data}).then(res => {
         res.data.coins && res.data.coins.forEach(v => {
-          this.result.push(v.currency, v.name)
-          console.log(v.currency)
+          this.result.push({name: v.currency, cname: v.cname})
         })
         res.data.users && res.data.users.forEach(v => {
-          this.result.push(v.name)
-          console.log(v.currency)
+          this.result.push({name: v.name})
         })
       })
+      console.log('this.result', this.result)
     })
   },
   destroyed() {

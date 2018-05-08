@@ -159,7 +159,7 @@
     .down
       height 70px
       border 1px solid #E1E1E1
-
+      background #FFF
       .down-tag
         flex 1
         font-size 14px
