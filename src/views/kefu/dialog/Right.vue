@@ -258,7 +258,7 @@
             this.isBuyer = v.buyer_id == this.serviceNow ?  "买家" : "卖家";
           } else {
             applUser = 1;
-            this.recv = v.buyer_id == this.serviceNow ?  0 : 1; // 是否为买家 0 买 1 卖
+            this.recv = v.buyer_id == this.serviceNow ?  1 : 0; // 是否为买家 0 买 1 卖
             this.isBuyer = v.buyer_id == this.serviceNow ?  "买家" : "卖家";
           }
         })
@@ -302,11 +302,11 @@
       },
       changeUser(index) { // 点击切换身份
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人对方资料
-          "user_id": this.appl == 0 ? this.JsonBig.parse(this.otherInfo[index].appellee_id) : this.JsonBig.parse(this.otherInfo[index].appellant_id)
+          "user_id": this.appl === 0 ? this.JsonBig.parse(this.otherInfo[index].appellee_id) : this.JsonBig.parse(this.otherInfo[index].appellant_id)
         }).then(data => {
-          console.log('反转申述人', data);
-          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.appl == 0 ? this.JsonBig.stringify(this.otherInfo[index].appellee_id) : this.JsonBig.stringify(this.otherInfo[index].appellant_id)})}) // 存储右边聊天人员
-          this.$store.commit({type: 'transformServiceUser', data: {id: this.appl == 0 ? this.JsonBig.stringify(this.otherInfo[index].appellee_id) : this.JsonBig.stringify(this.otherInfo[index].appellant_id)}}) // 存储右边聊天人员
+          console.log('反转申述人', data, this.appl);
+          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.appl === 0 ? this.JsonBig.stringify(this.otherInfo[index].appellee_id) : this.JsonBig.stringify(this.otherInfo[index].appellant_id)})}) // 存储右边聊天人员
+          this.$store.commit({type: 'transformServiceUser', data: {id: this.appl === 0 ? this.JsonBig.stringify(this.otherInfo[index].appellant_id) : this.JsonBig.stringify(this.otherInfo[index].appellee_id)}}) // 存储右边聊天人员
         }).catch(error=>{
           console.log('错误', error)
         })
@@ -472,6 +472,7 @@
         }
       },
       forceIcon(index) { // 强制放币弹窗
+        this.popIndex = index
         this.showPop1 = true
         this.forceIconName = this.appl === 0 ? this.otherInfo[index].name : this.serviceUser.user_name
         this.forceIconNameIcon = this.otherInfo[0].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : `/static/images/default_avator.png`
@@ -483,6 +484,7 @@
         }
       },
       rejectAppeal(index) { // 驳回申述弹窗
+        this.popIndex = index
         this.showPop2 = true
         this.rejectAppealObj = {
           "id": this.JsonBig.parse(this.otherInfo[index].sid),
@@ -509,35 +511,38 @@
         this.showPop3 = true
         this.comfirmStopTradeObj(index)
       },
+
       onPop1Ok() { // 强制放币确认
         this.showPop1 = false
-        let text = MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/reason/, this.pop1TextOld);
+        let text = MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1TextOld);
         this.sendMsg = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_send_order',
           Object.assign(this.forceIconObj, {"info": this.pop1TextOld})
         ).then((data)=>{
           console.log('强制放币', data)
+          this.$store.commit({type: 'stopTrade', data: this.otherInfo})
         }).catch((msg)=>{
           console.log(msg);
         });
       },
       onPop2Ok() { // 驳回申述确认
         this.showPop2 = false
-        let text = MSGS.get(2, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/reason/, this.pop2TextOld);
+        let text = MSGS.get(2, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop2TextOld);
         this.sendMsg = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_reject_appeal',
           Object.assign(this.rejectAppealObj, {"type": 1}) // 1: 交易, 2: 担保转账
         ).then((data)=>{
           console.log('驳回申述', data)
+          this.$store.commit({type: 'stopTrade', data: this.otherInfo})
         }).catch((msg)=>{
           console.log(msg);
         });
       },
       onPop3Ok() { // 终止交易确认
         this.showPop3 = false
-        let text = MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/reason/, this.pop3TextOld);
+        let text = MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld);
         this.sendMsg = text;
         this.$refs.textarea.focus();
         this.WsProxy.send('control', 'a_terminate_order',
@@ -546,6 +551,7 @@
             "info": this.pop3TextOld
           })
         ).then((data)=>{
+          this.$store.commit({type: 'stopTrade', data: this.otherInfo})
           console.log('终止交易', data)
         }).catch((msg)=>{
           console.log(msg);

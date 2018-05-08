@@ -1,21 +1,26 @@
 <template>
-  <BasePopup :show="orderLayer"
-             :width=470
-             :height=282>
-    <div class="order-layer">
-      <ul>
-        <li class="clearfix"><span>购买单价</span><b>{{price}} CNY</b></li>
-        <li class="clearfix"><span>购买数量</span><b>{{currency}} BTC</b></li>
-        <li class="clearfix"><span>购买金额</span><b>{{money}} CNY</b></li>
-      </ul>
-      <p>提醒：请确认价格后立即下单</p>
-      <p>下单后此订单的比特币将托管锁定，请放心购买</p>
-      <div class="btn-group clearfix">
-        <em @click="closeOrderLayer">取消</em>
-        <i @click="firmOrder">确认订单</i>
+  <div>
+    <BasePopup :show="orderLayer"
+               :width=470
+               :height=282>
+      <div class="order-layer">
+        <ul>
+          <li class="clearfix"><span>购买单价</span><b>{{price}} CNY</b></li>
+          <li class="clearfix"><span>购买数量</span><b>{{currency}} BTC</b></li>
+          <li class="clearfix"><span>购买金额</span><b>{{money}} CNY</b></li>
+        </ul>
+        <p>提醒：请确认价格后立即下单</p>
+        <p>下单后此订单的比特币将托管锁定，请放心购买</p>
+        <div class="btn-group clearfix">
+          <em @click="closeOrderLayer">取消</em>
+          <i @click="firmOrder">确认订单</i>
+        </div>
       </div>
-    </div>
-  </BasePopup>
+    </BasePopup>
+    <BasePopup class="remind-layer" :show="remindLayer">
+      <span v-clickoutside="closeLayer">{{remindText}}</span>
+    </BasePopup>
+  </div>
 </template>
 
 <script>
@@ -27,6 +32,8 @@
     data() {
       return {
         orderLayer: this.orderLayerShow,
+        remindLayer: false,
+        remindText: ''
       }
     },
     components: {
@@ -49,12 +56,34 @@
           money: this.money * 1,
           update_time: Math.floor(new Date().getTime() / 1000)
         }).then((data)=>{
-          console.log('确认订单', data.id)
+          console.log('确认订单')
           this.$store.state.newOrder = true
-          this.$router.push({ path: '/order'})
+          this.$router.push({ path: '/order', query: {id: this.JsonBig.stringify(data.id)}})
         }).catch((msg)=>{
           console.log(msg);
+          this.closeOrderLayer();
+          this.remindLayer = true;
+          switch (msg.ret) {
+            case 13:
+              this.remindText = '买家(对方)有订单未完成';
+              break;
+            case 14:
+              this.remindText = '当天取消订单超过5次';
+              break;
+            case 18:
+              this.remindText = '买家(你自己)有订单未完成';
+              break;
+            case 43:
+              this.remindText = '订单未完成';
+              break;
+            case 55:
+              this.remindText = '状态不匹配';
+              break;
+          }
         });
+      },
+      closeLayer() { // 关闭提示勾选弹窗
+        this.remindLayer = false
       }
     }
   }
@@ -98,5 +127,10 @@
         background #FFB422
         border-radius 2px
         color #FFF
+
+  .remind-layer
+    text-align center
+    line-height 94px
+
 </style>
 

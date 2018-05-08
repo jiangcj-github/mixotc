@@ -52,10 +52,10 @@
           id: this.JsonBig.parse(this.id), // 广告id
         }).then((data)=>{
           console.log('删除评价', data)
+          this.flag = 1
         }).catch((msg)=>{
           console.log(msg);
         });
-        location.reload()
       }
     }
   }

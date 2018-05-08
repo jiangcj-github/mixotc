@@ -265,14 +265,11 @@ export default {
     state.serviceMessage[data.id].push(data.msg);
     state.serviceNow !== data.id && state.serviceData[idex].unread++;
     state.serviceMessage = Object.assign({}, state.serviceMessage);
+    // 新增加消息对话列表置顶
+    state.serviceData.unshift(state.serviceData.splice(idex, 1)[0]);
   },
   // 新增发送消息
-  [types.changeServiceMessages](
-    state,
-    {
-      data: { id, time, code }
-    }
-  ) {
+  [types.changeServiceMessages](state, {data: { id, time, code }}) {
     // 消息发送成功或失败
     let idx = 0;
     state.serviceMessage[id].forEach((item, index) => {
@@ -285,12 +282,7 @@ export default {
     state.serviceMessage = Object.assign({}, state.serviceMessage);
   },
   // 发送图片
-  [types.changeServiceImgsrc](
-    state,
-    {
-      data: { id, time, src }
-    }
-  ) {
+  [types.changeServiceImgsrc](state, {data: { id, time, src }}) {
     state.serviceMessage[id].forEach((item, index) => {
       if (time === item.time) {
         item.content = src;
@@ -306,5 +298,15 @@ export default {
       .reverse()
       .concat(state.serviceMessage[state.serviceNow]);
     state.serviceMessage = Object.assign({}, state.serviceMessage);
+  },
+
+  // 终止交易
+  [types.stopTrade](state, { data }) {
+    let idex;
+    state.serviceData.forEach((item, index) => {
+      item.user_id === data[0].appellant_id && (idex = index);
+      item.user_id === data[0].appellee_id && (idex = index);
+      state.serviceData.splice(idex, 1)
+    });
   }
 };
