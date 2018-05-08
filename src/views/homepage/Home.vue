@@ -42,7 +42,7 @@
       <Rates :uid="uid" v-if="tab===1"></Rates>
       <!--信任操作弹框-->
       <BasePopup :show="pop">
-        <div class="pop">{{popArr[info.isTrust]}}</div>
+        <div class="pop">{{["取消信任成功","加入信任成功"][info.isTrust]}}</div>
       </BasePopup>
     </div>
   </div>
@@ -65,7 +65,6 @@
 
         tab:0,  //他的发布，他的评价
         pop:false,
-        popArr:["取消信任成功","加入信任成功"],
       }
     },
     computed:{

@@ -1,37 +1,7 @@
 <template>
   <div>
     <div class="transacation inner">
-      <div class="header">
-        <h2>购买{{filte.currency}}</h2>
-        <div class="f1">
-          <div class="search">
-            <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">搜索{{srchUls[srchUlSel].title}}</span>
-            <ul v-show="srchUlShow">
-              <li v-for="(e,i) in srchUls" @click="srchUlSel=i">{{e.title}}</li>
-            </ul>
-            <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput">
-            <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
-            <a href="javascript:void(0)" @click="searchStr"></a>
-            <ul v-show="srchTipShow && tips.length>0">
-              <li v-for="e in tips" @click="search">
-                <div v-if="e.type===0" @mousedown="srchText=e.name">
-                  <img class="coin" :src="e.icon"/><span>{{e.name}}</span><span class="gray">{{e.cname}}</span>
-                </div>
-                <div v-else-if="e.type===1" @mousedown="srchText=e.name">
-                  <span>{{e.name}}</span><span class="gray">{{e.account}}</span>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-        <ul class="top5">
-          <li class="eth tuijian" @click="filte.currency='eth'">ETH</li>
-          <li class="btc tuijian" @click="filte.currency='btc'">BTC</li>
-          <li class="ada tuijian" @click="filte.currency='ada'">ADA</li>
-          <li class="bat" @click="filte.currency='bat'">BAT</li>
-          <li class="ltc" @click="filte.currency='ltc'">LTC</li>
-        </ul>
-      </div>
+      <TopSearch :topList="['ETH', 'BTC', 'ADA', 'BAT', 'LTC']" ></TopSearch>
 
       <div class="filtrate">
         <div class="select" @click.stop="switchPayment">
@@ -123,15 +93,15 @@
 </template>
 
 <script>
-  import SearchInput from '@/components/common/SearchInput'
-  import ResultListItem from './children/ResultListItem';
-  import Pagination from '@/components/common/Pagination';
-  import BasePopup from '@/components/common/BasePopup';
-  import NothingContent from '@/components/common/NothingContent';
+  import TopSearch from './children/TopSearch';
+import ResultListItem from './children/ResultListItem';
+import Pagination from '@/components/common/Pagination';
+import BasePopup from '@/components/common/BasePopup';
+import NothingContent from '@/components/common/NothingContent';
 
   export default {
     components: {
-      SearchInput,
+      TopSearch,
       ResultListItem,
       Pagination,
       BasePopup,
@@ -139,18 +109,6 @@
     },
     data() {
       return {
-
-        srchUls: [
-          {title: "币种", type:"coin"},
-          {title: "商家昵称/账号",type:"user"},
-        ],
-        srchUlSel: 0,
-        srchUlShow: false,
-        srchTipShow: false,
-        srchText: "",
-
-        tips: [],
-
         tip: false,//限额错误文案提示
         showPayment: false,
         payment:[{type: '支付宝', score: 1, state: true}, {type: '微信', score: 2, state: true}, {type: '银行卡', score:4, state: true}],
@@ -185,9 +143,22 @@
       }
     },
     created() {
+      //获取信任人员列表
+    //  if (this.isLogin) {
+    //     this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
+    //       data && this.$store.commit('changeTrustList', {data: data.ids})
+    //       !data && this.$store.commit('changeTrustList', {data: []})
+    //     })
+    //   }
       this.fetchData({type: 1, count: 20, page: 0 })
     },
     mounted() {
+      // this.Bus.$on('changePage',data => {
+      //   this.filte.page = data - 1 ;
+      // });
+      this.Bus.$on('changeCurrency', data => {
+        this.filte.currency = data.toLowerCase()
+      });
       this.Bus.$on('changeInputContent', ({type, data}) => {
         type === 'currency' && (this.filte.user = '')
         this.filte[type] = data;
@@ -197,75 +168,12 @@
       });
     },
     destroyed() {
+      // this.Bus.$off('changePage');
+      this.Bus.$off('changeCurrency');
       this.Bus.$off('changeInputContent');
       this.Bus.$off(this.emitValue);
     },
     methods: {
-      fuzzyInput(){
-        if(this.srchText.length<=0){
-          this.srchTipShow=false;
-        }else{
-          this.srchTipShow=true;
-          this.loadTips();
-        }
-      },
-      //列表项搜索
-      search(){
-        if(this.srchText.length<=0) return;
-        let type=this.srchUls[this.srchUlSel].type;
-        if(type==="coin"){
-          this.filte.currency=this.srchText;
-        }else if(type==="user"){
-          this.filte.user=this.srchText;
-        }
-      },
-      //按钮搜索，不存在的币种，默认给模糊搜索结果第一条
-      searchStr(){
-        if(this.srchText.length<=0) return;
-        let type=this.srchUls[this.srchUlSel].type;
-        if(type==="coin"){
-          if(this.tips.length<=0) return;
-          let exist=0;
-          this.tips.forEach(e=>{
-            if(e.name===this.srchText.toLowerCase()) exist++;
-          });
-          if(exist<=0){
-            this.filte.currency=this.tips[0].name;
-          }else{
-            this.filte.currency=this.srchText;
-          }
-        }else if(type==="user"){
-          this.filte.user=this.srchText;
-        }
-      },
-      loadTips(){
-        let type=this.srchUls[this.srchUlSel].type;
-        let srchKey=this.srchText;
-        this.tips = [];
-        if(type==="coin"){
-          this.Proxy["coinSearch"]({keyword: srchKey}).then(res => {
-            res.data.coins && res.data.coins.forEach(v => {
-              this.tips.push({
-                name: v.currency || "-",
-                cname: v.cname || "-",
-                icon: this.HostUrl.http+"/image/"+v.icon,
-                type:0
-              });
-            });
-          });
-        }else if(type==="user"){
-          this.Proxy["userSearch"]({keyword: srchKey}).then(res => {
-            res.data.users && res.data.users.forEach(v => {
-              this.tips.push({
-                name: v.name || "-",
-                account:v.phone || v.email || "-",
-                type:1
-              });
-            });
-          });
-        }
-      },
-
       //拉取广告数据
       fetchData(params) {
         this.Proxy.sales(params).then(res=>{
@@ -276,7 +184,7 @@
       //最小限额输入处理
       inputDealMin(max) {
         let num = Number(this.min),
-          str = this.min;
+            str = this.min;
         if(!/^[0-9]+$/.test(str) || (this.max === '' ? false : num > this.max) || num < 1){
           this.min = str.substring(0, str.length - 1);
           this.$refs.min.value = str.substring(0, str.length - 1);
@@ -285,7 +193,7 @@
       //最大限额输入处理
       inputDealMax(min){
         let num = Number(this.max),
-          str = this.max;
+            str = this.max;
         if(!/^[0-9]+$/.test(str) || num < 1){
           this.max = str.substring(0, str.length - 1);
           this.$refs.max.value = str.substring(0, str.length - 1);
@@ -385,9 +293,9 @@
       },
       payTitle() {
         let title = this.payment.filter(item => {
-          return item.state;
+            return item.state;
         }).map(item => {
-          return item.type;
+            return item.type;
         })
         if(title.length === 0) return '选择支付方式'
         return title.join('/');
@@ -409,7 +317,7 @@
       filte: {
         handler(curVal) {
           let min = Number(curVal.min),
-            max = Number(curVal.max);
+              max = Number(curVal.max);
           curVal.min === '' && (curVal.min = 200);
           curVal.min === '' && (curVal.min = 9007199254741);
           if ((min > max && curVal.min !== '' && curVal.max !== '') || curVal.min < 200) {
@@ -431,8 +339,8 @@
           if (curVal) {
             this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
               data.ids && this.$store.commit('changeTrustList', {data: data.ids.map(item => {
-                  return this.JsonBig.stringify(item.Id);
-                })})
+                return this.JsonBig.stringify(item.Id);
+              })})
               !data && this.$store.commit('changeTrustList', {data: []})
             })
             return
@@ -446,8 +354,7 @@
 </script>
 
 <style scoped lang="stylus">
-  @import "../../stylus/base";
-  @import "stylus/topSearch";
+@import "../../stylus/base.styl";
   .transacation
     margin-top 40px
     margin-bottom 40px

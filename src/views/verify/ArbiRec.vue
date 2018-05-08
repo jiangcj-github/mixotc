@@ -154,8 +154,9 @@
     },
     watch:{
       days:function(){
-        this.$refs.di.date1=new Date(Date.now()-24*60*60*1000*this.days);
-        this.$refs.di.date2=new Date();
+        let date2=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000);
+        this.$refs.di.date2=date2;
+        this.$refs.di.date1=new Date(date2.getTime()-24*60*60*1000*this.days);
       },
       resUlSel:function(){
         this.loadArbiLists();
