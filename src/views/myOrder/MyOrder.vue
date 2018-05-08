@@ -70,7 +70,7 @@
           <li>{{content.currency&&content.currency.toUpperCase()}}</li>
           <li>
             <p><router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(content.buyer) == userId ? content.seller : content.buyer}}">{{content.name || content.contact}}</router-link></p>
-            <p class="talk" @click="$store.commit({'type':'changeChatBox', data: true})">联系他</p>
+            <p class="talk" @click="contactSomeone(JsonBig.stringify(content.buyer) == userId ? content.seller : content.buyer)">联系他</p>
           </li>
           <li>{{content.price}}</li>
           <li>
@@ -361,6 +361,9 @@
       this.Bus.$off(this.onDiChange);
     },
     methods: {
+      contactSomeone(id){
+        this.Bus.$emit('contactSomeone', {id: this.JsonBig.stringify(id)})
+      },
       appealTimer(item){
         if(item.timeToAppeal<=0) return;
         setTimeout(()=>{

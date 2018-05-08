@@ -3,7 +3,7 @@
     <Header v-show="$route.meta.headerShow"></Header>
     <router-view class="main-container" v-if="showView" :key="$route.path + JsonBig.stringify($route.query)"/>
     <Footer v-show="$route.meta.footerShow"></Footer>
-    <News v-show="$route.meta.newsShow"></News>
+    <News v-if="$store.state.userInfo && !$store.state.userInfo.is_admin"></News>
   </div>
 </template>
 

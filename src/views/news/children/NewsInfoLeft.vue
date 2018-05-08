@@ -57,6 +57,7 @@
       this.listenChat()//监听消息
       this.reqFriend()//监听好友请求
       this.beKickGroup()//监听被踢出群
+      this.quitGroup()//监听退群
       document.querySelector('.news-info-left .happy-scroll-container').className = 'happy-scroll-container import';
     },
     computed: {
@@ -91,6 +92,14 @@
       HappyScroll
     },
     methods: {
+      async fetchGroup() {
+        await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
+          if(!data) data = []
+          this.$store.commit({type: 'getGroupList', data})
+        }).catch(error=>{
+          console.log(error)
+        })
+      },
       //初始化拉取加工数据
       async initData() {
         let result = [];
@@ -103,12 +112,7 @@
           console.log(error)
         })
         //拉取群組列表
-        await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
-          if(!data) data = []
-          this.$store.commit({type: 'getGroupList', data})
-        }).catch(error=>{
-          console.log(error)
-        })
+        await this.fetchGroup();
         //拉取近十天对话列表
         let linkman = await this.WsProxy.send('control', 'recent_contact', {uid: this.$store.state.userInfo.uid}).then(data => {
           if(!data.contacts) return [];
@@ -262,11 +266,14 @@
           callback:(res) => {
             // console.log('sdfaasadfadsfasf', res)
             if (res.body && res.body.type === "req_fd") {
+              let {id, info, icon, name} = res.body.data;
               const obj = {
                 sid: this.JsonBig.stringify(res.body.id), 
-                id: this.JsonBig.stringify(res.body.data.id),
-                icon: res.body.data.icon,
-                name: res.body.data.name
+                id: this.JsonBig.stringify(id),
+                info: info,
+                icon: icon,
+                name: name,
+                isDeal: false
               }
               this.$store.commit({type:'newSystemMes', data: obj})
             }
@@ -280,6 +287,19 @@
             if (res.body && res.body.type === 'kick_g') {
               let {id} = res.body.data;
               this.$store.commit({type: 'beKick', data: this.JsonBig.stringify(id)})
+            }
+          }
+        }
+      },
+      //监听退群
+      async quitGroup() {
+        this.WebSocket.onMessage['quit_group'] = {
+          callback:async (res) => {
+            if (res.body && res.body.type === 'quit_g') {
+              let {id, uid} = res.body.data;
+              if(this.JsonBig.stringify(uid) === this.userId) return;
+              await this.fetchGroup();
+              this.$store.commit({type: 'updateGroupInfo', data: this.JsonBig.stringify(id)})
             }
           }
         }

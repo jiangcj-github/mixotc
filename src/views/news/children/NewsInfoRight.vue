@@ -54,14 +54,14 @@
           <div v-for="item of $store.state.messages['system']" :key="item.sid">
             <img :src="item.icon ? `${HostUrl.http}image/${item.icon}` : '/static/images/default_avator.png'" alt="">
             <ul>
-              <li>{{item.name}}</li>
-              <li>{{item.info}}</li>
+              <li class="system-info-name" :class="{single: item.info ? false : true}">{{item.name}}</li>
+              <li v-if="item.info" class="system-info-info">{{item.info}}</li>
             </ul>
             <button 
               @click="addFriend(item.id, item.info ? item.info : `我是${item.name},申请添加你为好友`)"
-              :disabled="friendIds.includes(item.id)"
+              :disabled="item.isDeal"
             >
-              {{friendIds.includes(item.id) ? '已同意' : '同意'}}
+              {{item.isDeal ? '已处理' : '同意'}}
             </button>
           </div>
         </div>
@@ -558,6 +558,7 @@
             chat= this.chat[this.index],
             time = new Date() - 0;
         this.addStoreMessages(tid, 0, text, time)
+        this.$store.commit({type: 'chatTop', data: this.index})
         // 发消息
         this.WsProxy.sendMessage({
           gid: chat.group || chat.isSingle ? tid : 0,
@@ -578,6 +579,7 @@
       // 同意好友请求
       async addFriend(id, info) {
         this.reqMessage = info;
+        this.$store.commit({type: 'agreeAddFriend', data:{id: id}})
         await this.WsProxy.send('control', 'add_friend', {
           ack: 0,
           id: this.JsonBig.parse(id)
@@ -855,6 +857,9 @@
               top 25px
           b 
             display block
+            position relative
+            left -5px
+            fz10()
       .messages
         width 100%
         margin 0
@@ -874,7 +879,6 @@
           top 50%
           margin-top -6px
         .avator
-          // background aquamarine
           margin-right 10px
           cursor pointer
         span
@@ -920,25 +924,36 @@
         background #FFF
         margin 10px auto 0
         img
+          flex-shrink 0
           width 37px
           height 37px
           border-radius 50%
-          // background aquamarine
           margin-right 16px
         button
-          width 56px
+          flex-shrink 0
+          width 54px
           height 24px
+          line-height 24px
           background #FFB422
           border-radius 2px
           color #FFF
-          margin-left 46px
           cursor pointer
         ul
+          width 380px
+          height 60px
           li
             width 190px
-          li:first-child
+          .system-info-name
+            height 32px
+            line-height 38px
             font-size 14px
-          li:last-child
+            &.single
+              height 60px
+              line-height 60px
+          .system-info-info
+            overflow hidden
+            text-overflow ellipsis
+            white-space nowrap
             font-size 12px
             color #999
     .input-text

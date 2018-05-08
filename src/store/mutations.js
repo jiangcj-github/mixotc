@@ -1,5 +1,5 @@
 import * as types from "./mutation-types";
-
+import JsonBig from "json-bigint";
 // 同步改变状态时
 export default {
   [types.changeLoginForm](state, { data }) {
@@ -89,14 +89,14 @@ export default {
   [types.updateGroupInfo](state, { data }) {
     //更新群信息
     state.curChat = data.id;
-    state.chat.filter((item, index) => {
-      item.id === data.id &&
-        data.length !== undefined &&
-        (state.chat[index].length = data.length);
-      item.id === data.id &&
-        data.name !== undefined &&
-        (state.chat[index].nickName = data.name);
-    });
+    let obj = state.groupList.filter(item => {
+      return JsonBig.stringify(item.id) === data.id;
+    })[0];
+    let target = state.chat.filter((item, index) => {
+      return item.id === data.id;
+    })[0];
+    target.length = obj.members.length;
+    target.nickName = obj.name;
   },
   //接收到消息和发送消息时的处理
   [types.addMessages](state, { data }) {
@@ -180,10 +180,23 @@ export default {
   },
 
   [types.newSystemMes](state, { data }) {
-    // 收款地址
+    // 系统消息(目前只有请求添加信息)
+    let idx;
+    state.messages["system"].forEach((item, index) => {
+      if(item.id === data.id) idx = index;
+    })
+    if(idx !== undefined) state.messages["system"].splice(idx, 1);
     state.messages["system"].push(data);
     if (state.curChat !== "system") state.systemMessage++;
     if (state.isLogin && !state.showChat) state.unreadNumber++;
+  },
+  // 同意好友请求后改变isDeal处理标志
+  [types.agreeAddFriend](state, { data }) {
+    let idx;
+    state.messages["system"].forEach((item, index) => {
+      if (item.id === data.id) idx = index;
+    });
+    state.messages["system"][idx].isDeal = true;
   },
 
   [types.beKick](state, { data }) {
@@ -201,6 +214,7 @@ export default {
     delete state.messages[id];
     state.messages = Object.assign({}, state.messages);
   },
+
   [types.delStranger](state) {
     //改变登陆用户时初始化必要的state
     state.trustList = [];

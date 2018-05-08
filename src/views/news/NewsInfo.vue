@@ -1,5 +1,5 @@
 <template>
-  <div class="news-info-wrap clearfix" v-show="$store.state.showChat">
+  <div class="news-info-wrap clearfix" v-show="$store.state.showChat" ondragstart="return false;">
     <NewsInfoLeft></NewsInfoLeft>
     <NewsInfoRight></NewsInfoRight>
   </div>

@@ -65,7 +65,7 @@
             name: this.userInfo.name
           },
           {
-            id : this.chat[this.index].id,
+            id : this.chat[this.index].isSingle ? this.chat[this.index].uid : this.chat[this.index].id,
             icon : this.chat[this.index].icon,
             name: this.chat[this.index].nickName
           }
@@ -131,7 +131,7 @@
           console.log(error)
         })
       },
-      createGroup() {
+      async createGroup() {
         let array = [];
       //新建群
         if(this.isNewGroup) {
@@ -164,11 +164,10 @@
           id: this.JsonBig.parse(this.nowChat),
           ids: array,
           uid: this.userInfo.uid
-        }).then(data => {
-          this.fetchGroup()
-          this.$store.commit({'type':'updateGroupInfo', data: {id: this.nowChat, length: this.ids.length}})
-          this.closeGroup()
-        })
+        }).then(data => {})
+        await this.fetchGroup()
+        this.$store.commit({'type':'updateGroupInfo', data: {id: this.nowChat }})
+        this.closeGroup()
       },
       closeGroup() {
         this.$emit('offAddGroup', 'false')
