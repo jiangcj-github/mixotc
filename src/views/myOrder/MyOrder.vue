@@ -255,6 +255,7 @@
         selectOrder: 3, // 订单类型筛选
         selectCurrency: '', // 币种筛选
         selectState: '', // 订单状态筛选
+        comment: 0, // 是否评价
         currencyBox:[ // 币种下拉显示
           {type: 'BTC', state: false, code: 'btc'},
           {type: 'ETH', state: false, code: 'eth'},
@@ -267,10 +268,10 @@
           {type: '申诉中', state: false, code: '3'},
         ], // 进行中状态下拉显示
         allStatusCom: [ // (126) 12310 (12678) (126789) (124) 12311 (15)
-          {type: '成功', state: false, code: '6,7,8,9'},
+          {type: '成功', state: false, code: '6,7,8,9,10'},
           {type: '成功-强制放币', state: false, code: '10'},
-          {type: '成功-未评价', state: false, code: 1},
-          {type: '成功-已评价', state: false, code: 1},
+          {type: '成功-未评价', state: false, code: '6,7'},
+          {type: '成功-已评价', state: false, code: '8,9'},
           {type: '失败-取消', state: false, code: '4'},
           {type: '失败-终止', state: false, code: '11'},
           {type: '失败-超时', state: false, code: '5'},
@@ -317,9 +318,30 @@
         console.log('selectCurrency', this.selectCurrency)
       });
       this.Bus.$on(this.allStatusValue, (data) => { // 类型筛选
-        data.length ? this.selectState = data.join(',') : this.selectState = data
+
+        if (data.indexOf('6,7') > -1) { // 选中未评价
+          if (data.indexOf('8,9') > -1) {
+            this.comment = 0
+            this.selectState = data.length ? data.join(',') : data
+          } else {
+            this.comment = 1
+            data.splice(data.indexOf('6,7'), 1)
+            this.selectState = data.length ? data.join(',') : ''
+          }
+        }
+        if (data.indexOf('8,9') > -1) { // 选中未评价
+          if (data.indexOf('6,7') > -1) {
+            this.comment = 0
+            this.selectState = data.length ? data.join(',') : data
+          } else {
+            this.comment = 2
+            data.splice(data.indexOf('8,9'), 1)
+            this.selectState = data.length ? data.join(',') : ''
+          }
+        }
+
         this.initData()
-        console.log('selectState', this.selectState)
+        console.log('selectState', data)
       });
       // 监听搜索框title值
       this.Bus.$on(this.searchValue,(data) => {
@@ -432,9 +454,6 @@
               // 可申诉时间到计时
               v.timeToAppeal = 30 * 60 - (Math.floor(Date.now() / 1000) - v.paytime);
               this.appealTimer(v);
-              // 判断操作数组的code值
-              this.JsonBig.stringify(v.buyer) == this.userId ? this.allStatusCom[2].code = '6,8' : '6,7'
-              this.JsonBig.stringify(v.buyer) == this.userId ? this.allStatusCom[3].code = '7,9' : '8,9'
             })
           },
           date:new Date()
@@ -459,8 +478,7 @@
               "order_id": this.orderId,
               "trade_code": this.tradeCode,
               "trader": this.trader,
-              "111": this.selectState,
-              "bbb": this.selectState
+              "comment": Number(this.comment), // 1 已 2 未 评价
             }
           }
         }))
