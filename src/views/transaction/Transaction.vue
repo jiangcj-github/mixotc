@@ -3,7 +3,7 @@
     <div class="transacation inner">
       <!--头部搜索栏-->
       <div class="header">
-        <h2>{{filte.currency && "购买"+filte.currency || "所有广告"}}</h2>
+        <h2>{{filte.currency && "购买"+filte.currency.toUpperCase() || "购买BTC"}}</h2>
         <div class="f1">
           <div class="search">
             <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">搜索{{srchUls[srchUlSel].title}}</span>
@@ -41,10 +41,11 @@
       </div>
       <!--筛选栏-->
       <div class="filtrate">
-        <div class="select" @click.stop="switchPayment">
+        <div class="select" @click.stop="showPayment=!showPayment" v-clickoutside="()=>{showPayment=false}">
           <i :class="{'select-item': payTitle !== '选择支付方式' }">{{payTitle}}</i>
-          <ul class="payment" v-clickoutside="changePayment" v-show="showPayment">
-            <li v-for="(item, index) of payment" :key="index" :class="{selected: item.state}" @click.stop="item.state = !item.state">
+          <ul class="payment" v-show="showPayment">
+            <li v-for="(item, index) of payment" :key="index" :class="{selected: item.state}"
+                @mousedown="item.state = !item.state" @click.stop="filte.payment = paymentScore">
               <span>{{item.type}}</span>
             </li>
           </ul>
@@ -52,16 +53,18 @@
         </div>
         <div class="price">
           <b v-if="tip" class="err-tip"><img src="/static/images/hint.png">最大限额不能低于最小限额，且最小限额为200</b>
-          <input type="number" class="min" @blur="filte.min = min" @keyup.enter="filte.min = min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低价" step="1" min="200">
-          <input type="number" class="max" @blur="filte.max = max" @keyup.enter="filte.max = max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高价" step="1">
+          <input type="number" class="min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低限额" step="1" min="200">
+          <input type="number" class="max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高限额" step="1">
         </div>
         <div class="wholesale">
-          <img src="/static/images/selected.png" alt="" @click="changeIsWhole" v-if="filte.btrade">
-          <img src="/static/images/unselect.png" alt="" @click="changeIsWhole" v-else>
-          <span>大额交易区</span>
+          <label @click="changeIsWhole">
+            <img src="/static/images/selected.png" alt="" v-if="filte.btrade">
+            <img src="/static/images/unselect.png" alt="" v-else>
+            <span>大额交易区</span>
+          </label>
         </div>
       </div>
-
+      <!--数据列表-->
       <div class="result-list">
         <div class="thead clearfix">
           <p class="merchant" title="默认排序">
@@ -120,15 +123,8 @@
           <div class="err loading">加载中...</div>
         </div>
       </div>
-      <!--<Pagination :total="230" :pageSize="20" emitValue='changePage'></Pagination>-->
-      <div class="page-btn" v-if="result.length >= 20">
-        <button @click="clickPre" :class="{'unable-btn': filte.page === 0}" :disabled="filte.page === 0">上一页</button>
-        <button @click="clickNext" :class="{'unable-btn': result && result.length < 20}" :disabled="result && result.length < 20">下一页</button>
-      </div>
-
+      <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
     </div>
-
-
     <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="popupClick(toPath)">
       <slot>
         <p><span>{{popupTip}}</span></p>
@@ -138,19 +134,15 @@
 </template>
 
 <script>
-  import SearchInput from '@/components/common/SearchInput'
   import ResultListItem from './children/ResultListItem';
-  import Pagination from '@/components/common/Pagination';
+  import Pagination from '@/views/verify/component/Pagination';
   import BasePopup from '@/components/common/BasePopup';
-  import NothingContent from '@/components/common/NothingContent';
 
   export default {
     components: {
-      SearchInput,
       ResultListItem,
       Pagination,
       BasePopup,
-      NothingContent
     },
     data() {
       return {
@@ -176,21 +168,16 @@
           type: 1,// 1出售，2购买
           payment: '',//1支付宝，2微信，4银行卡，可相加，共6种
           currency: '',//字符串
-          money: 'CNY',//货币类型CNY
           min: 200,
           max: 9007199254741,
-          count: 20,//每页广告条数
           user: '',//用户名昵称模糊搜索
-          // mode: '',//是否可溢价，1可，2不可，暂无
           price: '', //价格排序，1降序，2升序
           date: '',//时间排序，1降序，2升序
           order: '',//订单数排序，1降序，2升序
           volume: '',//交易量排序，1降序，2升序
           rate: '',//好评率排序，1降序，2升序
-          tradeable: '',
-          // trust: '',//信任人数排序，1降序，2升序
+          tradeable: '', //可交易量排序
           btrade: false,
-          page: 0
         },
         showPopup: false,
         popupTip: '',
@@ -199,13 +186,14 @@
         emitValue: 'popup',
 
         result: [],
+        total: 1,
+        curPage: 0,
+        pageSize: 20,
         err: 1, //数据加载结果：0-正常，1-无数据，2-网络异常，3-加载失败，4-加载中
       }
     },
-    created() {
-      this.fetchData({type: 1, count: 20, page: 0 })
-    },
     mounted() {
+      this.fetchData({type: 1, count: 20, page: 0 });
       this.Bus.$on('changeInputContent', ({type, data}) => {
         type === 'currency' && (this.filte.user = '')
         this.filte[type] = data;
@@ -219,102 +207,118 @@
       this.Bus.$off(this.emitValue);
     },
     methods: {
-      fuzzyInput(){
-        if(this.srchText.length<=0){
-          this.srchTipShow=false;
-        }else{
-          this.srchTipShow=true;
+      fuzzyInput() {
+        if (this.srchText.length <= 0) {
+          this.srchTipShow = false;
+        } else {
+          this.srchTipShow = true;
           this.loadTips();
         }
       },
       //列表项搜索
-      search(){
-        if(this.srchType===0){
-          this.filte.user="";
-          this.filte.currency=this.srchText;
-        }else{
-          this.filte.currency="";
-          this.filte.user=this.srchText;
+      search() {
+        if (this.srchType === 0) {
+          this.filte.user = "";
+          this.filte.currency = this.srchText || "btc";
+        } else {
+          this.filte.user = this.srchText;
         }
       },
       //按钮搜索，不存在的币种，默认给模糊搜索结果第一条
-      searchStr(){
-        if(this.srchType===0 && this.srchText.length>0){
-          let exist=0;
-          this.coinTips.forEach(e=>{
-            if(e.name.toLowerCase()===this.srchText.toLowerCase()) exist++;
+      searchStr() {
+        if (this.srchType === 0 && this.srchText.length > 0) {
+          let exist = 0;
+          this.coinTips.forEach(e => {
+            if (e.name.toLowerCase() === this.srchText.toLowerCase()) exist++;
           });
-          if(exist<=0){
-            this.srchText=this.coinTips[0] && this.coinTips[0].name || "";
+          if (exist <= 0) {
+            this.srchText = this.coinTips[0] && this.coinTips[0].name || "";
           }
         }
         this.search();
       },
-      loadTips(){
-        let srchKey=this.srchText;
-        if(this.srchType===0){
-          this.coinTips=[];
+      loadTips() {
+        let srchKey = this.srchText;
+        if (this.srchType === 0) {
+          this.coinTips = [];
           this.Proxy["coinSearch"]({keyword: srchKey}).then(res => {
             res.data.coins && res.data.coins.forEach(v => {
               this.coinTips.push({
                 name: v.currency || "-",
                 cname: v.cname || "-",
-                icon: this.HostUrl.http+"/image/"+v.icon,
-                type:0
+                icon: this.HostUrl.http + "/image/" + v.icon,
+                type: 0
               });
             });
           });
-        }else{
-          this.userTips=[];
+        } else {
+          this.userTips = [];
           this.Proxy["userSearch"]({keyword: srchKey}).then(res => {
             res.data.users && res.data.users.forEach(v => {
               this.userTips.push({
                 name: v.name || "-",
-                account:v.phone || v.email || "-",
-                type:1
+                account: v.phone || v.email || "-",
+                type: 1
               });
             });
           });
         }
       },
       //拉取广告数据
-      fetchData(params) {
-        this.Proxy.sales(params).then(res => {
+      fetchData() {
+        this.Proxy.sales({
+          type: this.filte.type,
+          payment: this.filte.payment,
+          currency: this.filte.currency || "btc",
+          money: 'CNY',
+          min: this.filte.min,
+          max: this.filte.max,
+          count: this.pageSize,
+          user: this.filte.user,
+          price: this.filte.price,
+          date: this.filte.date,
+          order: this.filte.order,
+          volume: this.filte.volume,
+          rate: this.filte.rate,
+          tradeable: this.filte.tradeable,
+          btrade: this.filte.btrade,
+          page: this.curPage,
+        }).then(res => {
           if (!res || !res.data || !res.data.sales || res.data.sales.length <= 0)
             this.err = 1; //无数据
-          else{
-            this.err=0;
+          else {
+            this.err = 0;
             this.parseResult(res.data.sales);
           }
-        }).catch((msg) => {console.log(msg);
+        }).catch((msg) => {
           if (!msg)
             this.err = 2; //网络异常
           else if (msg.ret !== 0)
             this.err = 3; //加载失败
         });
       },
-      parseResult(data){
-        this.result=[];
+      parseResult(data) {
+        this.result = [];
         data.forEach(e => {
           this.result.push({
             id: e.id,
             sid: e.sid,
             sid_str: this.JsonBig.stringify(data.sid),
-            headimg: e.icon && this.HostUrl.http+"/image/"+e.icon || "/static/images/default_avator.png",
+            headimg: e.icon && this.HostUrl.http + "/image/" + e.icon || "/static/images/default_avator.png",
             nickname: e.trader || "-",
             isTrust: this.trustArray.includes(this.JsonBig.stringify(e.sid)),
-            dealVolume: (e.volume+"").substr(0, (e.volume+"").indexOf(".")+6),
-            orderVolume: e.trade || "-",
-            rate: e.rate && e.rate+"%" || "-",
+            dealVolume: e.volume && (e.volume + "").substr(0, (e.volume + "").indexOf(".") + 6) || 0,
+            orderVolume: e.trade && (e.trade + "").substr(0, (e.trade + "").indexOf(".") + 6) || 0,
+            rate: e.rate && e.rate + "%" || "-",
             priceMin: e.min,
             priceMax: e.max,
-            pay_zfb: e.payments %2 === 1,
+            pay_zfb: e.payments % 2 === 1,
             pay_wx: [2, 3, 6, 7].includes(e.payments),
             pay_yhk: [4, 5, 6, 7].includes(e.payments),
-            amount: (e.tradeable+"").substr(0, (e.tradeable+"").indexOf(".")+6),
+            amount: (e.tradeable + "").substr(0, (e.tradeable + "").indexOf(".") + 6),
             price: e.price,
             currency: e.currency,
-            isLargeTran: true,
+            isLargeTran: e.bt_verify,
           });
         });
       },
@@ -322,56 +326,42 @@
       inputDealMin(max) {
         let num = Number(this.min),
           str = this.min;
-        if(!/^[0-9]+$/.test(str) || (this.max === '' ? false : num > this.max) || num < 1){
+        if (!/^[0-9]+$/.test(str) || (this.max === '' ? false : num > this.max) || num < 1) {
           this.min = str.substring(0, str.length - 1);
           this.$refs.min.value = str.substring(0, str.length - 1);
         }
+        this.filte.btrade = 0;
+        this.filte.min = this.min;
       },
       //最大限额输入处理
-      inputDealMax(min){
+      inputDealMax(min) {
         let num = Number(this.max),
           str = this.max;
-        if(!/^[0-9]+$/.test(str) || num < 1){
+        if (!/^[0-9]+$/.test(str) || num < 1) {
           this.max = str.substring(0, str.length - 1);
           this.$refs.max.value = str.substring(0, str.length - 1);
         }
+        this.filte.btrade = 0;
+        this.filte.max = this.max;
       },
       changeIsWhole() {
-        this.filte.btrade = !this.filte.btrade
-        this.filte.btrade = this.filte.btrade === true ? 1 : 0
-      },
-      //点击选择支付方式
-      switchPayment() {
-        if (!this.showPayment) {
-          this.showPayment = true;
-          return;
-        }
-        this.changePayment()
+        this.min = 100000;
+        this.max = 10000000;
+        this.filte.btrade = (this.filte.btrade + 1) % 2;
       },
       clearPayment() {
         this.payment.forEach(item => {
-          item.state = false
-        })
-      },
-      hidePayment() {
-        if(!this.showPayment) return;
-        this.showPayment = false
-      },
-      changePayment() {
-        this.hidePayment();
-        if (this.paymentScore === 0 ) {
-          this.filte.payment = ''
-          return;
-        }
-        this.filte.payment = this.paymentScore
+          item.state = false;
+        });
+        this.filte.payment=this.paymentScore;
       },
       sort(title) {
         title !== 'price' && (this.filte.price = ''),
         title !== 'date' && (this.filte.date = ''),
         title !== 'order' && (this.filte.order = ''),
         title !== 'volume' && (this.filte.volume = ''),
-        title !== 'rate' && (this.filte.rate =  ''),
-        title !== 'tradeable' && (this.filte.tradeable =  '');
+        title !== 'rate' && (this.filte.rate = ''),
+        title !== 'tradeable' && (this.filte.tradeable = '');
 
         if (title && (this.filte[title] === 1 || !this.filte[title])) {
           this.filte[title] = 2;
@@ -382,7 +372,7 @@
       popupClick(path) {
         clearTimeout(this.timer)
         this.showPopup = false;
-        this.$router.push({ name: path})
+        this.$router.push({name: path})
       },
       verifyState(state) {
         if (state === 1) {
@@ -414,21 +404,15 @@
         clearTimeout(this.timer);
         this.timer = setTimeout(() => {
           this.showPopup = false;
-          this.$router.push({ name: this.toPath})
+          this.$router.push({name: this.toPath})
         }, 3000);
       },
-      clickPre() {
-        this.filte.page <= 0 ? this.filte.page = 0 : this.filte.page--;
-      },
-      clickNext() {
-        this.filte.page++;
-      }
     },
     computed: {
       isLogin() {
         return this.$store.state.isLogin
       },
-      srchType(){
+      srchType() {
         return this.srchUls[this.srchUlSel].type;
       },
       payTitle() {
@@ -437,7 +421,7 @@
         }).map(item => {
           return item.type;
         })
-        if(title.length === 0) return '选择支付方式'
+        if (title.length === 0) return '选择支付方式'
         return title.join('/');
       },
       paymentScore() {
@@ -446,7 +430,7 @@
           return item.state;
         }).forEach(item => {
           score += item.score;
-        })
+        });
         return score;
       },
       trustArray() {
@@ -461,16 +445,16 @@
           curVal.min === '' && (curVal.min = 200);
           curVal.min === '' && (curVal.min = 9007199254741);
           if ((min > max && curVal.min !== '' && curVal.max !== '') || curVal.min < 200) {
-            // console.log(this.tip)
-            this.tip = true
+            this.tip = true;
             return;
+          } else {
+            this.tip = false;
           }
-          this.tip && (this.tip = false)
           let obj = {};
           for (const key in curVal) {
-            curVal.hasOwnProperty(key) && curVal[key] !== '' &&  (obj[key] = curVal[key])
+            curVal.hasOwnProperty(key) && curVal[key] !== '' && (obj[key] = curVal[key])
           }
-          this.fetchData(obj)
+          this.fetchData();
         },
         deep: true
       },
@@ -478,9 +462,11 @@
         handler(curVal) {
           if (curVal) {
             this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
-              data.ids && this.$store.commit('changeTrustList', {data: data.ids.map(item => {
+              data.ids && this.$store.commit('changeTrustList', {
+                data: data.ids.map(item => {
                   return this.JsonBig.stringify(item.Id);
-                })})
+                })
+              })
               !data && this.$store.commit('changeTrustList', {data: []})
             })
             return
@@ -489,7 +475,7 @@
         },
         immediate: true
       }
-    }
+    },
   }
 </script>
 

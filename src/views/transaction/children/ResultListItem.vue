@@ -2,13 +2,13 @@
   <li class="item clearfix">
     <div class="title merchant">
       <p class="avatar">
+        <img class="largeTran" v-if="data.isLargeTran" src="/static/images/whole_icon2.png" title="已大额认证">
         <img class="headimg" @click="toHomePage(data.sid)" :src="data.headimg" alt="">
       </p>
       <p class="userInfo">
         <span class="nickname" @click="toHomePage(data.sid)">{{data.nickname}}</span>
         <span class="tag">
           <i class="trust" v-if="data.isTrust" title="已信任">信任</i>
-          <img class="largeTran" v-if="data.isLargeTran" src="/static/images/whole_icon2.png" title="已大额认证">
         </span>
       </p>
     </div>
