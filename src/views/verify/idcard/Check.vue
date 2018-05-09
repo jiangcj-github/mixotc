@@ -164,7 +164,7 @@
         //
         let srchKey=this.srchText;
         let start= this.$refs.di.date1;
-        let end= this.$refs.di.date2;console.log(start+"--"+end);
+        let end= this.$refs.di.date2;
         start=start?Math.floor(new Date(this.$refs.di.date1).getTime()/1000):null;
         end=end?Math.floor(new Date(this.$refs.di.date2).getTime()/1000):null;
         let result=this.status[this.statusDropSel].value;

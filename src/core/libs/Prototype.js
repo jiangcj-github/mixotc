@@ -35,6 +35,7 @@ String.prototype.limit = function (number) {
   }
   return this;
 }
+
 //格式化秒-短格式
 /*
  * 传入：124
@@ -57,15 +58,13 @@ Number.prototype.formatSecord=function(){
   }
 };
 
-// xxxx-yy-zz, hh:mm:ss
-/**
- * {
- *    date: ''
- * }
- *
- *
- * @returns {string}
- */
+//保留小数点后n位
+String.prototype.formatFixed=function(n){
+  if(n<0) return;
+  let i=this.indexOf(".");
+  if(i<=0) return this;
+  return this.substr(0,i+n+1);
+};
 
 // 时间格式化
 Number.prototype.toDate = function (fmt) {

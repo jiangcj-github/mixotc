@@ -191,7 +191,7 @@
         result: [],
         total: 1,
         curPage: 0,
-        pageSize: 5,
+        pageSize: 20,
         err: 1, //数据加载结果：0-正常，1-无数据，2-网络异常，3-加载失败，4-加载中
       }
     },
@@ -310,18 +310,18 @@
             headimg: e.icon && this.HostUrl.http + "/image/" + e.icon || "/static/images/default_avator.png",
             nickname: e.trader || "-",
             isTrust: this.trustArray.includes(this.JsonBig.stringify(e.sid)),
-            dealVolume: e.volume && (e.volume + "").substr(0, (e.volume + "").indexOf(".") + 6) || 0,
-            orderVolume: e.trade && (e.trade + "").substr(0, (e.trade + "").indexOf(".") + 6) || 0,
+            dealVolume: e.volume && (e.volume + "").formatFixed(6) || 0,
+            orderVolume: e.trade && (e.trade + "").formatFixed(6) || 0,
             rate: e.rate && e.rate + "%" || "-",
             priceMin: e.min,
             priceMax: e.max,
             pay_zfb: e.payments % 2 === 1,
             pay_wx: [2, 3, 6, 7].includes(e.payments),
             pay_yhk: [4, 5, 6, 7].includes(e.payments),
-            amount: (e.tradeable + "").substr(0, (e.tradeable + "").indexOf(".") + 6),
-            price: e.price,
+            amount: e.tradeable && (e.tradeable + "").formatFixed(6) || 0,
+            price: e.price && (e.price + "").formatFixed(2) || 0,
             currency: e.currency,
-            isLargeTran: e.bt_verify,
+            isLargeTran: e.bt_verify===2?1:0,
           });
         });
       },
