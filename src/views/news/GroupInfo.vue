@@ -12,8 +12,8 @@
           type="text" 
           v-model="groupName" 
           :placeholder="(!groupInfo || !groupInfo.name || groupInfo.name === $store.state.userInfo.name) ? '编辑群名称' : groupInfo.name"
-          @input="inputDeal"
           @blur="updateGroup"
+          maxlength="30"
         />
       </li>
       <li>
@@ -111,9 +111,8 @@
     },
     async created() {
       await this.fetchGroup()
-    },
-    mounted() {
       this.groupName = this.groupInfo.name
+      this.$store.commit({type: 'updateGroupInfo', data: { id : this.id}})
     },
     computed: {
       isOwner() {
@@ -180,9 +179,6 @@
         }).catch(error=>{
           console.log(error)
         })
-      },
-      inputDeal() {
-        this.groupName = this.groupName.limit(20)
       },
       closeGroup() {
         this.$emit('offCheckGroup', 'false')
