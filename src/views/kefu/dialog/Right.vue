@@ -213,9 +213,7 @@
         rejectAppealObj: {}, // 驳回申述弹窗所用参数
 
         stopTradeUser: "", // 终止交易发起人
-        stopTradeOther: "", // 终止交易发起人对方
         stopTradeUserIcon: "", // 终止交易发起人头像
-        stopTradeOtherIcon: "", // 终止交易发起人对方头像
         stopTradePerson: 0, // 终止交易发起责任人
         stopTradeObj: {} // 终止交易弹窗所用参数
 
@@ -247,21 +245,34 @@
         return this.$store.state.serviceMessage[this.serviceNow] ? this.$store.state.serviceMessage[this.serviceNow] : []
       },
       otherInfo() { // 对方信息
+        //this.startSwiper();
         return this.$store.state.serviceNowOther
       },
       appl() {
+        //this.startSwiper();
         let applUser; //197113900708139008
-        this.otherInfo.forEach(v => {
-          if (v.appellant_id == this.serviceNow) { // 是否为申述人 0 申诉 1 被申诉
+        // this.otherInfo.forEach(v => {
+        //   if (v.appellant_id == this.serviceNow) { // 是否为申述人 0 申诉 1 被申诉
+        //     applUser = 0;
+        //     this.recv = v.buyer_id == this.serviceNow ?  0 : 1; // 是否为买家 0 买 1 卖
+        //     this.isBuyer = v.buyer_id == this.serviceNow ?  "买家" : "卖家";
+        //   } else {
+        //     applUser = 1;
+        //     this.recv = v.buyer_id == this.serviceNow ?  1 : 0; // 是否为买家 0 买 1 卖
+        //     this.isBuyer = v.buyer_id == this.serviceNow ?  "买家" : "卖家";
+        //   }
+        // })
+
+          if (this.otherInfo[0].appellant_id == this.serviceNow) { // 是否为申述人 0 申诉 1 被申诉
             applUser = 0;
-            this.recv = v.buyer_id == this.serviceNow ?  0 : 1; // 是否为买家 0 买 1 卖
-            this.isBuyer = v.buyer_id == this.serviceNow ?  "买家" : "卖家";
+            this.recv = this.otherInfo[0].buyer_id == this.serviceNow ?  0 : 1; // 是否为买家 0 买 1 卖
+            this.isBuyer = this.otherInfo[0].buyer_id == this.serviceNow ?  "买家" : "卖家";
           } else {
             applUser = 1;
-            this.recv = v.buyer_id == this.serviceNow ?  1 : 0; // 是否为买家 0 买 1 卖
-            this.isBuyer = v.buyer_id == this.serviceNow ?  "买家" : "卖家";
+            this.recv = this.otherInfo[0].buyer_id == this.serviceNow ?  1 : 0; // 是否为买家 1 买 0 卖
+            this.isBuyer = this.otherInfo[0].buyer_id == this.serviceNow ?  "买家" : "卖家";
           }
-        })
+
         console.log('applUser', applUser, this.recv)
         return applUser
       }
@@ -284,18 +295,22 @@
       this.Bus.$on("onIpClose", () => {
         this.showPopImg = false;
       });
+      this.mySwiper = new Swiper('.swiper-container', { // 调用轮播图
+        nextButton: '.swiper-button-next',
+        prevButton: '.swiper-button-prev',
+        observer: true, //修改swiper自己或子元素时，自动初始化swiper
+        observeParents: true,//修改swiper的父元素时，自动初始化swiper
+        // onSlideChangeEnd(swiper) {
+        //   console.log(111, swiper.activeIndex)
+        //   //this.isBuyer = swiper.activeIndex && this.otherInfo[swiper.activeIndex].buyer_id == this.serviceNow ?  "买家" : "卖家";
+        // }
+      })
     },
     methods: {
        startSwiper() {
-         new Swiper('.swiper-container', { // 调用轮播图
-           nextButton: '.swiper-button-next',
-           prevButton: '.swiper-button-prev',
-           observer: true, //修改swiper自己或子元素时，自动初始化swiper
-           observeParents: true,//修改swiper的父元素时，自动初始化swiper
-           onSlideChangeEnd(swiper) {
-             swiper.update(); //swiper更新
-           }
-         })
+         console.log('startSwiper')
+         // this.mySwiper && this.mySwiper.updateSlidesSize()
+
        },
       onCtrlEnter() { // 换行
         this.$refs.textarea.value += "\n";
@@ -474,8 +489,8 @@
       forceIcon(index) { // 强制放币弹窗
         this.popIndex = index
         this.showPop1 = true
-        this.forceIconName = this.appl === 0 ? this.otherInfo[index].name : this.serviceUser.user_name
-        this.forceIconNameIcon = this.otherInfo[0].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : `/static/images/default_avator.png`
+        this.forceIconName = this.serviceNow === this.otherInfo[index].seller_id ? this.serviceUser.user_name : this.otherInfo[index].name
+        this.forceIconNameIcon = this.serviceNow === this.otherInfo[index].seller_id ? (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : "/static/images/default_avator.png") : (this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : "/static/images/default_avator.png")
         this.forceIconObj = {
           "id": this.JsonBig.parse(this.otherInfo[index].sid),
           "seller": this.JsonBig.parse(this.otherInfo[index].seller_id),
@@ -498,16 +513,14 @@
       },
       comfirmStopTradeObj(index) { // 定义终止交易弹窗对象
         this.stopTradeObj = {
-          "id": this.JsonBig.parse(this.otherInfo[index].sid), // this.otherInfo
-          "responsible": this.JsonBig.parse(this.stopTradePerson), // this.otherInfo
+          "id": this.JsonBig.parse(this.otherInfo[index].sid),
+          "responsible": this.JsonBig.parse(this.stopTradePerson),
         }
       },
       stopTrade(index) { // 终止交易弹窗
         this.popIndex = index
-        this.stopTradeUser = this.serviceUser && this.serviceUser.user_name // 终止交易发起人名
-        this.stopTradeOther = this.otherInfo && this.otherInfo[index].name // 终止交易发起对方人名
-        this.stopTradeUserIcon = this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : `/static/images/default_avator.png`
-        this.stopTradeOtherIcon = this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : `/static/images/default_avator.png`
+        this.stopTradeUser = this.serviceNow === this.otherInfo[index].buyer_id ? this.serviceUser.user_name : this.otherInfo[index].name
+        this.stopTradeUserIcon = this.serviceNow === this.otherInfo[index].buyer_id ? (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : "/static/images/default_avator.png") : (this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : "/static/images/default_avator.png")
         this.showPop3 = true
         this.comfirmStopTradeObj(index)
       },
@@ -543,8 +556,23 @@
       onPop3Ok() { // 终止交易确认
         this.showPop3 = false
         let text = MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld);
-        this.sendMsg = text;
-        this.$refs.textarea.focus();
+        // 发送消息
+        this.WsProxy.sendMessage({
+          type: 'text',
+          // gid: this.JsonBig.parse("197129593973379072"),
+          tid: this.JsonBig.parse(this.serviceNow),
+          data:{
+            uid: this.$store.state.userInfo.uid,
+            rid: this.JsonBig.parse(this.serviceNow),
+            tid: this.JsonBig.parse(this.serviceNow),
+            msg: text
+          }
+        }).then(data => { // 发送消息成功后更改原保存信息
+          this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:0 }})
+        }).catch(error => {
+          this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:1 }})
+        });
+        // 确定终止交易
         this.WsProxy.send('control', 'a_terminate_order',
           Object.assign(this.stopTradeObj, {
             "type": 1, // 1: 订单, 2: 担保
@@ -556,6 +584,8 @@
         }).catch((msg)=>{
           console.log(msg);
         });
+
+        // this.$store.commit({type: 'stopTrade', data: this.otherInfo})
       },
       onPop4Ok() { // 证明无效确认
         this.showPop4 = false;

@@ -357,5 +357,6 @@ export default {
       item.user_id === data[0].appellee_id && (idex = index);
       state.serviceData.splice(idex, 1);
     });
+    state.serviceNow = state.serviceData[0].user_id
   }
 };

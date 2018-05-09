@@ -132,7 +132,7 @@
               "type": this.type,    // 1 交易; 2 担保
               "credit": this.score,  // 信誉度 1,2,3 好评3 差评1
               "transit": this.score,  // 发货速度 1,2,3
-              "comment": this.comment ? this.comment : '无' // 文字说明
+              "comment": this.comment ? this.comment : '暂无评价' // 文字说明
             }
           }
         }))

@@ -17,9 +17,9 @@
           <DateInterval ref="di"></DateInterval>
         </div>
         <div class="f3">
-          <a href="javascript:void(0)" :class="{active:days===1}" @click="days=1">今天</a>
-          <a href="javascript:void(0)" :class="{active:days===3}" @click="days=3">三天</a>
-          <a href="javascript:void(0)" :class="{active:days===7}" @click="days=7">七天</a>
+          <a href="javascript:void(0)" @click="days=1">今天</a>
+          <a href="javascript:void(0)" @click="days=3">三天</a>
+          <a href="javascript:void(0)" @click="days=7">七天</a>
         </div>
       </div>
       <div class="tb-head">
@@ -164,7 +164,7 @@
         //
         let srchKey=this.srchText;
         let start= this.$refs.di.date1;
-        let end= this.$refs.di.date2;console.log(start+"--"+end);
+        let end= this.$refs.di.date2;
         start=start?Math.floor(new Date(this.$refs.di.date1).getTime()/1000):null;
         end=end?Math.floor(new Date(this.$refs.di.date2).getTime()/1000):null;
         let result=this.status[this.statusDropSel].value;
