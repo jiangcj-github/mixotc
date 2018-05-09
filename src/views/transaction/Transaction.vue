@@ -297,6 +297,7 @@
         this.result=[];
         data.forEach(e => {
           this.result.push({
+            id: e.id,
             sid: e.sid,
             sid_str: this.JsonBig.stringify(data.sid),
             headimg: e.icon && this.HostUrl.http+"/image/"+e.icon || "/static/images/default_avator.png",
@@ -312,6 +313,8 @@
             pay_yhk: [4, 5, 6, 7].includes(e.payments),
             amount: (e.tradeable+"").substr(0, (e.tradeable+"").indexOf(".")+6),
             price: e.price,
+            currency: e.currency,
+            isLargeTran: true,
           });
         });
       },
