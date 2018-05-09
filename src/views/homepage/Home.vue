@@ -139,7 +139,7 @@
           headimg: (data.icon && this.HostUrl.http+"image/"+data.icon) || "/static/images/default_avator.png",
           tradeWidthNum: data.mytrade || 0,
           orderNum: data.order || 0,
-          volumn: data.volumes && data.volumes.toFixed(6)+"+BTC" || "0+BTC",
+          volumn: (data.volumes+"").substr(0, (data.volumes+"").indexOf(".")+6)+"+BTC",
           praiseRate: data.rate && data.rate+"%" || "0%",
           trustedNum: data.trusted || 0,
           trustNum: data.trust || 0,

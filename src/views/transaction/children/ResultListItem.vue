@@ -1,10 +1,16 @@
 <template>
   <li class="item clearfix">
     <div class="title merchant">
-      <!-- <img class="whole" src="/static/images/whole_icon2.png" alt="" > -->
-      <img class="avatar" @click="toHomePage(data.sid)" :src="data.headimg" alt="">
-      <span class="nickname" @click="toHomePage(data.sid)">{{data.nickname}}</span>
-      <span class="trust" v-if="data.isTrust">信任</span>
+      <p class="avatar">
+        <img class="headimg" @click="toHomePage(data.sid)" :src="data.headimg" alt="">
+      </p>
+      <p class="userInfo">
+        <span class="nickname" @click="toHomePage(data.sid)">{{data.nickname}}</span>
+        <span class="tag">
+          <i class="trust" v-if="data.isTrust" title="已信任">信任</i>
+          <img class="largeTran" v-if="data.isLargeTran" src="/static/images/whole_icon2.png" title="已大额认证">
+        </span>
+      </p>
     </div>
     <div class="title deal-volume">{{data.dealVolume}}</div>
     <div class="title order-volume">{{data.orderVolume}}</div>
@@ -26,14 +32,17 @@
 <script>
 export default {
   props: ['data','emitValue'],
-  mounted() {
-    // console.log(this.trustArray);
-  },
   methods: {
     toHomePage(sid) {
       this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})
     },
-    async _toOrder({id, sid, btverify, currency}) {
+    async _toOrder(data) {
+
+      let id=data.id;
+      let sid=data.sid;
+      //let btverify=data.btverify;
+      let currency=data.currency;
+
       //未登录
       let flag = 0;
       if (!this.$store.state.isLogin) {
@@ -88,11 +97,11 @@ export default {
         return
       }
 
-      if (this.$store.state.userInfo.btverify < btverify) {
-      //  大额交易权限判断（权限不符6）
-        this.Bus.$emit(this.emitValue, 6)
-        return
-      }
+      // if (this.$store.state.userInfo.btverify < btverify) {
+      // //  大额交易权限判断（权限不符6）
+      //   this.Bus.$emit(this.emitValue, 6)
+      //   return
+      // }
 
       // 是否有未完成订单（有7）
       await this.WsProxy.send('otc', 'orders', {type:1, state: '1,2,3', origin: 0}).then(data => {
@@ -130,44 +139,6 @@ export default {
     &.merchant
       width 200px
       padding-left 30px
-      .whole
-        position absolute
-        top 20px
-        left 30px
-        _rotate(-45deg)
-      .avatar
-        position absolute
-        top 21px
-        left 30px
-        width 45px
-        height 45px
-        border-radius 50%
-        cursor pointer
-      span
-        position absolute
-        left 85px
-        width 90px
-        overflow hidden
-        white-space nowrap
-        text-overflow ellipsis
-        &.nickname
-          top 22px
-          font-size 14px
-          color $col333
-          letter-spacing 0.16px
-          line-height 16px
-          cursor pointer
-        &.trust
-          bottom 22px
-          width 30px
-          height 14px
-          fz10()
-          text-align center
-          color #FFA21C
-          letter-spacing 0.11px
-          line-height 14px
-          border 1px solid #FFA21C
-          border-radius 2px
     &.payment
       width 120px
     &.order-volume
