@@ -1,7 +1,7 @@
 <template>
-  <div class="choice-box" v-clickoutside="closeSelect">
-    <b @click="showChoice()">{{items}}</b>
-    <ul v-show="show">
+  <div class="choice-box" v-clickoutside="closeSelect" :style="{width: `${widthWrap}px`}">
+    <b @click="showChoice()" :class="`${choiceClass}`" :style="{width: `${width}px`}">{{items}}</b>
+    <ul v-show="show" :style="{width: `${widthSelect}px`, top: `${top}px`}">
       <li v-for="(content, index) in classify" @click="changeSelect(content, index)" :key="index" :class="{active:(index === selectNum && isActive)}">{{content}}</li>
     </ul>
   </div>
@@ -16,6 +16,23 @@
         type: Boolean,
         default: true
       }, // 是否替换显示内容
+      choiceClass: String,
+      width: {
+        type: Number,
+        default: 70
+      },
+      top: {
+        type: Number,
+        default: 20
+      },
+      widthWrap: {
+        type: Number,
+        default: 80
+      },
+      widthSelect: {
+        type: Number,
+        default: 80
+      },
       selectValue: {
         type: Array,
         default: function () {
@@ -80,11 +97,9 @@
   .choice-box
     position relative
     display inline-block
-    width 80px
-    margin-right 30px
+    /*margin-right 30px*/
     b
       display inline-block
-      width 70px
       font-size $fz13
       color #999
       position relative
@@ -93,16 +108,26 @@
         position absolute
         top 8px
         right  0px
-        /*width 11px*/
-        /*height 5px*/
         content ''
         triangle_down(#999)
-        //background url(/static/images/triangle_black.png) no-repeat
-        /*background-size 11px 5px*/
+
+    .transforB
+      position relative
+      color #333
+      height 40px
+      line-height 40px
+      padding-left 10px
+      border-radius 2px
+      background #F4F6FA
+      &:after
+        position absolute
+        top 18px
+        right 10px
+        content ''
+        triangle_down(#333)
+
     ul
       position absolute
-      top 20px
-      width 80px
       background #FFF
       border 1px solid #E1E1E1
       font-size $fz13

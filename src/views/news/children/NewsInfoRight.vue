@@ -70,7 +70,14 @@
     <!-- 底部 -->
     <ol class="input-text clearfix">
       <li>
-        <input type="text" :disabled="isDisable" :class="{disable: isDisable}" v-model="sendText" @keyup.enter="sendMs(sendText)">
+        <input 
+          type="text" 
+          :disabled="isDisable" 
+          :class="{disable: isDisable}" 
+          v-model="sendText" 
+          @keyup.enter="sendMs(sendText)" 
+          maxlength="100"
+        >
       </li>
       <li @click="()=>{
           if(isDisable) return;
@@ -289,15 +296,15 @@
       },
       mapAddress(){
         return this.$store.state.moneyAddress.map(item => {
-           if(item.type === 1) {
-              return {text: `支付宝:${item.number}`, sendText: `收款人:${item.name}<br>支付宝账号:${item.number}`}
-            }
-            if(item.type === 2) {
-              return {text: `微信:${item.number}`, sendText: `收款人:${item.name}<br>微信账号:${item.number}`};
-            }
-            if(item.type === 4) {
-              return {text: `银行卡:${item.bank + '****' + (item.number.slice(-4))}`, sendText: `收款人：${item.name}<br>银行卡号:${item.number}<br> 开户行:${item.bank}`}
-            }
+          if(item.type === 1) {
+            return {text: `支付宝：${item.number}`, sendText: `收款人:${item.name}<br>支付宝账号:${item.number}`}
+          }
+          if(item.type === 2) {
+            return {text: `微信：${item.number}`, sendText: `收款人:${item.name}<br>微信账号:${item.number}`};
+          }
+          if(item.type === 4) {
+            return {text: `${item.bank + '****' + (item.number.slice(-4))}`, sendText: `收款人:${item.name}<br>银行卡号:${item.number}<br> 开户行:${item.bank}`}
+          }
         })
       },
       friendIds() {
@@ -395,9 +402,9 @@
               isFail: false,
               time: create_time
             })
+            if(index === length - 1) this.$store.commit({type: 'moreMessage', data: result});
           })
         })
-        this.$store.commit({type: 'moreMessage', data: result})
       },
       async historyIcon(id) {
         // console.log(this.mapCurMembers, this.membersInfo)
@@ -990,7 +997,7 @@
           cursor pointer
         .money-address
           position absolute
-          top -81px
+          bottom 45px
           right 12px
           width 150px
           color #FFF
@@ -1008,9 +1015,13 @@
             border-right 6px solid transparent
           p
             height 25px
+            padding 0 3px
             line-height 25px
             color #FFF
             cursor pointer
+            overflow hidden
+            white-space nowrap
+            text-overflow ellipsis
             &:hover
               background #474747
         span

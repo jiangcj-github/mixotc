@@ -7,7 +7,10 @@
       <img :src="addIcon" alt="">
       <span>{{addName}}</span>
     </div>
-    <textarea placeholder="请填写认证信息" v-model="text" maxlength="20"></textarea>
+    <div class="input-wrap">
+      <textarea placeholder="请填写认证信息" v-model="text" maxlength="30"></textarea>
+      <b>{{text.length}}/30</b>
+    </div>
     <button @click="openFirendLayer">添加好友</button>
     <!-- 添加好友弹窗 -->
     <BasePopup class="firend-layer"
@@ -122,13 +125,21 @@
         margin-left 10px
         margin-right 20px
         vertical-align middle
-    textarea
-      width 290px
-      height 80px
-      resize none
-      border none
-      padding 10px 0 0 10px
-      margin-bottom 30px
+    .input-wrap
+      position relative
+      b
+        position absolute
+        bottom 40px
+        right 8px
+        font-size 12px
+        color $col999
+      textarea
+        width 290px
+        height 80px
+        resize none
+        border none
+        padding 10px 0 0 10px
+        margin-bottom 30px
     button
       width 200px
       height 40px

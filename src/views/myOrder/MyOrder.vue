@@ -4,9 +4,10 @@
       <router-link to="/transaction">mixOTC</router-link> -
       <router-link to="/order">我的订单</router-link>
     </h1>
-    <div class="order-item">
+    <div class="order-item clearfix">
       <span @click="selectStatus(1)" :class="contentTabIndex === 1 ? 'content-btn-active' : 'content-btn'">进行中({{conductNum}})</span>
       <span @click="selectStatus(2)" :class="contentTabIndex === 2 ? 'content-btn-active' : 'content-btn'">完成({{completeNum}})</span>
+      <button @click="openTransform()">资金互转</button>
     </div>
     <div class="order-select clearfix">
       <SearchInput :content="content"
@@ -148,6 +149,11 @@
                  :leftContent="selectLeft"
                  :rightContent="selectRight">
     </SelectLayer>
+
+    <!-- 资金互转弹窗 -->
+    <TransformLayer :transformShow="showTransform"
+                    @offTransform="openTransform">
+    </TransformLayer>
   </div>
 </template>
 
@@ -165,6 +171,7 @@
   import SelectLayer from '@/views/myOrder/orderLayer/SelectLayer' // 申诉弹窗
   import CheckBox from '@/components/common/CheckBox' // 引入多选弹窗
   import CountDown from '@/components/common/CountDown' // 引入倒计时
+  import TransformLayer from '@/views/myOrder/orderLayer/TransformLayer' // 申诉弹窗
 
   export default {
     name: "my-order",
@@ -179,7 +186,8 @@
       ReleaseCoinLayer,
       SelectLayer,
       CheckBox,
-      CountDown
+      CountDown,
+      TransformLayer
     },
     data() {
       return {
@@ -229,6 +237,7 @@
         remindCoinLayer: false, // 提醒弹窗
         remindCoinContent: '提醒发送成功', // 提醒弹窗内容
 
+        showTransform: false, // 资金互转弹窗
 
         updateId: '', //标记已付款弹窗所用id
         updateInfo: '',
@@ -246,6 +255,7 @@
         selectOrder: 3, // 订单类型筛选
         selectCurrency: '', // 币种筛选
         selectState: '', // 订单状态筛选
+        comment: 0, // 是否评价
         currencyBox:[ // 币种下拉显示
           {type: 'BTC', state: false, code: 'btc'},
           {type: 'ETH', state: false, code: 'eth'},
@@ -258,10 +268,10 @@
           {type: '申诉中', state: false, code: '3'},
         ], // 进行中状态下拉显示
         allStatusCom: [ // (126) 12310 (12678) (126789) (124) 12311 (15)
-          {type: '成功', state: false, code: '6,7,8,9'},
+          {type: '成功', state: false, code: '6,7,8,9,10'},
           {type: '成功-强制放币', state: false, code: '10'},
-          {type: '成功-未评价', state: false, code: 1},
-          {type: '成功-已评价', state: false, code: 1},
+          {type: '成功-未评价', state: false, code: '6,7'},
+          {type: '成功-已评价', state: false, code: '8,9'},
           {type: '失败-取消', state: false, code: '4'},
           {type: '失败-终止', state: false, code: '11'},
           {type: '失败-超时', state: false, code: '5'},
@@ -308,9 +318,30 @@
         console.log('selectCurrency', this.selectCurrency)
       });
       this.Bus.$on(this.allStatusValue, (data) => { // 类型筛选
-        data.length ? this.selectState = data.join(',') : this.selectState = data
+
+        if (data.indexOf('6,7') > -1) { // 选中未评价
+          if (data.indexOf('8,9') > -1) {
+            this.comment = 0
+            this.selectState = data.length ? data.join(',') : data
+          } else {
+            this.comment = 1
+            data.splice(data.indexOf('6,7'), 1)
+            this.selectState = data.length ? data.join(',') : ''
+          }
+        }
+        if (data.indexOf('8,9') > -1) { // 选中未评价
+          if (data.indexOf('6,7') > -1) {
+            this.comment = 0
+            this.selectState = data.length ? data.join(',') : data
+          } else {
+            this.comment = 2
+            data.splice(data.indexOf('8,9'), 1)
+            this.selectState = data.length ? data.join(',') : ''
+          }
+        }
+
         this.initData()
-        console.log('selectState', this.selectState)
+        console.log('selectState', data)
       });
       // 监听搜索框title值
       this.Bus.$on(this.searchValue,(data) => {
@@ -423,9 +454,6 @@
               // 可申诉时间到计时
               v.timeToAppeal = 30 * 60 - (Math.floor(Date.now() / 1000) - v.paytime);
               this.appealTimer(v);
-              // 判断操作数组的code值
-              this.JsonBig.stringify(v.buyer) == this.userId ? this.allStatusCom[2].code = '6,8' : '6,7'
-              this.JsonBig.stringify(v.buyer) == this.userId ? this.allStatusCom[3].code = '7,9' : '8,9'
             })
           },
           date:new Date()
@@ -450,8 +478,7 @@
               "order_id": this.orderId,
               "trade_code": this.tradeCode,
               "trader": this.trader,
-              "111": this.selectState,
-              "bbb": this.selectState
+              "comment": Number(this.comment), // 1 已 2 未 评价
             }
           }
         }))
@@ -561,8 +588,6 @@
         }, 3000)
       },
       openReleaseCoin(st, content) { // 释放币弹窗
-        console.log('content', content)
-        // console.log(1111)
         if (st === 'false') {
           this.showReleaseCoin = false
         } else {
@@ -570,6 +595,9 @@
           this.updateId = content.id
           this.updateUid = content.sid
         }
+      },
+      openTransform(st) { // 资金互转弹窗
+        this.showTransform = st === 'false' ? false : true
       },
       openSelect(st, operation, index, content) { // 双选择公共弹窗
         if (st === 'false') {
@@ -650,21 +678,45 @@
         background-color $col422
 
     .order-item
+      height 60px
       margin-bottom 1px
-      padding-left 30px
+      padding 0 30px
       background #FFF
       line-height 60px
       font-size 16px
       cursor pointer
       span
-        padding 18px 15px
+        float left
+        padding 0 15px
       span:first-child
         margin-right 30px
       .content-btn
         color #999
       .content-btn-active
+        margin-top -1px
         color $col422
         border-bottom 2px solid $col422
+      button
+        float right
+        width 88px
+        height 25px
+        margin-top 17px
+        font-size 13px
+        color #FFB422
+        letter-spacing 0.27px
+        border 1px solid #FFB422
+        border-radius 2px
+        cursor pointer
+        &:before
+          display inline-block
+          width 12px
+          height 9px
+          position relative
+          top 0
+          left 0
+          content ''
+          margin-right 6px
+          background url(/static/images/transform.png) no-repeat
 
     .order-select
       height 50px
