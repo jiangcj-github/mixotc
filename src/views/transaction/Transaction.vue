@@ -107,9 +107,13 @@
             <span @click="sort('price')">价格(CNY)</span>
           </p>
         </div>
-        <ul v-if="err===0">
-          <li is='ResultListItem' :emitValue="emitValue" v-for="(item, index) of result" :key="index" :data="item" :class="{even: index%2 === 0}"></li>
-        </ul>
+        <div v-if="err===0">
+          <ul>
+            <li is='ResultListItem' :emitValue="emitValue" v-for="(item, index) of result" :key="index"
+                :data="item" :class="{even: index%2 === 0}"></li>
+          </ul>
+          <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
+        </div>
         <div v-else-if="err===1">
           <div class="err no-result">无相应的数据</div>
         </div>
@@ -123,7 +127,6 @@
           <div class="err loading">加载中...</div>
         </div>
       </div>
-      <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
     </div>
     <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="popupClick(toPath)">
       <slot>
@@ -188,7 +191,7 @@
         result: [],
         total: 1,
         curPage: 0,
-        pageSize: 20,
+        pageSize: 5,
         err: 1, //数据加载结果：0-正常，1-无数据，2-网络异常，3-加载失败，4-加载中
       }
     },

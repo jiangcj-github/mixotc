@@ -17,9 +17,9 @@
         <DateInterval ref="di"></DateInterval>
       </div>
       <div class="f3">
-        <a href="javascript:void(0)" :class="{active:days===1}" @click="days=1">今天</a>
-        <a href="javascript:void(0)" :class="{active:days===3}" @click="days=3">三天</a>
-        <a href="javascript:void(0)" :class="{active:days===7}" @click="days=7">七天</a>
+        <a href="javascript:void(0)" @click="days=1">今天</a>
+        <a href="javascript:void(0)" @click="days=3">三天</a>
+        <a href="javascript:void(0)" @click="days=7">七天</a>
       </div>
     </div>
     <div class="tb-head">
