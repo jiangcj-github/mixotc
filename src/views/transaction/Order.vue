@@ -31,7 +31,7 @@
           </li>
           <li class="clearfix">
             <span class="title">可交易量</span>
-            <p>{{contentData.tradeable}} {{contentData.currency && contentData.currency.toUpperCase()}}</p>
+            <p>{{tradeable}} {{contentData.currency && contentData.currency.toUpperCase()}}</p>
           </li>
           <li class="clearfix">
             <span class="title">限额</span>
@@ -129,7 +129,7 @@
         money: '',
         moneyValue: '',
         amountValue: '',
-        agree: false, //true已阅读规则，false未阅读
+        agree: true, //true已阅读规则，false未阅读
         copy:{
           type: ['出售', '购买'],
           // rate: [`可用余额1.242342BTC`, `${cnyPrice} CNY = ${btcPrice} BTC` ]
@@ -145,7 +145,8 @@
         layerId: '',
         priceLayer: '',
         currencyLayer: '',
-        moneyLayer: ''
+        moneyLayer: '',
+        tradeable: ''
       }
     },
     components: {
@@ -158,6 +159,7 @@
       }).then((data)=>{
         console.log('sale_detail', data)
         this.contentData = data
+        this.tradeable = this.contentData.tradeable && (this.contentData.tradeable * 1 + "").substr(0, (this.contentData.tradeable * 1 + "").indexOf(".") + 6) || 0
       }).catch((msg)=>{
         console.log(msg);
       });
@@ -217,6 +219,9 @@
         // }
         if (this.agree == false) { // 提示勾选
           this.remindLayer = true;
+          setTimeout(() => {
+            this.remindLayer = false
+          }, 3000)
           return
         }
         // 购买提示框

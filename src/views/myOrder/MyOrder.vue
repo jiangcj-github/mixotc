@@ -21,7 +21,8 @@
       <div class="order-choice-time clearfix" v-if="contentTabIndex === 2">
         <DateInterval class="date-group" :max="Date.parse(new Date())" ref="di"></DateInterval>
         <ul class="clearfix">
-          <li v-for="(item, index) in timeList" :class="{'time-active': index == num}" @click="selectTime(index)">{{item}}</li>
+          <!--:class="{'time-active': index == num}"-->
+          <li v-for="(item, index) in timeList" @click="selectTime(index)">{{item}}</li>
         </ul>
       </div>
     </div>
@@ -104,7 +105,7 @@
         </ul>
         <p class="order-content-extre clearfix">
           <span>订单号：{{JsonBig.stringify(content.id)}}</span>
-          <span>备注：{{content.info}}</span>
+          <span>备注：{{content.info ? content.info : '无'}}</span>
           <CountDown :endTime="endTime" class="reset-time" v-if="content.state == 1"></CountDown>
         </p>
       </div>
@@ -329,7 +330,7 @@
             this.selectState = data.length ? data.join(',') : ''
           }
         }
-        if (data.indexOf('8,9') > -1) { // 选中未评价
+        if (data.indexOf('8,9') > -1) { // 选中已评价
           if (data.indexOf('6,7') > -1) {
             this.comment = 0
             this.selectState = data.length ? data.join(',') : data
@@ -339,7 +340,6 @@
             this.selectState = data.length ? data.join(',') : ''
           }
         }
-
         this.initData()
         console.log('selectState', data)
       });
@@ -350,9 +350,6 @@
       });
       // 监听搜索框值
       this.Bus.$on('changeInputContent', ({type, data}) => {
-        this.result.forEach(v => {
-          data = v.name === data ? v.name : this.result[0].name
-        });
         if (type == 'order_id') {
           this.orderId = data
         } else if (type == 'order_tradecode') {
@@ -361,6 +358,7 @@
           this.trader = data
         }
         this.initData()
+        console.log('this.result', data, this.result)
       })
       // 模糊搜索
       this.Bus.$on(this.searchResult,({type, data}) => {
@@ -369,18 +367,20 @@
           keyword: data
         }).then((data)=>{
           data.results.forEach(v => {
-            this.result.push({name:v.Result})
+            this.result.push({name: v.Result})
           })
         }).catch((msg)=>{
           console.log(msg);
         });
-        console.log('searchResult', data)
+        console.log('searchResult', this.result, data)
       });
       // this.Bus.$on('offTime', data => this.showTime = data);
       // 时间框值
-      this.Bus.$on("onDiChange",()=>{
+      this.Bus.$on('onDiChange', () => {
+        console.log('11111', this.$refs.di.date1 )
         this.startValueDate = this.$refs.di.date1 ? Math.floor(new Date(this.$refs.di.date1).getTime() / 1000) : null;
         this.endValueDate = this.$refs.di.date2 ? Math.floor(new Date(this.$refs.di.date2).getTime() / 1000) : null;
+
         if (this.startValueDate && this.endValueDate) {
           this.initData()
         }
@@ -391,7 +391,7 @@
       this.Bus.$off(this.currencyValue);
       this.Bus.$off(this.allStatusValue);
       this.Bus.$off(this.searchValue);
-      this.Bus.$off(this.onDiChange);
+      this.Bus.$off('onDiChange');
     },
     methods: {
       contactSomeone(id){
@@ -750,6 +750,9 @@
             background #FFF3EB
             color #999
             cursor pointer
+            &:hover
+              background #FFF
+              color #FFB422
           .time-active
             background #FFF
             color #FFB422
