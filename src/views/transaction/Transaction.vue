@@ -348,9 +348,14 @@
         this.filte.max = this.max;
       },
       changeIsWhole() {
-        this.min = 100000;
-        this.max = 10000000;
         this.filte.btrade = (this.filte.btrade + 1) % 2;
+        if(this.filte.btrade){
+          this.min = 100000;
+          this.max = 10000000;
+        }else{
+          this.min = "";
+          this.max = "";
+        }
       },
       clearPayment() {
         this.payment.forEach(item => {
