@@ -14,8 +14,9 @@ export default {
     //存入用户登陆后返回的信息
     state.userInfo = data;
   },
-  [types.evaluateOrder](state, { data }) {  // 订单评论结果
-    state.evaluateOrderResult = data
+  [types.evaluateOrder](state, { data }) {
+    // 订单评论结果
+    state.evaluateOrderResult = data;
   },
   [types.changeChatBox](state, { data }) {
     // 控制右下方消息框显示
@@ -119,6 +120,7 @@ export default {
     state.isLogin && !state.showChat && state.unreadNumber++;
     // 有新增加消息进来，将对话列表置顶
     state.chat.unshift(state.chat.splice(idex, 1)[0]);
+    state.messages = Object.assign({}, state.messages);
   },
 
   [types.changeMessageState](
@@ -173,7 +175,9 @@ export default {
     // 查看更多消息
     // data =JSON.parse(JSON.stringify(data));
     !state.messages[state.curChat] && (state.messages[state.curChat] = []);
-    state.messages[state.curChat] = data.reverse().concat(state.messages[state.curChat]);
+    state.messages[state.curChat] = data
+      .reverse()
+      .concat(state.messages[state.curChat]);
     state.messages = Object.assign({}, state.messages);
   },
 
@@ -186,13 +190,14 @@ export default {
     // 系统消息(目前只有请求添加信息)
     let idx;
     state.messages["system"].forEach((item, index) => {
-      if(item.id === data.id) idx = index;
-    })
-    if(idx !== undefined) state.messages["system"].splice(idx, 1);
+      if (item.id === data.id) idx = index;
+    });
+    if (idx !== undefined) state.messages["system"].splice(idx, 1);
     state.messages["system"].push(data);
     if (state.curChat !== "system") state.systemMessage++;
     if (state.isLogin && !state.showChat) state.unreadNumber++;
   },
+
   // 同意好友请求后改变isDeal处理标志
   [types.agreeAddFriend](state, { data }) {
     let idx;
@@ -211,26 +216,58 @@ export default {
     });
   },
 
-  [types.delStranger](state, { data: {id, index} }) {
+  [types.delStranger](
+    state,
+    {
+      data: { id, index }
+    }
+  ) {
     //加好友后删除之前陌生人对话
     state.chat.splice(index, 1);
     delete state.messages[id];
     state.messages = Object.assign({}, state.messages);
   },
 
-  [types.delStranger](state) {
+  [types.initState](state) {
     //改变登陆用户时初始化必要的state
     state.trustList = [];
-    state.friendList= [];
+    state.friendList = [];
     state.groupList = [];
     state.unreadNumber = 0;
-    state.curChat = ''; //当前聊天
+    state.curChat = ""; //当前聊天
     state.systemMessage = 0; //未读系统消息
     state.token = "";
     state.chat = [];
     state.moneyAddress = [];
     state.messages = { system: [] };
   },
+//更新头像和昵称信息
+  [types.updateOther](
+    state,
+    {
+      data: { id, icon, type, name }
+    }
+  ) {
+    if(type === 0) {
+      let target = state.chat.filter(item => {
+        return item.id === id
+      })[0]
+      target && (target.icon = icon);
+      for (let i = 0; i < state.messages[id].length; i++) {
+        let item = state.messages[id][i];
+        if (item.icon === icon) break;
+        if (item.from !== JsonBig.stringify(state.userInfo.uid)) item.icon = icon;
+      }
+      // state.messages[id].forEach(item => {
+      //   if(item.from !== JsonBig.stringify(state.userInfo.uid)) item.icon = icon
+      // })
+      return;
+    }
+    if(type === 1) {
+
+    }
+  },
+
   /**
    * 审核申述客服部分
    */
@@ -251,7 +288,6 @@ export default {
     state.serviceData.forEach((item, index) => {
       item.user_id === data.id && (item.unread = 0);
     });
-
   },
   // 双方人员置换
   [types.transformServiceUser](state, { data }) {
@@ -272,7 +308,12 @@ export default {
     state.serviceData.unshift(state.serviceData.splice(idex, 1)[0]);
   },
   // 新增发送消息
-  [types.changeServiceMessages](state, {data: { id, time, code }}) {
+  [types.changeServiceMessages](
+    state,
+    {
+      data: { id, time, code }
+    }
+  ) {
     // 消息发送成功或失败
     let idx = 0;
     state.serviceMessage[id].forEach((item, index) => {
@@ -285,7 +326,12 @@ export default {
     state.serviceMessage = Object.assign({}, state.serviceMessage);
   },
   // 发送图片
-  [types.changeServiceImgsrc](state, {data: { id, time, src }}) {
+  [types.changeServiceImgsrc](
+    state,
+    {
+      data: { id, time, src }
+    }
+  ) {
     state.serviceMessage[id].forEach((item, index) => {
       if (time === item.time) {
         item.content = src;
@@ -309,7 +355,7 @@ export default {
     state.serviceData.forEach((item, index) => {
       item.user_id === data[0].appellant_id && (idex = index);
       item.user_id === data[0].appellee_id && (idex = index);
-      state.serviceData.splice(idex, 1)
+      state.serviceData.splice(idex, 1);
     });
   }
 };

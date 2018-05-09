@@ -28,6 +28,7 @@
       }
     },
     created() {
+      this.$store.commit({type: 'changeLoginForm', data: false})
       // console.log(this.token)
       let ws = this.WebSocket;
       //发送token登录后的处理
@@ -35,13 +36,11 @@
         callback: (data) => {
           if (data.op !== 18) return;
           if (data.body.ret !== 0) {
-            // sessionStorage.removeItem('otcToken')
             this.$store.commit({ type: 'changeToken', data: '' })
             ws.reConnectFlag = false;
             return;
           }
           ws.reConnectFlag = true;
-          
           this.$store.commit({
             type: 'getUserInfo',
             data: data.body
@@ -88,7 +87,7 @@
     methods: {
       //退出登录逻辑
       logout() {
-        // console.log('logout');
+        console.log('倒计时结束 logout');
         this.$store.commit({type: 'changeToken', data: ''});
         //改变vuex登录状态
         this.$store.commit({type: 'changeLogin', data: false});
@@ -130,6 +129,7 @@
             this.timer1 = setTimeout(this.logout, 600000);
             window.onmousedown = (event) => {
               //用户操作时重新计时
+              console.log('click')
               this.timer1 = clearTimeout(this.timer1);
               this.timer1 = setTimeout(this.logout, 600000);
             }

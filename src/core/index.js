@@ -240,6 +240,7 @@ const RUN_APP = (App, config, plugin) => {
       // 一个页面登录，让其他页面获取token
       if (!event.newValue) return;
       store.commit({ type: "changeToken", data: event.newValue });
+      location.reload()
     }
   });
 

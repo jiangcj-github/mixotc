@@ -53,9 +53,8 @@
       }
     },
     mounted() {
-      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('213797500157431808'), id: this.JsonBig.parse('211635337816973312') }).then(data => {})
+      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('214179029161349120'), id: this.JsonBig.parse('19855731022917632') }).then(data => {})
       this.initData()
-      this.listenChat()//监听消息
       this.reqFriend()//监听好友请求
       this.beKickGroup()//监听被踢出群
       this.quitGroup()//监听退群
@@ -96,7 +95,6 @@
       async fetchGroup() {
         await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
           if(!data) data = []
-          console.log('qqq', 2)
           this.$store.commit({type: 'getGroupList', data})
         }).catch(error=>{
           console.log(error)
@@ -199,69 +197,6 @@
         })
         linkman && this.$store.commit({type: 'changeChat', data: result});
       },
-      // 不在消息列表的人来消息时的处理
-      async dealNewChat(id, flag) {
-        !flag && !this.chatIds.includes(id) && await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(id)}).then( ({name, phone, email, icon }) => {
-           this.$store.commit({type: 'newChat', data:{
-              id: id,
-              group: false,
-              service: false,
-              icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-              nickName: name,
-              phone: phone,
-              email: email,
-              moreFlag: false,
-              unread: 0
-           }})
-        })
-        // console.log(this.chatIds.includes(id));
-        flag && !this.chatIds.includes(id) && await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
-          this.$store.commit({type: 'getGroupList', data})
-          let group = this.$store.state.groupList.filter(item => {
-            return this.friendGid[id] === this.JsonBig.stringify(item.id)
-          })[0]
-          !group && (group = this.$store.state.groupList.filter(item => {
-            return id === this.JsonBig.stringify(item.id)
-          })[0])
-          if(group.type === 1){
-              this.$store.commit({type: 'newChat', data:{
-                id: this.JsonBig.stringify(group.id),
-                group: true,
-                length: group.members.length,
-                service: false,
-                icon: "/static/images/groupChat_icon.png",
-                nickName: !group.name ? group.members.map(item =>{
-                  return item.name
-                }).join('、') : `${group.name}`,
-                phone: false,
-                email: false,
-                unread: 0,
-                moreFlag: false,
-                exists: true
-              }})
-            }else {
-              let other = group.members.filter( item => {
-                return this.JsonBig.stringify(item.id) !== this.userId
-              })[0]
-              let uid = this.JsonBig.stringify(other.id)
-              this.$store.commit({type: 'newChat', data:{
-                id: this.friendGid[uid],
-                uid: uid,
-                isSingle: true,
-                group: false,
-                service: false,
-                icon: other.icon ? `${this.HostUrl.http}image/${other.icon}` : "/static/images/default_avator.png",
-                nickName: other.name,
-                phone: other.phone,
-                email: other.email,
-                moreFlag: this.$store.state.messages[uid] ?  (this.$store.state.messages[uid].length === 0 ? false : true): false,
-                unread: 0
-              }})
-            }
-          }).catch(error=>{
-            console.log(error)
-        })
-      },
       // 监听系统消息(请求加好友)
       reqFriend(){
         this.WebSocket.onMessage['req_friend'] = {
@@ -302,104 +237,6 @@
               if(this.JsonBig.stringify(uid) === this.userId) return;
               await this.fetchGroup();
               this.$store.commit({type: 'updateGroupInfo', data: { id :this.JsonBig.stringify(gid)}})
-            }
-          }
-        }
-      },
-      // 监听消息
-      listenChat() {
-        //聊天信息监听
-        let _this = this;
-        this.WebSocket.onMessage['sms']={
-          async callback(res){
-            // op为7单人聊天信息，对象类型, op为6群聊信息，数组第0项
-            // 单聊
-            if (res.op && res.op === 7) {
-              let {id, uid, icon, name, data, type } = res.body;
-              let obj = {}
-              
-              // 文字
-              if (type === 'text') {
-                obj = {
-                  id: _this.JsonBig.stringify(id),
-                  from: _this.JsonBig.stringify(uid), 
-                  to: _this.userId,
-                  icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                  msg:{
-                    type: 0,
-                    content: data.msg
-                  },
-                  isLoding: false, 
-                  isFail: false,
-                  time: new Date() - 0
-                }
-                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
-                await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
-                return;
-              }
-              // 图片
-              obj = {
-                  id: _this.JsonBig.stringify(id),
-                  from: _this.JsonBig.stringify(uid), 
-                  to: _this.userId,
-                  icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                  msg:{
-                    type: 1,
-                    content: `${_this.HostUrl.http}file/${data.id}`
-                  },
-                  isLoding: true, 
-                  isFail: false,
-                  time: new Date() - 0
-                }
-                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
-                await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
-            };
-            // 群聊
-            if (Array.isArray(res) && res[0].op === 6) { 
-              let {id, uid, gid, data, type } = res[0].body;
-              let obj = {};
-            if (_this.userId === _this.JsonBig.stringify(uid)) return;
-              let other = _this.$store.state.groupList.filter(item => {
-                return _this.JsonBig.stringify(gid) === _this.JsonBig.stringify(item.id)
-              })[0].members.filter(item => {
-                return _this.JsonBig.stringify(uid) === _this.JsonBig.stringify(item.id)
-              })[0]
-              let {icon, name} = other;
-              if (type === 'text') {
-                obj = {
-                  id: _this.JsonBig.stringify(id),
-                  from: _this.JsonBig.stringify(uid), 
-                  to: _this.userId,
-                  name: name,
-                  icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                  msg:{
-                    type: 0,
-                    content: data.msg
-                  },
-                  isLoding: false, 
-                  isFail: false,
-                  time: new Date() - 0
-                }
-                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
-                await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
-                return;
-              }
-              //图片
-              obj = {
-                  id: _this.JsonBig.stringify(id),
-                  from: _this.JsonBig.stringify(uid), 
-                  to: _this.userId,
-                  icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                  msg:{
-                    type: 1,
-                    content: `${_this.HostUrl.http}file/${data.id}`
-                  },
-                  isLoding: true, 
-                  isFail: false,
-                  time: new Date() - 0
-                }
-                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
-                await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
             }
           }
         }

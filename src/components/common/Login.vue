@@ -190,6 +190,9 @@
             this.timer = setTimeout(() => {
               this.hidePopup();
             },3000)
+            if(data.body && this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
+              this.$store.commit({ type: 'initState'})
+            }
             this.$store.commit({
               type: 'getUserInfo',
               data: data.body

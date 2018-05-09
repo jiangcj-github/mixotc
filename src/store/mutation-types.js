@@ -26,6 +26,7 @@ const chatTop = "chatTop"; // 新增发送消息
 const delStranger = "delStranger"; // 加好友后删除之前陌生人对话
 const initState = "initState"; // 改变登陆用户时初始化必要的state
 const agreeAddFriend = "agreeAddFriend";
+const updateOther = "updateOther";
 
 
 const evaluateOrder = "evaluateOrder"; // 订单评论结果
@@ -74,6 +75,7 @@ export {
   chatTop,
   delStranger,
   initState,//改变登陆用户时初始化必要的state
+  updateOther,
   agreeAddFriend,
 
   evaluateOrder,
