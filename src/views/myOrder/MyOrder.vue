@@ -4,9 +4,10 @@
       <router-link to="/transaction">mixOTC</router-link> -
       <router-link to="/order">我的订单</router-link>
     </h1>
-    <div class="order-item">
+    <div class="order-item clearfix">
       <span @click="selectStatus(1)" :class="contentTabIndex === 1 ? 'content-btn-active' : 'content-btn'">进行中({{conductNum}})</span>
       <span @click="selectStatus(2)" :class="contentTabIndex === 2 ? 'content-btn-active' : 'content-btn'">完成({{completeNum}})</span>
+      <button @click="openTransform()">资金互转</button>
     </div>
     <div class="order-select clearfix">
       <SearchInput :content="content"
@@ -148,6 +149,11 @@
                  :leftContent="selectLeft"
                  :rightContent="selectRight">
     </SelectLayer>
+
+    <!-- 资金互转弹窗 -->
+    <TransformLayer :transformShow="showTransform"
+                    @offTransform="openTransform">
+    </TransformLayer>
   </div>
 </template>
 
@@ -165,6 +171,7 @@
   import SelectLayer from '@/views/myOrder/orderLayer/SelectLayer' // 申诉弹窗
   import CheckBox from '@/components/common/CheckBox' // 引入多选弹窗
   import CountDown from '@/components/common/CountDown' // 引入倒计时
+  import TransformLayer from '@/views/myOrder/orderLayer/TransformLayer' // 申诉弹窗
 
   export default {
     name: "my-order",
@@ -179,7 +186,8 @@
       ReleaseCoinLayer,
       SelectLayer,
       CheckBox,
-      CountDown
+      CountDown,
+      TransformLayer
     },
     data() {
       return {
@@ -229,6 +237,7 @@
         remindCoinLayer: false, // 提醒弹窗
         remindCoinContent: '提醒发送成功', // 提醒弹窗内容
 
+        showTransform: false, // 资金互转弹窗
 
         updateId: '', //标记已付款弹窗所用id
         updateInfo: '',
@@ -561,8 +570,6 @@
         }, 3000)
       },
       openReleaseCoin(st, content) { // 释放币弹窗
-        console.log('content', content)
-        // console.log(1111)
         if (st === 'false') {
           this.showReleaseCoin = false
         } else {
@@ -570,6 +577,9 @@
           this.updateId = content.id
           this.updateUid = content.sid
         }
+      },
+      openTransform(st) { // 资金互转弹窗
+        this.showTransform = st === 'false' ? false : true
       },
       openSelect(st, operation, index, content) { // 双选择公共弹窗
         if (st === 'false') {
@@ -650,21 +660,45 @@
         background-color $col422
 
     .order-item
+      height 60px
       margin-bottom 1px
-      padding-left 30px
+      padding 0 30px
       background #FFF
       line-height 60px
       font-size 16px
       cursor pointer
       span
-        padding 18px 15px
+        float left
+        padding 0 15px
       span:first-child
         margin-right 30px
       .content-btn
         color #999
       .content-btn-active
+        margin-top -1px
         color $col422
         border-bottom 2px solid $col422
+      button
+        float right
+        width 88px
+        height 25px
+        margin-top 17px
+        font-size 13px
+        color #FFB422
+        letter-spacing 0.27px
+        border 1px solid #FFB422
+        border-radius 2px
+        cursor pointer
+        &:before
+          display inline-block
+          width 12px
+          height 9px
+          position relative
+          top 0
+          left 0
+          content ''
+          margin-right 6px
+          background url(/static/images/transform.png) no-repeat
 
     .order-select
       height 50px
