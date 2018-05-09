@@ -693,7 +693,7 @@
       .content-btn
         color #999
       .content-btn-active
-        margin-top -1px
+        margin-top -2px
         color $col422
         border-bottom 2px solid $col422
       button

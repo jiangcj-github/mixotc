@@ -167,7 +167,7 @@
             height 12px
 
           .down-left
-            margin-right 20px
+            margin-right 10px
             padding-right 20px
             color $col94C
             letter-spacing 0.23px
