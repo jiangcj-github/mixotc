@@ -8,16 +8,16 @@
         <div class="wrap">
           <ul class="firend-list" v-if="!search">
             <li v-for="content in userList" :key="content.id" :class="{cur: content.id === $store.state.curChat}" @click="selectChat(content.id)">
-              <img :src="content.icon" alt="" class="head-portrait">
+              <img :src="content.icon ? content.icon : (content.isSingle ?  infoDiction[content.uid] && infoDiction[content.uid].icon : infoDiction[content.id] && infoDiction[content.id].icon)" alt="" class="head-portrait">
               <b v-if="content.unread"></b>
-              <span>{{content.nickName}}{{content.length ? `(${content.length})` : ''}}</span>
+              <span>{{content.nickName ? content.nickName : (content.isSingle ? infoDiction[content.uid] && infoDiction[content.uid].name : infoDiction[content.uid] && infoDiction[content.id].name)}}{{content.length ? `(${content.length})` : ''}}</span>
               <img src="/static/images/close_btn.png" alt="" class="close-head" @click.stop="delUser(content.id)">
             </li>
           </ul>
           <ul class="firend-list" v-else>
             <li v-for="(content) in searchRange" :key="content.id" :class="{cur: content.id === $store.state.curChat}" @click="newChat(content)">
-              <img :src="content.icon" alt="" class="head-portrait">
-              <span>{{content.nickName}}{{content.length ? `(${content.length})` : ''}}</span>
+              <img :src="content.icon ? content.icon : (content.isSingle ?  infoDiction[content.uid].icon : infoDiction[content.id].icon)" alt="" class="head-portrait">
+              <span>{{content.nickName ? content.nickName : (content.isSingle ? infoDiction[content.uid].name : infoDiction[content.id].name)}}{{content.length ? `(${content.length})` : ''}}</span>
             </li>
           </ul>
         </div>
@@ -53,7 +53,7 @@
       }
     },
     mounted() {
-      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('214179029161349120'), id: this.JsonBig.parse('19855731022917632') }).then(data => {})
+      this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('21456287755431936'), id: this.JsonBig.parse('19855731022917632') }).then(data => {})
       this.initData()
       this.reqFriend()//监听好友请求
       this.beKickGroup()//监听被踢出群
@@ -68,6 +68,38 @@
         return this.$store.state.chat.map(item => {
           return item.id
         })
+      },
+      infoDiction() {
+        let obj = {};
+        this.$store.state.groupList.forEach(item => {
+          item.members.forEach(ite => {
+            let id = this.JsonBig.stringify(ite.id);
+            !obj[id] && (obj[id] = {
+              icon: ite.icon ? `${this.HostUrl.http}image/${ite.icon}` : "/static/images/default_avator.png",
+              name: ite.name
+            })
+          })
+        })
+        let strangerInfo = this.$store.state.strangerInfo;
+        for (const key in strangerInfo) {
+         !obj[key] && (obj[key] = {
+           icon: strangerInfo[key].icon,
+           name: strangerInfo[key].name
+         })
+        }
+        this.$store.state.friendList.forEach(item => {
+          let id = this.JsonBig.stringify(item.id);
+          !obj[id] && (obj[id] = {
+            icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
+            name: item.name
+          })
+        })
+       let icon = this.$store.state.userInfo.icon
+        !obj[this.userId] && (obj[this.userId] = {
+          icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+          name: this.$store.state.userInfo.name
+        })
+        return obj;
       },
       friendGid() {
         let obj = {};
@@ -156,8 +188,6 @@
                 isSingle: true,
                 group: false,
                 service: false,
-                icon: other.icon ? `${this.HostUrl.http}image/${other.icon}` : "/static/images/default_avator.png",
-                nickName: other.name,
                 phone: other.phone,
                 email: other.email,
                 moreFlag: true,
@@ -179,6 +209,13 @@
             }); 
           }else {
             let id = this.JsonBig.stringify(item.uid);
+            this.$store.commit(
+              {type: 'updateStrangerInfo', data: {
+                id: id,
+                icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
+                name: item.name
+              }
+            })
             if (this.friendIds.includes(id) || this.userId === id) return;
             result.push({
               mid: item.mid ? this.JsonBig.stringify(item.mid) : 0,
@@ -186,8 +223,6 @@
               uid: id,
               group: false,
               service: false,
-              icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
-              nickName: item.name,
               phone: item.phone,
               email: item.email,
               moreFlag: true,
@@ -208,10 +243,16 @@
                 sid: this.JsonBig.stringify(res.body.id), 
                 id: this.JsonBig.stringify(id),
                 info: info,
-                icon: icon,
-                name: name,
                 isDeal: false
               }
+              this.$store.commit({
+                type: 'updateStrangerInfo', data: 
+                  {
+                    id: this.JsonBig.stringify(id),
+                    icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                    name: name
+                  }
+              })
               this.$store.commit({type:'newSystemMes', data: obj})
             }
           }
@@ -262,7 +303,7 @@
         let result = [];
         //联系人列表
         this.$store.state.chat.forEach(item => {
-          if (item.nickName.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText)) {
+          if (this.infoDiction[item.uid] && this.infoDiction[item.uid].name.includes(this.searchText) || this.infoDiction[item.id] && this.infoDiction[item.id].name.includes(this.searchText) || item.nickName && item.nickName.includes(this.searchText) || item.phone && item.phone.includes(this.searchText) || item.email && item.email.includes(this.searchText)) {
             result.push(item);
           }
         })
@@ -277,8 +318,6 @@
               isSingle: true,
               group: false,
               service: false,
-              icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
-              nickName: item.name,
               phone: item.phone,
               email: item.email,
               moreFlag: true,

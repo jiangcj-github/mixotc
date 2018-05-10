@@ -3,7 +3,7 @@
     <p class="wrap-title">
       <span>群信息</span>
       <i @click="quitFlag = true">退出该群</i>
-      <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeGroup">
+      <img src="/static/images/close_btn_tr2.png" class="close-btn-img" @click="closeGroup">
     </p>
     <ol>
       <li>

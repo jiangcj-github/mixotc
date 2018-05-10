@@ -215,14 +215,13 @@ export default {
       }
     });
   },
-
+  //加好友后删除之前陌生人对话
   [types.delStranger](
     state,
     {
       data: { id, index }
     }
   ) {
-    //加好友后删除之前陌生人对话
     state.chat.splice(index, 1);
     delete state.messages[id];
     state.messages = Object.assign({}, state.messages);
@@ -240,34 +239,17 @@ export default {
     state.chat = [];
     state.moneyAddress = [];
     state.messages = { system: [] };
-  },
-//更新头像和昵称信息
-  [types.updateOther](
-    state,
-    {
-      data: { id, icon, type, name }
-    }
-  ) {
-    if(type === 0) {
-      let target = state.chat.filter(item => {
-        return item.id === id
-      })[0]
-      target && (target.icon = icon);
-      for (let i = 0; i < state.messages[id].length; i++) {
-        let item = state.messages[id][i];
-        if (item.icon === icon) break;
-        if (item.from !== JsonBig.stringify(state.userInfo.uid)) item.icon = icon;
-      }
-      // state.messages[id].forEach(item => {
-      //   if(item.from !== JsonBig.stringify(state.userInfo.uid)) item.icon = icon
-      // })
-      return;
-    }
-    if(type === 1) {
-
-    }
+    state.isLogin = false;
   },
 
+  [types.updateStrangerInfo](state, { data:{id, icon, name} }) {
+    //更新陌生人信息
+    state.strangerInfo[id] = {
+      icon,
+      name
+    }
+    state.strangerInfo = Object.assign({}, state.strangerInfo);
+  },
   /**
    * 审核申述客服部分
    */
@@ -357,6 +339,6 @@ export default {
       item.user_id === data[0].appellee_id && (idex = index);
       state.serviceData.splice(idex, 1);
     });
-    state.serviceNow = state.serviceData[0].user_id
+    state.serviceNow = state.serviceData[0].user_id;
   }
 };

@@ -36,12 +36,20 @@
           <p class="more-info" v-if="chat[index].moreFlag" @click="fetchMore(10, 1)">查看更多消息</p>
           <p class="more-info" v-else></p>
           <div class="messages clearfix" v-for="(item, idx) of messages" :key="item.id ? item.id :item.time">
-            <p class="time-info" v-if="idx > 0 && dealTime(messages[idx-1].time, item.time)">{{dealTime(messages[idx-1].time, item.time)}}</p>
+            <p class="time-info" v-if="idx > 0 && dealTime(messages[idx - 1].time, item.time)">{{dealTime(messages[idx-1].time, item.time)}}</p>
             <div :class="{'left-people': item.from !== JsonBig.stringify($store.state.userInfo.uid), 'right-people': item.from === JsonBig.stringify($store.state.userInfo.uid)}">
-              <img class="avator" :src="item.icon" alt="" @click="toHomepage(item.from)">
+              
+              <img 
+                class="avator" 
+                :src="infoDiction[item.from] && infoDiction[item.from].icon"
+                alt="" 
+                @click="toHomepage(item.from)"
+              >
               <p>
                 <i :class="{name: chat[index].group && userId !== item.from}"></i>
-                <b v-if="chat[index].group && userId !== item.from">{{item.name}}</b>
+
+                <b v-if="chat[index].group && userId !== item.from">{{infoDiction[item.from] && infoDiction[item.from].name}}</b>
+
                 <span v-if="item.msg.type === 1" class="images">
                   <img
                     :src="item.msg.content"
@@ -62,13 +70,13 @@
         <!-- 系统消息 -->
         <div class="system-info" v-if="curChat === 'system'">
           <div v-for="item of $store.state.messages['system']" :key="item.sid">
-            <img :src="item.icon ? `${HostUrl.http}image/${item.icon}` : '/static/images/default_avator.png'" alt="">
+            <img :src="infoDiction[item.id] && infoDiction[item.id].icon" alt="">
             <ul>
-              <li class="system-info-name" :class="{single: item.info ? false : true}">{{item.name}}</li>
-              <li v-if="item.info" class="system-info-info">{{item.info}}</li>
+              <li class="system-info-name">{{infoDiction[item.id] && infoDiction[item.id].name}}</li>
+              <li class="system-info-info">{{item.info ? item.info : `我是${infoDiction[item.id] && infoDiction[item.id].name},申请添加你为好友`}}</li>
             </ul>
             <button 
-              @click="addFriend(item.id, item.info ? item.info : `我是${item.name},申请添加你为好友`)"
+              @click="addFriend(item.id, item.info ? item.info : `我是${infoDiction[item.id] && infoDiction[item.id].name},申请添加你为好友`)"
               :disabled="item.isDeal"
             >
               {{item.isDeal ? '已处理' : '同意'}}
@@ -138,8 +146,8 @@
       :addFriendShow="showAddFriend"
       @offAddFriend="openAddFriend"
       :id="curChat"
-      :name="chat[index].nickName"
-      :icon="chat[index].icon"
+      :name="infoDiction[chat[index].uid].name"
+      :icon="infoDiction[chat[index].uid].icon"
       >
     </AddFriend>
     <!-- 添加群聊弹窗 -->
@@ -239,8 +247,9 @@
         let result = '';
         this.$store.state.chat.forEach(item=> {
           if (item.id === this.$store.state.curChat) {
-            result = item.nickName
-            item.length && (result += `(${item.length})`)
+           item.nickName && (result = item.nickName);
+           item.isSingle && (result = this.infoDiction[item.uid] && this.infoDiction[item.uid].name);
+           !item.nickName && !item.isSingle && (result = this.infoDiction[item.id] && this.infoDiction[item.id].name)
           }
         })
         return result
@@ -338,6 +347,38 @@
         })
         return obj
       },
+      infoDiction() {
+        let obj = {};
+        this.$store.state.groupList.forEach(item => {
+          item.members.forEach(ite => {
+            let id = this.JsonBig.stringify(ite.id);
+            !obj[id] && (obj[id] = {
+              icon: ite.icon ? `${this.HostUrl.http}image/${ite.icon}` : "/static/images/default_avator.png",
+              name: ite.name
+            })
+          })
+        })
+        this.$store.state.friendList.forEach(item => {
+          let id = this.JsonBig.stringify(item.id);
+          !obj[id] && (obj[id] = {
+            icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
+            name: item.name
+          })
+        })
+        let strangerInfo = this.$store.state.strangerInfo;
+        for (const key in strangerInfo) {
+         !obj[key] && (obj[key] = {
+           icon: strangerInfo[key].icon,
+           name: strangerInfo[key].name
+         })
+        }
+        let icon = this.$store.state.userInfo.icon
+        !obj[this.userId] && (obj[this.userId] = {
+          icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+          name: this.$store.state.userInfo.name
+        })
+        return obj;
+      }
     },
     methods: {
       // 拉取收款地址数据
@@ -370,7 +411,7 @@
         if(friendFlag) id = this.friendGid[id];
         await this.dealNewChat(id, friendFlag ? 1 : 0);
         friendFlag && (flag = this.chatIds.indexOf(id));
-        console.log(id, this.friendGid)
+        // console.log(id, this.friendGid)
         this.$store.commit({type: 'changeChatBox', data: true})
         if(flag !== -1) {
           this.$store.commit({type: 'chatTop', data: flag})
@@ -396,11 +437,10 @@
         }).then(data => {
           (!data.msgs || data.msgs.length < num) && this.$store.commit({type: 'changeMoreFlag', data:{id: this.curChat, flag: false }})
           if (!data.msgs) return;
-          let uid = this.userId,
-              icon = this.$store.state.userInfo.icon;
+          let uid = this.userId;
 
           let length = data.msgs.length
-          data.msgs.forEach((item, index) => {
+          data.msgs.forEach(async (item, index) => {
             let sender_id = this.JsonBig.stringify(item.sender_id),
                 create_time = item.create_time * 1000,
                 messageContent = {
@@ -414,8 +454,6 @@
               id: this.JsonBig.stringify(item.id),
               from: sender_id === uid ? uid : sender_id,
               to: sender_id === uid ? this.curChat : uid,
-              name: '',
-              icon: sender_id === uid ? (icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png") : (this.mapCurMembers[sender_id] && this.mapCurMembers[sender_id].icon ? this.mapCurMembers[sender_id].icon : this.chat[this.index].icon),
               msg:{
                 type: item.type === 'image' ? 1 : 0,
                 content: messageContent[item.type]
@@ -424,28 +462,22 @@
               isFail: false,
               time: create_time
             }
-            if(sender_id === uid) {
-              obj.name = this.$store.state.userInfo.name;
-            } else {
-              this.historyIcon(sender_id, obj)
-            } 
+            if(!this.infoDiction[obj.from]) {
+              await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(obj.from)}).then(({name, phone, email, icon }) => {
+                this.$store.commit(
+                  {type: 'updateStrangerInfo', 
+                    data: {
+                      id: obj.from,
+                      icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                      name: name
+                    }
+                })
+              })
+            }
             result.push(obj)
             if(index === length - 1) this.$store.commit({type: 'moreMessage', data: result});
           })
         })
-      },
-      async historyIcon(id, obj) {
-        // console.log(this.mapCurMembers, this.membersInfo)
-        if(this.mapCurMembers[id] && this.mapCurMembers[id].name) {
-          obj.name = this.mapCurMembers[id].name;
-          return;
-        };
-        if(this.membersInfo[id] && this.membersInfo[id].name){ 
-          obj.name = this.membersInfo[id].name;
-          return;
-        };
-        obj.name = await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(id)}).then(data => data.name);
-        // console.log(name)
       },
       // 监听消息
       listenChat() {
@@ -459,31 +491,16 @@
               let {id, uid, icon, name, data, type } = res.body;
               let obj = {},
                   messageContent = {
-                    text: data.msg.br(),
+                    text: data.msg && data.msg.br(),
                     image: `${_this.HostUrl.http}file/${data.id}`,
                     audio: `您收到一条语音信息，请在手机端查看`,
                     video: `您收到一条视频信息，请在手机端查看`,
                     gift: `您收到一条红包信息，请在手机端查看`
                   }
-                  // messageContent.text.split('').map(item=>{
-                  //   if(item === '\n') item = '<br>';
-                  //   return item;
-                  // })
-                // if (icon) {
-                //   _this.$store.commit({
-                //     type: 'updateOther', 
-                //     data:{
-                //       id: _this.JsonBig.stringify(uid), 
-                //       icon: `${_this.HostUrl.http}image/${icon}`,
-                //       type: 0 
-                //     }
-                //   })
-                // }
                 obj = {
                   id: _this.JsonBig.stringify(id),
                   from: _this.JsonBig.stringify(uid), 
                   to: _this.userId,
-                  icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                   msg:{
                     type: type === 'image' ? 1 : 0,
                     content: messageContent[type]
@@ -492,6 +509,14 @@
                   isFail: false,
                   time: new Date() - 0
                 }
+                _this.$store.commit({
+                  type: 'updateStrangerInfo', data: 
+                    {
+                      id: _this.JsonBig.stringify(id),
+                      icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                      name: name
+                    }
+                })
                 _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
                 await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
             }
@@ -501,7 +526,7 @@
                 let {id, uid, gid, data, type } = res[0].body;
                 let obj = {},
                     messageContent = {
-                      text: data.msg.br(),
+                      text: data.msg && data.msg.br(),
                       image: `${_this.HostUrl.http}file/${data.id}`,
                       audio: `您收到一条语音信息，请在手机端查看`,
                       video: `您收到一条视频信息，请在手机端查看`,
@@ -515,22 +540,11 @@
                   return _this.JsonBig.stringify(uid) === _this.JsonBig.stringify(item.id)
                 })[0]
                 let {icon, name} = other;
-                // if (icon && group.type === 0) {
-                //   _this.$store.commit({
-                //     type: 'updateOther', 
-                //     data:{
-                //       id: _this.JsonBig.stringify(gid), 
-                //       icon: `${_this.HostUrl.http}image/${icon}`,
-                //       type: 0 
-                //     }
-                //   })
-                // }
                 obj = {
                   id: _this.JsonBig.stringify(id),
                   from: _this.JsonBig.stringify(uid), 
                   to: _this.userId,
                   name: name,
-                  icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                   msg:{
                     type: type === 'image' ? 1 : 0,
                     content: messageContent[type]
@@ -588,7 +602,6 @@
           from: this.userId,
           to: tid,
           name: this.$store.state.userInfo.name,
-          icon: this.$store.state.userInfo.icon ? `${this.HostUrl.http}image/${this.$store.state.userInfo.icon}` : "/static/images/default_avator.png",
           msg:{
             type: type,
             content: content
@@ -640,12 +653,19 @@
       // 不在消息列表的人来消息时的处理
       async dealNewChat(id, flag) {
         !flag && !this.chatIds.includes(id) && await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(id)}).then( ({name, phone, email, icon }) => {
+          this.$store.commit(
+            {type: 'updateStrangerInfo', 
+              data: {
+                id: id,
+                icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                name: name
+              }
+          })
            this.$store.commit({type: 'newChat', data:{
               id: id,
+              uid: id,
               group: false,
               service: false,
-              icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-              nickName: name,
               phone: phone,
               email: email,
               moreFlag: false,
@@ -689,8 +709,6 @@
                 isSingle: true,
                 group: false,
                 service: false,
-                icon: other.icon ? `${this.HostUrl.http}image/${other.icon}` : "/static/images/default_avator.png",
-                nickName: other.name,
                 phone: other.phone,
                 email: other.email,
                 moreFlag: this.$store.state.messages[uid] ?  (this.$store.state.messages[uid].length === 0 ? false : true): false,
@@ -772,12 +790,10 @@
                   this.$store.commit({type: 'delStranger', data:{id: otherId, index: idx }})
                 }
                 //加好友后的处理
-                let icon = other.icon;
                 let obj = {
                   id: 0,
                   from: otherId,
                   to: this.userId,
-                  icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
                   msg:{
                     type: 0,
                     content: this.JsonBig.stringify(aid) === this.userId ? this.reqMessage : '已通过验证，开始对话吧'
@@ -786,7 +802,6 @@
                   isFail: false,
                   time: new Date() - 0
                 }
-                console.log(JSON.stringify(obj))
                 this.$store.commit({type: 'addMessages', data:{id: this.JsonBig.stringify(id), msg: obj }})
               }
               this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
@@ -1102,9 +1117,6 @@
             height 32px
             line-height 38px
             font-size 14px
-            &.single
-              height 60px
-              line-height 60px
           .system-info-info
             overflow hidden
             text-overflow ellipsis

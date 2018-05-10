@@ -61,13 +61,13 @@
         this.addList = [
           { 
             id : this.JsonBig.stringify(this.userInfo.uid),
-            icon: this.userInfo.icon ? `${this.HostUrl.http}image/${this.userInfo.icon}` : `/static/images/default_avator.png`,
+            icon: this.infoDiction[this.JsonBig.stringify(this.userInfo.uid)].icon,
             name: this.userInfo.name
           },
           {
             id : this.chat[this.index].isSingle ? this.chat[this.index].uid : this.chat[this.index].id,
-            icon : this.chat[this.index].icon,
-            name: this.chat[this.index].nickName
+            icon : this.infoDiction[this.chat[this.index].uid].icon,
+            name: this.infoDiction[this.chat[this.index].uid].name
           }
         ]
         return;
@@ -107,6 +107,38 @@
           if (item.id === this.nowChat) idx = index;
         })
         return idx
+      },
+      infoDiction() {
+        let obj = {};
+        this.$store.state.groupList.forEach(item => {
+          item.members.forEach(ite => {
+            let id = this.JsonBig.stringify(ite.id);
+            !obj[id] && (obj[id] = {
+              icon: ite.icon ? `${this.HostUrl.http}image/${ite.icon}` : "/static/images/default_avator.png",
+              name: ite.name
+            })
+          })
+        })
+        this.$store.state.friendList.forEach(item => {
+          let id = this.JsonBig.stringify(item.id);
+          !obj[id] && (obj[id] = {
+            icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
+            name: item.name
+          })
+        })
+        let strangerInfo = this.$store.state.strangerInfo;
+        for (const key in strangerInfo) {
+         !obj[key] && (obj[key] = {
+           icon: strangerInfo[key].icon,
+           name: strangerInfo[key].name
+         })
+        }
+        let icon = this.$store.state.userInfo.icon
+        !obj[this.userId] && (obj[this.userId] = {
+          icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+          name: this.$store.state.userInfo.name
+        })
+        return obj;
       }
     },
     watch: {

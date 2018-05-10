@@ -29,6 +29,7 @@
     },
     created() {
       this.$store.commit({type: 'changeLoginForm', data: false})
+      // this.$store.commit({type: 'changeLogin', data: false});
       // console.log(this.token)
       let ws = this.WebSocket;
       //发送token登录后的处理
@@ -41,6 +42,7 @@
             return;
           }
           ws.reConnectFlag = true;
+          console.log(this.$store.state.trustList)
           this.$store.commit({
             type: 'getUserInfo',
             data: data.body

@@ -17,6 +17,7 @@ export default {
   messages: {
     system:[]
   },
+  strangerInfo: {},
 
   /**
    * 审核申述客服部分
