@@ -58,6 +58,20 @@ Number.prototype.formatSecord=function(){
   }
 };
 
+Number.prototype.formatSecord2=function(){
+  let h,m,s;
+  if(this<60){
+    s=this;
+    return s+"s";
+  }else if(this>=60&&this<3600){
+    let m=Math.floor(this/60);
+    return m+"min";
+  }else{
+    let h=Math.floor(this/3600);
+    return h+"h";
+  }
+};
+
 //保留小数点后n位
 String.prototype.formatFixed=function(n){
   if(n<0) return;
