@@ -19,7 +19,14 @@
       </li>
     </ul>
 
-    <happy-scroll style="width:399px;height:325px" :resize="true" bigger-move-h="end" smaller-move-h="end" hide-horizontal class="main-content">
+    <happy-scroll 
+      style="width:399px;height:325px" 
+      :resize="true" 
+      bigger-move-h="end" 
+      hide-horizontal 
+      class="main-content"
+      :scroll-top="9999999"
+    >
       <div class="wrap">
         <!-- 空白消息框 -->
         <div class="blank" v-if="!title && curChat !== 'system'"></div>
@@ -397,7 +404,7 @@
             let sender_id = this.JsonBig.stringify(item.sender_id),
                 create_time = item.create_time * 1000,
                 messageContent = {
-                    text: item.data.msg,
+                    text: item.data.msg && item.data.msg.br(),
                     image: `${this.HostUrl.http}file/${item.data.id}`,
                     audio: `您收到一条语音信息，请在手机端查看`,
                     video: `您收到一条视频信息，请在手机端查看`,
@@ -408,7 +415,7 @@
               from: sender_id === uid ? uid : sender_id,
               to: sender_id === uid ? this.curChat : uid,
               name: '',
-              icon: sender_id === uid ? (icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png") : (this.mapCurMembers[sender_id] && this.mapCurMembers[sender_id].icon ? this.mapCurMembers[sender_id].icon : "/static/images/default_avator.png"),
+              icon: sender_id === uid ? (icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png") : (this.mapCurMembers[sender_id] && this.mapCurMembers[sender_id].icon ? this.mapCurMembers[sender_id].icon : this.chat[this.index].icon),
               msg:{
                 type: item.type === 'image' ? 1 : 0,
                 content: messageContent[item.type]
@@ -452,12 +459,16 @@
               let {id, uid, icon, name, data, type } = res.body;
               let obj = {},
                   messageContent = {
-                    text: data.msg,
+                    text: data.msg.br(),
                     image: `${_this.HostUrl.http}file/${data.id}`,
                     audio: `您收到一条语音信息，请在手机端查看`,
                     video: `您收到一条视频信息，请在手机端查看`,
                     gift: `您收到一条红包信息，请在手机端查看`
                   }
+                  // messageContent.text.split('').map(item=>{
+                  //   if(item === '\n') item = '<br>';
+                  //   return item;
+                  // })
                 // if (icon) {
                 //   _this.$store.commit({
                 //     type: 'updateOther', 
@@ -490,7 +501,7 @@
                 let {id, uid, gid, data, type } = res[0].body;
                 let obj = {},
                     messageContent = {
-                      text: data.msg,
+                      text: data.msg.br(),
                       image: `${_this.HostUrl.http}file/${data.id}`,
                       audio: `您收到一条语音信息，请在手机端查看`,
                       video: `您收到一条视频信息，请在手机端查看`,

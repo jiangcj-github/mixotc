@@ -47,7 +47,7 @@ function createConnect(url) {
     console.log("open");
     reConnectInterval && clearInterval(reConnectInterval);
     !clearMessageInterval &&
-      (clearMessageInterval = setInterval(clearMessage, 5000));
+      (clearMessageInterval = setInterval(clearMessage, 7000));
     let obj = pool.onOpen;
     for (const key in obj) {
       obj[key](event.data);
@@ -113,7 +113,7 @@ function clearMessage() {
   let obj = pool.onMessage,
     date = new Date();
   for (const key in obj) {
-    if (obj[key].date && date - obj[key].date > 30000) {
+    if (obj[key].date && date - obj[key].date > 10000) {
       obj[key].callback(false);
       delete obj[key];
     }

@@ -35,6 +35,14 @@ String.prototype.limit = function (number) {
   }
   return this;
 }
+// 处理换行
+String.prototype.br = function(){
+  let result = this.split("").map(item => {
+    if (item === "\n") item = "<br>";
+    return item;
+  }).join('');
+  return result;
+};
 
 //格式化秒-短格式
 /*
