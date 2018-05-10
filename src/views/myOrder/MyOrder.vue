@@ -113,15 +113,15 @@
     <!-- 订单无内容 -->
     <MyOrderNothing v-if="!contentList"></MyOrderNothing>
     <!-- 分页 -->
-    <!--<Pagination  v-if="contentList !== null"-->
-                <!--:total="70"-->
-                <!--:pageSize="20"-->
-                <!--emitValue="changePage">-->
-    <!--</Pagination >-->
-    <div class="page-btn" v-if="contentList">
-      <button @click="clickPre" :class="{'unable-btn': page === 0}" :disabled="page === 0">上一页</button>
-      <button @click="clickNext" :class="{'unable-btn': contentList && contentList.length < 15}" :disabled="contentList && contentList.length < 15">下一页</button>
-    </div>
+    <Pagination  v-if="contentList !== null"
+                :total="pageTotal"
+                :pageSize="15"
+                emitValue="changePage">
+    </Pagination >
+    <!--<div class="page-btn" v-if="contentList">-->
+      <!--<button @click="clickPre" :class="{'unable-btn': page === 0}" :disabled="page === 0">上一页</button>-->
+      <!--<button @click="clickNext" :class="{'unable-btn': contentList && contentList.length < 15}" :disabled="contentList && contentList.length < 15">下一页</button>-->
+    <!--</div>-->
 
 
     <!-- 标记已付款弹窗 -->
@@ -289,7 +289,9 @@
         conductNum: 0, // 进行数量
         completeNum: 0, // 完成数量
 
-        page: 0, // 分页数量
+        pageTotal: 0, // 分页总数
+        changePage: 'changePage', // 监听自组件数量
+        page: 0 // 分页
       }
     },
     created() {
@@ -393,11 +395,16 @@
         console.log('11111', this.$refs.di.date1 )
         this.startValueDate = this.$refs.di.date1 ? Math.floor(new Date(this.$refs.di.date1).getTime() / 1000) : null;
         this.endValueDate = this.$refs.di.date2 ? Math.floor(new Date(this.$refs.di.date2).getTime() / 1000) : null;
-
         if (this.startValueDate && this.endValueDate) {
           this.initData()
         }
       });
+      // 分页
+      this.Bus.$on(this.changePage, data => {
+        console.log('changePage', data)
+        this.page = data
+        this.initData()
+      })
     },
     destroyed() {
       this.Bus.$off(this.orderTypeValue);
@@ -424,8 +431,9 @@
         ws.onMessage[seq] = { // 监听
           callback: (data) => {
             if(!data || data.body.ret !== 0) return;
-            console.log('order', data.body.data.orders)
+            console.log('order', data.body)
             this.contentList = data.body.data.orders
+            this.pageTotal = data.body.data.amount
             // 购买成功的订单显示弹窗
             if (this.$store.state.newOrder) {
               this.updateTradeCode = this.contentList[0].trade_code
@@ -655,16 +663,16 @@
         this.initData()
       },
       // 分页操作
-      clickPre() {
-        this.page <= 0 ? this.page = 0 : this.page--;
-        this.initData()
-        console.log(111, this.page)
-      },
-      clickNext() {
-        this.page++;
-        this.initData()
-        console.log(222, this.page)
-      }
+      // clickPre() {
+      //   this.page <= 0 ? this.page = 0 : this.page--;
+      //   this.initData()
+      //   console.log(111, this.page)
+      // },
+      // clickNext() {
+      //   this.page++;
+      //   this.initData()
+      //   console.log(222, this.page)
+      // }
     }
   }
 </script>

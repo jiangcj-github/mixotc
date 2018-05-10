@@ -90,6 +90,7 @@ export default {
       }
     },
     changeCurPage(num) {
+      this.toPage && (this.toPage = '')
       if(num === '...' || num === 0 || num > this.totalPage) return;
       this.curPage = num
       this.Bus.$emit(this.emitValue, num)
