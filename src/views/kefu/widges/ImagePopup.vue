@@ -8,7 +8,11 @@
   export default {
     props: {
       url: {type: String, default: "",},
-      onClose:{type: String, default: "onIpClose"}
+      onClose:{type: String, default: "onIpClose"},
+      maxW: {type:Number,default: 1000},
+      maxH: {type:Number,default: 1000},
+      minW: {type:Number,default: 100},
+      minH: {type:Number,default: 100},
     },
     data(){
       return {
@@ -19,36 +23,70 @@
 
         mleft: 0,
         mtop: 0,
-        width: "",
-        height: "",
+        w: 0,
+        h: 0,
+        nw: 0,
+        nh: 0,
+
       }
+    },
+    mounted(){
+      this.initWh();
     },
     methods:{
       close(){
         this.Bus.$emit(this.onClose);
       },
-      zoom(w,level){
-        if(level>=0){
-          return w*(1+level/3);
-        }else{
-          return w*(1+level/13);
+      initWh(){
+        let nw=this.$refs.img.naturalWidth;
+        let nh=this.$refs.img.naturalHeight;
+        let nw2=nw;
+        let nh2=nh;
+        if(nw>this.maxW){
+          nw2=this.maxW;
+          nh2=nh/nw*nw2;
+        }else if(nw<this.minW){
+          nw2=this.minW;
+          nh2=nh/nw*nw2;
+        }else if(nh>this.maxH){
+          nh2=this.maxH;
+          nw2=nw/nh*nh2;
+        }else if(nh<this.minH){
+          nh2=this.minH;
+          nw2=nw/nh*nh2;
         }
+        this.nw=nw2;
+        this.nh=nh2;
+        this.w=nw2;
+        this.h=nh2;
+        this.draw();
+      },
+      zoom(d){
+        let level2=this.level+d;
+        let w2,h2;
+        if(level2>=0){
+          w2=this.nw*(1+level2/3);
+          h2=this.nh*(1+level2/3);
+        }else{
+          w2=this.nw*(1+level2/13);
+          h2=this.nh*(1+level2/13);
+        }
+        if(w2>this.maxW||w2<this.minW||h2>this.maxH||h2<this.minH){
+          return;
+        }
+        this.level=level2;
+        this.w=w2;
+        this.h=h2;
+        this.draw();
       },
       onWheel(e){
         if(e.deltaY>0){
           //向下滚动
-          if(this.level<=-10) return;
-          this.level--;
+          this.zoom(-1);
         }else{
           //向上滚
-          if(this.level>=10) return;
-          this.level++;
+          this.zoom(1);
         }
-        let naturalWidth=this.$refs.img.naturalWidth;
-        let naturalHeight=this.$refs.img.naturalHeight;
-        this.width =this.zoom(naturalWidth,this.level);
-        this.height =this.zoom(naturalHeight,this.level);
-        this.draw();
       },
       onMouseDown(e){
         this.move=true;
@@ -72,8 +110,8 @@
       draw(){
         this.$refs.img.style.marginLeft=this.mleft+"px";
         this.$refs.img.style.marginTop=this.mtop+"px";
-        this.$refs.img.style.width=this.width+"px";
-        this.$refs.img.style.height=this.height+"px";
+        this.$refs.img.style.width=this.w+"px";
+        this.$refs.img.style.height=this.h+"px";
       }
     }
   }

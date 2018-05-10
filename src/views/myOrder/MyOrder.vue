@@ -95,7 +95,7 @@
               <span v-else-if="operation.flag===2" class="text-b" @click="showOperation(index)">{{operation.name}}</span>
               <span v-else-if="operation.flag===4" @click="openSelect($event, operation, index, content)">{{operation.name}}</span>
               <span v-else-if="operation.flag===7" @click="openSelect($event, operation, index, content)">
-                {{operation.name}}<i v-if="content.timeToAppeal>0">({{content.timeToAppeal.formatSecord()}}可申诉)</i>
+                {{operation.name}}<i v-if="content.timeToAppeal>0">({{content.timeToAppeal.formatSecord2()}}可申诉)</i>
               </span>
               <span v-else-if="operation.flag===9" @click="openSelect($event, operation, index, content)">{{operation.name}}</span>
               <span v-else-if="operation.flag===5" @click="remindCoin(content)">{{operation.name}}</span>

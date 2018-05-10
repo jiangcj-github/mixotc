@@ -33,7 +33,7 @@
         uid: "",
 
         rates:[],
-        pageSize:1,
+        pageSize:10,
         curPage: 1,
         total: 0,
         err: -1,
@@ -51,23 +51,7 @@
       this.Bus.$off("onPageChange");
     },
     methods: {
-      loadRatesTotal(){
-        this.WsProxy.send('otc','rates',{
-          id:this.uid,
-          origin:-1
-        }).then((data)=>{
-            this.pageSize=data.count;
-            this.total=data.origin*this.pageSize;
-            if(data.rates){
-              this.total+=data.rates.length;
-            }
-        }).catch((msg)=>{
-          console.log(msg);
-        });
-      },
       loadRates(p=0){
-        //获取总数
-        this.loadRatesTotal();
         //获取列表
         this.WsProxy.send('otc','rates',{
           id:this.uid,
@@ -77,6 +61,7 @@
             this.err=1;
           }else{
             this.err=0;
+            this.total=data.amount;
             this.parseRates(data.rates);
           }
         }).catch((msg)=>{

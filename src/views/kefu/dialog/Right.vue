@@ -110,7 +110,7 @@
         <p class="pop1Remind">责任用户取消交易权限3天。仲裁3次，永久关闭交易权限</p>
         <div class="textarea">
           <textarea placeholder="填写强制放币的理由" ref="pop3Text" v-model="pop3Text" @input="onPop3Input"></textarea>
-          <p>{{pop1Text.length}}/50</p>
+          <p>{{pop3Text.length}}/50</p>
         </div>
         <div class="btns">
           <button class="b1" @click="onPop3Ok">确认</button>
@@ -290,8 +290,6 @@
     },
     mounted() {
       this.startSwiper();
-      // 获取聊天消息
-      let _this = this;
       this.Bus.$on("onIpClose", () => {
         this.showPopImg = false;
       });
@@ -309,7 +307,7 @@
     methods: {
        startSwiper() {
          console.log('startSwiper')
-         // this.mySwiper && this.mySwiper.updateSlidesSize()
+         this.mySwiper && this.mySwiper.updateSlides()
 
        },
       onCtrlEnter() { // 换行
@@ -554,38 +552,39 @@
         });
       },
       onPop3Ok() { // 终止交易确认
-        this.showPop3 = false
-        let text = MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld);
+        this.showPop3 = false;
+        let time = new Date() - 0,
+        text = MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld);
         // 发送消息
-        this.WsProxy.sendMessage({
-          type: 'text',
-          // gid: this.JsonBig.parse("197129593973379072"),
-          tid: this.JsonBig.parse(this.serviceNow),
-          data:{
-            uid: this.$store.state.userInfo.uid,
-            rid: this.JsonBig.parse(this.serviceNow),
-            tid: this.JsonBig.parse(this.serviceNow),
-            msg: text
-          }
-        }).then(data => { // 发送消息成功后更改原保存信息
-          this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:0 }})
-        }).catch(error => {
-          this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:1 }})
-        });
+        // this.WsProxy.sendMessage({
+        //   type: 'text',
+        //   // gid: this.JsonBig.parse("197129593973379072"),
+        //   tid: this.JsonBig.parse(this.serviceNow),
+        //   data:{
+        //     uid: this.$store.state.userInfo.uid,
+        //     rid: this.JsonBig.parse(this.serviceNow),
+        //     tid: this.JsonBig.parse(this.serviceNow),
+        //     msg: text
+        //   }
+        // }).then(data => { // 发送消息成功后更改原保存信息
+        //   this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:0 }})
+        // }).catch(error => {
+        //   this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:1 }})
+        // });
         // 确定终止交易
-        this.WsProxy.send('control', 'a_terminate_order',
-          Object.assign(this.stopTradeObj, {
-            "type": 1, // 1: 订单, 2: 担保
-            "info": this.pop3TextOld
-          })
-        ).then((data)=>{
-          this.$store.commit({type: 'stopTrade', data: this.otherInfo})
-          console.log('终止交易', data)
-        }).catch((msg)=>{
-          console.log(msg);
-        });
+        // this.WsProxy.send('control', 'a_terminate_order',
+        //   Object.assign(this.stopTradeObj, {
+        //     "type": 1, // 1: 订单, 2: 担保
+        //     "info": this.pop3TextOld
+        //   })
+        // ).then((data)=>{
+        //   this.$store.commit({type: 'stopTrade', data: this.otherInfo})
+        //   console.log('终止交易', data)
+        // }).catch((msg)=>{
+        //   console.log(msg);
+        // });
 
-        // this.$store.commit({type: 'stopTrade', data: this.otherInfo})
+        this.$store.commit({type: 'stopTrade', data: this.otherInfo})
       },
       onPop4Ok() { // 证明无效确认
         this.showPop4 = false;
