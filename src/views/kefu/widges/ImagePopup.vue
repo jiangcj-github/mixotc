@@ -46,8 +46,8 @@
         }
         let naturalWidth=this.$refs.img.naturalWidth;
         let naturalHeight=this.$refs.img.naturalHeight;
-        this.width =this.zoom(naturalWidth,this.level);
-        this.height =this.zoom(naturalHeight,this.level);
+        this.width = this.zoom(naturalWidth,this.level);
+        this.height = this.zoom(naturalHeight,this.level);
         this.draw();
       },
       onMouseDown(e){
