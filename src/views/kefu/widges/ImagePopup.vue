@@ -8,7 +8,11 @@
   export default {
     props: {
       url: {type: String, default: "",},
-      onClose:{type: String, default: "onIpClose"}
+      onClose:{type: String, default: "onIpClose"},
+      maxW: {type:Number,default: 1000},
+      maxH: {type:Number,default: 1000},
+      minW: {type:Number,default: 200},
+      minH: {type:Number,default: 200},
     },
     data(){
       return {
@@ -27,28 +31,34 @@
       close(){
         this.Bus.$emit(this.onClose);
       },
-      zoom(w,level){
-        if(level>=0){
-          return w*(1+level/3);
+      zoom(d){
+        let nw=this.$refs.img.naturalWidth;
+        let nh=this.$refs.img.naturalHeight;
+        let level2=this.level+d;
+        let w2,h2;
+        if(level2>=0){
+          w2=nw*(1+(this.level+d)/3);
+          h2=nh*(1+(this.level+d)/3);
         }else{
-          return w*(1+level/13);
+          w2=nw*(1+(this.level+d)/13);
+          h2=nh*(1+(this.level+d)/13);
         }
+        if(w2>this.maxW||w2<this.minW||h2>this.maxH||h2<this.minH){
+          return;
+        }
+        this.level=level2;
+        this.width=w2;
+        this.height=h2;
+        this.draw();
       },
       onWheel(e){
         if(e.deltaY>0){
           //向下滚动
-          if(this.level<=-10) return;
-          this.level--;
+          this.zoom(-1);
         }else{
           //向上滚
-          if(this.level>=10) return;
-          this.level++;
+          this.zoom(1);
         }
-        let naturalWidth=this.$refs.img.naturalWidth;
-        let naturalHeight=this.$refs.img.naturalHeight;
-        this.width =this.zoom(naturalWidth,this.level);
-        this.height =this.zoom(naturalHeight,this.level);
-        this.draw();
       },
       onMouseDown(e){
         this.move=true;
