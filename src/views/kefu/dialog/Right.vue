@@ -377,7 +377,7 @@
         this.addStoreMessages(1, '', time);
       },
       send() { // 发送消息
-        if (/^\s*$/.test(this.$refs.textarea.innerHTML)) return;
+        if (/^\s*$/.test(this.$refs.textarea.innerText)) return;
         let time = new Date() - 0;
         this.addStoreMessages(0, this.$refs.textarea.innerHTML, time)
         // 发送消息
