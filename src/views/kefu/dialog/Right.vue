@@ -52,10 +52,12 @@
         <button class="b2" @click="showPop4 = true">证明无效</button>
         <button class="b3" @click="onClickM1">通知放币</button>
       </div>
-      <div contenteditable="true" ref="textarea" class="textarea" title=""
-                v-html="sendMsg"
-                @keydown.enter.exact="send"
-                @keydown.ctrl.enter="onCtrlEnter">
+      <div contenteditable="true"
+           ref="textarea"
+           class="textarea"
+           v-html="sendMsg"
+           @keydown.enter.exact.prevent="send"
+           @keydown.ctrl.enter="onCtrlEnter">
       </div>
       <div class="bottom">
         <span>按下Enter发送内容/Ctrl+Enter换行</span>
@@ -165,6 +167,7 @@
   import MSGS from "./msg.js";
   import Swiper from 'swiper'; // 引入swiper
   import 'swiper/dist/css/swiper.min.css';
+  import Util from "@/js/Util.js";
 
   export default {
     components: {
@@ -289,37 +292,54 @@
       }
     },
     mounted() {
-      this.startSwiper();
       this.Bus.$on("onIpClose", () => {
         this.showPopImg = false;
       });
-      this.mySwiper = new Swiper('.swiper-container', { // 调用轮播图
-        nextButton: '.swiper-button-next',
-        prevButton: '.swiper-button-prev',
-        observer: true, //修改swiper自己或子元素时，自动初始化swiper
-        observeParents: true,//修改swiper的父元素时，自动初始化swiper
-        // onSlideChangeEnd(swiper) {
-        //   console.log(111, swiper.activeIndex)
-        //   //this.isBuyer = swiper.activeIndex && this.otherInfo[swiper.activeIndex].buyer_id == this.serviceNow ?  "买家" : "卖家";
-        // }
-      })
+      //this.startSwiper()
     },
     methods: {
-       startSwiper() {
-         console.log('startSwiper')
-         this.mySwiper && this.mySwiper.updateSlides()
-
-       },
+      startSwiper() {
+        let _this = this
+        this.$nextTick(() => {
+          new Swiper('.swiper-container', { // 调用轮播图
+            navigation: {
+              nextEl: '.swiper-button-next',
+              prevEl: '.swiper-button-prev',
+            },
+            observer: true, //修改swiper自己或子元素时，自动初始化swiper
+            observeParents: true,//修改swiper的父元素时，自动初始化swiper
+            on: {
+              slideChangeTransitionEnd() {
+                _this.isBuyer = _this.otherInfo && _this.otherInfo[this.activeIndex].buyer_id == _this.serviceNow ?  "买家" : "卖家";
+              }
+            }
+          })
+        })
+      },
       onCtrlEnter() { // 换行
-        this.$refs.textarea.value += "\n";
+        if (Util.browserType() === "IE" || Util.browserType() === "Edge") {
+          this.$refs.textarea.innerHTML += "<div></div>";
+        } else if (Util.browserType() === "FF") {
+          this.$refs.textarea.innerHTML += "<br>";
+        } else {
+          this.$refs.textarea.innerHTML += "<div><br/></div>";
+        }
+        Util.placeCaretAtEnd(this.$refs.textarea);
       },
       changeUser(index) { // 点击切换身份
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人对方资料
           "user_id": this.appl === 0 ? this.JsonBig.parse(this.otherInfo[index].appellee_id) : this.JsonBig.parse(this.otherInfo[index].appellant_id)
         }).then(data => {
+          data.forEach(v => {
+            v.buyer_id = this.JsonBig.stringify(v.buyer_id) // 买家
+            v.seller_id = this.JsonBig.stringify(v.seller_id) // 卖家
+            v.sid = this.JsonBig.stringify(v.sid) // 订单
+            v.appellant_id = this.JsonBig.stringify(v.appellant_id) // 申述人
+            v.appellee_id = this.JsonBig.stringify(v.appellee_id) // 被申述人
+          })
           console.log('反转申述人', data, this.appl);
-          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.appl === 0 ? this.JsonBig.stringify(this.otherInfo[index].appellee_id) : this.JsonBig.stringify(this.otherInfo[index].appellant_id)})}) // 存储右边聊天人员
-          this.$store.commit({type: 'transformServiceUser', data: {id: this.appl === 0 ? this.JsonBig.stringify(this.otherInfo[index].appellant_id) : this.JsonBig.stringify(this.otherInfo[index].appellee_id)}}) // 存储右边聊天人员
+          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.appl === 0 ? this.otherInfo[index].appellee_id : this.otherInfo[index].appellant_id})}) // 存储右边聊天人员
+          this.$store.commit({type: 'transformServiceUser', data: {id: this.appl === 0 ? this.otherInfo[index].appellant_id : this.otherInfo[index].appellee_id}}) // 存储右边聊天人员
         }).catch(error=>{
           console.log('错误', error)
         })
@@ -377,7 +397,7 @@
         this.addStoreMessages(1, '', time);
       },
       send() { // 发送消息
-        if (/^\s*$/.test(this.$refs.textarea.innerHTML)) return;
+        if (/^\s*$/.test(this.$refs.textarea.innerText)) return;
         let time = new Date() - 0;
         this.addStoreMessages(0, this.$refs.textarea.innerHTML, time)
         // 发送消息
@@ -447,34 +467,13 @@
         this.$refs.textarea.innerHTML = text;
         this.$refs.textarea.focus();
       },
-      onClickM1() { // 点击通知放币按钮
-        let text = MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`);
-        this.$refs.textarea.innerHTML = text;
+      onPop4Ok() { // 证明无效确认
+        this.showPop4 = false;
+        let text = MSGS.get(1, this.appl, this.recv);
+        text = text.replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<span style="color:#FF794C">[${this.otherInfo[0].trade_code}]</span>`);
+        this.sendMsg= text;
         this.$refs.textarea.focus();
-      },
-      onPop1Input() { // 填写强制放币理由(责任人已定)
-        if (this.pop1Text.length > 50) {
-          this.pop1Text = this.pop1TextOld;
-          this.$refs.pop1Text.value = this.pop1TextOld;
-        } else {
-          this.pop1TextOld = this.pop1Text;
-        }
-      },
-      onPop2Input() { // 填写驳回申述理由
-        if (this.pop2Text.length > 50) {
-          this.pop2Text = this.pop2TextOld;
-          this.$refs.pop2Text.value = this.pop2TextOld;
-        } else {
-          this.pop2TextOld = this.pop2Text;
-        }
-      },
-      onPop3Input() { // 填写强制放币理由(选择终止交易的责任人)
-        if (this.pop3Text.length > 50) {
-          this.pop3Text = this.pop3TextOld;
-          this.$refs.pop3Text.value = this.pop3TextOld;
-        } else {
-          this.pop3TextOld = this.pop3Text;
-        }
+
       },
       onPop4Input() { // 填写证明无效理由
         if (this.pop4Text.length > 50) {
@@ -484,6 +483,12 @@
           this.pop4TextOld = this.pop4Text;
         }
       },
+      onClickM1() { // 点击通知放币按钮
+        let text = MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`);
+        this.$refs.textarea.innerHTML = text;
+        this.$refs.textarea.focus();
+      },
+      // 强制放币部分
       forceIcon(index) { // 强制放币弹窗
         this.popIndex = index
         this.showPop1 = true
@@ -496,25 +501,61 @@
           "responsible": this.JsonBig.parse(this.otherInfo[index].seller_id),
         }
       },
-      rejectAppeal(index) { // 驳回申述弹窗
-        this.popIndex = index
-        this.showPop2 = true
-        this.rejectAppealObj = {
-          "id": this.JsonBig.parse(this.otherInfo[index].sid),
+      onPop1Input() { // 填写强制放币理由(责任人已定)
+        if (this.pop1Text.length > 50) {
+          this.pop1Text = this.pop1TextOld;
+          this.$refs.pop1Text.value = this.pop1TextOld;
+        } else {
+          this.pop1TextOld = this.pop1Text;
         }
       },
-      seletPop3Radio(num) { // 终止交易弹窗单选按钮
-        this.pop3Radio = num
-        this.stopTradePerson = this.pop3Radio === 0 ? this.serviceUser.user_id : 0
-        console.log('this.popIndex', this.popIndex)
-        this.comfirmStopTradeObj(this.popIndex)
+      onPop1Ok() { // 强制放币确认
+        this.showPop1 = false
+        let time = new Date() - 0,
+            text1 = MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1TextOld),
+            text2 = MSGS.get(5, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1TextOld)
+        // 发送消息
+        this.WsProxy.sendMessage({ // 发送给买家
+          type: 'text',
+          // gid: this.JsonBig.parse("197129593973379072"),
+          tid: this.otherInfo[this.popIndex].buyer_id,
+          data:{
+            uid: this.$store.state.userInfo.uid,
+            rid: this.otherInfo[this.popIndex].buyer_id,
+            tid: this.otherInfo[this.popIndex].buyer_id,
+            msg: text1
+          }
+        }).then(data => { // 发送消息成功后更改原保存信息
+
+        }).catch(error => {
+
+        });
+        this.WsProxy.sendMessage({ // 发送给买家
+          type: 'text',
+          // gid: this.JsonBig.parse("197129593973379072"),
+          tid: this.otherInfo[this.popIndex].seller_id,
+          data:{
+            uid: this.$store.state.userInfo.uid,
+            rid: this.otherInfo[this.popIndex].seller_id,
+            tid: this.otherInfo[this.popIndex].seller_id,
+            msg: text2
+          }
+        }).then(data => { // 发送消息成功后更改原保存信息
+
+        }).catch(error => {
+
+        });
+
+        this.WsProxy.send('control', 'a_send_order',
+          Object.assign(this.forceIconObj, {"info": this.pop1TextOld})
+        ).then((data)=>{
+          console.log('强制放币', data)
+          this.$store.commit({type: 'stopTrade', data: this.otherInfo[this.popIndex]})
+        }).catch((msg)=>{
+          console.log(msg);
+        });
       },
-      comfirmStopTradeObj(index) { // 定义终止交易弹窗对象
-        this.stopTradeObj = {
-          "id": this.JsonBig.parse(this.otherInfo[index].sid),
-          "responsible": this.JsonBig.parse(this.stopTradePerson),
-        }
-      },
+      // 终止交易部分
       stopTrade(index) { // 终止交易弹窗
         this.popIndex = index
         this.stopTradeUser = this.serviceNow === this.otherInfo[index].buyer_id ? this.serviceUser.user_name : this.otherInfo[index].name
@@ -522,77 +563,176 @@
         this.showPop3 = true
         this.comfirmStopTradeObj(index)
       },
+      onPop3Input() { // 填写选择终止交易理由
+        if (this.pop3Text.length > 50) {
+          this.pop3Text = this.pop3TextOld;
+          this.$refs.pop3Text.value = this.pop3TextOld;
+        } else {
+          this.pop3TextOld = this.pop3Text;
+        }
+      },
+      comfirmStopTradeObj(index) { // 定义终止交易弹窗对象
+        this.stopTradeObj = {
+          "id": this.JsonBig.parse(this.otherInfo[index].sid),
+          "responsible": this.JsonBig.parse(this.stopTradePerson),
+        }
+      },
+      seletPop3Radio(num) { // 终止交易弹窗单选按钮
+        this.pop3Radio = num
+        this.stopTradePerson = this.pop3Radio === 0 ? this.otherInfo[this.popIndex].buyer_id : 0
+        console.log('this.popIndex', this.popIndex, this.stopTradePerson)
+        this.comfirmStopTradeObj(this.popIndex)
+      },
+      onPop3Ok() { // 终止交易确认
+        // console.log('this.popIndex', this.popIndex)
+        // console.log('this.stopTradeObj', this.stopTradeObj, this.pop3Radio)
+        this.showPop3 = false;
+        let time = new Date() - 0,
+          text1 = MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld), // 非责任人
+          text2 = MSGS.get(7, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld); // 责任人
 
-      onPop1Ok() { // 强制放币确认
-        this.showPop1 = false
-        let text = MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1TextOld);
-        this.sendMsg = text;
-        this.$refs.textarea.focus();
-        this.WsProxy.send('control', 'a_send_order',
-          Object.assign(this.forceIconObj, {"info": this.pop1TextOld})
+        // 发送消息
+        if (this.pop3Radio == 1) { // 双方无责
+          this.WsProxy.sendMessage({ // 发送给买家
+            type: 'text',
+            // gid: this.JsonBig.parse("197129593973379072"),
+            tid: this.otherInfo[this.popIndex].buyer_id,
+            data:{
+              uid: this.$store.state.userInfo.uid,
+              rid: this.otherInfo[this.popIndex].buyer_id,
+              tid: this.otherInfo[this.popIndex].buyer_id,
+              msg: text1
+            }
+          }).then(data => { // 发送消息成功后更改原保存信息
+
+          }).catch(error => {
+
+          });
+          this.WsProxy.sendMessage({ // 发送给买家
+            type: 'text',
+            // gid: this.JsonBig.parse("197129593973379072"),
+            tid: this.otherInfo[this.popIndex].seller_id,
+            data:{
+              uid: this.$store.state.userInfo.uid,
+              rid: this.otherInfo[this.popIndex].seller_id,
+              tid: this.otherInfo[this.popIndex].seller_id,
+              msg: text1
+            }
+          }).then(data => { // 发送消息成功后更改原保存信息
+
+          }).catch(error => {
+
+          });
+        }
+        if (this.pop3Radio == 0) { // 买家责任
+          this.WsProxy.sendMessage({ // 发送给买家
+            type: 'text',
+            // gid: this.JsonBig.parse("197129593973379072"),
+            tid: this.otherInfo[this.popIndex].buyer_id,
+            data:{
+              uid: this.$store.state.userInfo.uid,
+              rid: this.otherInfo[this.popIndex].buyer_id,
+              tid: this.otherInfo[this.popIndex].buyer_id,
+              msg: text2
+            }
+          }).then(data => { // 发送消息成功后更改原保存信息
+
+          }).catch(error => {
+
+          });
+          this.WsProxy.sendMessage({ // 发送给卖家
+            type: 'text',
+            // gid: this.JsonBig.parse("197129593973379072"),
+            tid: this.otherInfo[this.popIndex].seller_id,
+            data:{
+              uid: this.$store.state.userInfo.uid,
+              rid: this.otherInfo[this.popIndex].seller_id,
+              tid: this.otherInfo[this.popIndex].seller_id,
+              msg: text1
+            }
+          }).then(data => { // 发送消息成功后更改原保存信息
+
+          }).catch(error => {
+
+          });
+        }
+        // 确定终止交易
+        this.WsProxy.send('control', 'a_terminate_order',
+          Object.assign(this.stopTradeObj, {
+            "type": 1, // 1: 订单, 2: 担保
+            "info": this.pop3TextOld
+          })
         ).then((data)=>{
-          console.log('强制放币', data)
-          this.$store.commit({type: 'stopTrade', data: this.otherInfo})
+          this.$store.commit({type: 'stopTrade', data: this.otherInfo[this.popIndex]})
+          console.log('终止交易', data)
         }).catch((msg)=>{
           console.log(msg);
         });
+        // this.$store.commit({type: 'stopTrade', data: this.otherInfo[this.popIndex]})
+      },
+
+      // 驳回申诉部分
+      rejectAppeal(index) { // 驳回申述弹窗
+        this.popIndex = index
+        this.showPop2 = true
+        this.rejectAppealObj = {
+          "id": this.JsonBig.parse(this.otherInfo[index].sid),
+        }
+      },
+      onPop2Input() { // 填写驳回申述理由
+        if (this.pop2Text.length > 50) {
+          this.pop2Text = this.pop2TextOld;
+          this.$refs.pop2Text.value = this.pop2TextOld;
+        } else {
+          this.pop2TextOld = this.pop2Text;
+        }
       },
       onPop2Ok() { // 驳回申述确认
         this.showPop2 = false
         let text = MSGS.get(2, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop2TextOld);
-        this.sendMsg = text;
-        this.$refs.textarea.focus();
+        // 发送消息
+        if (this.appl === 0 && this.recv === 0) {
+          this.WsProxy.sendMessage({ // 发送给买家
+            type: 'text',
+            // gid: this.JsonBig.parse("197129593973379072"),
+            tid: this.otherInfo[this.popIndex].buyer_id,
+            data:{
+              uid: this.$store.state.userInfo.uid,
+              rid: this.otherInfo[this.popIndex].buyer_id,
+              tid: this.otherInfo[this.popIndex].buyer_id,
+              msg: text1
+            }
+          }).then(data => { // 发送消息成功后更改原保存信息
+
+          }).catch(error => {
+
+          });
+        }
+        if (this.appl === 0 && this.recv === 1) {
+          this.WsProxy.sendMessage({ // 发送给卖家
+            type: 'text',
+            // gid: this.JsonBig.parse("197129593973379072"),
+            tid: this.otherInfo[this.popIndex].seller_id,
+            data:{
+              uid: this.$store.state.userInfo.uid,
+              rid: this.otherInfo[this.popIndex].seller_id,
+              tid: this.otherInfo[this.popIndex].seller_id,
+              msg: text1
+            }
+          }).then(data => { // 发送消息成功后更改原保存信息
+
+          }).catch(error => {
+
+          });
+        }
         this.WsProxy.send('control', 'a_reject_appeal',
           Object.assign(this.rejectAppealObj, {"type": 1}) // 1: 交易, 2: 担保转账
         ).then((data)=>{
           console.log('驳回申述', data)
-          this.$store.commit({type: 'stopTrade', data: this.otherInfo})
+          this.$store.commit({type: 'stopTrade', data: this.otherInfo[this.popIndex = index]})
         }).catch((msg)=>{
           console.log(msg);
         });
-      },
-      onPop3Ok() { // 终止交易确认
-        this.showPop3 = false;
-        let time = new Date() - 0,
-        text = MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld);
-        // 发送消息
-        // this.WsProxy.sendMessage({
-        //   type: 'text',
-        //   // gid: this.JsonBig.parse("197129593973379072"),
-        //   tid: this.JsonBig.parse(this.serviceNow),
-        //   data:{
-        //     uid: this.$store.state.userInfo.uid,
-        //     rid: this.JsonBig.parse(this.serviceNow),
-        //     tid: this.JsonBig.parse(this.serviceNow),
-        //     msg: text
-        //   }
-        // }).then(data => { // 发送消息成功后更改原保存信息
-        //   this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:0 }})
-        // }).catch(error => {
-        //   this.$store.commit({type: 'changeServiceMessages', data:{id: this.serviceNow, time: time, code:1 }})
-        // });
-        // 确定终止交易
-        // this.WsProxy.send('control', 'a_terminate_order',
-        //   Object.assign(this.stopTradeObj, {
-        //     "type": 1, // 1: 订单, 2: 担保
-        //     "info": this.pop3TextOld
-        //   })
-        // ).then((data)=>{
-        //   this.$store.commit({type: 'stopTrade', data: this.otherInfo})
-        //   console.log('终止交易', data)
-        // }).catch((msg)=>{
-        //   console.log(msg);
-        // });
-
-        this.$store.commit({type: 'stopTrade', data: this.otherInfo})
-      },
-      onPop4Ok() { // 证明无效确认
-        this.showPop4 = false;
-        let text = MSGS.get(1, this.appl, this.recv);
-        text = text.replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<span style="color:#FF794C">[${this.otherInfo[0].trade_code}]</span>`);
-        this.sendMsg= text;
-        this.$refs.textarea.focus();
-
       },
       onClickImg(item) { // 点击放大图片
         this.showPopImg = true;
@@ -965,6 +1105,7 @@
       height 150px
       border 1px solid #E1E1E1
       border-radius 2px
+      overflow-y auto
       > textarea
         border none
         outline none

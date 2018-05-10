@@ -149,7 +149,7 @@
         arbis: [],
         pageSize: 20,
         curPage: 1,
-        total: 0,
+        total: 1,
       }
     },
     watch:{
@@ -169,7 +169,7 @@
       this.loadArbiLists();
       this.Bus.$on("onPageChange",(p) => {
         this.curPage=p;
-        this.loadArbiLists(p-1);
+        this.loadArbiLists();
       });
       this.Bus.$on("onDiChange",()=>{
         this.loadArbiLists();
@@ -187,7 +187,7 @@
       search(){
         this.loadArbiLists();
       },
-      loadArbiLists(p=0){
+      loadArbiLists(){
         //
         let srchKey1=null;  //申诉人
         let srchKey2=null;  //被申诉人
@@ -214,8 +214,6 @@
           case 2: sortByDuration=2;break;
           case 3: sortByDuration=1;break;
         }
-        //获取总数
-        this.loadArbiTotal();
         //获取列表
         this.WsProxy.send("control","a_get_appeal_list",{
           sid: srchKey5,
@@ -229,13 +227,14 @@
           end: end,
           duration: sortByDuration,
           create: sortByCreate,
-          origin: p,
+          origin: this.curPage-1,
           count: this.pageSize,
         }).then((data)=>{
           if(!data||!data.appeals||data.appeals.length<=0){
             this.err=1; //无数据
           }else{
             this.err=0;
+            this.total=data.amount;
             this.parseArbis(data.appeals);
           }
         }).catch((msg)=>{
@@ -244,27 +243,6 @@
           }else if(msg.ret!==0){
             this.err=3; //加载异常
           }
-        });
-      },
-      loadArbiTotal(){
-        this.WsProxy.send("control","a_get_appeal_list",{
-          sid: null,
-          appellant: null,
-          appellee: null,
-          handler: null,
-          responsible: null,
-          type: 0,
-          result: 0,
-          start: null,
-          end: null,
-          duration: null,
-          create: null,
-          origin: -1,
-          count: this.pageSize,
-        }).then((data)=>{
-          this.total=data.origin*this.pageSize+data.appeals.length;
-        }).catch((msg)=>{
-          console.log(msg);
         });
       },
       loadTips(){
@@ -347,7 +325,6 @@
     },
     destroyed(){
       this.Bus.$off("onPageChange");
-      this.Bus.$off("onLastPage");
       this.Bus.$off("onDiChange");
     }
   }

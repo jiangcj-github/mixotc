@@ -335,8 +335,8 @@ export default {
   [types.stopTrade](state, { data }) {
     let idex;
     state.serviceData.forEach((item, index) => {
-      item.user_id === data[0].appellant_id && (idex = index);
-      item.user_id === data[0].appellee_id && (idex = index);
+      //item.user_id === data.appellant_id && (idex = index);
+      item.user_id === data.appellee_id && (idex = index);
       state.serviceData.splice(idex, 1);
     });
     state.serviceNow = state.serviceData[0].user_id;

@@ -46,7 +46,7 @@
     },
     methods: {
       closeOrderLayer() {
-        this.$emit('offOrderLayer', false)
+        this.$emit('offOrderLayer', false);
       },
       firmOrder() {
         this.WsProxy.send('otc','new_order',{
@@ -56,11 +56,9 @@
           money: this.money * 1,
           update_time: Math.floor(new Date().getTime() / 1000)
         }).then((data)=>{
-          console.log('确认订单')
-          this.$store.state.newOrder = true
-          this.$router.push({ path: '/order', query: {id: this.JsonBig.stringify(data.id)}})
+          this.$store.state.newOrder = true;
+          this.$router.push({ path: '/order', query: {id: this.JsonBig.stringify(data.id)}});
         }).catch((msg)=>{
-          console.log(msg);
           this.closeOrderLayer();
           this.remindLayer = true;
           switch (msg.ret) {
@@ -78,6 +76,9 @@
               break;
             case 55:
               this.remindText = '状态不匹配';
+              break;
+            default:
+              this.remindText= '下单出错';
               break;
           }
         });

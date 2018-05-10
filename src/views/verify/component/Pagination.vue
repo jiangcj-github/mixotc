@@ -91,8 +91,8 @@
 
   .pagi input{box-sizing:border-box;width:50px;height:40px;margin:0 5px;border:1px solid #e1e1e1;border-radius:2px;text-align:center;}
   .pagi input:focus{border-color:#fea350;outline:none;}
-  .pagi button{width:65px;height:40px;margin-left:20px;color:#fff;letter-spacing:0.15px;background:#ffb4222;
-    border-radius:2px;border:none;cursor:pointer;background:#ffb422;}
+  .pagi button{width:65px;height:40px;margin-left:20px;color:#fff;letter-spacing:0.15px;background:#ffb422;
+    border-radius:2px;border:none;cursor:pointer;}
   .pagi button:hover{background:#fea350;}
   .pagi button.disabled{pointer-events:none;background:#e1e1e1;}
 </style>

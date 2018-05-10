@@ -53,12 +53,12 @@
         </div>
         <div class="price">
           <b v-if="tip" class="err-tip"><img src="/static/images/hint.png">最大限额不能低于最小限额，且最小限额为200</b>
-          <input type="number" class="min" @input="inputDealMin(max)" ref='min' v-model="min" placeholder="最低限额" step="1" min="200">
-          <input type="number" class="max" @input="inputDealMax(min)" ref='max' v-model="max" placeholder="最高限额" step="1">
+          <input type="number" class="min" @input="inputDealMin()" ref='min' v-model="filte.min" placeholder="最低限额" step="1" min="200">
+          <input type="number" class="max" @input="inputDealMax()" ref='max' v-model="filte.max" placeholder="最高限额" step="1">
         </div>
         <div class="wholesale">
           <label @click="changeIsWhole">
-            <img src="/static/images/selected.png" alt="" v-if="filte.btrade">
+            <img src="/static/images/selected.png" alt="" v-if="largeTran">
             <img src="/static/images/unselect.png" alt="" v-else>
             <span>大额交易区</span>
           </label>
@@ -109,10 +109,10 @@
         </div>
         <div v-if="err===0">
           <ul>
-            <li is='ResultListItem' :emitValue="emitValue" v-for="(item, index) of result" :key="index"
+            <li is='ResultListItem' :trustArray="trustArray" :emitValue="emitValue" v-for="(item, index) of result" :key="index"
                 :data="item" :class="{even: index%2 === 0}"></li>
           </ul>
-          <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
+          <Pagination class="pageBar" :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
         </div>
         <div v-else-if="err===1">
           <div class="err no-result">无相应的数据</div>
@@ -171,8 +171,8 @@
           type: 1,// 1出售，2购买
           payment: '',//1支付宝，2微信，4银行卡，可相加，共6种
           currency: '',//字符串
-          min: 200,
-          max: 9007199254741,
+          min: null,
+          max: null,
           user: '',//用户名昵称模糊搜索
           price: '', //价格排序，1降序，2升序
           date: '',//时间排序，1降序，2升序
@@ -180,8 +180,9 @@
           volume: '',//交易量排序，1降序，2升序
           rate: '',//好评率排序，1降序，2升序
           tradeable: '', //可交易量排序
-          btrade: false,
         },
+        largeTran: 0, //大额交易选择状态
+
         showPopup: false,
         popupTip: '',
         toPath: '',
@@ -190,24 +191,24 @@
 
         result: [],
         total: 1,
-        curPage: 0,
+        curPage: 1,
         pageSize: 20,
         err: 1, //数据加载结果：0-正常，1-无数据，2-网络异常，3-加载失败，4-加载中
       }
     },
     mounted() {
-      this.fetchData({type: 1, count: 20, page: 0 });
-      this.Bus.$on('changeInputContent', ({type, data}) => {
-        type === 'currency' && (this.filte.user = '')
-        this.filte[type] = data;
-      });
+      this.fetchData();
       this.Bus.$on(this.emitValue, data => {
         this.verifyState(data)
       });
+      this.Bus.$on("onPageChange",(p) => {
+        this.curPage=p;
+        this.fetchData();
+      });
     },
     destroyed() {
-      this.Bus.$off('changeInputContent');
       this.Bus.$off(this.emitValue);
+      this.Bus.$off("onPageChange");
     },
     methods: {
       fuzzyInput() {
@@ -284,13 +285,13 @@
           volume: this.filte.volume,
           rate: this.filte.rate,
           tradeable: this.filte.tradeable,
-          btrade: this.filte.btrade,
-          page: this.curPage,
+          page: this.curPage-1,
         }).then(res => {
           if (!res || !res.data || !res.data.sales || res.data.sales.length <= 0)
             this.err = 1; //无数据
           else {
             this.err = 0;
+            this.total=res.data.amount;
             this.parseResult(res.data.sales);
           }
         }).catch((msg) => {
@@ -309,7 +310,6 @@
             sid_str: this.JsonBig.stringify(data.sid),
             headimg: e.icon && this.HostUrl.http + "/image/" + e.icon || "/static/images/default_avator.png",
             nickname: e.trader || "-",
-            isTrust: this.trustArray.includes(this.JsonBig.stringify(e.sid)),
             dealVolume: e.volume && (e.volume + "").formatFixed(6) || 0,
             orderVolume: e.trade && (e.trade + "").formatFixed(6) || 0,
             rate: e.rate && e.rate + "%" || "-",
@@ -326,35 +326,34 @@
         });
       },
       //最小限额输入处理
-      inputDealMin(max) {
-        let num = Number(this.min),
-          str = this.min;
-        if (!/^[0-9]+$/.test(str) || (this.max === '' ? false : num > this.max) || num < 1) {
+      inputDealMin() {
+        let min=this.filte.min;
+        let max=this.filte.max;
+        let num = Number(this.filte.min);
+        if (!/^[0-9]+$/.test(min) || (max && num > max) || num < 1) {
           this.min = str.substring(0, str.length - 1);
           this.$refs.min.value = str.substring(0, str.length - 1);
         }
-        this.filte.btrade = 0;
-        this.filte.min = this.min;
+        this.largeTran = 0;
       },
       //最大限额输入处理
-      inputDealMax(min) {
-        let num = Number(this.max),
-          str = this.max;
-        if (!/^[0-9]+$/.test(str) || num < 1) {
-          this.max = str.substring(0, str.length - 1);
-          this.$refs.max.value = str.substring(0, str.length - 1);
+      inputDealMax() {
+        let max=this.filte.max;
+        let num = Number(max);
+        if (!/^[0-9]+$/.test(max) || num < 1) {
+          this.filte.max = max.substring(0, max.length - 1);
+          this.$refs.max.value = max.substring(0, max.length - 1);
         }
-        this.filte.btrade = 0;
-        this.filte.max = this.max;
+        this.largeTran = 0;
       },
       changeIsWhole() {
-        this.filte.btrade = (this.filte.btrade + 1) % 2;
-        if(this.filte.btrade){
-          this.min = 100000;
-          this.max = 10000000;
+        this.largeTran = (this.largeTran + 1) % 2;
+        if(this.largeTran){
+          this.filte.min = 100000;
+          this.filte.max = 10000000;
         }else{
-          this.min = "";
-          this.max = "";
+          this.filte.min = null;
+          this.filte.max = null;
         }
       },
       clearPayment() {
@@ -386,7 +385,6 @@
         if (state === 1) {
           this.popupTip = '请先进行实名认证';
           // this.toPath = 'order';
-
         }
         if (state === 2) {
           this.popupTip = '不能购买自己的广告';
@@ -428,7 +426,7 @@
           return item.state;
         }).map(item => {
           return item.type;
-        })
+        });
         if (title.length === 0) return '选择支付方式'
         return title.join('/');
       },
@@ -450,17 +448,11 @@
         handler(curVal) {
           let min = Number(curVal.min),
             max = Number(curVal.max);
-          curVal.min === '' && (curVal.min = 200);
-          curVal.min === '' && (curVal.min = 9007199254741);
-          if ((min > max && curVal.min !== '' && curVal.max !== '') || curVal.min < 200) {
+          if ((min > max && curVal.min && curVal.max) || (curVal.min && curVal.min < 200)) {
             this.tip = true;
             return;
           } else {
             this.tip = false;
-          }
-          let obj = {};
-          for (const key in curVal) {
-            curVal.hasOwnProperty(key) && curVal[key] !== '' && (obj[key] = curVal[key])
           }
           this.fetchData();
         },
@@ -474,15 +466,15 @@
                 data: data.ids.map(item => {
                   return this.JsonBig.stringify(item.Id);
                 })
-              })
+              });
               !data && this.$store.commit('changeTrustList', {data: []})
-            })
+            });
             return
           }
-          this.$store.commit('changeTrustList', {data: []})
+          this.$store.commit('changeTrustList', {data: []});
         },
         immediate: true
-      }
+      },
     },
   }
 </script>
@@ -638,7 +630,6 @@
 
     .result-list
       margin-bottom 20px
-      border 1px solid $col1E1
       border-radius 2px
       .thead
         height 60px
@@ -713,21 +704,4 @@
       letter-spacing 0.29px
       span
         display block
-
-  /*分页部分*/
-  .page-btn
-    width 300px
-    margin 0 auto
-    text-align center
-    button
-      width 80px
-      height 40px
-      background #FFB422
-      color #FFF
-      cursor pointer
-    button:last-child
-      margin-left 100px
-    .unable-btn
-      background #999
-
 </style>

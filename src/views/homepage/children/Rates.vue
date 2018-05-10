@@ -35,7 +35,7 @@
         rates:[],
         pageSize:10,
         curPage: 1,
-        total: 0,
+        total: 1,
         err: -1,
       }
     },
@@ -44,24 +44,25 @@
       this.loadRates();
       this.Bus.$on("onPageChange",(p)=>{
         this.curPage=p;
-        this.loadRates(p-1);
+        this.loadRates();
       });
     },
     destroyed(){
       this.Bus.$off("onPageChange");
     },
     methods: {
-      loadRates(p=0){
+      loadRates(){
         //获取列表
         this.WsProxy.send('otc','rates',{
           id:this.uid,
-          origin:p
+          origin: this.curPage-1,
         }).then((data)=>{
-          if(p===0&&(!data||!data.rates||data.rates.length<=0)){
+          if(!data||!data.rates||data.rates.length<=0){
             this.err=1;
           }else{
             this.err=0;
             this.total=data.amount;
+            this.Bus.$emit("onRateTotalUpdate",this.total);
             this.parseRates(data.rates);
           }
         }).catch((msg)=>{

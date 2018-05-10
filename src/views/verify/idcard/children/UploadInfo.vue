@@ -15,14 +15,14 @@
         <div class="form">
           <p style="margin-bottom:12px">
             <span class="checkbox" :class="{check:formResult===1}" @click="checkPass">审核通过</span>
-            <span class="checkbox" :class="{check:formResult===0}" @click="checkRefuse" style="margin-left:20px">审核不通过</span>
+            <span class="checkbox" :class="{check:formResult===0}" @click="formResult=0" style="margin-left:20px">审核不通过</span>
           </p>
           <div class="textarea" :class="{disabled:formResult!==0}">
             <textarea placeholder="不通过原因：字数限制0～50个字符。" v-model="formRemark" @input="inputRemark" ref="textarea"></textarea>
             <p class="indicator">{{formRemark.length}}/50</p>
           </div>
           <div class="mali">
-            <span class="radio" :class="{check:formMali,disabled:formResult!==0}" @click="checkMali">是否恶意上传认证</span>
+            <span class="radio" :class="{check:formMali,disabled:formResult!==0}" @click="formMali=!formMali">是否恶意上传认证</span>
             <ul>
               <li>恶意认证提交后，封锁该用户3天认证功能</li>
               <li>3次恶意认证后，永久封锁认证功能</li>
@@ -63,38 +63,25 @@
         formMali: false,
         formRemark: '',
         formRemarkOld: '',
-
-        canSubmit: false,
+      }
+    },
+    computed:{
+      canSubmit:function () {
+        if(this.formResult===1){
+          return true;
+        }else if(this.formResult===0 && (this.formRemark.length>0 || this.formMali)){
+          return true;
+        }else{
+          return false;
+        }
       }
     },
     methods: {
       checkPass(){
         this.formResult=1;
         this.formRemark="";
-        this.isValidSubmit();
-      },
-      checkRefuse(){
-        this.formResult=0;
-        this.isValidSubmit();
-      },
-      checkMali(){
-        this.formMali=!this.formMali;
-        this.isValidSubmit();
       },
       inputRemark(){
-        this.isValidateRemark();
-        this.isValidSubmit();
-      },
-      isValidSubmit(){
-        if(this.formResult==1){
-          this.canSubmit=true;
-        }else if(this.formResult==0 && (this.formRemark.length>0 || this.formMali)){
-          this.canSubmit=true;
-        }else{
-          this.canSubmit=false;
-        }
-      },
-      isValidateRemark(){
         if(this.formRemark.length>50){
           this.formRemark=this.formRemarkOld;
           this.$refs.textarea.value=this.formRemarkOld;

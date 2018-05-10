@@ -33,13 +33,13 @@
     <div v-if="isLogin" @click="pop=false">
       <!--菜单项tab-->
       <ul class="menu-tab">
-        <li :class="{active:tab===0}" @click="tab=0">他的发布</li>
-        <li :class="{active:tab===1}" @click="tab=1">收到的评价</li>
+        <li :class="{active:tab===0}" @click="tab=0">他的发布({{saleNum}})</li>
+        <li :class="{active:tab===1}" @click="tab=1">收到的评价({{rateNum}})</li>
       </ul>
       <!--发布列表-->
-      <Sales :uid="uid" v-if="tab===0"></Sales>
+      <Sales :uid="uid" v-show="tab===0"></Sales>
       <!--评价列表-->
-      <Rates :uid="uid" v-if="tab===1"></Rates>
+      <Rates :uid="uid" v-show="tab===1"></Rates>
       <!--信任操作弹框-->
       <BasePopup :show="pop">
         <div class="pop">{{["取消信任成功","加入信任成功"][info.isTrust]}}</div>
@@ -64,6 +64,8 @@
         info:{},
 
         tab:0,  //他的发布，他的评价
+        rateNum:0,
+        saleNum:0,
         pop:false,
       }
     },
@@ -82,6 +84,16 @@
     },
     mounted(){
       this.uid=this.$route.query.uid;
+      this.Bus.$on("onRateTotalUpdate",(num)=>{
+        this.rateNum=num;
+      });
+      this.Bus.$on("onSaleTotalUpdate",(num)=>{
+        this.saleNum=num;
+      });
+    },
+    destroyed(){
+      this.Bus.$off("onRateTotalUpdate");
+      this.Bus.$off("onSaleTotalUpdate");
     },
     watch:{
       isLogin:{

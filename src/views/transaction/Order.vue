@@ -39,7 +39,7 @@
           </li>
           <li class="clearfix">
             <span class="title">付款方式</span>
-            <p>
+            <p class="payment">
               <img src="/static/images/OTC_zhifubao.png" alt="" v-if="contentData.payments %2 === 1">
               <img src="/static/images/OTC_wechat.png" alt="" v-if="[2, 3, 6, 7].includes(contentData.payments)">
               <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(contentData.payments)">
@@ -65,24 +65,25 @@
         <span class="error-text">{{errorText[errorFlag]}}</span>
         <div class="input">
           <div>
-            <input type="number" :placeholder="`输入${copy.type[type]}金额`" v-model="money" @input="changeMoney" @keydown="checkMoney(money)" autofocus="autofocus">
+            <input type="number" :placeholder="`输入${copy.type[type]}金额`" v-model="money"
+                   @input="changeMoney" @keydown="checkMoney(money)" autofocus="autofocus" @wheel.prevent="">
             <b>CNY</b>
           </div>
           <img src="/static/images/huansuan.png" alt="">
           <div>
-            <input type="number" :placeholder="`输入${copy.type[type]}数量`" v-model="amount"  @input="changeAmount" @keydown="checkAmount(amount)">
+            <input type="number" :placeholder="`输入${copy.type[type]}数量`" v-model="amount"
+                   @input="changeAmount" @keydown="checkAmount(amount)" @wheel.prevent="">
             <b>{{contentData.currency && contentData.currency.toUpperCase()}}</b>
           </div>
         </div>
         <p class="charge" v-if="!type">手续费：0.2% 0BTC</p>
-        <div class="rules">
-          <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
-          <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
-          <a href="#/transaction/tradeRules" target="_blank">我已阅读《OTC购买流程规则》</a>
+        <div class="rules" @click="agree = !agree">
+          <img src="/static/images/rules_checked.png" alt="" v-if="agree">
+          <img src="/static/images/rules_unchecked.png" alt="" v-else>
+          <span>我已阅读</span><a href="#/transaction/tradeRules" @click.stop="" target="_blank">《OTC购买流程规则》</a>
         </div>
       </div>
-      <!--:disabled="agree"-->
-      <button :class="{able:agree}" @click="openOrderLayer()">{{copy.type[type]}}</button>
+      <button :class="{able:canSubmit}" @click="openOrderLayer()">{{copy.type[type]}}</button>
       <p class="tishi">
         <img src="/static/images/hint.png" alt="">
         <span>新用户首次交易前请务必查阅本平台交易流程及规则，如交易出现问题请及时与客服人员沟通</span>
@@ -97,9 +98,11 @@
                 @offOrderLayer="openOrderLayer">
     </OrderLayer>
     <!-- 引入勾选购买规则弹窗 -->
+    <!--
     <BasePopup class="remind-layer" :show="remindLayer">
       <span v-clickoutside="closeLayer">请勾选购买规则</span>
     </BasePopup>
+    -->
     <!-- 引入大额交易弹窗 -->
     <!--<BasePopup :show="bigAmountLayer"-->
                <!--:width=470-->
@@ -134,8 +137,8 @@
           type: ['出售', '购买'],
           // rate: [`可用余额1.242342BTC`, `${cnyPrice} CNY = ${btcPrice} BTC` ]
         },
-        errorText: ['请输入交易金额', '交易量不能超过最大限额', '交易量不能低于最小限额', '交易量不能超过可交易量'],
-        errorFlag: 5,
+        errorText: ['', '交易量不能超过最大限额', '交易量不能低于最小限额', '交易量不能超过可交易量'],
+        errorFlag: 0,
         contentData: {},
         showOrderLayer: false, // 控制购买弹窗显示隐藏
         remindLayer: false, // 控制勾选弹窗
@@ -154,35 +157,45 @@
       BasePopup
     },
     mounted() {
+      this.Bus.$on("offOrderLayer",()=>{
+        this.showOrderLayer=false;
+      });
       this.WsProxy.send('otc','sale_detail',{
         id: this.JsonBig.parse(this.$route.query.id)
       }).then((data)=>{
-        console.log('sale_detail', data)
-        this.contentData = data
-        this.tradeable = this.contentData.tradeable && (this.contentData.tradeable * 1 + "").substr(0, (this.contentData.tradeable * 1 + "").indexOf(".") + 6) || 0
+        this.contentData = data;
+        this.tradeable = this.contentData.tradeable && (this.contentData.tradeable * 1 + "").formatFixed(6) || 0
       }).catch((msg)=>{
-        console.log(msg);
+        alert(JSON.stringify(msg));
       });
       this.getPrice()
+    },
+    destroyed(){
+      this.Bus.$off("offOrderLayer");
+    },
+    computed:{
+      canSubmit:function () {
+        return this.agree && this.amount && this.money;
+      }
     },
     methods: {
       // 获取价格
       async getPrice() {
         await this.Proxy.getPrice().then(res => {
-          this.priceList = res.data.prices
-          console.log('this.priceList', res)
+          this.priceList = res.data.prices;
           this.selectPrice = this.priceList.filter(item => {
-            return item.currency == this.contentData.currency
+            return item.currency == this.contentData.currency;
           })
+        }).catch((msg)=>{
+          alert(JSON.stringify(msg));
         });
-        this.rate = this.selectPrice[0] && (this.selectPrice[0].cny / this.selectPrice[0].btc)
-        console.log('selectPrice', this.selectPrice)
+        this.rate = this.selectPrice[0] && (this.selectPrice[0].cny / this.selectPrice[0].btc);
       },
       contactSomeone(id){
-        this.Bus.$emit('contactSomeone', {id: id})
+        this.Bus.$emit('contactSomeone', {id: id});
       },
       changeMoney() {
-        this.money = /^\d+\.?\d{0,2}$/.test(this.money) || this.money === '' ? this.money : this.moneyValue
+        this.money = /^\d+\.?\d{0,2}$/.test(this.money) || this.money === '' ? this.money : this.moneyValue;
         this.amount = (this.money / (this.rate)).toFixed(6);
         this.money === '' && (this.amount = '');
       },
@@ -190,43 +203,44 @@
         this.moneyValue = value
       },
       changeAmount() {
-        this.amount = /^\d+\.?\d{0,6}$/.test(this.amount) || this.amount === '' ? this.amount : this.amountValue
+        this.amount = /^\d+\.?\d{0,6}$/.test(this.amount) || this.amount === '' ? this.amount : this.amountValue;
         this.money = (this.amount * this.rate).toFixed(2);
         this.amount === '' && (this.money = '');
+        this.errorFlag=0;
       },
       checkAmount(value) {
-        this.amountValue = value
+        this.amountValue = value;
       },
       openOrderLayer(st) { // 弹窗提示
-        if (this.money == '') { // 无内容提示
-          this.errorFlag = 0;
-          return
-        }
+        // if (this.money === '') { // 无内容提示
+        //   this.errorFlag = 0;
+        //   return
+        // }
         if (this.money > this.contentData.max) { // 超过交易额
           this.errorFlag = 1;
-          return
+          return;
         }
         if (this.money < this.contentData.min) { // 低于最小交易额
           this.errorFlag = 2;
-          return
+          return;
         }
         if (this.amount > this.contentData.tradeable) { // 超过交易量
           this.errorFlag = 3;
-          return
+          return;
         }
         // if (this.money > 100000) { // 大额交易
         //   this.bigAmountLayer = true
         // }
-        if (this.agree == false) { // 提示勾选
-          this.remindLayer = true;
-          setTimeout(() => {
-            this.remindLayer = false
-          }, 3000)
-          return
-        }
+        // if (this.agree == false) { // 提示勾选
+        //   this.remindLayer = true;
+        //   setTimeout(() => {
+        //     this.remindLayer = false
+        //   }, 3000)
+        //   return
+        // }
         // 购买提示框
-        if (st == false) {
-          this.showOrderLayer = false
+        if (st === false) {
+          this.showOrderLayer = false;
         } else {
           this.priceLayer = this.contentData.price; // 弹窗价格
           this.layerId = this.contentData.id; // 弹窗id
@@ -235,15 +249,16 @@
           this.showOrderLayer = true;
         }
       },
-      closeLayer() { // 关闭提示勾选弹窗
-        this.remindLayer = false
-      }
+      // closeLayer() { // 关闭提示勾选弹窗
+      //   this.remindLayer = false
+      // }
     }
   }
 </script>
 
 <style scoped lang="stylus">
 @import "../../stylus/base.styl";
+@import "stylus/order";
   .order
     margin-top 40px
     margin-bottom 40px
@@ -410,13 +425,10 @@
         font-size $fz13
         color $col333
       .rules
-        height 12px
-        line-height 12px
         img
           margin-right 5px
           cursor pointer
         a
-          display inline-block
           letter-spacing 0.23px
           color #57A100
           fz11()
@@ -431,7 +443,6 @@
       letter-spacing 0.15px
       font-size $fz13
       color #FFF
-      cursor pointer
       &:focus
         outline 0
       &.able
@@ -439,12 +450,10 @@
         &:active
           background $col350
     .tishi
-      height 32px
-      line-height 32px
       color $col94C
       letter-spacing 0.23px
       img
-        margin-right 8px
+        margin-right 5px
       span
         display inline-block
         fz11()

@@ -8,7 +8,7 @@
       <p class="userInfo">
         <span class="nickname" @click="toHomePage(data.sid)">{{data.nickname}}</span>
         <span class="tag">
-          <i class="trust" v-if="data.isTrust" title="已信任">信任</i>
+          <i class="trust" v-if="trustArray.includes(JsonBig.stringify(data.sid))" title="已信任">信任</i>
         </span>
       </p>
     </div>
@@ -31,7 +31,7 @@
 
 <script>
 export default {
-  props: ['data','emitValue'],
+  props: ['data','emitValue','trustArray'],
   methods: {
     toHomePage(sid) {
       this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})

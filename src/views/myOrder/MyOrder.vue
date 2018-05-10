@@ -76,8 +76,8 @@
           </li>
           <li>{{content.price}}</li>
           <li>
-            <p :class="JsonBig.stringify(content.buyer) == userId ? 'text-g' : 'text-r'">{{JsonBig.stringify(content.buyer) == userId ? `+${content.amountc}${content.currency.toUpperCase()}` : `-${content.amountc}${content.currency.toUpperCase()}`}}</p>
-            <p>{{Number(content.fee).toFixed(10)}}</p>
+            <p :class="JsonBig.stringify(content.buyer) == userId ? 'text-g' : 'text-r'">{{JsonBig.stringify(content.buyer) == userId ? `+${content.amountc && content.amountc.toFixed(6)}${content.currency.toUpperCase()}` : `-${content.amountc && content.amountc.toFixed(6)}${content.currency.toUpperCase()}`}}</p>
+            <p>{{content.fee === 0 ? '' : content.fee.toFixed(6)}}</p>
           </li>
           <li>{{content.amountm}}</li>
           <li>{{content.trade_code}}</li>
@@ -113,15 +113,15 @@
     <!-- 订单无内容 -->
     <MyOrderNothing v-if="!contentList"></MyOrderNothing>
     <!-- 分页 -->
-    <!--<Pagination  v-if="contentList !== null"-->
-                <!--:total="70"-->
-                <!--:pageSize="20"-->
-                <!--emitValue="changePage">-->
-    <!--</Pagination >-->
-    <div class="page-btn" v-if="contentList">
-      <button @click="clickPre" :class="{'unable-btn': page === 0}" :disabled="page === 0">上一页</button>
-      <button @click="clickNext" :class="{'unable-btn': contentList && contentList.length < 15}" :disabled="contentList && contentList.length < 15">下一页</button>
-    </div>
+    <Pagination  v-if="contentList !== null"
+                :total="pageTotal"
+                :pageSize="15"
+                emitValue="changePage">
+    </Pagination >
+    <!--<div class="page-btn" v-if="contentList">-->
+      <!--<button @click="clickPre" :class="{'unable-btn': page === 0}" :disabled="page === 0">上一页</button>-->
+      <!--<button @click="clickNext" :class="{'unable-btn': contentList && contentList.length < 15}" :disabled="contentList && contentList.length < 15">下一页</button>-->
+    <!--</div>-->
 
 
     <!-- 标记已付款弹窗 -->
@@ -289,7 +289,9 @@
         conductNum: 0, // 进行数量
         completeNum: 0, // 完成数量
 
-        page: 0, // 分页数量
+        pageTotal: 0, // 分页总数
+        changePage: 'changePage', // 监听自组件数量
+        page: 0 // 分页
       }
     },
     created() {
@@ -308,40 +310,50 @@
       // 监听下拉框值，将值传给子组件
       this.Bus.$on(this.orderTypeValue, (data) => { // 类型筛选
         this.selectOrder = data
-        console.log('orderTypeValue', this.selectOrder)
+        //console.log('orderTypeValue', this.selectOrder)
         this.initData()
-        console.log('this.sortActive', this.sortActive)
+        //console.log('this.sortActive', this.sortActive)
       });
       this.Bus.$on(this.currencyValue, (data) => { // 币种筛选
         data.length ? this.selectCurrency = data.join(',') : this.selectCurrency = data
         this.initData()
-        console.log('currencyValue', data)
-        console.log('selectCurrency', this.selectCurrency)
+        // console.log('currencyValue', data)
+        // console.log('selectCurrency', this.selectCurrency)
       });
       this.Bus.$on(this.allStatusValue, (data) => { // 类型筛选
-
-        if (data.indexOf('6,7') > -1) { // 选中未评价
-          if (data.indexOf('8,9') > -1) {
-            this.comment = 0
-            this.selectState = data.length ? data.join(',') : data
-          } else {
-            this.comment = 1
-            data.splice(data.indexOf('6,7'), 1)
-            this.selectState = data.length ? data.join(',') : ''
-          }
-        }
-        if (data.indexOf('8,9') > -1) { // 选中已评价
+        if (data.indexOf('6,7') > -1 || data.indexOf('8,9') > -1) {
           if (data.indexOf('6,7') > -1) {
-            this.comment = 0
-            this.selectState = data.length ? data.join(',') : data
-          } else {
-            this.comment = 2
-            data.splice(data.indexOf('8,9'), 1)
-            this.selectState = data.length ? data.join(',') : ''
+            if (data.indexOf('8,9') > -1) {
+              this.comment = 0
+              this.selectState = data.length && data.join(',')
+            } else {
+              this.comment = 1
+              data.splice(data.indexOf('6,7'), 1)
+              this.selectState = data.length ? data.join(',') : ''
+            }
           }
+          if (data.indexOf('8,9') > -1) {
+            if (data.indexOf('6,7') > -1) {
+              this.comment = 0
+              this.selectState = data.length && data.join(',')
+            } else {
+              this.comment = 2
+              data.splice(data.indexOf('8,9'), 1)
+              this.selectState = data.length ? data.join(',') : ''
+            }
+          }
+        } else {
+          this.comment = 0
+          this.selectState = data.length && data.join(',')
         }
+        if (this.contentTabIndex === 1) { // 进行中的全部状态
+          this.selectState === 0 && (this.selectState = "1,2,3")
+        }
+        if (this.contentTabIndex === 2) { // 已完成中的全部状态
+          this.selectState === 0 && (this.selectState = "4,5,6,7,8,9,10,11")
+        }
+        console.log('selectState', this.selectState)
         this.initData()
-        console.log('selectState', data)
       });
       // 监听搜索框title值
       this.Bus.$on(this.searchValue,(data) => {
@@ -366,8 +378,11 @@
         this.WsProxy.send('otc',`fuzzy_search_${type}`,{ // 请求数据
           keyword: data
         }).then((data)=>{
-          data.results.forEach(v => {
+          data.results && data.results.forEach(v => {
             this.result.push({name: v.Result})
+          })
+          data.List && data.List.forEach(v => {
+            this.result.push({name: v.name})
           })
         }).catch((msg)=>{
           console.log(msg);
@@ -380,11 +395,16 @@
         console.log('11111', this.$refs.di.date1 )
         this.startValueDate = this.$refs.di.date1 ? Math.floor(new Date(this.$refs.di.date1).getTime() / 1000) : null;
         this.endValueDate = this.$refs.di.date2 ? Math.floor(new Date(this.$refs.di.date2).getTime() / 1000) : null;
-
         if (this.startValueDate && this.endValueDate) {
           this.initData()
         }
       });
+      // 分页
+      this.Bus.$on(this.changePage, data => {
+        console.log('changePage', data)
+        this.page = data
+        this.initData()
+      })
     },
     destroyed() {
       this.Bus.$off(this.orderTypeValue);
@@ -411,8 +431,9 @@
         ws.onMessage[seq] = { // 监听
           callback: (data) => {
             if(!data || data.body.ret !== 0) return;
-            console.log('order', data.body.data.orders)
+            console.log('order', data.body)
             this.contentList = data.body.data.orders
+            this.pageTotal = data.body.data.amount
             // 购买成功的订单显示弹窗
             if (this.$store.state.newOrder) {
               this.updateTradeCode = this.contentList[0].trade_code
@@ -642,16 +663,16 @@
         this.initData()
       },
       // 分页操作
-      clickPre() {
-        this.page <= 0 ? this.page = 0 : this.page--;
-        this.initData()
-        console.log(111, this.page)
-      },
-      clickNext() {
-        this.page++;
-        this.initData()
-        console.log(222, this.page)
-      }
+      // clickPre() {
+      //   this.page <= 0 ? this.page = 0 : this.page--;
+      //   this.initData()
+      //   console.log(111, this.page)
+      // },
+      // clickNext() {
+      //   this.page++;
+      //   this.initData()
+      //   console.log(222, this.page)
+      // }
     }
   }
 </script>
