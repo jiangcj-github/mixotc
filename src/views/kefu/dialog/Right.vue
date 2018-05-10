@@ -54,7 +54,7 @@
       </div>
       <div contenteditable="true" ref="textarea" class="textarea" title=""
                 v-html="sendMsg"
-                @keydown.enter.exact="send"
+                @keydown.enter.exact.prevent="send"
                 @keydown.ctrl.enter="onCtrlEnter">
       </div>
       <div class="bottom">
@@ -165,6 +165,7 @@
   import MSGS from "./msg.js";
   import Swiper from 'swiper'; // 引入swiper
   import 'swiper/dist/css/swiper.min.css';
+  import Util from "@/js/Util.js";
 
   export default {
     components: {
@@ -311,7 +312,14 @@
 
        },
       onCtrlEnter() { // 换行
-        this.$refs.textarea.value += "\n";
+        if (Util.browserType() === "IE" || Util.browserType() === "Edge") {
+          this.$refs.textarea.innerHTML += "<div></div>";
+        } else if (Util.browserType() === "FF") {
+          this.$refs.textarea.innerHTML += "<br>";
+        } else {
+          this.$refs.textarea.innerHTML += "<div><br/></div>";
+        }
+        Util.placeCaretAtEnd(this.$refs.textarea);
       },
       changeUser(index) { // 点击切换身份
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人对方资料
@@ -377,7 +385,7 @@
         this.addStoreMessages(1, '', time);
       },
       send() { // 发送消息
-        if (/^\s*$/.test(this.$refs.textarea.innerHTML)) return;
+        if (/^\s*$/.test(this.$refs.textarea.innerText)) return;
         let time = new Date() - 0;
         this.addStoreMessages(0, this.$refs.textarea.innerHTML, time)
         // 发送消息
@@ -965,6 +973,7 @@
       height 150px
       border 1px solid #E1E1E1
       border-radius 2px
+      overflow-y auto
       > textarea
         border none
         outline none
