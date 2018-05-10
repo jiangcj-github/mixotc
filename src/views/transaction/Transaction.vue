@@ -112,7 +112,7 @@
             <li is='ResultListItem' :emitValue="emitValue" v-for="(item, index) of result" :key="index"
                 :data="item" :class="{even: index%2 === 0}"></li>
           </ul>
-          <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
+          <Pagination class="pageBar" :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
         </div>
         <div v-else-if="err===1">
           <div class="err no-result">无相应的数据</div>
@@ -190,24 +190,24 @@
 
         result: [],
         total: 1,
-        curPage: 0,
+        curPage: 1,
         pageSize: 20,
         err: 1, //数据加载结果：0-正常，1-无数据，2-网络异常，3-加载失败，4-加载中
       }
     },
     mounted() {
-      this.fetchData({type: 1, count: 20, page: 0 });
-      this.Bus.$on('changeInputContent', ({type, data}) => {
-        type === 'currency' && (this.filte.user = '')
-        this.filte[type] = data;
-      });
+      this.fetchData();
       this.Bus.$on(this.emitValue, data => {
         this.verifyState(data)
       });
+      this.Bus.$on("onPageChange",(p) => {
+        this.curPage=p;
+        this.fetchData();
+      });
     },
     destroyed() {
-      this.Bus.$off('changeInputContent');
       this.Bus.$off(this.emitValue);
+      this.Bus.$off("onPageChange");
     },
     methods: {
       fuzzyInput() {
@@ -285,12 +285,13 @@
           rate: this.filte.rate,
           tradeable: this.filte.tradeable,
           btrade: this.filte.btrade,
-          page: this.curPage,
+          page: this.curPage-1,
         }).then(res => {
           if (!res || !res.data || !res.data.sales || res.data.sales.length <= 0)
             this.err = 1; //无数据
           else {
             this.err = 0;
+            this.total=res.data.amount;
             this.parseResult(res.data.sales);
           }
         }).catch((msg) => {
@@ -638,7 +639,6 @@
 
     .result-list
       margin-bottom 20px
-      border 1px solid $col1E1
       border-radius 2px
       .thead
         height 60px
@@ -713,21 +713,4 @@
       letter-spacing 0.29px
       span
         display block
-
-  /*分页部分*/
-  .page-btn
-    width 300px
-    margin 0 auto
-    text-align center
-    button
-      width 80px
-      height 40px
-      background #FFB422
-      color #FFF
-      cursor pointer
-    button:last-child
-      margin-left 100px
-    .unable-btn
-      background #999
-
 </style>

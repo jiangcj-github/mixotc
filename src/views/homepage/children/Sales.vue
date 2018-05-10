@@ -95,10 +95,6 @@
       this.uid= this.JsonBig.parse(this.$route.query.uid) || "";
       this.loadSales();
     },
-    destroyed(){
-      this.Bus.$off("onPageChange");
-      this.Bus.$off("onLastPage");
-    },
     watch:{
       fltTypeSel:function () {
         this.loadSales();
@@ -108,14 +104,15 @@
       }
     },
     methods: {
-      loadSales(p=0){
+      loadSales(){
         this.WsProxy.send('otc','his_sales',{
-          id: this.uid,origin:p,type:this.fltType,currency: this.fltCoin
+          id: this.uid,origin:0,type:this.fltType,currency: this.fltCoin
         }).then((data)=>{
-          if(p===0&&(!data||!data.sales||data.sales.length<=0)){
+          if(!data||!data.sales||data.sales.length<=0){
             this.err=1;
           }else{
             this.err=0;
+            this.Bus.$emit("onSaleTotalUpdate",data.sales.length);
             this.parseSales(data.sales);
           }
         }).catch((msg)=>{
