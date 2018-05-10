@@ -257,7 +257,8 @@
           });
         } else {
           this.userTips = [];
-          this.Proxy["userSearch"]({keyword: srchKey}).then(res => {
+          let currency=this.filte.currency || "btc";
+          this.Proxy["userSearch"]({keyword: srchKey,currency:currency,type:1}).then(res => {
             res.data.users && res.data.users.forEach(v => {
               this.userTips.push({
                 name: v.name || "-",

@@ -128,8 +128,8 @@
         data && data.forEach((item)=>{
           this.sales.push({
             create: new Date(item.create*1000).dateHandle("yyyy/MM/dd hh:mm:ss"),
-            type: {1:"购买",2:"出售"}[item.type+""],
-            isBuy:{1:true,2:false}[item.type+""],
+            type: {0:"购买",1:"出售"}[item.type+""],
+            isBuy:{0:true,1:false}[item.type+""],
             currency: item.currency.toUpperCase(),
             price: {"CNY":"¥"}[item.money.toUpperCase()]+" "+item.price,
             minmax: item.min+"~"+item.max,

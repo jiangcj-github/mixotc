@@ -40,7 +40,7 @@ export default {
 
       let id=data.id;
       let sid=data.sid;
-      //let btverify=data.btverify;
+      //let btverify=data.btverify
       let currency=data.currency;
 
       //未登录
