@@ -517,12 +517,13 @@
                       name: name
                     }
                 })
-                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
                 await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
+                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
             }
             // 群聊（好友单聊实质为群聊）
             if (Array.isArray(res) && res[0].op === 6) {
-              res.forEach(ite => {
+              res.forEach(async (ite) => {
+                console.log(99999)
                 let {id, uid, gid, data, type } = res[0].body;
                 let obj = {},
                     messageContent = {
@@ -553,8 +554,8 @@
                   isFail: false,
                   time: new Date() - 0
                 }
+                await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
                 _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
-                _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
               })
             }
           }

@@ -53,7 +53,7 @@
       }
     },
     mounted() {
-      this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('21456287755431936'), id: this.JsonBig.parse('19855731022917632') }).then(data => {})
+      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('21456287755431936'), id: this.JsonBig.parse('19855731022917632') }).then(data => {})
       this.initData()
       this.reqFriend()//监听好友请求
       this.beKickGroup()//监听被踢出群

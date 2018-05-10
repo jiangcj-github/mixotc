@@ -212,6 +212,7 @@ const RUN_APP = (App, config, plugin) => {
   // }
 
   window.addEventListener("storage", function(event) {
+    console.log(event.key, !sessionStorage.length);
     if (event.key == "getSessionStorage") {
       // console.log(2, 'getSessionStorage',tabIndex)
       // 已存在的标签页会收到这个事件
@@ -222,7 +223,7 @@ const RUN_APP = (App, config, plugin) => {
       // 已存在的标签页会收到这个事件
       // 一个页面退出其他页面删除token
       store.commit({ type: "changeToken", data: "" });
-    } else if (event.key == "sessionStorage" && !sessionStorage.length) {
+    } else if (event.key == "sessionStorage") {
       // 新开启的标签页会收到这个事件
       console.log('新开启的标签页')
       let data = JsonBig.parse(event.newValue);
