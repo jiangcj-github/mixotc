@@ -292,30 +292,30 @@
       }
     },
     mounted() {
-      this.startSwiper();
       this.Bus.$on("onIpClose", () => {
         this.showPopImg = false;
       });
-      this.mySwiper = new Swiper('.swiper-container', { // 调用轮播图
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev',
-        },
-        observer: true, //修改swiper自己或子元素时，自动初始化swiper
-        observeParents: true,//修改swiper的父元素时，自动初始化swiper
-        // onSlideChangeEnd(swiper) {
-        //   console.log(111, swiper.activeIndex)
-        //   //this.isBuyer = swiper.activeIndex && this.otherInfo[swiper.activeIndex].buyer_id == this.serviceNow ?  "买家" : "卖家";
-        // }
-      })
+      //this.startSwiper()
     },
     methods: {
-       startSwiper() {
-         console.log('startSwiper')
-         // this.mySwiper && this.mySwiper.update();
-         // this.mySwiper && this.mySwiper.navigation.update();
-
-       },
+      startSwiper() {
+        let _this = this
+        this.$nextTick(() => {
+          new Swiper('.swiper-container', { // 调用轮播图
+            navigation: {
+              nextEl: '.swiper-button-next',
+              prevEl: '.swiper-button-prev',
+            },
+            observer: true, //修改swiper自己或子元素时，自动初始化swiper
+            observeParents: true,//修改swiper的父元素时，自动初始化swiper
+            on: {
+              slideChangeTransitionEnd() {
+                _this.isBuyer = _this.otherInfo && _this.otherInfo[this.activeIndex].buyer_id == _this.serviceNow ?  "买家" : "卖家";
+              }
+            }
+          })
+        })
+      },
       onCtrlEnter() { // 换行
         if (Util.browserType() === "IE" || Util.browserType() === "Edge") {
           this.$refs.textarea.innerHTML += "<div></div>";
