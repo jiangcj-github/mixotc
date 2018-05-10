@@ -137,7 +137,7 @@
           type: ['出售', '购买'],
           // rate: [`可用余额1.242342BTC`, `${cnyPrice} CNY = ${btcPrice} BTC` ]
         },
-        errorText: ['下单出错', '交易量不能超过最大限额', '交易量不能低于最小限额', '交易量不能超过可交易量'],
+        errorText: ['', '交易量不能超过最大限额', '交易量不能低于最小限额', '交易量不能超过可交易量'],
         errorFlag: 0,
         contentData: {},
         showOrderLayer: false, // 控制购买弹窗显示隐藏
@@ -157,6 +157,9 @@
       BasePopup
     },
     mounted() {
+      this.Bus.$on("offOrderLayer",()=>{
+        this.showOrderLayer=false;
+      });
       this.WsProxy.send('otc','sale_detail',{
         id: this.JsonBig.parse(this.$route.query.id)
       }).then((data)=>{
@@ -166,6 +169,9 @@
         alert(JSON.stringify(msg));
       });
       this.getPrice()
+    },
+    destroyed(){
+      this.Bus.$off("offOrderLayer");
     },
     computed:{
       canSubmit:function () {
@@ -200,6 +206,7 @@
         this.amount = /^\d+\.?\d{0,6}$/.test(this.amount) || this.amount === '' ? this.amount : this.amountValue;
         this.money = (this.amount * this.rate).toFixed(2);
         this.amount === '' && (this.money = '');
+        this.errorFlag=0;
       },
       checkAmount(value) {
         this.amountValue = value;
