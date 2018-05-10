@@ -76,8 +76,8 @@
           </li>
           <li>{{content.price}}</li>
           <li>
-            <p :class="JsonBig.stringify(content.buyer) == userId ? 'text-g' : 'text-r'">{{JsonBig.stringify(content.buyer) == userId ? `+${content.amountc}${content.currency.toUpperCase()}` : `-${content.amountc}${content.currency.toUpperCase()}`}}</p>
-            <p>{{Number(content.fee).toFixed(10)}}</p>
+            <p :class="JsonBig.stringify(content.buyer) == userId ? 'text-g' : 'text-r'">{{JsonBig.stringify(content.buyer) == userId ? `+${content.amountc && content.amountc.toFixed(6)}${content.currency.toUpperCase()}` : `-${content.amountc && content.amountc.toFixed(6)}${content.currency.toUpperCase()}`}}</p>
+            <p>{{content.fee === 0 ? '' : content.fee.toFixed(6)}}</p>
           </li>
           <li>{{content.amountm}}</li>
           <li>{{content.trade_code}}</li>
@@ -308,40 +308,50 @@
       // 监听下拉框值，将值传给子组件
       this.Bus.$on(this.orderTypeValue, (data) => { // 类型筛选
         this.selectOrder = data
-        console.log('orderTypeValue', this.selectOrder)
+        //console.log('orderTypeValue', this.selectOrder)
         this.initData()
-        console.log('this.sortActive', this.sortActive)
+        //console.log('this.sortActive', this.sortActive)
       });
       this.Bus.$on(this.currencyValue, (data) => { // 币种筛选
         data.length ? this.selectCurrency = data.join(',') : this.selectCurrency = data
         this.initData()
-        console.log('currencyValue', data)
-        console.log('selectCurrency', this.selectCurrency)
+        // console.log('currencyValue', data)
+        // console.log('selectCurrency', this.selectCurrency)
       });
       this.Bus.$on(this.allStatusValue, (data) => { // 类型筛选
-
-        if (data.indexOf('6,7') > -1) { // 选中未评价
-          if (data.indexOf('8,9') > -1) {
-            this.comment = 0
-            this.selectState = data.length ? data.join(',') : data
-          } else {
-            this.comment = 1
-            data.splice(data.indexOf('6,7'), 1)
-            this.selectState = data.length ? data.join(',') : ''
-          }
-        }
-        if (data.indexOf('8,9') > -1) { // 选中已评价
+        if (data.indexOf('6,7') > -1 || data.indexOf('8,9') > -1) {
           if (data.indexOf('6,7') > -1) {
-            this.comment = 0
-            this.selectState = data.length ? data.join(',') : data
-          } else {
-            this.comment = 2
-            data.splice(data.indexOf('8,9'), 1)
-            this.selectState = data.length ? data.join(',') : ''
+            if (data.indexOf('8,9') > -1) {
+              this.comment = 0
+              this.selectState = data.length && data.join(',')
+            } else {
+              this.comment = 1
+              data.splice(data.indexOf('6,7'), 1)
+              this.selectState = data.length ? data.join(',') : ''
+            }
           }
+          if (data.indexOf('8,9') > -1) {
+            if (data.indexOf('6,7') > -1) {
+              this.comment = 0
+              this.selectState = data.length && data.join(',')
+            } else {
+              this.comment = 2
+              data.splice(data.indexOf('8,9'), 1)
+              this.selectState = data.length ? data.join(',') : ''
+            }
+          }
+        } else {
+          this.comment = 0
+          this.selectState = data.length && data.join(',')
         }
+        if (this.contentTabIndex === 1) { // 进行中的全部状态
+          this.selectState === 0 && (this.selectState = "1,2,3")
+        }
+        if (this.contentTabIndex === 2) { // 已完成中的全部状态
+          this.selectState === 0 && (this.selectState = "4,5,6,7,8,9,10,11")
+        }
+        console.log('selectState', this.selectState)
         this.initData()
-        console.log('selectState', data)
       });
       // 监听搜索框title值
       this.Bus.$on(this.searchValue,(data) => {
@@ -366,8 +376,11 @@
         this.WsProxy.send('otc',`fuzzy_search_${type}`,{ // 请求数据
           keyword: data
         }).then((data)=>{
-          data.results.forEach(v => {
+          data.results && data.results.forEach(v => {
             this.result.push({name: v.Result})
+          })
+          data.List && data.List.forEach(v => {
+            this.result.push({name: v.name})
           })
         }).catch((msg)=>{
           console.log(msg);

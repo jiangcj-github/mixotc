@@ -159,7 +159,7 @@
       }).then((data)=>{
         console.log('sale_detail', data)
         this.contentData = data
-        this.tradeable = this.contentData.tradeable && (this.contentData.tradeable * 1 + "").substr(0, (this.contentData.tradeable * 1 + "").indexOf(".") + 6) || 0
+        this.tradeable = this.contentData.tradeable && (this.contentData.tradeable * 1 + "").formatFixed(6) || 0
       }).catch((msg)=>{
         console.log(msg);
       });

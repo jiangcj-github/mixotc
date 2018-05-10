@@ -18,7 +18,7 @@ let MSGS = {
   m8: "订单号orderId已被仲裁执行强制放币，[reason]。", // 买卖家
   m9: "订单号orderId已被仲裁执行强制放币，[reason]。\n提醒：您已被仲裁，将取消交易权限3天。仲裁3次，将永久关闭交易权限。", // 买家 - 卖家
   m10: "订单号orderId被仲裁终止交易，[reason]。", // 买卖家
-  m11: "订单号orderId被仲裁终止交易，[reason]。\n提醒：您已被仲裁，将取消交易权限3天。仲裁3次，将永久关闭交易权限。", // 卖家 - 买家
+  m11: "订单号orderId被仲裁终止交易，[reason]。\n提醒：您已被仲裁，将取消交易权限3天。仲裁3次，将永久关闭交易权限。",
 
   get: function (type, p1, p2) {
     if (type === 0 && p1 === 0 && p2 === 0) {
@@ -48,13 +48,13 @@ let MSGS = {
     if (type === 4) {
       return this.m8;
     }
-    if (type === 5 && p1 === 1 && p2 === 1) {
+    if (type === 5) {
       return this.m9;
     }
     if (type === 6) {
       return this.m10;
     }
-    if (type === 7 && p1 === 1 && p2 === 0) {
+    if (type === 7) {
       return this.m11;
     }
   }
