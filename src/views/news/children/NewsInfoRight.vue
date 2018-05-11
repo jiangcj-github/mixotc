@@ -52,11 +52,12 @@
 
                 <span v-if="item.msg.type === 1" class="images">
                   <img
+                    :id="'img' + item.time"
                     :src="item.msg.content"
                     alt=""
-                    @load="imgLoad(curChat, item.time)"
+                    @load="imgLoad(curChat, item.time, 'img' + item.time)"
                     @error="imgError(curChat, item.time, item.msg.content)"
-                    @click="showBigPicture(!item.isLoding && !item.isFail, item.msg.content)"
+                    @click="showBigPicture(!item.isLoding && !item.isFail, item.msg.content, 'img' + item.time)"
                   >
                 </span>
                 <span v-if="item.msg.type === 0" v-html="item.msg.content" class="msg-text"></span>
@@ -127,7 +128,7 @@
     </ol>
 
     <!-- 大图展示 -->
-    <div class="big-img" v-if="showBig">
+    <div class="big-img" v-show="showBig">
       <span>
         <img
           src="/static/images/close_btn_tr.png"
@@ -137,7 +138,7 @@
           >
         </span>
       <div class="picture">
-        <img v-if="showBigSrc" :src="showBigSrc" alt="">
+        <img v-show="showBigSrc" :src="showBigSrc" alt="" ref="bigImg">
       </div>
     </div>
     <!-- 添加好友弹窗 -->
@@ -193,6 +194,7 @@
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
   import GroupInfo from '@/views/news/GroupInfo' // 查看群
   import { HappyScroll } from 'vue-happy-scroll'
+  import EXIF from 'exif-js'
 
   export default {
     name: "news-info-right",
@@ -218,6 +220,7 @@
         sendFile: '',
         showBig: false,
         showBigSrc: '',
+        showBigClass: '',
         userId: this.JsonBig.stringify(this.$store.state.userInfo.uid),
         reqMessage: ''
       }
@@ -230,6 +233,7 @@
       HappyScroll
     },
     mounted() {
+      console.log(EXIF)
       this.fetchAddress()//拉取收款地址
       this.listenChat()//监听消息
       this.beFriend()//监听被加好友
@@ -561,10 +565,12 @@
           }
         }
       },
-      showBigPicture(flag, src) {
+      showBigPicture(flag, src, id) {
         if (!flag) return;
         this.showBigSrc = src;
         this.showBig = true;
+        console.log(this.$refs.bigImg, document.getElementById(id).className)
+        this.$refs.bigImg.className = document.getElementById(id).className;
       },
       sendAddress(item) {
         this.sendMs(item)
@@ -585,7 +591,20 @@
       toHomepage(id) {
         this.$router.push({ name: 'homepage', query: { uid: id }})
       },
-      imgLoad(tid, time) {
+      imgLoad(tid, time, ref) {
+        let orient;
+        EXIF.getData(document.getElementById(ref), function () {
+          orient = EXIF.getTag(this, 'Orientation');
+          if (orient === 3 ) {
+            this.className = 'rotate180'
+          }else if( orient === 6) {
+            this.className = 'rotate270'
+          }else if( orient === 8) {
+            this.className = 'rotate90'
+          }else{
+            this.className = ''
+          }
+        });
         this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0 }})
       },
       imgError(tid, time, src) {
@@ -865,7 +884,7 @@
       curChat:{
         handler(curvalue){
           let messages = this.$store.state.messages[curvalue];
-          if (!messages || messages && messages.length === 0) {
+          if ((!messages || messages && messages.length === 0) && this.chat[this.index] && this.chat[this.index].moreFlag) {
             this.fetchMore(3)
           }
         },
@@ -1016,6 +1035,12 @@
                 height 100%
                 border-radius 0
                 cursor url('/static/images/bigger.ico'), auto;
+                &.rotate90
+                  _rotate(90deg)
+                &.rotate180
+                  _rotate(180deg)
+                &.rotate270
+                  _rotate(270deg)
           i
             position absolute
             top 9px
@@ -1232,7 +1257,24 @@
           -moz-transform translateY(-50%)
           -webkit-transform translateY(-50%)
           -o-transform translateY(-50%)
-
+          &.rotate90
+            transform translateY(-50%) rotate(90deg)
+            -ms-transform translateY(-50%) rotate(90deg)
+            -moz-transform translateY(-50%) rotate(90deg)
+            -webkit-transform translateY(-50%) rotate(90deg)
+            -o-transform translateY(-50%) rotate(90deg)
+          &.rotate180
+            transform translateY(-50%) rotate(180deg)
+            -ms-transform translateY(-50%) rotate(180deg)
+            -moz-transform translateY(-50%) rotate(180deg)
+            -webkit-transform translateY(-50%) rotate(180deg)
+            -o-transform translateY(-50%) rotate(180deg)
+          &.rotate270
+            transform translateY(-50%) rotate(270deg)
+            -ms-transform translateY(-50%) rotate(270deg)
+            -moz-transform translateY(-50%) rotate(270deg)
+            -webkit-transform translateY(-50%) rotate(270deg)
+            -o-transform translateY(-50%) rotate(270deg)
   /*弹窗*/
   .belive-layer, .address-layer
     text-align center
