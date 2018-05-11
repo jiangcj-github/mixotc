@@ -81,6 +81,7 @@
       checkPass(){
         this.formResult=1;
         this.formRemark="";
+        this.formMali=false;
       },
       inputRemark(){
         if(this.formRemark.length>50){
