@@ -138,7 +138,14 @@
           >
         </span>
       <div class="picture">
-        <img v-show="showBigSrc" :src="showBigSrc" alt="" ref="bigImg">
+        <img 
+          v-show="showBigSrc" 
+          :style="{visibility: bigLoading ? 'hidden' : 'visible'}"
+          :src="showBigSrc" 
+          alt="" 
+          ref="bigImg" 
+          @load="bigImgLoad()"
+        >
       </div>
     </div>
     <!-- 添加好友弹窗 -->
@@ -220,6 +227,7 @@
         sendFile: '',
         showBig: false,
         showBigSrc: '',
+        bigLoading: true,
         showBigClass: '',
         userId: this.JsonBig.stringify(this.$store.state.userInfo.uid),
         reqMessage: ''
@@ -233,7 +241,6 @@
       HappyScroll
     },
     mounted() {
-      console.log(EXIF)
       this.fetchAddress()//拉取收款地址
       this.listenChat()//监听消息
       this.beFriend()//监听被加好友
@@ -527,7 +534,6 @@
             // 群聊（好友单聊实质为群聊）
             if (Array.isArray(res) && res[0].op === 6) {
               res.forEach(async (ite) => {
-                console.log(99999)
                 let {id, uid, gid, data, type } = res[0].body;
                 let obj = {},
                     messageContent = {
@@ -567,10 +573,21 @@
       },
       showBigPicture(flag, src, id) {
         if (!flag) return;
+        this.bigLoading = true;
         this.showBigSrc = src;
         this.showBig = true;
-        console.log(this.$refs.bigImg, document.getElementById(id).className)
         this.$refs.bigImg.className = document.getElementById(id).className;
+      },
+      bigImgLoad(){
+        this.bigLoading = false;
+        let height = this.$refs.bigImg.clientHeight;
+        if(height > 376) {
+          this.$refs.bigImg.style.top = 0;
+          this.$refs.bigImg.style.marginTop = 0;
+          return;
+        }
+        this.$refs.bigImg.style.top = '50%';
+        this.$refs.bigImg.style.marginTop = `-${height/2}px`;
       },
       sendAddress(item) {
         this.sendMs(item)
@@ -762,7 +779,8 @@
             msg: text
           }
         }).then(data => {
-          this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0 }})
+          console.log(data)
+          this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0, mid: this.JsonBig.stringify(data.data.msg_id)}})
         }).catch(error => {
           this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
         })
@@ -1251,30 +1269,12 @@
           height auto
           position relative
           left 0
-          top 50%
-          transform translateY(-50%)
-          -ms-transform translateY(-50%)
-          -moz-transform translateY(-50%)
-          -webkit-transform translateY(-50%)
-          -o-transform translateY(-50%)
           &.rotate90
-            transform translateY(-50%) rotate(90deg)
-            -ms-transform translateY(-50%) rotate(90deg)
-            -moz-transform translateY(-50%) rotate(90deg)
-            -webkit-transform translateY(-50%) rotate(90deg)
-            -o-transform translateY(-50%) rotate(90deg)
+            _rotate(90deg)
           &.rotate180
-            transform translateY(-50%) rotate(180deg)
-            -ms-transform translateY(-50%) rotate(180deg)
-            -moz-transform translateY(-50%) rotate(180deg)
-            -webkit-transform translateY(-50%) rotate(180deg)
-            -o-transform translateY(-50%) rotate(180deg)
+            _rotate(180deg)
           &.rotate270
-            transform translateY(-50%) rotate(270deg)
-            -ms-transform translateY(-50%) rotate(270deg)
-            -moz-transform translateY(-50%) rotate(270deg)
-            -webkit-transform translateY(-50%) rotate(270deg)
-            -o-transform translateY(-50%) rotate(270deg)
+            _rotate(270deg)
   /*弹窗*/
   .belive-layer, .address-layer
     text-align center

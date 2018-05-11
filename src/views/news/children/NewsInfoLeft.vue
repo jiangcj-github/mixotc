@@ -11,7 +11,7 @@
               <img :src="content.icon ? content.icon : (content.isSingle ?  infoDiction[content.uid] && infoDiction[content.uid].icon : infoDiction[content.id] && infoDiction[content.id].icon)" alt="" class="head-portrait">
               <b v-if="content.unread"></b>
               <span>{{content.nickName ? content.nickName : (content.isSingle ? infoDiction[content.uid] && infoDiction[content.uid].name : infoDiction[content.uid] && infoDiction[content.id].name)}}{{content.length ? `(${content.length})` : ''}}</span>
-              <img src="/static/images/close_btn.png" alt="" class="close-head" @click.stop="delUser(content.id)">
+              <img src="/static/images/close_btn.png" alt="" class="close-head" @click.stop="delUser(content)">
             </li>
           </ul>
           <ul class="firend-list" v-else>
@@ -53,7 +53,7 @@
       }
     },
     mounted() {
-      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('21456287755431936'), id: this.JsonBig.parse('19855731022917632') }).then(data => {})
+      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('214837633300303872'), id: this.JsonBig.parse('19855731022917632') }).then(data => {})
       this.initData()
       this.reqFriend()//监听好友请求
       this.beKickGroup()//监听被踢出群
@@ -348,8 +348,27 @@
         })
       this.searchRange = result
       },
-      delUser(id) {
-        this.$store.commit({type: 'delChat', data: id})
+      delUser(chat) {
+        let messages = this.$store.state.messages[chat.id],
+            lastId = 0;
+        for (let i = messages.length - 1; i < messages.length; i--) {
+          if(messages[i].id) {
+            lastId = messages[i].id;
+            break;
+          }
+        }
+        let gid = (chat.isSingle || chat.group) ? chat.id : chat.uid,
+            uid = chat.uid ? chat.uid : 0;
+        console.log(uid,gid,lastId)
+        this.WsProxy.send('control', 'ignore_group', {
+          uid: this.JsonBig.parse(uid),
+          gid: this.JsonBig.parse(gid),
+          msg_id: this.JsonBig.parse(lastId)
+        }).then(data => {
+        }).catch(error=>{
+          console.log(error)
+        })
+        this.$store.commit({type: 'delChat', data: chat.id})
       },
       newChat(chat) {
         this.search = false

@@ -138,7 +138,6 @@
             //定时查询token，token删除即退出登录
             this.timer2 && (this.timer2 = clearInterval(this.timer2));
             this.timer2 = setInterval(() => {
-              // if(sessionStorage.getItem('otcToken')) return;
               if (this.token) return;
               this.logout()
             }, 1000);

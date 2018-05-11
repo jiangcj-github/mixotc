@@ -58,9 +58,10 @@ export default {
   [types.delChat](state, { data }) {
     state.curChat = "";
     // 删除聊天
-    state.chat.filter((item, index) => {
+    state.chat.forEach((item, index) => {
       item.id === data && state.chat.splice(index, 1);
     });
+    delete state.messages[data];
   },
   [types.getFriendList](state, { data }) {
     //好友列表
@@ -126,7 +127,7 @@ export default {
   [types.changeMessageState](
     state,
     {
-      data: { id, time, code }
+      data: { id, time, code, mid }
     }
   ) {
     // 消息发送成功或失败
@@ -134,6 +135,7 @@ export default {
     state.messages[id].forEach((item, index) => {
       if (time === item.time) {
         item.isLoding = false;
+        mid && (item.id = mid);
         code && (item.isFail = true);
         idx = index;
       }
@@ -242,14 +244,20 @@ export default {
     state.isLogin = false;
   },
 
-  [types.updateStrangerInfo](state, { data:{id, icon, name} }) {
+  [types.updateStrangerInfo](
+    state,
+    {
+      data: { id, icon, name }
+    }
+  ) {
     //更新陌生人信息
     state.strangerInfo[id] = {
       icon,
       name
-    }
+    };
     state.strangerInfo = Object.assign({}, state.strangerInfo);
   },
+
   /**
    * 审核申述客服部分
    */
