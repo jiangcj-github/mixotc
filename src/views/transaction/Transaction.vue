@@ -307,6 +307,7 @@
         data.forEach(e => {
           this.result.push({
             id: e.id,
+            id_str: this.JsonBig.stringify(data.id),
             sid: e.sid,
             sid_str: this.JsonBig.stringify(data.sid),
             headimg: e.icon && this.HostUrl.http + "/image/" + e.icon || "/static/images/default_avator.png",
