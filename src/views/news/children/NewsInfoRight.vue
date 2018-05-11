@@ -137,16 +137,24 @@
           @click="()=>{this.showBigSrc = ''; this.showBig = false}"
           >
         </span>
-      <div class="picture">
-        <img 
-          v-show="showBigSrc" 
-          :style="{visibility: bigLoading ? 'hidden' : 'visible'}"
-          :src="showBigSrc" 
-          alt="" 
-          ref="bigImg" 
-          @load="bigImgLoad()"
-        >
-      </div>
+      <happy-scroll
+        style="width:370px;height:376px" 
+        :resize="true" 
+        bigger-move-h="start" 
+        hide-horizontal 
+        class="bigImg-content"
+      >
+        <div class="picture">
+          <img 
+            v-show="showBigSrc" 
+            :style="{visibility: bigLoading ? 'hidden' : 'visible'}"
+            :src="showBigSrc" 
+            alt="" 
+            ref="bigImg" 
+            @load="bigImgLoad()"
+          >
+        </div>
+      </happy-scroll>
     </div>
     <!-- 添加好友弹窗 -->
     <AddFriend
@@ -572,7 +580,7 @@
         }
       },
       showBigPicture(flag, src, id) {
-        if (!flag) return;
+        if (!flag || this.showBigSrc === src) return;
         this.bigLoading = true;
         this.showBigSrc = src;
         this.showBig = true;
@@ -582,12 +590,10 @@
         this.bigLoading = false;
         let height = this.$refs.bigImg.clientHeight;
         if(height > 376) {
-          this.$refs.bigImg.style.top = 0;
           this.$refs.bigImg.style.marginTop = 0;
           return;
         }
-        this.$refs.bigImg.style.top = '50%';
-        this.$refs.bigImg.style.marginTop = `-${height/2}px`;
+        this.$refs.bigImg.style.marginTop = `${(376-height)/2}px`;
       },
       sendAddress(item) {
         this.sendMs(item)
@@ -779,7 +785,6 @@
             msg: text
           }
         }).then(data => {
-          console.log(data)
           this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0, mid: this.JsonBig.stringify(data.data.msg_id)}})
         }).catch(error => {
           this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
@@ -1259,16 +1264,10 @@
           height 10px
           cursor pointer
       .picture
-        width 100%
-        height 100%
-        overflow auto
         text-align center
-        vertical-align middle
         img
           max-width 100%
           height auto
-          position relative
-          left 0
           &.rotate90
             _rotate(90deg)
           &.rotate180

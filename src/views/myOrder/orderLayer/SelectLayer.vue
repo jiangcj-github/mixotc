@@ -17,7 +17,7 @@
 
   export default {
     name: "explain-layer",
-    props: ['selectShow', 'type', 'contentInfo', 'leftContent', 'rightContent', 'id', 'info'],
+    props: ['selectShow', 'type', 'contentInfo', 'leftContent', 'rightContent', 'id', 'info', 'uid'],
     data() {
       return {
         selectLayer: this.selectShow,
@@ -55,7 +55,7 @@
             break;
           case 7:  // 申述
             this.$emit('offSelet', 'false')
-            this.$store.commit({'type':'changeChatBox', data: true})
+            this.Bus.$emit('contactSomeone', {id: this.JsonBig.stringify(this.uid)})
             break;
           case 9:  // 撤销申述
             this.WsProxy.send('control','cancel_appeal',{

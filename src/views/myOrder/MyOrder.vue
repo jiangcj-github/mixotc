@@ -146,6 +146,7 @@
                  :type="showType"
                  :id="updateId"
                  :info="updateInfo"
+                 :uid="otherId"
                  :contentInfo="selectContent"
                  :leftContent="selectLeft"
                  :rightContent="selectRight">
@@ -242,6 +243,7 @@
 
         updateId: '', //标记已付款弹窗所用id
         updateInfo: '',
+        otherId: '',//对方ID
         updateUid: '',
         updateTradeCode: '', // 标记弹窗所用资金码
 
@@ -631,6 +633,7 @@
               this.selectContent = '确定取消订单？'; // 内容
               this.selectLeft = '取消'; // 左边内容
               this.selectRight = '确定'; // 右边内容
+              this.otherId = this.JsonBig.stringify(content.buyer) == this.userId ? content.seller : content.buyer;
               this.updateId = this.contentList[index].id;
               break;
             case 7: // 买家申请弹窗
@@ -638,6 +641,7 @@
               this.selectContent = this.JsonBig.stringify(content.buyer) === this.userId ? '请先与对方联系，核实对方是否放币' : '请先与对方联系，核实对方是否付款'; // 内容
               this.selectLeft = '申诉'; // 左边内容
               this.selectRight = '联系对方'; // 右边内容
+              this.otherId = this.JsonBig.stringify(content.buyer) == this.userId ? content.seller : content.buyer;
               this.updateId = this.contentList[index].id;
               this.updateInfo = this.contentList[index].info;
               break;
@@ -645,6 +649,7 @@
               this.selectContent = '确定撤销申诉？'
               this.selectLeft = '取消'; // 左边内容
               this.selectRight = '确定'; // 右边内容
+              this.otherId = this.JsonBig.stringify(content.buyer) == this.userId ? content.seller : content.buyer;
               this.updateId = this.contentList[index].id;
               this.updateInfo = this.contentList[index].info;
           }

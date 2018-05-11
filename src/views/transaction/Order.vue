@@ -13,7 +13,7 @@
         <div class="contact clearfix">
           <span @click="contactSomeone(JsonBig.stringify(contentData.sid))" class="conversation">
             <img src="/static/images/conversation_icon.png" alt="">
-            <i @click="$store.commit({'type':'changeChatBox', data: true})">联系TA</i>
+            <i>联系TA</i>
           </span>
           <router-link class="self-page" :to="{path:'/homepage', query:{uid: contentData.sid}}" tag="span">
             <img src="/static/images/selfpage_icon.png" alt="">

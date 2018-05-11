@@ -351,22 +351,24 @@
       delUser(chat) {
         let messages = this.$store.state.messages[chat.id],
             lastId = 0;
-        for (let i = messages.length - 1; i < messages.length; i--) {
-          if(messages[i].id) {
-            lastId = messages[i].id;
-            break;
+        if (messages) {
+          for (let i = messages.length - 1; i < messages.length; i--) {
+            if(messages[i].id) {
+              lastId = messages[i].id;
+              break;
+            }
           }
         }
+        if(!lastId) chat.mid && (lastId = chat.mid)
         let gid = (chat.isSingle || chat.group) ? chat.id : chat.uid,
             uid = chat.uid ? chat.uid : 0;
-        console.log(uid,gid,lastId)
-        this.WsProxy.send('control', 'ignore_group', {
+        lastId && this.WsProxy.send('control', 'ignore_group', {
           uid: this.JsonBig.parse(uid),
           gid: this.JsonBig.parse(gid),
           msg_id: this.JsonBig.parse(lastId)
         }).then(data => {
-        }).catch(error=>{
-          console.log(error)
+          }).catch(error=>{
+            console.log(error)
         })
         this.$store.commit({type: 'delChat', data: chat.id})
       },
