@@ -128,9 +128,9 @@
         </div>
       </div>
     </div>
-    <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="popupClick(toPath)">
+    <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="showPopup=false">
       <slot>
-        <p><span>{{popupTip}}</span></p>
+        <p class="popErr"><img src="/static/images/hint.png"><span>{{popupTip}}</span></p>
       </slot>
     </BasePopup>
   </div>
@@ -140,6 +140,7 @@
   import ResultListItem from './children/ResultListItem';
   import Pagination from '@/views/verify/component/Pagination';
   import BasePopup from '@/components/common/BasePopup';
+  import timeout from "@/js/Timeout.js";
 
   export default {
     components: {
@@ -196,7 +197,8 @@
     mounted() {
       this.fetchData();
       this.Bus.$on("onOrderFail",(msg) => {
-        this.verifyState(msg)
+        this.verifyState(msg);
+
       });
       this.Bus.$on("onPageChange",(p) => {
         this.curPage=p;
@@ -304,9 +306,7 @@
         data.forEach(e => {
           this.result.push({
             id: e.id,
-            id_str: this.JsonBig.stringify(data.id),
             sid: e.sid,
-            sid_str: this.JsonBig.stringify(data.sid),
             headimg: e.icon && this.HostUrl.http + "/image/" + e.icon || "/static/images/default_avator.png",
             nickname: e.trader || "-",
             dealVolume: e.volume && (e.volume + "").formatFixed(6) || 0,
@@ -375,17 +375,12 @@
         }
         title && this.filte[title] === 2 && (this.filte[title] = 1);
       },
-      popupClick(path) {
-        clearTimeout(this.timer)
-        this.showPopup = false;
-        this.$router.push({name: path})
-      },
       verifyState(msg) {
         this.popupTip = msg;
         this.showPopup = true;
-        setTimeout(() => {
-          this.showPopup = false;
-        }, 3000);
+        timeout(()=>{
+          this.showPopup=false;
+        },3000);
       },
     },
     computed: {

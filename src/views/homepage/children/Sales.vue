@@ -40,7 +40,7 @@
           </span>
           <span class="pay-time">{{e.dead}}</span>
           <span class="operation">
-          <router-link class="buy-to" :to="'/transaction/order?id='+e.id" tag="span" v-if="!e.isBuy"><i>向他购买</i></router-link>
+          <span class="buy-to" @click="toOrder(e)" v-if="!e.isBuy"><i>向他购买</i></span>
           <span class="buy-to" :class="{disabled:e.isBuy}"  v-else><i>向他出售</i></span>
         </span>
         </div>
@@ -56,10 +56,11 @@
   </div>
 </template>
 <script>
+  import beforeOrder from "@/views/transaction/js/beforeOrder.js";
   export default {
     data() {
       return {
-        uid: "",
+        uid: 0,
 
         sales:[],
         err: -1,
@@ -92,7 +93,7 @@
       },
     },
     mounted() {
-      this.uid= this.JsonBig.parse(this.$route.query.uid) || "";
+      this.uid= this.JsonBig.parse(this.$route.query.uid) || 0;
       this.loadSales();
     },
     watch:{
@@ -139,7 +140,23 @@
             id:item.id,
           });
         });
-      }
+      },
+      toOrder(e){
+        let res=beforeOrder({
+          ws: this.WsProxy,
+          id : e.id,
+          sid : this.uid,
+          currency: e.currency,
+          loginUid: this.$store.state.userInfo.uid,
+          isLogin: this.$store.state.isLogin,
+          isVerify: this.$store.state.userInfo.verify,
+        });
+        if(!res){
+          this.$router.push({ name: 'order', query: { id:e.id}})
+        }else{
+          alert(res);
+        }
+      },
     }
   }
 </script>

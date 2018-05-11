@@ -51,6 +51,7 @@
   import Sales from './children/Sales';
   import Rates from './children/Rates';
   import BasePopup from '@/components/common/BasePopup';
+  import timeout from "@/js/Timeout.js";
   export default {
     components: {
       Sales,
@@ -161,7 +162,7 @@
       },
       showPop(){
         this.isShowPop=true;
-        setTimeout(()=>{this.isShowPop=false;},3000);
+        timeout(()=>{this.isShowPop=false;},3000);
       },
     },
   }

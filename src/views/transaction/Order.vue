@@ -83,7 +83,8 @@
           <span>我已阅读</span><a href="#/transaction/tradeRules" @click.stop="" target="_blank">《OTC购买流程规则》</a>
         </div>
       </div>
-      <button :class="{able:canSubmit}" @click="openOrderLayer()">{{copy.type[type]}}</button>
+      <button class="able" @click="openOrderLayer()" v-if="canSubmit">{{copy.type[type]}}</button>
+      <button v-else="">{{copy.type[type]}}</button>
       <p class="tishi">
         <img src="/static/images/hint.png" alt="">
         <span>新用户首次交易前请务必查阅本平台交易流程及规则，如交易出现问题请及时与客服人员沟通</span>
@@ -168,14 +169,30 @@
       }).catch((msg)=>{
         alert(JSON.stringify(msg));
       });
-      this.getPrice()
+      this.getPrice();
     },
     destroyed(){
       this.Bus.$off("offOrderLayer");
     },
     computed:{
       canSubmit:function () {
-        return this.agree && this.amount && this.money;
+        if(!this.agree || !this.amount || !this.money) {
+          this.errorFlag=0;
+          return false;
+        }
+        if (this.money > this.contentData.max) { // 超过交易额
+          this.errorFlag = 1;
+          return false;
+        }else if (this.money < this.contentData.min) { // 低于最小交易额
+          this.errorFlag = 2;
+          return false;
+        }else if (this.amount > this.contentData.tradeable) { // 超过交易量
+          this.errorFlag = 3;
+          return false;
+        }else{
+          this.errorFlag=0;
+        }
+        return true;
       }
     },
     methods: {
@@ -206,38 +223,15 @@
         this.amount = /^\d+\.?\d{0,6}$/.test(this.amount) || this.amount === '' ? this.amount : this.amountValue;
         this.money = (this.amount * this.rate).toFixed(2);
         this.amount === '' && (this.money = '');
-        this.errorFlag=0;
       },
       checkAmount(value) {
         this.amountValue = value;
       },
       openOrderLayer(st) { // 弹窗提示
-        // if (this.money === '') { // 无内容提示
-        //   this.errorFlag = 0;
-        //   return
-        // }
-        if (this.money > this.contentData.max) { // 超过交易额
-          this.errorFlag = 1;
-          return;
-        }
-        if (this.money < this.contentData.min) { // 低于最小交易额
-          this.errorFlag = 2;
-          return;
-        }
-        if (this.amount > this.contentData.tradeable) { // 超过交易量
-          this.errorFlag = 3;
-          return;
-        }
         // if (this.money > 100000) { // 大额交易
         //   this.bigAmountLayer = true
         // }
-        // if (this.agree == false) { // 提示勾选
-        //   this.remindLayer = true;
-        //   setTimeout(() => {
-        //     this.remindLayer = false
-        //   }, 3000)
-        //   return
-        // }
+
         // 购买提示框
         if (st === false) {
           this.showOrderLayer = false;

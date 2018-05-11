@@ -24,7 +24,7 @@
     <div class="title amount">{{data.amount}}</div>
     <div class="title price">{{data.price}}</div>
     <div class="title button">
-      <button @click="_toOrder(data)">购买</button>
+      <button @click.stop="_toOrder(data)">购买</button>
     </div>
   </li>
 </template>
@@ -40,19 +40,19 @@ export default {
     _toOrder(data){
       let res=beforeOrder({
         ws: this.WsProxy,
-        id :data.id_str,
-        sid :data.sid_str,
+        id :data.id,
+        sid :data.sid,
         currency: data.currency,
-        loginUid: this.JsonBig.stringify(this.$store.state.userInfo.uid),
+        loginUid: this.$store.state.userInfo.uid,
         isLogin: this.$store.state.isLogin,
         isVerify: this.$store.state.userInfo.verify,
       });
       if(!res){
-        this.$router.push({ name: 'order', query: { id: this.JsonBig.stringify(id) }})
+        this.$router.push({ name: 'order', query: { id: data.id}})
       }else if(res==="未登录") {
-        
+        this.$store.commit({type: 'changeLoginForm', data: true});
       }else{
-        this.Bus.$emit("onOrderFail");
+        this.Bus.$emit(this.onOrderFail,res);
       }
     },
   }
