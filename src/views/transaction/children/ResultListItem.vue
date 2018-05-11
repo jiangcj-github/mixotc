@@ -49,7 +49,9 @@ export default {
       });
       if(!res){
         this.$router.push({ name: 'order', query: { id: this.JsonBig.stringify(id) }})
-      }else if(res==="未登陆"){
+      }else if(res==="未登录") {
+        
+      }else{
         this.Bus.$emit("onOrderFail");
       }
     },
