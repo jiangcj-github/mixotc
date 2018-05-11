@@ -43,8 +43,8 @@ export default {
         id :data.id_str,
         sid :data.sid_str,   //发布人ID，字符串
         currency: data.currency,   //广告货币,btc
-        loginUid: this..loginUid,   //当前登录ID,字符串
-        isLogin: param.isLogin,     //是否登录，bool
+        loginUid: this.$store.state.uid,   //当前登录ID,字符串
+        isLogin: this.$store.state.isLogin,
         isVerify: this.$store.state.userInfo.verify,
       });
       if(!res){
