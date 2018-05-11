@@ -14,12 +14,13 @@
             <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
             <a href="javascript:void(0)" @click="searchStr"></a>
             <!--币种模糊搜索结果-->
-            <ul v-show="srchTipShow && coinTips.length>0" v-if="this.srchType===0">
+            <ul v-show="srchTipShow" v-if="this.srchType===0">
               <li v-for="e in coinTips" @click="search">
                 <div @mousedown="srchText=e.name">
                   <img class="coin" :src="e.icon"/><span>{{e.name}}</span><span class="gray">{{e.cname}}</span>
                 </div>
               </li>
+              <li class="notip" v-show="coinTips.length<=0">暂无该币种信息</li>
             </ul>
             <!--商家模糊搜索结果-->
             <ul v-show="srchTipShow && userTips.length>0" v-else-if="this.srchType===1">
