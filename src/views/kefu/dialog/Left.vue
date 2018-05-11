@@ -97,7 +97,7 @@
         }).then(data => {
           console.log('对话列表', data);
           //this.ulsBuf = data;
-          data.forEach(v => {
+          data && data.forEach(v => {
             v.user_id = this.JsonBig.stringify(v.user_id)
             v.unread = 0
             console.log('111', v.user_id)
@@ -109,9 +109,9 @@
       },
       selectNowUser() {
         this.WsProxy.send('control', 'a_get_user_appeals', { // 初始化页面获得联系人
-          "user_id": this.$route.query.uid ? this.JsonBig.parse(this.$route.query.uid) : this.JsonBig.parse(this.uls[0].user_id),
+          "user_id": this.uls && (this.$route.query.uid ? this.JsonBig.parse(this.$route.query.uid) : this.JsonBig.parse(this.uls[0].user_id)),
         }).then(data => {
-          data.forEach(v => {
+          data && data.forEach(v => {
             v.buyer_id = this.JsonBig.stringify(v.buyer_id) // 买家
             v.seller_id = this.JsonBig.stringify(v.seller_id) // 卖家
             v.sid = this.JsonBig.stringify(v.sid) // 订单
@@ -143,7 +143,7 @@
       },
       parseUls() { // 搜索输入框
         this.searchList = [];
-        this.$store.state.serviceData.forEach(v => {
+        this.$store.state.serviceData && this.$store.state.serviceData.forEach(v => {
           if (new RegExp("^.*"+this.srchText+".*$").test(v.user_name)) {
             this.searchList.push(v);
           }

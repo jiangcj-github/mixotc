@@ -49,7 +49,7 @@
         <input type="file" ref="file" v-show="0" accept="image/*" @change="chooseImage">
         <span class="br"></span>
         <button class="b1" @click="onClickM0">上传付款证明</button>
-        <button class="b2" @click="showPop4 = true">证明无效</button>
+        <button class="b2" @click="onClickM2">证明无效</button>
         <button class="b3" @click="onClickM1">通知放币</button>
       </div>
       <div contenteditable="true"
@@ -218,7 +218,11 @@
         stopTradeUser: "", // 终止交易发起人
         stopTradeUserIcon: "", // 终止交易发起人头像
         stopTradePerson: 0, // 终止交易发起责任人
-        stopTradeObj: {} // 终止交易弹窗所用参数
+        stopTradeObj: {}, // 终止交易弹窗所用参数
+
+        ineffectiveProof: "", // 证明无效
+        paymentProofs: "", // 付款证明输入框内容
+        noticeCoin: "" // 通知放币
 
       }
     },
@@ -226,7 +230,7 @@
       user() { // 监听右侧当前聊天人员
         // console.log('当前', this.$store.state.serviceNow)
         let result = '';
-        this.$store.state.serviceData.forEach(item => {
+        this.$store.state.serviceData && this.$store.state.serviceData.forEach(item => {
           // console.log('当前', item)
           if (item.user_id === this.$store.state.serviceNow) {
             result = item.user_name
@@ -252,19 +256,7 @@
         return this.$store.state.serviceNowOther
       },
       appl() {
-        //this.startSwiper();
-        let applUser; //197113900708139008
-        // this.otherInfo.forEach(v => {
-        //   if (v.appellant_id == this.serviceNow) { // 是否为申述人 0 申诉 1 被申诉
-        //     applUser = 0;
-        //     this.recv = v.buyer_id == this.serviceNow ?  0 : 1; // 是否为买家 0 买 1 卖
-        //     this.isBuyer = v.buyer_id == this.serviceNow ?  "买家" : "卖家";
-        //   } else {
-        //     applUser = 1;
-        //     this.recv = v.buyer_id == this.serviceNow ?  1 : 0; // 是否为买家 0 买 1 卖
-        //     this.isBuyer = v.buyer_id == this.serviceNow ?  "买家" : "卖家";
-        //   }
-        // })
+        let applUser;
 
           if (this.otherInfo[0].appellant_id == this.serviceNow) { // 是否为申述人 0 申诉 1 被申诉
             applUser = 0;
@@ -311,6 +303,12 @@
             on: {
               slideChangeTransitionEnd() {
                 _this.isBuyer = _this.otherInfo && _this.otherInfo[this.activeIndex].buyer_id == _this.serviceNow ?  "买家" : "卖家";
+                // 证明无效输入框内容
+                this.ineffectiveProof = MSGS.get(1, this.appl, this.recv).replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<span style="color:#FF794C">[${_this.otherInfo[this.activeIndex].trade_code}]</span>`)
+                // 上传付款证明
+                this.paymentProofs = MSGS.get(0, this.appl, this.recv).replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.activeIndex].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[this.activeIndex].trade_code}]</i>`)
+                // 通知放币
+                this.noticeCoin = MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.activeIndex].sid})</a>`);
               }
             }
           })
@@ -462,18 +460,25 @@
         return time2.formatTime()
       },
       onClickM0() { // 点击上传付款证明按钮
-        let text = MSGS.get(0, this.appl, this.recv);
-        text = text.replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`);
-        this.$refs.textarea.innerHTML = text;
+        if (this.otherInfo && this.otherInfo.length === 1) {
+          this.paymentProofs = MSGS.get(0, this.appl, this.recv);
+          this.paymentProofs = this.paymentProofs.replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`);
+        }
+        this.$refs.textarea.innerHTML = this.paymentProofs;
         this.$refs.textarea.focus();
       },
+      onClickM2() {
+        this.pop4Text = '';
+        this.showPop4 = true
+      },
       onPop4Ok() { // 证明无效确认
-        this.showPop4 = false;
-        let text = MSGS.get(1, this.appl, this.recv);
-        text = text.replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<span style="color:#FF794C">[${this.otherInfo[0].trade_code}]</span>`);
-        this.sendMsg= text;
+        this.showPop4 = false
+        if (this.otherInfo && this.otherInfo.length === 1) {
+          this.ineffectiveProof = MSGS.get(1, this.appl, this.recv);
+          this.ineffectiveProof = this.ineffectiveProof.replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<span style="color:#FF794C">[${this.otherInfo[0].trade_code}]</span>`);
+        }
+        this.sendMsg = this.ineffectiveProof;
         this.$refs.textarea.focus();
-
       },
       onPop4Input() { // 填写证明无效理由
         if (this.pop4Text.length > 50) {
@@ -484,13 +489,16 @@
         }
       },
       onClickM1() { // 点击通知放币按钮
-        let text = MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`);
-        this.$refs.textarea.innerHTML = text;
+        if (this.otherInfo && this.otherInfo.length === 1) {
+          this.noticeCoin = MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`);
+        }
+        this.$refs.textarea.innerHTML = this.noticeCoin;
         this.$refs.textarea.focus();
       },
       // 强制放币部分
       forceIcon(index) { // 强制放币弹窗
         this.popIndex = index
+        this.pop1Text = ''
         this.showPop1 = true
         this.forceIconName = this.serviceNow === this.otherInfo[index].seller_id ? this.serviceUser.user_name : this.otherInfo[index].name
         this.forceIconNameIcon = this.serviceNow === this.otherInfo[index].seller_id ? (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : "/static/images/default_avator.png") : (this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : "/static/images/default_avator.png")
@@ -557,6 +565,7 @@
       },
       // 终止交易部分
       stopTrade(index) { // 终止交易弹窗
+        this.pop3Text = ''
         this.popIndex = index
         this.stopTradeUser = this.serviceNow === this.otherInfo[index].buyer_id ? this.serviceUser.user_name : this.otherInfo[index].name
         this.stopTradeUserIcon = this.serviceNow === this.otherInfo[index].buyer_id ? (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : "/static/images/default_avator.png") : (this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : "/static/images/default_avator.png")
@@ -674,6 +683,7 @@
       // 驳回申诉部分
       rejectAppeal(index) { // 驳回申述弹窗
         this.popIndex = index
+        this.pop2Text = ''
         this.showPop2 = true
         this.rejectAppealObj = {
           "id": this.JsonBig.parse(this.otherInfo[index].sid),
@@ -758,7 +768,7 @@
       letter-spacing 0.19px
       padding 0 20px
     .fixed
-      margin 15px 0
+      margin 15px 0 15px 5px
       height 160px
       background #fff
       box-shadow 0 2px 4px 0 #999
@@ -1153,6 +1163,9 @@
   .swiper-container, swiper-container-horizontal
     width 610px
     margin 0 20px
+  .swiper-slide
+    width 600px !important
+    margin-left 5px
   .swiper-button-next, .swiper-button-prev
     background-image none
     width 20px

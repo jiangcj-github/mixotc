@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="transacation inner">
+    <div class="transacation inner" @click="showPopup=false">
       <!--头部搜索栏-->
       <div class="header">
         <h2>{{filte.currency && "购买"+filte.currency.toUpperCase() || "购买BTC"}}</h2>
@@ -109,7 +109,7 @@
         </div>
         <div v-if="err===0">
           <ul>
-            <li is='ResultListItem' :trustArray="trustArray" :emitValue="emitValue" v-for="(item, index) of result" :key="index"
+            <li is='ResultListItem' :trustArray="trustArray" onOrderFail="onOrderFail" v-for="(item, index) of result" :key="index"
                 :data="item" :class="{even: index%2 === 0}"></li>
           </ul>
           <Pagination class="pageBar" :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
@@ -128,9 +128,9 @@
         </div>
       </div>
     </div>
-    <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="popupClick(toPath)">
+    <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="showPopup=false">
       <slot>
-        <p><span>{{popupTip}}</span></p>
+        <p class="popErr"><img src="/static/images/hint.png"><span>{{popupTip}}</span></p>
       </slot>
     </BasePopup>
   </div>
@@ -140,6 +140,7 @@
   import ResultListItem from './children/ResultListItem';
   import Pagination from '@/views/verify/component/Pagination';
   import BasePopup from '@/components/common/BasePopup';
+  import timeout from "@/js/Timeout.js";
 
   export default {
     components: {
@@ -184,10 +185,7 @@
         largeTran: 0, //大额交易选择状态
 
         showPopup: false,
-        popupTip: '',
-        toPath: '',
-        timer: null,
-        emitValue: 'popup',
+        popupTip: '出错',
 
         result: [],
         total: 1,
@@ -198,8 +196,9 @@
     },
     mounted() {
       this.fetchData();
-      this.Bus.$on(this.emitValue, data => {
-        this.verifyState(data)
+      this.Bus.$on("onOrderFail",(msg) => {
+        this.verifyState(msg);
+
       });
       this.Bus.$on("onPageChange",(p) => {
         this.curPage=p;
@@ -207,7 +206,7 @@
       });
     },
     destroyed() {
-      this.Bus.$off(this.emitValue);
+      this.Bus.$off("onOrderFail");
       this.Bus.$off("onPageChange");
     },
     methods: {
@@ -257,7 +256,8 @@
           });
         } else {
           this.userTips = [];
-          this.Proxy["userSearch"]({keyword: srchKey}).then(res => {
+          let currency=this.filte.currency || "btc";
+          this.Proxy["userSearch"]({keyword: srchKey,currency:currency,type:1}).then(res => {
             res.data.users && res.data.users.forEach(v => {
               this.userTips.push({
                 name: v.name || "-",
@@ -307,7 +307,6 @@
           this.result.push({
             id: e.id,
             sid: e.sid,
-            sid_str: this.JsonBig.stringify(data.sid),
             headimg: e.icon && this.HostUrl.http + "/image/" + e.icon || "/static/images/default_avator.png",
             nickname: e.trader || "-",
             dealVolume: e.volume && (e.volume + "").formatFixed(6) || 0,
@@ -374,44 +373,14 @@
           this.filte[title] = 2;
           return;
         }
-        title && this.filte[title] === 2 && (this.filte[title] = 1)
+        title && this.filte[title] === 2 && (this.filte[title] = 1);
       },
-      popupClick(path) {
-        clearTimeout(this.timer)
-        this.showPopup = false;
-        this.$router.push({name: path})
-      },
-      verifyState(state) {
-        if (state === 1) {
-          this.popupTip = '请先进行实名认证';
-          // this.toPath = 'order';
-        }
-        if (state === 2) {
-          this.popupTip = '不能购买自己的广告';
-          this.toPath = 'index';
-        }
-        if (state === 3) {
-          this.popupTip = '广告已下架';
-          this.toPath = 'index';
-        }
-        if (state === 4) {
-          this.popupTip = '创建钱包失败';
-          this.toPath = 'index';
-        }
-        if (state === 6) {
-          confirm('您的交易上限为10万，是否申请大额交易？')
-          return;
-        }
-        if (state === 7) {
-          this.popupTip = '有未完成购买订单，请完成后再下单';
-          this.toPath = 'index';
-        }
+      verifyState(msg) {
+        this.popupTip = msg;
         this.showPopup = true;
-        clearTimeout(this.timer);
-        this.timer = setTimeout(() => {
-          this.showPopup = false;
-          this.$router.push({name: this.toPath})
-        }, 3000);
+        timeout(()=>{
+          this.showPopup=false;
+        },3000);
       },
     },
     computed: {
@@ -427,7 +396,7 @@
         }).map(item => {
           return item.type;
         });
-        if (title.length === 0) return '选择支付方式'
+        if (title.length === 0) return '选择支付方式';
         return title.join('/');
       },
       paymentScore() {

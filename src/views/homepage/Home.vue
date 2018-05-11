@@ -30,7 +30,7 @@
         <div class="unit"><label>{{info.securedNum}}</label><span>担保</span></div>
       </div>
     </div>
-    <div v-if="isLogin" @click="pop=false">
+    <div v-if="isLogin" @click="isShowPop=false">
       <!--菜单项tab-->
       <ul class="menu-tab">
         <li :class="{active:tab===0}" @click="tab=0">他的发布({{saleNum}})</li>
@@ -41,8 +41,8 @@
       <!--评价列表-->
       <Rates :uid="uid" v-show="tab===1"></Rates>
       <!--信任操作弹框-->
-      <BasePopup :show="pop">
-        <div class="pop">{{["取消信任成功","加入信任成功"][info.isTrust]}}</div>
+      <BasePopup :show="isShowPop">
+        <div class="popContent">{{["取消信任成功","加入信任成功"][info.isTrust]}}</div>
       </BasePopup>
     </div>
   </div>
@@ -51,6 +51,7 @@
   import Sales from './children/Sales';
   import Rates from './children/Rates';
   import BasePopup from '@/components/common/BasePopup';
+  import timeout from "@/js/Timeout.js";
   export default {
     components: {
       Sales,
@@ -66,7 +67,7 @@
         tab:0,  //他的发布，他的评价
         rateNum:0,
         saleNum:0,
-        pop:false,
+        isShowPop:false,
       }
     },
     computed:{
@@ -160,8 +161,8 @@
         }
       },
       showPop(){
-        this.pop=true;
-        setTimeout(()=>{this.pop=false;},3000);
+        this.isShowPop=true;
+        timeout(()=>{this.isShowPop=false;},3000);
       },
     },
   }
@@ -293,7 +294,7 @@
             font-size 14px
             color #333333
             letter-spacing 0.16px
-    .pop
+    .popContent
       width 100%
       height 100%
       display flex

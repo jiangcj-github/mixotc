@@ -24,12 +24,12 @@
       <img src="/static/images/close_btn.png" alt="" @click="offVerify">
       <div class="buy-layer-content">
         <h1>请输入短信验证码</h1>
-        <p>
-          <input type="text" v-model="messageVerify"/><span @click="sendVerify" :class="{offBg: showOffBg}">{{verifyCode}}</span>
-          <b class="errortext" v-if="errorShow">请输入正确的验证码</b>
+        <p class="err-wrap">
+          <input type="text" v-model="messageVerify" @input="onInput"/><span @click="sendVerify" :class="{offBg: showOffBg}">{{verifyCode}}</span>
+          <b class="errortext" v-if="errorShow">{{errText}}</b>
         </p>
         <div>
-          <em @click="closePopup">取消</em>
+          <em @click="offVerify">取消</em>
           <i @click="succPopup">确定</i>
         </div>
       </div>
@@ -52,7 +52,7 @@
                @keydown="delNum(index)"/>
         <b class="errortext" v-if="errorShow">请输入正确的验证码</b>
         <div>
-          <em @click="closePopup">取消</em>
+          <em @click="offVerify">取消</em>
           <i @click="succPopup">确定</i>
         </div>
       </div>
@@ -62,6 +62,7 @@
 
 <script>
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
+  // import md5 from 'md5'
 
   export default {
     name: "release-coin-layer",
@@ -80,7 +81,8 @@
         // realInput:'',
         inputContent: '', // 聚焦谷歌输入框内容
         inputGroup: [], // 记录输入框内容,
-        errorShow: false
+        errorShow: false,
+        errText: ''
       }
     },
     components: {
@@ -88,7 +90,12 @@
     },
     watch: {
       releaseCoinShow(state) {
-        this.buyLayer = state === true ?  true : false
+        if (state === true) {
+          this.buyLayer = true
+          this.PaymentValue = ''
+        } else {
+          this.buyLayer = false
+        }
       },
       inputGroup(newValue, oldValue) {
         // console.log(newValue, oldValue, newValue[newValue.length - 1].length)
@@ -104,7 +111,11 @@
       buyNext() { // 点击下一步
         if (this.PaymentValue === '') return
         this.$emit('offRelease', 'false');
+        this.messageVerify = '';
+        this.errText = '';
         this.verifyLayer = true;
+        // this.PaymentValue = this.getSafePass(this.PaymentValue)
+        // console.log('this.PaymentValue', this.PaymentValue)
         if (this.$store.state.userInfo.email) {
           this.WsProxy.send('control','send_code',{ // 获取验证码
             type: 2, // 0 登录; 1 修改密码; 2 支付
@@ -147,6 +158,9 @@
           });
         }
       },
+      onInput() { // 聚焦输入框
+        this.errText = ''
+      },
       getNum(index) {
         let oEvent = window.event;
         if (oEvent.keyCode === 8) return;
@@ -160,8 +174,17 @@
           this.inputContent = index - 1
         }
       },
+      getSafePass(plainPass) { // 加密算法
+        // let reader = new FileReader(),
+        //     uid = this.JsonBig.stringify(this.$store.state.userInfo.uid)
+        // reader.onload = (callback) => {
+        //   let md5 = rstr2hex(binl2rstr(binl_md5(reader.result, reader.result.length)));
+        // }
+        // plainPass = md5;
+      },
       succPopup() { // 点击确定
         console.log('uid', this.uid, this.id)
+        //console.log('md5', this.PaymentValue)
         this.WsProxy.send('otc','send_order',{
           uid: this.uid,
           id: this.id,
@@ -171,6 +194,11 @@
           console.log('确定', data)
         }).catch((msg)=>{
           msg.ret !== 0 && (this.errorShow = true)
+          switch (msg.ret) {
+            case 7:
+              this.errText = '密码错误'
+              break;
+          }
           // console.log('this.errorShow', this.errorShow)
           console.log('你错了', msg.ret);
         })
@@ -182,7 +210,10 @@
 <style scoped lang="stylus">
   @import "../../../stylus/base.styl"
   .buy-layer, .info-layer, .geogle-layer
+    .err-wrap
+      position relative
     .errortext
+      position absolute
       display block
       font-size 12px
       color #ff794c
