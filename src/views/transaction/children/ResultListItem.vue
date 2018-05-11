@@ -32,7 +32,7 @@
 <script>
 import beforeOrder from "../js/beforeOrder.js";
 export default {
-  props: ['data','emitValue','trustArray'],
+  props: ['data','onOrderFail','trustArray'],
   methods: {
     toHomePage(sid) {
       this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})
@@ -41,15 +41,15 @@ export default {
       let res=beforeOrder({
         ws: this.WsProxy,
         id :data.id_str,
-        sid :data.sid_str,   //发布人ID，字符串
-        currency: data.currency,   //广告货币,btc
-        loginUid: this.$store.state.uid,   //当前登录ID,字符串
+        sid :data.sid_str,
+        currency: data.currency,
+        loginUid: this.JsonBig.stringify(this.$store.state.userInfo.uid),
         isLogin: this.$store.state.isLogin,
         isVerify: this.$store.state.userInfo.verify,
       });
       if(!res){
         this.$router.push({ name: 'order', query: { id: this.JsonBig.stringify(id) }})
-      }else{
+      }else if(res==="未登陆"){
         this.Bus.$emit("onOrderFail");
       }
     },
