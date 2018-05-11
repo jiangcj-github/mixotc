@@ -113,7 +113,7 @@
     <!-- 订单无内容 -->
     <MyOrderNothing v-if="!contentList"></MyOrderNothing>
     <!-- 分页 -->
-    <Pagination  v-if="contentList !== null"
+    <Pagination  v-if="contentList && contentList.length"
                 :total="pageTotal"
                 :pageSize="15"
                 emitValue="changePage">
