@@ -166,8 +166,6 @@
         tip: false,//限额错误文案提示
         showPayment: false,
         payment:[{type: '支付宝', score: 1, state: true}, {type: '微信', score: 2, state: true}, {type: '银行卡', score:4, state: true}],
-        min:'',
-        max:'',
         filte:{
           type: 1,// 1出售，2购买
           payment: '',//1支付宝，2微信，4银行卡，可相加，共6种
@@ -275,8 +273,8 @@
           payment: this.filte.payment,
           currency: this.filte.currency || "btc",
           money: 'CNY',
-          min: this.filte.min,
-          max: this.filte.max,
+          min: this.filte.min || 0,
+          max: this.filte.max || 9007199254740992,
           count: this.pageSize,
           user: this.filte.user,
           price: this.filte.price,
@@ -328,18 +326,16 @@
       inputDealMin() {
         let min=this.filte.min;
         let max=this.filte.max;
-        let num = Number(this.filte.min);
-        if (!/^[0-9]+$/.test(min) || (max && num > max) || num < 1) {
-          this.min = str.substring(0, str.length - 1);
-          this.$refs.min.value = str.substring(0, str.length - 1);
+        if (!/^[0-9]+$/.test(min) || (max && min > max) || min < 1) {
+          this.filte.min = min.substring(0, min.length - 1);
+          this.$refs.min.value = min.substring(0, min.length - 1);
         }
         this.largeTran = 0;
       },
       //最大限额输入处理
       inputDealMax() {
         let max=this.filte.max;
-        let num = Number(max);
-        if (!/^[0-9]+$/.test(max) || num < 1) {
+        if (!/^[0-9]+$/.test(max) || max < 1) {
           this.filte.max = max.substring(0, max.length - 1);
           this.$refs.max.value = max.substring(0, max.length - 1);
         }
@@ -415,8 +411,7 @@
     watch: {
       filte: {
         handler(curVal) {
-          let min = Number(curVal.min),
-            max = Number(curVal.max);
+          let min = Number(curVal.min), max = Number(curVal.max);
           if ((min > max && curVal.min && curVal.max) || (curVal.min && curVal.min < 200)) {
             this.tip = true;
             return;
