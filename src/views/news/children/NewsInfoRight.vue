@@ -66,7 +66,7 @@
               </p>
             </div>
           </div>
-          <p class="time-info" v-if="chat[index].uid !== chat[index].id && !chat[index].exists">{{chat[index].group ? '您已被管理员移出群聊' : '对方已将您从好友列表移除'}}</p>
+          <p class="time-info" v-if="!chat[index].service &&  chat[index].uid !== chat[index].id && !chat[index].exists">{{chat[index].group ? '您已被管理员移出群聊' : '对方已将您从好友列表移除'}}</p>
         </div>
 
         <!-- 系统消息 -->
