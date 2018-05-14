@@ -149,10 +149,10 @@
             return;
           }
           //退出登录时清理定时器，移除监听
-          //  this.timer1 = clearTimeout(this.timer1);
-           this.timer2 = clearInterval(this.timer2);
-           window.onmousedown = null
-           this.$store.commit({type: 'changeTrustList', data: []});
+          this.Loop.isOverTime.clear();
+          this.timer2 = clearInterval(this.timer2);
+          window.onmousedown = null
+          this.$store.commit({type: 'changeTrustList', data: []});
         },
         immediate: true
       }

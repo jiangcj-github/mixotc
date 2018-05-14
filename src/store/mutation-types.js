@@ -22,11 +22,14 @@ const moreMessage = "moreMessage";
 const moneyAddress = "moneyAddress";
 const newSystemMes = "newSystemMes";
 const beKick = 'beKick' // 新增发送消息
+const beAdd = "beAdd"; // 被加入群
 const chatTop = "chatTop"; // 新增发送消息
 const delStranger = "delStranger"; // 加好友后删除之前陌生人对话
 const initState = "initState"; // 改变登陆用户时初始化必要的state
 const updateStrangerInfo = "updateStrangerInfo"; // 跟新陌生人信息
 const agreeAddFriend = "agreeAddFriend";
+const delFriend = "delFriend";
+
 
 
 const evaluateOrder = "evaluateOrder"; // 订单评论结果
@@ -72,11 +75,13 @@ export {
   moneyAddress,
   newSystemMes,
   beKick,// 被踢出群
+  beAdd,
   chatTop,
   delStranger,
   initState,//改变登陆用户时初始化必要的state
   updateStrangerInfo,
   agreeAddFriend,
+  delFriend,
 
   evaluateOrder,
 

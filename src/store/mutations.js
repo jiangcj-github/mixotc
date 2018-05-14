@@ -73,6 +73,15 @@ export default {
   },
   [types.newChat](state, { data }) {
     // 新建聊天窗口
+    let idx, id;
+    state.chat.forEach((item, index)=>{
+      if(data.id === item.uid || data.uid === item.uid) {
+        idx = index;
+        id = item.id;
+      }
+    })
+    idx !== undefined && state.chat.splice(idx, 1);
+    state.messages[id] && delete state.messages[id];
     state.chat.unshift(data);
     state.curChat = data.id;
   },
@@ -217,6 +226,15 @@ export default {
       }
     });
   },
+
+  [types.beAdd](state, { data }) {
+    //被踢出群
+    state.chat.forEach(item => {
+      if (item.id === data) {
+        item.exists = true;
+      }
+    });
+  },
   //加好友后删除之前陌生人对话
   [types.delStranger](
     state,
@@ -256,6 +274,17 @@ export default {
       name
     };
     state.strangerInfo = Object.assign({}, state.strangerInfo);
+  },
+
+  [types.delFriend](state, { data: { id, index } }) {
+    //被删除好友
+    state.friendList.splice(index, 1)
+    state.chat.forEach(item => {
+      if (item.id === id) {
+        item.exists = false;
+        if(id !== state.curChat) item.unread++;
+      }
+    });
   },
 
   /**
@@ -341,13 +370,18 @@ export default {
 
   // 终止交易
   [types.stopTrade](state, { data }) {
-   // && length === 1
-   //  console.log('stopTrade 0', data.appellant_id, data.appellee_id)
-   //  && !console.log('stopTrade 2', item.user_id) && stateArr.splice(index, 1),[]);
-    state.serviceData = state.serviceData.filter((item, index) => item.user_id !== data.appellant_id && item.user_id !== data.appellee_id);
-    state.serviceNowOther = state.serviceNowOther.filter((item, index) => item.sid !== data.sid);
-    state.serviceNow = '';
-    state.serviceUser = {}
+    // && length === 1
+    //  console.log('stopTrade 0', data.appellant_id, data.appellee_id)
+    //  && !console.log('stopTrade 2', item.user_id) && stateArr.splice(index, 1),[]);
+    state.serviceData = state.serviceData.filter(
+      (item, index) =>
+        item.user_id !== data.appellant_id && item.user_id !== data.appellee_id
+    );
+    state.serviceNowOther = state.serviceNowOther.filter(
+      (item, index) => item.sid !== data.sid
+    );
+    state.serviceNow = "";
+    state.serviceUser = {};
     //state.serviceNow = state.serviceData.length && state.serviceData[0].user_id;
     //state.serviceUser = state.serviceData.length && state.serviceData[0];
     // state.serviceNowOther = state.serviceData.length && state.serviceData[0].user_id

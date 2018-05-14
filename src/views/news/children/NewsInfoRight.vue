@@ -66,6 +66,7 @@
               </p>
             </div>
           </div>
+          <p class="time-info" v-if="chat[index].uid !== chat[index].id && !chat[index].exists">{{chat[index].group ? '您已被管理员移出群聊' : '对方已将您从好友列表移除'}}</p>
         </div>
 
         <!-- 系统消息 -->
@@ -253,6 +254,7 @@
       this.listenChat()//监听消息
       this.beFriend()//监听被加好友
       this.beAddedGroup()//监听被加入群
+      this.delFriend()//监听被加好友
       //监听其他页面调用聊天窗口
       this.Bus.$on('contactSomeone',({id, msg})=> {
         this.contactSomeone(id, msg)
@@ -754,6 +756,7 @@
                 service: false,
                 phone: other.phone,
                 email: other.email,
+                exists: true,
                 moreFlag: this.$store.state.messages[uid] ?  (this.$store.state.messages[uid].length === 0 ? false : true): false,
                 unread: 0
               }})
@@ -813,13 +816,25 @@
           }
         }
       },
+      delFriend(){
+        this.WebSocket.onMessage['del_fd'] = {
+          callback: (res) => {
+            if (res.body && res.body.type === 'del_fd') {
+              let id = this.JsonBig.stringify(res.body.data.id);
+              this.$store.commit({type: 'delFriend', data: { id: this.friendGid[id], index: this.friendIds.indexOf(id)}})
+            }
+          }
+        }
+      },
       // 监听被加入群聊
       beAddedGroup() {
         this.WebSocket.onMessage['add_g_notify'] = {
           callback:async (res) => {
             if (res.body && ["add_g", "cre_g"].includes(res.body.type)) {
               let {id, aid, type, members} = res.body.data;
-              await this.dealNewChat(this.JsonBig.stringify(id), 1)
+              let idstr =  this.JsonBig.stringify(id);
+              if(this.chatIds.includes(idstr)) this.$store.commit({type: 'beAdd', data: idstr})
+              await this.dealNewChat(idstr, 1)
               if(type === 0) {
                 let other = members.filter(item => {
                   return this.JsonBig.stringify(item.id) !== this.userId
@@ -845,9 +860,9 @@
                   isFail: false,
                   time: new Date() - 0
                 }
-                this.$store.commit({type: 'addMessages', data:{id: this.JsonBig.stringify(id), msg: obj }})
+                this.$store.commit({type: 'addMessages', data:{id: idstr, msg: obj }})
               }
-              this.$store.commit({type: 'changeCurChat', data: {id: this.JsonBig.stringify(id)}})
+              this.$store.commit({type: 'changeCurChat', data: {id: idstr}})
             }
           }
         }

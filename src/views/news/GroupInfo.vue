@@ -181,10 +181,12 @@
         })
       },
       closeGroup() {
+
         this.$emit('offCheckGroup', 'false')
       },
       openDelGroup(st) {
         if (st === 'false') {
+          this.fetchGroup()
           this.showDelGroup = false
         } else {
           this.showDelGroup = true

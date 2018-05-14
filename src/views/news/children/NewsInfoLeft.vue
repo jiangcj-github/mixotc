@@ -53,7 +53,7 @@
       }
     },
     mounted() {
-      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('214837633300303872'), id: this.JsonBig.parse('19855731022917632') }).then(data => {})
+      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('215993507544829952'), id: this.JsonBig.parse('19855731022917632') }).then(data => {})
       this.initData()
       this.reqFriend()//监听好友请求
       this.beKickGroup()//监听被踢出群
@@ -191,6 +191,7 @@
                 service: false,
                 phone: other.phone,
                 email: other.email,
+                exists: true,
                 moreFlag: true,
                 unread: 0
               }); 
