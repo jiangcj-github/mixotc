@@ -3,45 +3,46 @@
     <div class="h1">{{user}}({{isBuyer}})</div>
 
     <!-- 对话框展示 -->
-    <div class="swiper-container">
-      <div class="swiper-wrapper">
-        <div class="fixed swiper-slide" v-for="(content, index) in otherInfo" >
-          <h3>{{appl === 1 ? '申诉人' : '被申诉人'}}</h3>
-          <div class="mf1">
-            <img :src="content.icon ? `${HostUrl.http}image/${content.icon}` : `/static/images/default_avator.png`" @click="changeUser(index)">
-            <span class="i1" @click="changeUser(index)">{{content.name}}</span>
-            <span class="i2">已标记付款</span>
-            <span class="i3">{{Math.floor(((new Date().getTime() / 1000) - content.update) / 60)}}分钟</span>
-          </div>
-          <div class="mf2">
-            <span class="i1">已被申诉{{content.times}}次</span>
-            <button class="i2" @click="forceIcon(index)">强制放币</button>
-            <button class="i3" @click="stopTrade(index)">终止交易</button>
-            <button class="i3" @click="rejectAppeal(index)" v-if="appl === 0">驳回申诉</button>
+    <div style="height: 390px">
+      <div class="swiper-container">
+        <div class="swiper-wrapper">
+          <div class="fixed swiper-slide" v-for="(content, index) in otherInfo" >
+            <h3>{{appl === 1 ? '申诉人' : '被申诉人'}}</h3>
+            <div class="mf1">
+              <img :src="content.icon ? `${HostUrl.http}image/${content.icon}` : `/static/images/default_avator.png`" @click="changeUser(index)">
+              <span class="i1" @click="changeUser(index)">{{content.name}}</span>
+              <span class="i2">已标记付款</span>
+              <span class="i3">{{Math.floor(((new Date().getTime() / 1000) - content.update) / 60)}}分钟</span>
+            </div>
+            <div class="mf2">
+              <span class="i1">已被申诉{{content.times}}次</span>
+              <button class="i2" @click="forceIcon(index)">强制放币</button>
+              <button class="i3" @click="stopTrade(index)">终止交易</button>
+              <button class="i3" @click="rejectAppeal(index)" v-if="appl === 0">驳回申诉</button>
+            </div>
           </div>
         </div>
+        <div class="swiper-button-prev" v-if="otherInfo && otherInfo.length > 1"></div>
+        <div class="swiper-button-next" v-if="otherInfo && otherInfo.length > 1"></div>
       </div>
-      <div class="swiper-button-prev" v-if="otherInfo && otherInfo.length > 1"></div>
-      <div class="swiper-button-next" v-if="otherInfo && otherInfo.length > 1"></div>
+
+      <!-- 聊天-->
+      <happy-scroll color="rgba(200,200,200,0.8)" size="5" bigger-move-h="end" resize hide-horizontal class="scrollPane">
+        <div class="msgBox">
+          <p class="check-more" @click="checkMore(10)">查看更多</p>
+          <div v-for="(item, index) in msgHis" :key="index" class="message">
+            <div class="tline" v-if="index> 0 && dealTime(msgHis[index-1].time, item.time)"><i>{{dealTime(msgHis[index-1].time, item.time)}}</i></div>
+            <p :class="{al: item.isSend !== JsonBig.stringify($store.state.userInfo.uid), ar: item.isSend == JsonBig.stringify($store.state.userInfo.uid)}">
+              <img :src="item.headimg" alt=""/>
+              <span v-if="item.type === 0" v-html="item.content"></span>
+              <span v-else-if="item.type === 1" class="img-wrap"><img :src="item.content" @click="onClickImg(item)"/></span>
+              <i class="err" title="发送失败" v-if="!item.isLoding && item.err" @click="resend(item)"></i>
+              <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding" alt="">
+            </p>
+          </div>
+        </div>
+      </happy-scroll>
     </div>
-
-    <!-- 聊天-->
-    <happy-scroll color="rgba(200,200,200,0.8)" size="5" bigger-move-h="end" resize hide-horizontal class="scrollPane">
-      <div class="msgBox">
-        <p class="check-more" @click="checkMore(10)">查看更多</p>
-        <div v-for="(item, index) in msgHis" :key="index" class="message">
-          <div class="tline" v-if="index> 0 && dealTime(msgHis[index-1].time, item.time)"><i>{{dealTime(msgHis[index-1].time, item.time)}}</i></div>
-          <p :class="{al: item.isSend !== JsonBig.stringify($store.state.userInfo.uid), ar: item.isSend == JsonBig.stringify($store.state.userInfo.uid)}">
-            <img :src="item.headimg" alt=""/>
-            <span v-if="item.type === 0" v-html="item.content"></span>
-            <span v-else-if="item.type === 1" class="img-wrap"><img :src="item.content" @click="onClickImg(item)"/></span>
-            <i class="err" title="发送失败" v-if="!item.isLoding && item.err" @click="resend(item)"></i>
-            <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding" alt="">
-          </p>
-        </div>
-      </div>
-    </happy-scroll>
-
     <!-- 下方发送消息 -->
     <div class="sendBox">
       <div class="menu">
@@ -264,7 +265,7 @@
             this.isBuyer = this.otherInfo[0].buyer_id == this.serviceNow ?  "买家" : "卖家";
           } else {
             applUser = 1;
-            this.recv = this.otherInfo[0].buyer_id == this.serviceNow ?  1 : 0; // 是否为买家 1 买 0 卖
+            this.recv = this.otherInfo[0].buyer_id == this.serviceNow ?  0 : 1; // 是否为买家 1 买 0 卖
             this.isBuyer = this.otherInfo[0].buyer_id == this.serviceNow ?  "买家" : "卖家";
           }
 
@@ -304,11 +305,11 @@
               slideChangeTransitionEnd() {
                 _this.isBuyer = _this.otherInfo && _this.otherInfo[this.activeIndex].buyer_id == _this.serviceNow ?  "买家" : "卖家";
                 // 证明无效输入框内容
-                this.ineffectiveProof = MSGS.get(1, this.appl, this.recv).replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<i style="color:#FF794C">[${_this.otherInfo[this.activeIndex].trade_code}]</i>`)
+                this.ineffectiveProof = MSGS.get(1, this.appl, this.recv) ? MSGS.get(1, this.appl, this.recv).replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<i style="color:#FF794C">[${_this.otherInfo[this.activeIndex].trade_code}]</i>`) : '';
                 // 上传付款证明
-                this.paymentProofs = MSGS.get(0, this.appl, this.recv).replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.activeIndex].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[this.activeIndex].trade_code}]</i>`)
+                this.paymentProofs = MSGS.get(0, this.appl, this.recv) ? MSGS.get(0, this.appl, this.recv).replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.activeIndex].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[this.activeIndex].trade_code}]</i>`) : '';
                 // 通知放币
-                this.noticeCoin = MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.activeIndex].sid})</a>`);
+                this.noticeCoin = MSGS.get(3, this.appl, this.recv) ? MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.activeIndex].sid})</a>`) : '';
               }
             }
           })
@@ -462,7 +463,7 @@
       onClickM0() { // 点击上传付款证明按钮
         if (this.otherInfo && this.otherInfo.length === 1) {
           this.paymentProofs = MSGS.get(0, this.appl, this.recv);
-          this.paymentProofs = this.paymentProofs.replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`);
+          this.paymentProofs = this.paymentProofs ? this.paymentProofs.replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`) : '';
         }
         this.$refs.textarea.innerHTML = this.paymentProofs;
         this.$refs.textarea.focus();
@@ -475,7 +476,7 @@
         this.showPop4 = false
         if (this.otherInfo && this.otherInfo.length === 1) {
           this.ineffectiveProof = MSGS.get(1, this.appl, this.recv);
-          this.ineffectiveProof = this.ineffectiveProof.replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`);
+          this.ineffectiveProof = this.ineffectiveProof ? this.ineffectiveProof.replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`) : '';
         }
         this.sendMsg = this.ineffectiveProof;
         this.$refs.textarea.focus();
@@ -490,7 +491,7 @@
       },
       onClickM1() { // 点击通知放币按钮
         if (this.otherInfo && this.otherInfo.length === 1) {
-          this.noticeCoin = MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`);
+          this.noticeCoin = MSGS.get(3, this.appl, this.recv) ? MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`) : '';
         }
         this.$refs.textarea.innerHTML = this.noticeCoin;
         this.$refs.textarea.focus();
@@ -520,8 +521,8 @@
       onPop1Ok() { // 强制放币确认
         this.showPop1 = false
         let time = new Date() - 0,
-            text1 = MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1TextOld),
-            text2 = MSGS.get(5, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1TextOld)
+            text1 = MSGS.get(4, this.appl, this.recv) ? MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1TextOld) : '',
+            text2 = MSGS.get(5, this.appl, this.recv) ? MSGS.get(5, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1TextOld) : ''
         // 发送消息
         this.WsProxy.sendMessage({ // 发送给买家
           type: 'text',
@@ -597,8 +598,8 @@
         // console.log('this.stopTradeObj', this.stopTradeObj, this.pop3Radio)
         this.showPop3 = false;
         let time = new Date() - 0,
-          text1 = MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld), // 非责任人
-          text2 = MSGS.get(7, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld); // 责任人
+          text1 = MSGS.get(6, this.appl, this.recv) ? MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld) : '', // 非责任人
+          text2 = MSGS.get(7, this.appl, this.recv) ? MSGS.get(7, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld) : ''; // 责任人
 
         // 发送消息
         if (this.pop3Radio == 1) { // 双方无责
@@ -699,7 +700,7 @@
       },
       onPop2Ok() { // 驳回申述确认
         this.showPop2 = false
-        let text = MSGS.get(2, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop2TextOld);
+        let text = MSGS.get(2, this.appl, this.recv) ? MSGS.get(2, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop2TextOld) : '';
         // 发送消息
         if (this.appl === 0 && this.recv === 0) {
           this.WsProxy.sendMessage({ // 发送给买家

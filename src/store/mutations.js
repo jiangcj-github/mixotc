@@ -342,8 +342,13 @@ export default {
   // 终止交易
   [types.stopTrade](state, { data }) {
    // && length === 1
-    state.serviceData.forEach((item, index) => (item.user_id === data.appellant_id || item.user_id === data.appellee_id)
-     && state.serviceData.splice(index, 1));
-    state.serviceNow = state.serviceData[0].user_id;
+   //  console.log('stopTrade 0', data.appellant_id, data.appellee_id)
+   //  && !console.log('stopTrade 2', item.user_id) && stateArr.splice(index, 1),[]);
+    state.serviceData = state.serviceData.filter((item, index) => item.user_id !== data.appellant_id && item.user_id !== data.appellee_id);
+    state.serviceNowOther = state.serviceNowOther.filter((item, index) => item.sid !== data.sid);
+    if (state.serviceUser.user_id == data.appellant_id || state.serviceUser.user_id == data.appellee_id) {
+      state.serviceUser = {}
+    };
+    state.serviceNow = state.serviceData.length && state.serviceData[0].user_id;
   }
 };

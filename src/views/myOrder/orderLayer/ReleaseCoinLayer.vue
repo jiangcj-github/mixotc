@@ -183,13 +183,11 @@
           code: this.messageVerify
         }).then((data)=>{
           console.log('确定', data)
+          this.verifyLayer = false
+          window.location.reload()
         }).catch((msg)=>{
           msg.ret !== 0 && (this.errorShow = true)
           switch (msg.ret) {
-            case 0:
-              this.verifyLayer = false
-              window.location.reload()
-              break;
             case 7:
               this.errText = '密码错误'
               break;
