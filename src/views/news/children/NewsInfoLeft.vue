@@ -153,7 +153,7 @@
           console.log(error)
         })
         //加工数据
-        console.log(linkman)
+        // console.log(linkman)
         linkman && linkman.forEach(item => {
           let group = null;
           if (item.gid) {
