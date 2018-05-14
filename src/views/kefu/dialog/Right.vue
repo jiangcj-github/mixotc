@@ -35,7 +35,14 @@
             <p :class="{al: item.isSend !== JsonBig.stringify($store.state.userInfo.uid), ar: item.isSend == JsonBig.stringify($store.state.userInfo.uid)}">
               <img :src="item.headimg" alt=""/>
               <span v-if="item.type === 0" v-html="item.content"></span>
-              <span v-else-if="item.type === 1" class="img-wrap"><img :src="item.content" @click="onClickImg(item)"/></span>
+              <span v-else-if="item.type === 1" class="img-wrap">
+                <img :src="item.content"
+                     :id="'img' + item.time"
+                     alt=""
+                     @load="imgLoad(serviceNow, item.time, 'img' + item.time)"
+                     @error="imgError(serviceNow, item.time, item.content)"
+                     @click="onClickImg(item, 'img' + item.time)"/>
+              </span>
               <i class="err" title="发送失败" v-if="!item.isLoding && item.err" @click="resend(item)"></i>
               <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding" alt="">
             </p>
@@ -112,7 +119,7 @@
         </div>
         <p class="pop1Remind">责任用户取消交易权限3天。仲裁3次，永久关闭交易权限</p>
         <div class="textarea">
-          <textarea placeholder="填写强制放币的理由" ref="pop3Text" v-model="pop3Text" @input="onPop3Input"></textarea>
+          <textarea placeholder="填写终止交易的理由" ref="pop3Text" v-model="pop3Text" @input="onPop3Input"></textarea>
           <p>{{pop3Text.length}}/50</p>
         </div>
         <div class="btns">
@@ -169,6 +176,7 @@
   import Swiper from 'swiper'; // 引入swiper
   import 'swiper/dist/css/swiper.min.css';
   import Util from "@/js/Util.js";
+  import EXIF from 'exif-js' // 大图不旋转
 
   export default {
     components: {
@@ -354,6 +362,26 @@
           time: time
         };
         this.$store.commit({type: 'addServiceMessages', data:{id: this.serviceNow, msg: obj }})
+      },
+      imgLoad(tid, time, ref) {
+        let orient;
+        EXIF.getData(document.getElementById(ref), function () {
+          orient = EXIF.getTag(this, 'Orientation');
+          if (orient === 3 ) {
+            this.className = 'rotate180'
+          }else if( orient === 6) {
+            this.className = 'rotate270'
+          }else if( orient === 8) {
+            this.className = 'rotate90'
+          }else{
+            this.className = ''
+          }
+        });
+        this.$store.commit({type: 'changeServiceMessages', data:{id: tid, time: time, code:0 }})
+      },
+      imgError(tid, time, src) {
+        if (src === '') return;
+        this.$store.commit({type: 'changeServiceMessages', data:{id: tid, time: time, code:1 }})
       },
       async chooseImage() { // 上传图片
         this.sendFile = this.$refs.file.files[0];
@@ -745,9 +773,10 @@
           console.log(msg);
         });
       },
-      onClickImg(item) { // 点击放大图片
+      onClickImg(item, id) { // 点击放大图片
         this.showPopImg = true;
         this.popImgSrc = item.content;
+        document.getElementById(id).className && (this.$refs.img.className = document.getElementById(id).className);
       }
     }
   }

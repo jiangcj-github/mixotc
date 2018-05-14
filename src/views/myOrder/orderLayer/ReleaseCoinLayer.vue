@@ -50,7 +50,7 @@
                maxlength="1"
                @keyup="getNum(index)"
                @keydown="delNum(index)"/>
-        <b class="errortext" v-if="errorShow">请输入正确的验证码</b>
+        <b class="errortext" v-if="errorShow">{{errText}}</b>
         <div>
           <em @click="offVerify">取消</em>
           <i @click="succPopup">确定</i>
@@ -98,10 +98,11 @@
         }
       },
       inputGroup(newValue, oldValue) {
-        // console.log(newValue, oldValue, newValue[newValue.length - 1].length)
+        // console.log('1111', newValue, oldValue, newValue[newValue.length - 1].length)
         // if (newValue[newValue.length - 1].length) {
         //   this.inputContent =  newValue.length + 1
         // }
+        this.messageVerify = this.inputGroup.join('')
       }
     },
     methods: {
@@ -111,8 +112,9 @@
       buyNext() { // 点击下一步
         if (this.PaymentValue === '') return
         this.$emit('offRelease', 'false');
-        this.messageVerify = '';
         this.errText = '';
+        this.messageVerify = '';
+        this.inputGroup = [];
         this.verifyLayer = true;
         this.PaymentValue = this.getSafePass(this.PaymentValue)
         console.log('this.PaymentValue', this.PaymentValue)
@@ -123,7 +125,12 @@
           }).then((data)=>{
             console.log('获取验证码', data)
           }).catch((msg)=>{
-            console.log(msg);
+            switch (msg.ret) {
+              case 3:
+                this.errText = '刚发过确认码，还未超时'
+                break;
+            }
+            console.log('获取验证码错误', msg);
           });
         }
       },
@@ -154,7 +161,12 @@
           }).then((data)=>{
             console.log('获取验证码', data)
           }).catch((msg)=>{
-            console.log(msg);
+            switch (msg.ret) {
+              case 3:
+                this.errText = '刚发过确认码，还未超时'
+                break;
+            }
+            console.log('获取验证码错误', msg);
           });
         }
       },
@@ -173,7 +185,6 @@
         if (oEvent.keyCode === 8) {
           this.inputContent = index - 1
         }
-        this.messageVerify = this.inputGroup.join('')
       },
       succPopup() { // 点击确定
         this.WsProxy.send('otc','send_order',{
@@ -188,6 +199,9 @@
         }).catch((msg)=>{
           msg.ret !== 0 && (this.errorShow = true)
           switch (msg.ret) {
+            case 6:
+              this.errText = '谷歌验证失败'
+              break;
             case 7:
               this.errText = '密码错误'
               break;
@@ -195,7 +209,6 @@
               this.errText = '验证码错误'
               break;
           }
-          // console.log('输入框', this.inputGroup.join(''))
           console.log('你错了', msg.ret);
         })
       },
