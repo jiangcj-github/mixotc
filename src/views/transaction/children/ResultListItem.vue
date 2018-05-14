@@ -38,7 +38,7 @@ export default {
       this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})
     },
     _toOrder(data){
-      let res=beforeOrder({
+      beforeOrder({
         ws: this.WsProxy,
         id :data.id,
         sid :data.sid,
@@ -46,14 +46,15 @@ export default {
         loginUid: this.$store.state.userInfo.uid,
         isLogin: this.$store.state.isLogin,
         isVerify: this.$store.state.userInfo.verify,
+      }).then(()=>{
+        this.$router.push({ name: 'order', query: { id: data.id}});
+      }).catch((res)=>{
+        if(res==="未登录") {
+          this.$store.commit({type: 'changeLoginForm', data: true});
+        }else{
+          this.Bus.$emit(this.onOrderFail,res);
+        }
       });
-      if(!res){
-        this.$router.push({ name: 'order', query: { id: data.id}})
-      }else if(res==="未登录") {
-        this.$store.commit({type: 'changeLoginForm', data: true});
-      }else{
-        this.Bus.$emit(this.onOrderFail,res);
-      }
     },
   },
 };

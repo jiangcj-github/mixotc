@@ -66,7 +66,7 @@
               this.remindText = '卖家(对方)有订单未完成';
               break;
             case 14:
-              this.remindText = '当天取消订单超过5次';
+              this.remindText = '当天取消订单超过5次，请明天再下单';
               break;
             case 18:
               this.remindText = '买家(您)有订单未完成';

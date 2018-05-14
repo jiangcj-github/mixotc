@@ -1,24 +1,30 @@
 import JsonBig from "json-bigint";
 
 let beforeOrder=function(param) {
-  let opt={
+  let opt = {
     ws: param.ws,   //WsSocket
-    id :param.id,   //广告ID,BigInt
-    sid :param.sid,   //发布人ID，BigInt
+    id: param.id,   //广告ID,BigInt
+    sid: param.sid,   //发布人ID，BigInt
     currency: param.currency.toLowerCase(),   //广告货币,btc
     loginUid: param.loginUid,   //当前登录ID,BigInt
-    isLogin :param.isLogin,     //是否登录，bool
+    isLogin: param.isLogin,     //是否登录，bool
     isVerify: param.isVerify,   //是否实名认证,bool
   };
 
   //是否登录
-  if(!opt.isLogin) return "未登录";
+  if (!opt.isLogin) {
+    return Promise.reject("未登录");
+  }
 
   //是否实名认证
-  //if(!opt.isVerify) return "未实名认证";
+  // if(!opt.isVerify){
+  //   return Promise.reject("未实名认证");
+  // }
 
   //是否自己的广告
-  if(JsonBig.stringify(opt.sid)===JsonBig.stringify(opt.loginUid)) return "不能与自己交易";
+  if(JsonBig.stringify(opt.sid)===JsonBig.stringify(opt.loginUid)){
+    return Promise.reject("不能与自己交易");
+  }
 
   //广告是否存在
   let isExist=new Promise((resolve,reject)=>{
@@ -63,15 +69,11 @@ let beforeOrder=function(param) {
     });
   });
 
-  Promise.all([
+  return Promise.all([
     isExist,
     hasWallet,
     hasUnfinishOrder,
-  ]).then(()=>{
-    return "";
-  }).catch((err)=>{
-    return err;
-  });
+  ]);
 };
 
 export default beforeOrder;
