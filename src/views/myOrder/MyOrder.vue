@@ -94,8 +94,8 @@
               <span v-else-if="operation.flag===8" class="active-btn" @click="openReleaseCoin($event, content, index)">{{operation.name}}</span>
               <span v-else-if="operation.flag===2" class="text-b" @click="showOperation(index)">{{operation.name}}</span>
               <span v-else-if="operation.flag===4" @click="openSelect($event, operation, index, content)">{{operation.name}}</span>
-              <span v-else-if="operation.flag===7" @click="openSelect($event, operation, index, content)">
-                {{operation.name}}<i v-if="content.timeToAppeal>0">({{content.timeToAppeal.formatSecord2()}}可申诉)</i>
+              <span v-else-if="operation.flag===7" @click="openSelect($event, operation, index, content)" :class="{disabled:content.timeToAppeal>0}">
+                {{operation.name}}<i v-if="content.timeToAppeal>0">({{content.timeToAppeal.formatSecord()}})</i>
               </span>
               <span v-else-if="operation.flag===9" @click="openSelect($event, operation, index, content)">{{operation.name}}</span>
               <span v-else-if="operation.flag===5" @click="remindCoin(content)">{{operation.name}}</span>
@@ -116,7 +116,8 @@
     <Pagination  v-if="contentList && contentList.length"
                 :total="pageTotal"
                 :pageSize="15"
-                emitValue="changePage">
+                :curPage="curPage">
+                <!--emitValue="changePage"-->
     </Pagination >
     <!--<div class="page-btn" v-if="contentList">-->
       <!--<button @click="clickPre" :class="{'unable-btn': page === 0}" :disabled="page === 0">上一页</button>-->
@@ -161,7 +162,7 @@
 
 <script>
   import ChoiceBox from '@/components/common/ChoiceBox' // 引入下拉选择框
-  import Pagination from '@/components/common/Pagination' // 引入分页
+  // import Pagination from '@/components/common/Pagination' // 引入分页
   // import DatePicker from '@/components/common/DatePicker' // 引入日历
   import DateInterval from '@/components/common/DateInterval' // 引入日历
   import SearchInput from '@/components/common/SearchInput' // 引入搜索下拉框
@@ -174,6 +175,7 @@
   import CheckBox from '@/components/common/CheckBox' // 引入多选弹窗
   import CountDown from '@/components/common/CountDown' // 引入倒计时
   import TransformLayer from '@/views/myOrder/orderLayer/TransformLayer' // 申诉弹窗
+  import Pagination from "@/views/verify/component/Pagination";
 
   export default {
     name: "my-order",
@@ -292,8 +294,9 @@
         completeNum: 0, // 完成数量
 
         pageTotal: 0, // 分页总数
-        changePage: 'changePage', // 监听自组件数量
-        page: 0 // 分页
+        curPage: 1, // 当前页
+        // changePage: 'changePage', // 监听自组件数量
+        // page: 0 // 分页
       }
     },
     created() {
@@ -394,7 +397,6 @@
       // this.Bus.$on('offTime', data => this.showTime = data);
       // 时间框值
       this.Bus.$on('onDiChange', () => {
-        console.log('11111', this.$refs.di.date1 )
         this.startValueDate = this.$refs.di.date1 ? Math.floor(new Date(this.$refs.di.date1).getTime() / 1000) : null;
         this.endValueDate = this.$refs.di.date2 ? Math.floor(new Date(this.$refs.di.date2).getTime() / 1000) : null;
         if (this.startValueDate && this.endValueDate) {
@@ -402,11 +404,15 @@
         }
       });
       // 分页
-      this.Bus.$on(this.changePage, data => {
-        console.log('changePage', data)
-        this.page = data
-        this.initData()
-      })
+      // this.Bus.$on(this.changePage, data => {
+      //   console.log('changePage', data)
+      //   this.page = data
+      //   this.initData()
+      // })
+      this.Bus.$on('onPageChange', data => {
+        this.curPage = data;
+        this.initData();
+      });
     },
     destroyed() {
       this.Bus.$off(this.orderTypeValue);
@@ -414,16 +420,24 @@
       this.Bus.$off(this.allStatusValue);
       this.Bus.$off(this.searchValue);
       this.Bus.$off('onDiChange');
+      this.Bus.$off('onPageChange');
     },
     methods: {
       contactSomeone(id){
         this.Bus.$emit('contactSomeone', {id: this.JsonBig.stringify(id)})
       },
-      appealTimer(item){
-        if(item.timeToAppeal<=0) return;
+      appealTimer(){
+        let s=0;
+        this.contentList && this.contentList.forEach((e,i)=>{
+          if(e.timeToAppeal>0){
+            s++;
+            e.timeToAppeal--;
+            this.$set(this.contentList,i,e);
+          }
+        });
+        if(s<=0) return;
         setTimeout(()=>{
-          item.timeToAppeal--;
-          this.appealTimer(item);
+          this.appealTimer();
         },1000);
       },
       initData() {
@@ -443,7 +457,7 @@
               this.$store.state.newOrder = false
             }
             // 根据状态进行判断
-            this.contentList && this.contentList.forEach(v => {
+            this.contentList && this.contentList.forEach((v,i) => {
               // 倒计时数据
               if (v.state == 1) {
                 this.endTime = (v.limit - (Math.floor(new Date().getTime() / 1000) - v.create * 1) / 60) * 60000
@@ -475,9 +489,9 @@
               }
               v.operationList = operationListObject[v.state]
               // 可申诉时间到计时
-              v.timeToAppeal = 30 * 60 - (Math.floor(Date.now() / 1000) - v.paytime);
-              this.appealTimer(v);
-            })
+              v.timeToAppeal= 30 * 60 - (Math.floor(Date.now() / 1000) - v.paytime);
+            });
+            this.appealTimer();
           },
           date:new Date()
         };
@@ -489,7 +503,7 @@
             data: {
               "type": this.selectOrder, // 1 买; 2 卖; 3 全部  <-state=0
               "state": this.selectState, // 订单状态
-              "origin": this.page, // 分页
+              "origin": this.curPage - 1, // 分页
               "count": 15, // 每页多少条数据
               "date": this.dateSort,// 时间排序 1降序 2升序
               "price": this.price,// 单价排序 1降序 2升序
@@ -561,7 +575,7 @@
       },
       selectTime(index) { // 时间切换
         this.num = index;
-        let date2 = new Date(new Date(new Date().toLocaleDateString()).getTime() + 24 * 60 * 60 * 1000);
+        let date2 = new Date(new Date(new Date().toDateString()).getTime() + 24 * 60 * 60 * 1000);
         this.$refs.di.date2 = date2;
         if (index === 0) {
           this.$refs.di.date1 = new Date(date2.getTime() - (24 * 60 * 60 * 1000))
@@ -854,6 +868,9 @@
             p
               color #FFB422
               cursor pointer
+              >span.disabled
+                color #999
+                pointer-events none
             .active-btn
               display inline-block
               width 100px

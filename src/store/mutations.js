@@ -341,12 +341,9 @@ export default {
 
   // 终止交易
   [types.stopTrade](state, { data }) {
-    let idex;
-    state.serviceData.forEach((item, index) => {
-      //item.user_id === data.appellant_id && (idex = index);
-      item.user_id === data.appellee_id && (idex = index);
-      state.serviceData.splice(idex, 1);
-    });
+   // && length === 1
+    state.serviceData.forEach((item, index) => (item.user_id === data.appellant_id || item.user_id === data.appellee_id)
+     && state.serviceData.splice(index, 1));
     state.serviceNow = state.serviceData[0].user_id;
   }
 };
