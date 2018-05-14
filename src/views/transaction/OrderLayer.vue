@@ -63,13 +63,13 @@
           this.remindLayer = true;
           switch (msg.ret) {
             case 13:
-              this.remindText = '买家(对方)有订单未完成';
+              this.remindText = '卖家(对方)有订单未完成';
               break;
             case 14:
               this.remindText = '当天取消订单超过5次';
               break;
             case 18:
-              this.remindText = '买家(你自己)有订单未完成';
+              this.remindText = '买家(您)有订单未完成';
               break;
             case 43:
               this.remindText = '订单未完成';
