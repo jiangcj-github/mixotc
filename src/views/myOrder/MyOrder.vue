@@ -94,8 +94,8 @@
               <span v-else-if="operation.flag===8" class="active-btn" @click="openReleaseCoin($event, content, index)">{{operation.name}}</span>
               <span v-else-if="operation.flag===2" class="text-b" @click="showOperation(index)">{{operation.name}}</span>
               <span v-else-if="operation.flag===4" @click="openSelect($event, operation, index, content)">{{operation.name}}</span>
-              <span v-else-if="operation.flag===7" @click="openSelect($event, operation, index, content)">
-                {{operation.name}}<i v-if="content.timeToAppeal>0">({{content.timeToAppeal.formatSecord2()}}可申诉)</i>
+              <span v-else-if="operation.flag===7" @click="openSelect($event, operation, index, content)" :class="{disabled:content.timeToAppeal>0}">
+                {{operation.name}}<i v-if="content.timeToAppeal>0">({{content.timeToAppeal.formatSecord()}})</i>
               </span>
               <span v-else-if="operation.flag===9" @click="openSelect($event, operation, index, content)">{{operation.name}}</span>
               <span v-else-if="operation.flag===5" @click="remindCoin(content)">{{operation.name}}</span>
@@ -293,7 +293,7 @@
 
         pageTotal: 0, // 分页总数
         changePage: 'changePage', // 监听自组件数量
-        page: 0 // 分页
+        page: 0, // 分页
       }
     },
     created() {
@@ -394,7 +394,6 @@
       // this.Bus.$on('offTime', data => this.showTime = data);
       // 时间框值
       this.Bus.$on('onDiChange', () => {
-        console.log('11111', this.$refs.di.date1 )
         this.startValueDate = this.$refs.di.date1 ? Math.floor(new Date(this.$refs.di.date1).getTime() / 1000) : null;
         this.endValueDate = this.$refs.di.date2 ? Math.floor(new Date(this.$refs.di.date2).getTime() / 1000) : null;
         if (this.startValueDate && this.endValueDate) {
@@ -419,11 +418,18 @@
       contactSomeone(id){
         this.Bus.$emit('contactSomeone', {id: this.JsonBig.stringify(id)})
       },
-      appealTimer(item){
-        if(item.timeToAppeal<=0) return;
+      appealTimer(){
+        let s=0;
+        this.contentList && this.contentList.forEach((e,i)=>{
+          if(e.timeToAppeal>0){
+            s++;
+            e.timeToAppeal--;
+            this.$set(this.contentList,i,e);
+          }
+        });
+        if(s<=0) return;
         setTimeout(()=>{
-          item.timeToAppeal--;
-          this.appealTimer(item);
+          this.appealTimer();
         },1000);
       },
       initData() {
@@ -443,7 +449,7 @@
               this.$store.state.newOrder = false
             }
             // 根据状态进行判断
-            this.contentList && this.contentList.forEach(v => {
+            this.contentList && this.contentList.forEach((v,i) => {
               // 倒计时数据
               if (v.state == 1) {
                 this.endTime = (v.limit - (Math.floor(new Date().getTime() / 1000) - v.create * 1) / 60) * 60000
@@ -475,9 +481,9 @@
               }
               v.operationList = operationListObject[v.state]
               // 可申诉时间到计时
-              v.timeToAppeal = 30 * 60 - (Math.floor(Date.now() / 1000) - v.paytime);
-              this.appealTimer(v);
-            })
+              v.timeToAppeal= 30 * 60 - (Math.floor(Date.now() / 1000) - v.paytime);
+            });
+            this.appealTimer();
           },
           date:new Date()
         };
@@ -561,7 +567,7 @@
       },
       selectTime(index) { // 时间切换
         this.num = index;
-        let date2 = new Date(new Date(new Date().toLocaleDateString()).getTime() + 24 * 60 * 60 * 1000);
+        let date2 = new Date(new Date(new Date().toDateString()).getTime() + 24 * 60 * 60 * 1000);
         this.$refs.di.date2 = date2;
         if (index === 0) {
           this.$refs.di.date1 = new Date(date2.getTime() - (24 * 60 * 60 * 1000))
@@ -854,6 +860,9 @@
             p
               color #FFB422
               cursor pointer
+              >span.disabled
+                color #999
+                pointer-events none
             .active-btn
               display inline-block
               width 100px
