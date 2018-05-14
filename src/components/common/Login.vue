@@ -99,6 +99,7 @@
       changeAccount(account) {
         this.account = account;
       },
+      //保存登录账号最多5个
       saveAccount(account) {
         let storage = this.Storage.otcAccount;
         let list = storage.get();
@@ -114,7 +115,7 @@
             return;
           }
           list.length < 5 && list.unshift(account)
-          list.length > 5 && list.splice(4,1) && list.unshift(account)
+          list.length >= 5 && list.splice(4,1) && list.unshift(account)
           storage.set(list)
         }
       },
@@ -201,6 +202,7 @@
             data.body.msg && this.$store.commit({ type: 'changeToken', data: data.body.msg })
             data.body.msg && localStorage.setItem('getToken', data.body.msg);
             this.$store.commit({ type: 'changeLogin', data: true });
+            this.Storage.loginTime.set(new Date() - 0)
             localStorage.removeItem('getToken')
 
           },

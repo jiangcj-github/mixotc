@@ -10,7 +10,8 @@
 export default {
   symbolsRefresh: {},
   topCurrency: {},
-  topCurrencyRoll: {}
+  topCurrencyRoll: {},
+  isOverTime: {}
   // testMoreTaskBegin: {
   //   start: true,
   //   delayTime: 1000,

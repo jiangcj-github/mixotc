@@ -18,7 +18,7 @@ export default {
    * expiryTime:到期时间
    */
   storageList: [
-    // {name: 'otcToken', duration:86400000, expiryTime: 0, default:[], useDefault:false, arrPath:['a'] },
+    {name: 'loginTime', duration:0, expiryTime: 0, default:[], useDefault:false},
     {
       name: "otcAccount",
       duration: 0,

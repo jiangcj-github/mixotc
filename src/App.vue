@@ -42,13 +42,13 @@
             return;
           }
           ws.reConnectFlag = true;
-          console.log(this.$store.state.trustList)
           this.$store.commit({
             type: 'getUserInfo',
             data: data.body
           });
-
           this.$store.commit({type: 'changeLogin', data: true});
+          this.Storage.loginTime.set(new Date() - 0)
+
           // this.watchTokenFlag = false
         }
       });
@@ -82,14 +82,15 @@
       }
     },
     destroyed() {
-      this.timer1 && (this.timer1 = clearTimeout(this.timer1));
+      // this.timer1 && (this.timer1 = clearTimeout(this.timer1));
       this.timer2 && (this.timer2 = clearInterval(this.timer2));
       window.onmousedown = null
     },
     methods: {
       //退出登录逻辑
       logout() {
-        console.log('倒计时结束 logout');
+        // 一个选项卡退出，所有选项卡均退出
+        localStorage.setItem("removeSessionStorage", Date.now());
         this.$store.commit({type: 'changeToken', data: ''});
         //改变vuex登录状态
         this.$store.commit({type: 'changeLogin', data: false});
@@ -126,15 +127,19 @@
       isLogin: {
         handler: function(curVal, oldVal) {
           if (curVal) {
-          //登录时设置定时器，绑定事件监听用户操作
-            this.timer1 && (this.timer1 = clearTimeout(this.timer1));
-            this.timer1 = setTimeout(this.logout, 600000);
+          //登录时设置定时器，绑定事件监听用户操作(任意一个选项卡有点击即重新计时)
             window.onmousedown = (event) => {
               //用户操作时重新计时
-              console.log('click')
-              this.timer1 = clearTimeout(this.timer1);
-              this.timer1 = setTimeout(this.logout, 600000);
+              this.Storage.loginTime.set(new Date() - 0);
             }
+            this.Loop.isOverTime.clear();
+            this.Loop.isOverTime.set(() => {
+              // 10分钟无操作则自动退出
+              let flag = new Date() - 0 - this.Storage.loginTime.get() > 600000;
+              if(flag) this.logout();
+            }, 1000)
+            this.Loop.isOverTime.start()
+
             //定时查询token，token删除即退出登录
             this.timer2 && (this.timer2 = clearInterval(this.timer2));
             this.timer2 = setInterval(() => {
@@ -144,9 +149,10 @@
             return;
           }
           //退出登录时清理定时器，移除监听
-           this.timer1 = clearTimeout(this.timer1);
-           this.timer2 = clearTimeout(this.timer2);
+          //  this.timer1 = clearTimeout(this.timer1);
+           this.timer2 = clearInterval(this.timer2);
            window.onmousedown = null
+           this.$store.commit({type: 'changeTrustList', data: []});
         },
         immediate: true
       }
