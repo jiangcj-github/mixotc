@@ -30,7 +30,7 @@
       <div class="img phone-img">
         <img src="/static/images/phoneicon.png">
         <p>
-          <img src="/static/images/QRcode.png" alt="">
+          <img src="/static/images/down_load.png" alt="">
           <span><i>下载APP沟通更方便</i></span>
         </p>
       </div>
@@ -153,6 +153,7 @@
           console.log(error)
         })
         //加工数据
+        console.log(linkman)
         linkman && linkman.forEach(item => {
           let group = null;
           if (item.gid) {
@@ -178,12 +179,12 @@
               });
             }else {
               let other = group.members.filter( item => {
-                return this.JsonBig.stringify(item.id) !== this.userId
+                return this.JsonBig.stringify(item.id) !== this.JsonBig.stringify(this.$store.state.userInfo.uid)
               })[0]
               let uid = this.JsonBig.stringify(other.id)
               result.push({
                 mid: item.mid ? this.JsonBig.stringify(item.mid) : 0,
-                id: this.friendGid[uid],
+                id: this.JsonBig.stringify(group.id),
                 uid: uid,
                 isSingle: true,
                 group: false,

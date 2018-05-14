@@ -16,7 +16,7 @@
           <li class="itag" @mouseenter="showQr" @mouseleave="hideQr">
             <img class="top-logo" src="/static/images/phoneicon.png" alt="">
             <div class="show-qr" v-show="isHover">
-              <img src="/static/images/QRcode.png" alt="">
+              <img src="/static/images/down_load.png" alt="">
               <span>APP安卓端下载</span>
             </div>
           </li>

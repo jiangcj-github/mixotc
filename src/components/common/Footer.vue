@@ -181,6 +181,8 @@
 
         img
           float left
+          width 60px
+          height 60px
 
         span
           display inline-block
