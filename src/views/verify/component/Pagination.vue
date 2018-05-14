@@ -71,7 +71,7 @@
         if(!/^[0-9]*[1-9][0-9]*$/.test(str) || num > this.totalPage) return;
         this.changePage(num);
       }
-    }
+    },
   };
 </script>
 <style lang="stylus" scoped>

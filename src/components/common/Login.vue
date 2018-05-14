@@ -228,7 +228,7 @@
       },
       getExplorerInfo() {
         let explorer = window.navigator.userAgent.toLowerCase();
-        //ie 
+        //ie
         if (explorer.indexOf("msie") >= 0) {
           var ver = explorer.match(/msie ([\d.]+)/)[1];
           return "IE" + ver;

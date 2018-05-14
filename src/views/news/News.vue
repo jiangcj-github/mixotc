@@ -61,7 +61,7 @@
               this.newMessage = false
             }, 3000)
             return;
-          } 
+          }
           this.newMessage = false
         },
         immediate: true

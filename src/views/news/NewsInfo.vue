@@ -28,7 +28,7 @@
       cons(){
         console.log(9999)
       }
-    }
+    },
   }
 </script>
 

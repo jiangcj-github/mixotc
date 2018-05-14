@@ -55,7 +55,7 @@ export default {
         this.Bus.$emit(this.onOrderFail,res);
       }
     },
-  }
+  },
 };
 </script>
 
