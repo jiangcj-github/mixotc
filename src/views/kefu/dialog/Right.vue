@@ -304,7 +304,7 @@
               slideChangeTransitionEnd() {
                 _this.isBuyer = _this.otherInfo && _this.otherInfo[this.activeIndex].buyer_id == _this.serviceNow ?  "买家" : "卖家";
                 // 证明无效输入框内容
-                this.ineffectiveProof = MSGS.get(1, this.appl, this.recv).replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<span style="color:#FF794C">[${_this.otherInfo[this.activeIndex].trade_code}]</span>`)
+                this.ineffectiveProof = MSGS.get(1, this.appl, this.recv).replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<i style="color:#FF794C">[${_this.otherInfo[this.activeIndex].trade_code}]</i>`)
                 // 上传付款证明
                 this.paymentProofs = MSGS.get(0, this.appl, this.recv).replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.activeIndex].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[this.activeIndex].trade_code}]</i>`)
                 // 通知放币
@@ -475,7 +475,7 @@
         this.showPop4 = false
         if (this.otherInfo && this.otherInfo.length === 1) {
           this.ineffectiveProof = MSGS.get(1, this.appl, this.recv);
-          this.ineffectiveProof = this.ineffectiveProof.replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<span style="color:#FF794C">[${this.otherInfo[0].trade_code}]</span>`);
+          this.ineffectiveProof = this.ineffectiveProof.replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`);
         }
         this.sendMsg = this.ineffectiveProof;
         this.$refs.textarea.focus();

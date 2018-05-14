@@ -180,7 +180,7 @@
           uid: this.uid,
           id: this.id,
           pass: this.PaymentValue,
-          code: this.messageVerify * 1
+          code: this.messageVerify
         }).then((data)=>{
           console.log('确定', data)
         }).catch((msg)=>{
