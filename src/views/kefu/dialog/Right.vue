@@ -1,6 +1,6 @@
 <template>
   <div class="right">
-    <div class="h1">{{user}}({{isBuyer}})</div>
+    <div class="h1"><b v-show="serviceNow">{{user}}({{isBuyer}})</b></div>
 
     <!-- 对话框展示 -->
     <div style="height: 390px">
@@ -27,7 +27,7 @@
       </div>
 
       <!-- 聊天-->
-      <happy-scroll color="rgba(200,200,200,0.8)" size="5" bigger-move-h="end" resize hide-horizontal class="scrollPane">
+      <happy-scroll color="rgba(200,200,200,0.8)" size="5" bigger-move-h="end" resize hide-horizontal class="scrollPane" v-show="serviceNow">
         <div class="msgBox">
           <p class="check-more" @click="checkMore(10)">查看更多</p>
           <div v-for="(item, index) in msgHis" :key="index" class="message">
@@ -49,9 +49,9 @@
         <img src="/static/images/kefu/album.png" @click="$refs.file.click()" title="发送图片">
         <input type="file" ref="file" v-show="0" accept="image/*" @change="chooseImage">
         <span class="br"></span>
-        <button class="b1" @click="onClickM0">上传付款证明</button>
-        <button class="b2" @click="onClickM2">证明无效</button>
-        <button class="b3" @click="onClickM1">通知放币</button>
+        <button class="b1" @click="onClickM0" :disabled="serviceNow === '' ? true : false">上传付款证明</button>
+        <button class="b2" @click="onClickM2" :disabled="serviceNow === '' ? true : false">证明无效</button>
+        <button class="b3" @click="onClickM1" :disabled="serviceNow === '' ? true : false">通知放币</button>
       </div>
       <div contenteditable="true"
            ref="textarea"
@@ -62,7 +62,7 @@
       </div>
       <div class="bottom">
         <span>按下Enter发送内容/Ctrl+Enter换行</span>
-        <button @click="send">发送</button>
+        <button @click="send" :disabled="serviceNow === '' ? true : false">发送</button>
       </div>
     </div>
     <!--图片弹出框-->
