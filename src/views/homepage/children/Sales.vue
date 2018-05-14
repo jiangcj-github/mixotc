@@ -67,8 +67,8 @@
 
         fltTypes:[
           {text:"全部广告",value:null},
-          {text:"购买",value:1},
-          {text:"出售",value:2},
+          {text:"购买",value:2},
+          {text:"出售",value:1},
         ],
         fltTypeSel: 0,
         fltTypeShow: false,
