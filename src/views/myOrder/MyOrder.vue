@@ -116,7 +116,8 @@
     <Pagination  v-if="contentList && contentList.length"
                 :total="pageTotal"
                 :pageSize="15"
-                emitValue="changePage">
+                :curPage="curPage">
+                <!--emitValue="changePage"-->
     </Pagination >
     <!--<div class="page-btn" v-if="contentList">-->
       <!--<button @click="clickPre" :class="{'unable-btn': page === 0}" :disabled="page === 0">上一页</button>-->
@@ -161,7 +162,7 @@
 
 <script>
   import ChoiceBox from '@/components/common/ChoiceBox' // 引入下拉选择框
-  import Pagination from '@/components/common/Pagination' // 引入分页
+  // import Pagination from '@/components/common/Pagination' // 引入分页
   // import DatePicker from '@/components/common/DatePicker' // 引入日历
   import DateInterval from '@/components/common/DateInterval' // 引入日历
   import SearchInput from '@/components/common/SearchInput' // 引入搜索下拉框
@@ -174,6 +175,7 @@
   import CheckBox from '@/components/common/CheckBox' // 引入多选弹窗
   import CountDown from '@/components/common/CountDown' // 引入倒计时
   import TransformLayer from '@/views/myOrder/orderLayer/TransformLayer' // 申诉弹窗
+  import Pagination from "@/views/verify/component/Pagination";
 
   export default {
     name: "my-order",
@@ -292,8 +294,9 @@
         completeNum: 0, // 完成数量
 
         pageTotal: 0, // 分页总数
-        changePage: 'changePage', // 监听自组件数量
-        page: 0, // 分页
+        curPage: 1, // 当前页
+        // changePage: 'changePage', // 监听自组件数量
+        // page: 0 // 分页
       }
     },
     created() {
@@ -401,11 +404,15 @@
         }
       });
       // 分页
-      this.Bus.$on(this.changePage, data => {
-        console.log('changePage', data)
-        this.page = data
-        this.initData()
-      })
+      // this.Bus.$on(this.changePage, data => {
+      //   console.log('changePage', data)
+      //   this.page = data
+      //   this.initData()
+      // })
+      this.Bus.$on('onPageChange', data => {
+        this.curPage = data;
+        this.initData();
+      });
     },
     destroyed() {
       this.Bus.$off(this.orderTypeValue);
@@ -413,6 +420,7 @@
       this.Bus.$off(this.allStatusValue);
       this.Bus.$off(this.searchValue);
       this.Bus.$off('onDiChange');
+      this.Bus.$off('onPageChange');
     },
     methods: {
       contactSomeone(id){
@@ -495,7 +503,7 @@
             data: {
               "type": this.selectOrder, // 1 买; 2 卖; 3 全部  <-state=0
               "state": this.selectState, // 订单状态
-              "origin": this.page, // 分页
+              "origin": this.curPage - 1, // 分页
               "count": 15, // 每页多少条数据
               "date": this.dateSort,// 时间排序 1降序 2升序
               "price": this.price,// 单价排序 1降序 2升序
