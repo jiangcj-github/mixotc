@@ -109,7 +109,7 @@
       },
       selectNowUser() {
         this.WsProxy.send('control', 'a_get_user_appeals', { // 初始化页面获得联系人
-          "user_id": this.uls && (this.$route.query.uid ? this.JsonBig.parse(this.$route.query.uid) : this.JsonBig.parse(this.uls[0].user_id)),
+          "user_id": this.$route.query.uid ? this.JsonBig.parse(this.$route.query.uid) : (this.uls ? this.JsonBig.parse(this.uls[0].user_id) : 0),
         }).then(data => {
           data && data.forEach(v => {
             v.buyer_id = this.JsonBig.stringify(v.buyer_id) // 买家

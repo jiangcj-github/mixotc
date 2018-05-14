@@ -315,49 +315,49 @@
       // 监听下拉框值，将值传给子组件
       this.Bus.$on(this.orderTypeValue, (data) => { // 类型筛选
         this.selectOrder = data
-        //console.log('orderTypeValue', this.selectOrder)
         this.initData()
-        //console.log('this.sortActive', this.sortActive)
       });
       this.Bus.$on(this.currencyValue, (data) => { // 币种筛选
         data.length ? this.selectCurrency = data.join(',') : this.selectCurrency = data
         this.initData()
-        // console.log('currencyValue', data)
-        // console.log('selectCurrency', this.selectCurrency)
       });
       this.Bus.$on(this.allStatusValue, (data) => { // 类型筛选
-        if (data.indexOf('6,7') > -1 || data.indexOf('8,9') > -1) {
-          if (data.indexOf('6,7') > -1) {
-            if (data.indexOf('8,9') > -1) {
-              this.comment = 0
-              this.selectState = data.length && data.join(',')
-            } else {
-              this.comment = 1
-              data.splice(data.indexOf('6,7'), 1)
-              this.selectState = data.length ? data.join(',') : ''
-            }
-          }
-          if (data.indexOf('8,9') > -1) {
-            if (data.indexOf('6,7') > -1) {
-              this.comment = 0
-              this.selectState = data.length && data.join(',')
-            } else {
-              this.comment = 2
-              data.splice(data.indexOf('8,9'), 1)
-              this.selectState = data.length ? data.join(',') : ''
-            }
-          }
-        } else {
-          this.comment = 0
-          this.selectState = data.length && data.join(',')
-        }
-        if (this.contentTabIndex === 1) { // 进行中的全部状态
-          this.selectState === 0 && (this.selectState = "1,2,3")
-        }
-        if (this.contentTabIndex === 2) { // 已完成中的全部状态
-          this.selectState === 0 && (this.selectState = "4,5,6,7,8,9,10,11")
-        }
-        console.log('selectState', this.selectState)
+        // if (data.indexOf('6,7') > -1 || data.indexOf('8,9') > -1) {
+        //   if (data.indexOf('6,7') > -1) {
+        //     if (data.indexOf('8,9') > -1) {
+        //       this.comment = 0
+        //       this.selectState = data.length && data.join(',')
+        //     } else {
+        //       this.comment = 1
+        //       data.splice(data.indexOf('6,7'), 1)
+        //       this.selectState = data.length ? data.join(',') : ''
+        //     }
+        //   }
+        //   if (data.indexOf('8,9') > -1) {
+        //     if (data.indexOf('6,7') > -1) {
+        //       this.comment = 0
+        //       this.selectState = data.length && data.join(',')
+        //     } else {
+        //       this.comment = 2
+        //       data.splice(data.indexOf('8,9'), 1)
+        //       this.selectState = data.length ? data.join(',') : ''
+        //     }
+        //   }
+        // } else {
+        //   this.comment = 0
+        //   this.selectState = data.length && data.join(',')
+        // }
+        let a = data.indexOf('6,7'), b = data.indexOf('8,9'), selectStateArr = ['1,2,3', '4,5,6,7,8,9,10,11']
+        !((a + 1) && (b + 1)) && ((a + 1) && (this.comment = 1) && data.splice(a, 1) || (b + 1) && (this.comment = 2) && data.splice(b, 1)) || (this.comment = 0)
+        this.selectState = data.length && data.join(',') || !this.comment && (this.selectState = selectStateArr[this.contentTabIndex - 1]) || ''
+        // if (this.contentTabIndex === 1) { // 进行中的全部状态
+        //   this.selectState === '' && !this.comment && (this.selectState = "1,2,3")
+        // }
+        // if (this.contentTabIndex === 2) { // 已完成中的全部状态
+        //   this.selectState === '' && !this.comment && (this.selectState = "4,5,6,7,8,9,10,11")
+        // }
+        // console.log('a', a, 'b', b, !((a + 1) && (b + 1)))
+        console.log('selectState', this.selectState, this.comment)
         this.initData()
       });
       // 监听搜索框title值
@@ -374,8 +374,12 @@
         } else{
           this.trader = data
         }
+        if (this.result.length === 0) {
+          this.comment = 0
+          this.selectState = this.contentTabIndex === 1 ? '123' : '4,5,6,7,8,9,10,11'
+        }
         this.initData()
-        console.log('this.result', data, this.result)
+        console.log('this.result', data, this.result, this.result.length, this.contentTabIndex)
       })
       // 模糊搜索
       this.Bus.$on(this.searchResult,({type, data}) => {
@@ -419,6 +423,7 @@
       this.Bus.$off(this.currencyValue);
       this.Bus.$off(this.allStatusValue);
       this.Bus.$off(this.searchValue);
+      this.Bus.$off('changeInputContent');
       this.Bus.$off('onDiChange');
       this.Bus.$off('onPageChange');
     },
@@ -742,6 +747,7 @@
         height 25px
         margin-top 17px
         font-size 13px
+        background #FFF
         color #FFB422
         letter-spacing 0.27px
         border 1px solid #FFB422

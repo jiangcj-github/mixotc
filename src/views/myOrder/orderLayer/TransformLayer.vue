@@ -54,7 +54,10 @@
         </li>
         <li>
           <p>数量</p>
-          <div><input type="text" v-model.trim="amount"/><button>全部</button></div>
+          <div class="amount-input">
+            <input type="text" v-model.trim="amount"/><button>全部</button>
+            <span>可划转数量为：1.12345678 BTC</span>
+          </div>
           <b v-show="amount">数量应不大于可划转数量</b>
         </li>
       </ul>
@@ -178,6 +181,7 @@
             background #FFB422
             border-radius 0 2px 2px 0
             cursor pointer
+
       ol
         display flex
         align-items center
@@ -192,6 +196,15 @@
             width 16.3px
             height 12.9px
             margin 15px 12px 0
+    .amount-input
+      position relative
+      span
+        position absolute
+        top 12px
+        right 80px
+        font-size 11px
+        color #999
+        letter-spacing 0.12px
     .btn-group
       text-align center
       i,em
