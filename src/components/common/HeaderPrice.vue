@@ -51,7 +51,7 @@
     },
     methods: {
       async _initGetdata() {
-        let res =await fetch('http://47.74.244.40:8081/v1/home/topCurrency').then(data => data.json())
+        let res =await fetch('http://47.74.244.196/v1/home/topCurrency').then(data => data.json())
 
         this.exchange = res.data
         // // this.exchange = [{"id":"5acf80024aef0e2828293cb2","name":"BTC","changePercent":0.90,"price":{"cny":5590.129083652126,"usd":698.2312039247622,"btc":0.09471957971460038,"eth":1.5738048012975354}},{"id":"5acf7dc64aef0e28282939a3","name":"ETC","changePercent":-0.85,"price":{"cny":23370.82907642308,"usd":456.593021713392,"btc":0.06185059878756389,"eth":1.0291733227415678}},{"id":"5acf805c4aef0e2828293d1d","name":"ADA","changePercent":0,"price":{"cny":47957.79091382944,"usd":7627.480096047534,"btc":1.031551994874608,"eth":17.152018009082067}}]
@@ -60,7 +60,7 @@
         this.Loop.topCurrencyRoll.clear()
         this.Loop.topCurrency.setDelayTime(10000)
         this.Loop.topCurrency.set(async () => {
-          let res = await fetch('http://47.74.244.40:8081/v1/home/topCurrency').then(data => data.json())
+          let res = await fetch('http://47.74.244.196/v1/home/topCurrency').then(data => data.json())
           this.exchangeCopy = this.flag && res.data || this.exchangeCopy
           this.exchange = !this.flag && res.data || this.exchange
           // console.log(this.exchange)

@@ -51,6 +51,7 @@ export default {
       return item.id;
     });
   },
+  // 好友对应的gid,返回对象key为uid，value为gid
   friendGid: state => {
     let obj = {};
     state.groupList.forEach(item => {
@@ -64,9 +65,23 @@ export default {
     });
     return obj;
   },
+  // 返回数组 所有好友的uid字符串数组
   friendIds: state => {
     return state.friendList.map(item => {
       return JsonBig.stringify(item.id);
     });
+  },
+  
+  title: state => {
+    let result = "";
+    let infoDiction = this.a.infoDiction(state);
+    state.chat.forEach(item => {
+      if (item.id === state.curChat) {
+        item.nickName && (result = item.nickName);
+        item.isSingle && (result = infoDiction[item.uid] && infoDiction[item.uid].name);
+        !item.nickName && !item.isSingle && (result = infoDiction[item.id] && infoDiction[item.id].name);
+      }
+    });
+    return result;
   }
 };

@@ -85,7 +85,7 @@
         await this.Proxy.fetch({
           url: {
             host: '47.74.244.196',
-            port: '8081',
+            port: '80',
             path: '/v1/home/searchTips'
           },
           data: {
@@ -111,7 +111,7 @@
           {
             url: {
               host: '47.74.244.196',
-              port: '8081',
+              port: '80',
               path: '/v1/currency/detail'
             },
             data: {

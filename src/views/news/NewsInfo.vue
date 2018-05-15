@@ -20,15 +20,7 @@
     components: {
       NewsInfoLeft,
       NewsInfoRight
-    },
-    watch: {
-
-    },
-    methods: {
-      cons(){
-        console.log(9999)
-      }
-    },
+    }
   }
 </script>
 

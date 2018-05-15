@@ -214,7 +214,7 @@
         }
       },
       //监听退群
-      async quitGroup() {
+      quitGroup() {
         this.WebSocket.onMessage['quit_group'] = {
           callback:async (res) => {
             if (res.body && res.body.type === 'quit_g') {
@@ -264,6 +264,7 @@
               service: false,
               phone: item.phone,
               email: item.email,
+              exists: true,
               moreFlag: true,
               unread: 0
             });
@@ -290,7 +291,7 @@
             });
           }
         })
-      this.searchRange = result
+        this.searchRange = result
       },
       delUser(chat) {
         let messages = this.$store.state.messages[chat.id],

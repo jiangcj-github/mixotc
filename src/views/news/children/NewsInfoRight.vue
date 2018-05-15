@@ -18,75 +18,8 @@
         <img src="/static/images/close_btn.png" class="close-btn-img" @click="closeTalk">
       </li>
     </ul>
-
-    <happy-scroll 
-      style="width:399px;height:325px" 
-      :resize="true" 
-      bigger-move-h="end" 
-      hide-horizontal 
-      class="main-content"
-      :scroll-top="9999999">
-      <div class="wrap">
-        <!-- 空白消息框 -->
-        <div class="blank" v-if="!title && curChat !== 'system'"></div>
-
-        <!-- 聊天消息框 -->
-        <div class="news-info-talk clearfix" v-if="title && curChat !== 'system'">
-          <p class="more-info" v-if="chat[index].moreFlag" @click="fetchMore(10, 1)">查看更多消息</p>
-          <p class="more-info" v-else></p>
-          <div class="messages clearfix" v-for="(item, idx) of messages" :key="item.id ? item.id :item.time">
-            <p class="time-info" v-if="idx > 0 && dealTime(messages[idx - 1].time, item.time)">{{dealTime(messages[idx-1].time, item.time)}}</p>
-            <div :class="{'left-people': item.from !== JsonBig.stringify($store.state.userInfo.uid), 'right-people': item.from === JsonBig.stringify($store.state.userInfo.uid)}">
-              
-              <img 
-                class="avator" 
-                :src="infoDiction[item.from] && infoDiction[item.from].icon"
-                alt="" 
-                @click="toHomepage(item.from)"
-              >
-              <p>
-                <i :class="{name: chat[index].group && userId !== item.from}"></i>
-
-                <b v-if="chat[index].group && userId !== item.from">{{infoDiction[item.from] && infoDiction[item.from].name}}</b>
-
-                <span v-if="item.msg.type === 1" class="images">
-                  <img
-                    :id="'img' + item.time"
-                    :src="item.msg.content"
-                    alt=""
-                    @load="imgLoad(curChat, item.time, 'img' + item.time)"
-                    @error="imgError(curChat, item.time, item.msg.content)"
-                    @click="showBigPicture(!item.isLoding && !item.isFail, item.msg.content, 'img' + item.time)"
-                  >
-                </span>
-                <span v-if="item.msg.type === 0" v-html="item.msg.content" class="msg-text"></span>
-                <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding">
-                <img src="/static/images/hint.png" class="failFlag" v-if="!item.isLoding && item.isFail">
-              </p>
-            </div>
-          </div>
-          <p class="time-info" v-if="!chat[index].service &&  chat[index].uid !== chat[index].id && !chat[index].exists">{{chat[index].group ? '您已被管理员移出群聊' : '对方已将您从好友列表移除'}}</p>
-        </div>
-
-        <!-- 系统消息 -->
-        <div class="system-info" v-if="curChat === 'system'">
-          <div v-for="item of $store.state.messages['system']" :key="item.sid">
-            <img :src="infoDiction[item.id] && infoDiction[item.id].icon" alt="">
-            <ul>
-              <li class="system-info-name">{{infoDiction[item.id] && infoDiction[item.id].name}}</li>
-              <li class="system-info-info">{{item.info ? item.info : `我是${infoDiction[item.id] && infoDiction[item.id].name},申请添加你为好友`}}</li>
-            </ul>
-            <button 
-              @click="addFriend(item.id, item.info ? item.info : `我是${infoDiction[item.id] && infoDiction[item.id].name},申请添加你为好友`)"
-              :disabled="item.isDeal"
-            >
-              {{item.isDeal ? '已处理' : '同意'}}
-            </button>
-          </div>
-        </div>
-      </div>
-    </happy-scroll>
-
+    <!-- 聊天信息部分 -->
+    <RightContent></RightContent>
     <!-- 底部 -->
     <ol class="input-text clearfix">
       <li>
@@ -103,8 +36,7 @@
           if(isDisable) return;
           this.$refs.up_img.click()
         }" 
-        class="send-image"
-      >
+        class="send-image">
         <img src="/static/images/picture_icon.png"  title="发送图片">
         <div style='display:none'>
           <input type='file' ref="up_img" accept="image/png, image/jpeg" @change="uploadImage">
@@ -126,36 +58,6 @@
         <span>收款地址</span>
       </li>
     </ol>
-
-    <!-- 大图展示 -->
-    <div class="big-img" v-show="showBig">
-      <span>
-        <img
-          src="/static/images/close_btn_tr.png"
-          ref="bigPic"
-          alt=""
-          @click="()=>{this.showBigSrc = ''; this.showBig = false}"
-          >
-        </span>
-      <happy-scroll
-        style="width:370px;height:376px" 
-        :resize="true" 
-        bigger-move-h="start" 
-        hide-horizontal 
-        class="bigImg-content"
-      >
-        <div class="picture">
-          <img 
-            v-show="showBigSrc" 
-            :style="{visibility: bigLoading ? 'hidden' : 'visible'}"
-            :src="showBigSrc" 
-            alt="" 
-            ref="bigImg" 
-            @load="bigImgLoad()"
-          >
-        </div>
-      </happy-scroll>
-    </div>
     <!-- 添加好友弹窗 -->
     <AddFriend
       v-if="showAddFriend"
@@ -210,7 +112,7 @@
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
   import GroupInfo from '@/views/news/GroupInfo' // 查看群
   import { HappyScroll } from 'vue-happy-scroll'
-  import EXIF from 'exif-js'
+  import RightContent from './right/RightContent.vue';
 
   export default {
     name: "news-info-right",
@@ -233,13 +135,7 @@
         },
         timer: null,
         sendText: '',
-        sendFile: '',
-        showBig: false,
-        showBigSrc: '',
-        bigLoading: true,
-        showBigClass: '',
         userId: this.JsonBig.stringify(this.$store.state.userInfo.uid),
-        reqMessage: ''
       }
     },
     components: {
@@ -247,40 +143,22 @@
       AddGroup,
       BasePopup,
       GroupInfo,
+      RightContent,
       HappyScroll
     },
     mounted() {
       this.fetchAddress()//拉取收款地址
-      this.listenChat()//监听消息
       this.beFriend()//监听被加好友
-      this.beAddedGroup()//监听被加入群
       this.delFriend()//监听被加好友
-      //监听其他页面调用聊天窗口
-      this.Bus.$on('contactSomeone',({id, msg})=> {
-        this.contactSomeone(id, msg)
-      });
-    },
-    destroyed() {
-      this.Bus.$off('contactSomeone');
     },
     computed: {
       ...mapGetters([
         'chatIds',
         'friendIds',
         'friendGid',
-        'infoDiction'
+        'infoDiction',
+        'title'
       ]),
-      title() {
-        let result = '';
-        this.chat.forEach(item=> {
-          if (item.id === this.curChat) {
-           item.nickName && (result = item.nickName);
-           item.isSingle && (result = this.infoDiction[item.uid] && this.infoDiction[item.uid].name);
-           !item.nickName && !item.isSingle && (result = this.infoDiction[item.id] && this.infoDiction[item.id].name)
-          }
-        })
-        return result
-      },
       curChat() {
         return this.$store.state.curChat
       },
@@ -361,184 +239,6 @@
       async fetchFriendList() {
         await this.$store.dispatch({ type: 'getFriendList', ws: this.WsProxy})
       },
-      //其余页面入口-联系他
-      async contactSomeone(id, msg) {
-        if(this.userId === id) {
-          alert('不能和自己聊天')
-          return;
-        }
-        let flag = this.chatIds.indexOf(id),
-            friendFlag = false;
-        await this.fetchFriendList();
-        friendFlag = this.friendIds.includes(id);
-        if(friendFlag) id = this.friendGid[id];
-        await this.dealNewChat(id, friendFlag ? 1 : 0);
-        friendFlag && (flag = this.chatIds.indexOf(id));
-        this.$store.commit({type: 'changeChatBox', data: true})
-        if(flag !== -1) {
-          this.$store.commit({type: 'chatTop', data: flag})
-        }
-        this.$store.commit({type: 'changeCurChat', data: {id: id }})
-        if (msg) this.sendMs(msg);
-      },
-      //更多消息
-      async fetchMore(num, flag) {
-        if(this.index === '') return;
-        let result = [];
-        let chat = this.chat[this.index];
-        if(flag && this.messages[0] && !this.messages[0].id) {
-          this.$store.commit({type: 'changeMoreFlag', data:{id: this.curChat, flag: false }})
-          return;
-        }
-       let data =  await this.WsProxy.send('control', 'get_history_msgs', {
-          peer_id:  chat.group || chat.isSingle ? 0 : this.JsonBig.parse(this.curChat),
-          group_id: chat.group || chat.isSingle ? this.JsonBig.parse(this.curChat) : 0,
-          last_msg_id: this.messages[0] && this.messages[0].id ? this.JsonBig.parse(this.messages[0].id) : 0,
-          is_peer_admin: this.chat[this.index].service ? 1 : 0,
-          count: num
-        }).then(data => {
-          (!data.msgs || data.msgs.length < num) && this.$store.commit({type: 'changeMoreFlag', data:{id: this.curChat, flag: false }})
-          if (!data.msgs) return;
-          let uid = this.userId;
-
-          let length = data.msgs.length
-          data.msgs.forEach(async (item, index) => {
-            let sender_id = this.JsonBig.stringify(item.sender_id),
-                create_time = item.create_time * 1000,
-                messageContent = {
-                    text: item.data.msg && item.data.msg.br(),
-                    image: `${this.HostUrl.http}file/${item.data.id}`,
-                    audio: `您收到一条语音信息，请在手机端查看`,
-                    video: `您收到一条视频信息，请在手机端查看`,
-                    gift: `您收到一条红包信息，请在手机端查看`
-                  };
-            let obj = {
-              id: this.JsonBig.stringify(item.id),
-              from: sender_id === uid ? uid : sender_id,
-              to: sender_id === uid ? this.curChat : uid,
-              msg:{
-                type: item.type === 'image' ? 1 : 0,
-                content: messageContent[item.type]
-              },
-              isLoding: item.type === 'image' ? true : false,
-              isFail: false,
-              time: create_time
-            }
-            if(!this.infoDiction[obj.from]) {
-              await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(obj.from)}).then(({name, phone, email, icon }) => {
-                this.$store.commit(
-                  {type: 'updateStrangerInfo', 
-                    data: {
-                      id: obj.from,
-                      icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                      name: name
-                    }
-                })
-              })
-            }
-            result.push(obj)
-            if(index === length - 1) this.$store.commit({type: 'moreMessage', data: result});
-          })
-        })
-      },
-      // 监听消息
-      listenChat() {
-        //聊天信息监听
-        let _this = this;
-        this.WebSocket.onMessage['sms']={
-          async callback(res){
-            // op为7单人(陌生人)聊天信息，对象类型, op为6群聊信息，数组第0项
-            // 单聊
-            if (res.op && res.op === 7) {
-              let {id, uid, icon, name, data, type } = res.body;
-              let obj = {},
-                  messageContent = {
-                    text: data.msg && data.msg.br(),
-                    image: `${_this.HostUrl.http}file/${data.id}`,
-                    audio: `您收到一条语音信息，请在手机端查看`,
-                    video: `您收到一条视频信息，请在手机端查看`,
-                    gift: `您收到一条红包信息，请在手机端查看`
-                  }
-                obj = {
-                  id: _this.JsonBig.stringify(id),
-                  from: _this.JsonBig.stringify(uid), 
-                  to: _this.userId,
-                  msg:{
-                    type: type === 'image' ? 1 : 0,
-                    content: messageContent[type]
-                  },
-                  isLoding: type === 'image' ? true : false, 
-                  isFail: false,
-                  time: new Date() - 0
-                }
-                _this.$store.commit({
-                  type: 'updateStrangerInfo', data: 
-                    {
-                      id: _this.JsonBig.stringify(id),
-                      icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                      name: name
-                    }
-                })
-                await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
-                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
-            }
-            // 群聊（好友单聊实质为群聊）
-            if (Array.isArray(res) && res[0].op === 6) {
-              res.forEach(async (ite) => {
-                let {id, uid, gid, data, type } = res[0].body;
-                let obj = {},
-                    messageContent = {
-                      text: data.msg && data.msg.br(),
-                      image: `${_this.HostUrl.http}file/${data.id}`,
-                      audio: `您收到一条语音信息，请在手机端查看`,
-                      video: `您收到一条视频信息，请在手机端查看`,
-                      gift: `您收到一条红包信息，请在手机端查看`
-                    };
-                if (_this.userId === _this.JsonBig.stringify(uid)) return;
-                let group = _this.$store.state.groupList.filter(item => {
-                  return _this.JsonBig.stringify(gid) === _this.JsonBig.stringify(item.id)
-                })[0];
-                let other = group.members.filter(item => {
-                  return _this.JsonBig.stringify(uid) === _this.JsonBig.stringify(item.id)
-                })[0]
-                let {icon, name} = other;
-                obj = {
-                  id: _this.JsonBig.stringify(id),
-                  from: _this.JsonBig.stringify(uid), 
-                  to: _this.userId,
-                  name: name,
-                  msg:{
-                    type: type === 'image' ? 1 : 0,
-                    content: messageContent[type]
-                  },
-                  isLoding: type === 'image' ? true : false, 
-                  isFail: false,
-                  time: new Date() - 0
-                }
-                console.log(_this.JsonBig.stringify(gid))
-                await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
-                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
-              })
-            }
-          }
-        }
-      },
-      showBigPicture(flag, src, id) {
-        if (!flag || this.showBigSrc === src) return;
-        this.bigLoading = true;
-        this.showBigSrc = src;
-        this.showBig = true;
-        this.$refs.bigImg.className = document.getElementById(id).className;
-      },
-      bigImgLoad(){
-        this.bigLoading = false;
-        let height = this.$refs.bigImg.clientHeight;
-        if(height > 376) {
-          this.$refs.bigImg.style.marginTop = 0;
-          return;
-        }
-        this.$refs.bigImg.style.marginTop = `${(376-height)/2}px`;
-      },
       sendAddress(item) {
         this.sendMs(item)
       },
@@ -557,31 +257,6 @@
       },
       toHomepage(id) {
         this.$router.push({ name: 'homepage', query: { uid: id }})
-      },
-      imgLoad(tid, time, ref) {
-        let orient;
-        EXIF.getData(document.getElementById(ref), function () {
-          orient = EXIF.getTag(this, 'Orientation');
-          if (orient === 3 ) {
-            this.className = 'rotate180'
-          }else if( orient === 6) {
-            this.className = 'rotate270'
-          }else if( orient === 8) {
-            this.className = 'rotate90'
-          }else{
-            this.className = ''
-          }
-        });
-        this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0 }})
-      },
-      imgError(tid, time, src) {
-        if (src === '') return;
-        this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
-      },
-      // 处理是否显示消息时间
-      dealTime(time1, time2) {
-        if(time2 - time1 < 180000) return false;
-        return time2.formatTime()
       },
       //发送增加本地消息记录
       addStoreMessages(tid, type, content, time) {
@@ -637,73 +312,6 @@
             this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
           })
       },
-      // 不在消息列表的人来消息时的处理
-      async dealNewChat(id, flag) {
-        !flag && !this.chatIds.includes(id) && await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(id)}).then( ({name, phone, email, icon }) => {
-          this.$store.commit(
-            {type: 'updateStrangerInfo', 
-              data: {
-                id: id,
-                icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                name: name
-              }
-          })
-           this.$store.commit({type: 'newChat', data:{
-              id: id,
-              uid: id,
-              group: false,
-              service: false,
-              phone: phone,
-              email: email,
-              moreFlag: false,
-              unread: 0
-           }})
-        })
-        flag && !this.chatIds.includes(id) && await this.$store.dispatch({ type: 'getGroupList', ws: this.WsProxy});
-        if(this.chatIds.includes(id)) return;
-        let group = this.$store.state.groupList.filter(item => {
-          return this.friendGid[id] === this.JsonBig.stringify(item.id)
-        })[0];
-        !group && (group = this.$store.state.groupList.filter(item => {
-          return id === this.JsonBig.stringify(item.id)
-        })[0])
-        if(group.type === 1){
-          this.$store.commit({type: 'newChat', data:{
-            id: this.JsonBig.stringify(group.id),
-            group: true,
-            length: group.members.length,
-            service: false,
-            icon: "/static/images/groupChat_icon.png",
-            nickName: !group.name ? group.members.map(item =>{
-              return item.name
-            }).join('、') : `${group.name}`,
-            phone: false,
-            email: false,
-            unread: 0,
-            moreFlag: false,
-            exists: true
-          }})
-        }else {
-          let other = group.members.filter( item => {
-            return this.JsonBig.stringify(item.id) !== this.userId
-          })[0];
-          let uid = this.JsonBig.stringify(other.id)
-          this.$store.commit({
-            type: 'newChat', data:{
-              id: this.friendGid[uid],
-              uid: uid,
-              isSingle: true,
-              group: false,
-              service: false,
-              phone: other.phone,
-              email: other.email,
-              exists: true,
-              moreFlag: this.$store.state.messages[uid] ?  (this.$store.state.messages[uid].length === 0 ? false : true): false,
-              unread: 0
-            }
-          })
-        }
-      },
       sendImg(tid, time) {
         this.addStoreMessages(tid, 1, '', time);
       },
@@ -733,16 +341,6 @@
         })
         this.sendText = '';
       },
-      // 同意好友请求
-      async addFriend(id, info) {
-        this.reqMessage = info;
-        this.$store.commit({type: 'agreeAddFriend', data:{id: id}})
-        await this.WsProxy.send('control', 'add_friend', {
-          ack: 0,
-          id: this.JsonBig.parse(id)
-        }).then(data => {})
-        await this.fetchFriendList();
-      },
       // 监听被添加好友
       beFriend(){
         this.WebSocket.onMessage['add_friend'] = {
@@ -761,47 +359,6 @@
             if (res.body && res.body.type === 'del_fd') {
               let id = this.JsonBig.stringify(res.body.data.id);
               this.$store.commit({type: 'delFriend', data: { id: this.friendGid[id], index: this.friendIds.indexOf(id)}})
-            }
-          }
-        }
-      },
-      // 监听被加入群聊
-      beAddedGroup() {
-        this.WebSocket.onMessage['add_g_notify'] = {
-          callback:async (res) => {
-            if (res.body && ["add_g", "cre_g"].includes(res.body.type)) {
-              let {id, aid, type, members} = res.body.data;
-              let idstr =  this.JsonBig.stringify(id);
-              if(this.chatIds.includes(idstr)) this.$store.commit({type: 'beAdd', data: idstr})
-              await this.dealNewChat(idstr, 1)
-              if(type === 0) {
-                let other = members.filter(item => {
-                  return this.JsonBig.stringify(item.id) !== this.userId
-                })[0];
-                //处理加好友后的陌生人对话框
-                let idx = '', otherId = this.JsonBig.stringify(other.id);
-                this.chat.forEach((item, index)=>{
-                  if (item.id === otherId) idx = index;
-                })
-                if(idx !== '') {
-                  this.$store.commit({type: 'delStranger', data:{id: otherId, index: idx }})
-                }
-                //加好友后的处理
-                let obj = {
-                  id: 0,
-                  from: otherId,
-                  to: this.userId,
-                  msg:{
-                    type: 0,
-                    content: this.JsonBig.stringify(aid) === this.userId ? this.reqMessage : '已通过验证，开始对话吧'
-                  },
-                  isLoding: false,
-                  isFail: false,
-                  time: new Date() - 0
-                }
-                this.$store.commit({type: 'addMessages', data:{id: idstr, msg: obj }})
-              }
-              this.$store.commit({type: 'changeCurChat', data: {id: idstr}})
             }
           }
         }
@@ -855,17 +412,6 @@
         }).catch((msg)=>{
           console.log(msg);
         });
-      }
-    },
-    watch: {
-      curChat:{
-        handler(curvalue){
-          let messages = this.$store.state.messages[curvalue];
-          if ((!messages || messages && messages.length === 0) && this.chat[this.index] && this.chat[this.index].moreFlag) {
-            this.fetchMore(3)
-          }
-        },
-        immediate: true
       }
     }
   }
@@ -967,165 +513,6 @@
           height 10px
           cursor pointer
           vertical-align middle
-    .news-info-talk
-      width 399px
-      text-align center
-      .more-info
-        font-size 12px
-        color #FF794C
-        padding-top 10px
-        margin-bottom 5px
-        cursor pointer
-      .time-info
-        display inline-block
-        padding 0px 5px
-        margin 0 auto
-        margin-bottom 20px
-        font-size 12px
-        background #E1E1E1
-        border-radius 2px
-        color #999
-      div
-        width 390px
-        font-size 12px
-        margin-bottom 15px
-        img
-          width 30px
-          height 30px
-          border-radius 50%
-          vertical-align top
-        p
-          display inline-block
-          position relative
-          span
-            display inline-block
-            max-width 250px
-            padding 5px
-            border-radius 2px
-            margin-top 2px
-            word-wrap break-word
-            &.images
-              width 90px
-              height 60px
-              img
-                width 100%
-                height 100%
-                border-radius 0
-                cursor url('/static/images/bigger.ico'), auto;
-                &.rotate90
-                  _rotate(90deg)
-                &.rotate180
-                  _rotate(180deg)
-                &.rotate270
-                  _rotate(270deg)
-          i
-            position absolute
-            top 9px
-            display block
-            border-width 5px 8px
-            border-style solid dashed dashed
-            font-size 0
-            line-height 0
-            &.name
-              top 25px
-          b 
-            display block
-            position relative
-            left -5px
-            fz10()
-      .messages
-        width 100%
-        margin 0
-        .lodingFlag, .failFlag
-          position absolute
-          width 12px
-          height 12px
-        .lodingFlag
-          animation mymove 1.5s linear infinite;
-          -webkit-animation mymove 1.5s linear infinite;
-      .left-people
-        float left
-        margin-left 10px
-        text-align left
-        .lodingFlag, .failFlag
-          right -22px
-          top 50%
-          margin-top -6px
-        .avator
-          margin-right 10px
-          cursor pointer
-        span
-          background #E1E1E1
-        i
-          left -16px
-          border-color transparent #E1E1E1 transparent transparent
-      .right-people
-        float right
-        margin-right 10px
-        text-align right
-        .lodingFlag, .failFlag
-          left -22px
-          top 50%
-          margin-top -6px
-        .avator
-          float right
-          // background aquamarine
-          cursor pointer
-          margin-left 10px
-        span
-          float right
-          text-align left
-          margin-right 10px
-          background #FFB422
-        i
-          right -6px
-          border-color transparent transparent transparent #FFB422
-    .blank
-      width 399px
-      padding-top 10px
-      text-align center
-    .system-info
-      width 399px
-      max-height 320px
-      padding-top 10px
-      div
-        display flex
-        align-items center
-        width 345px
-        height 37px
-        padding 12px 20px 11px 15px
-        background #FFF
-        margin 10px auto 0
-        img
-          flex-shrink 0
-          width 37px
-          height 37px
-          border-radius 50%
-          margin-right 16px
-        button
-          flex-shrink 0
-          width 54px
-          height 24px
-          line-height 24px
-          background #FFB422
-          border-radius 2px
-          color #FFF
-          cursor pointer
-        ul
-          width 380px
-          height 60px
-          li
-            width 190px
-          .system-info-name
-            height 32px
-            line-height 38px
-            font-size 14px
-          .system-info-info
-            overflow hidden
-            text-overflow ellipsis
-            white-space nowrap
-            font-size 12px
-            color #999
     .input-text
       position absolute
       bottom 0
@@ -1199,35 +586,6 @@
         img
           width 19.4px
           height 19px
-    .big-img
-      box-sizing()
-      position absolute
-      left -400px
-      top 0
-      width 400px
-      height 420px
-      padding 44px 20px 0 20px
-      background $col6FA
-      box-shadow -2px -2px 8px 0 rgba(51, 51, 51, 0.30)
-      span
-        position absolute
-        top 15px
-        right 23.5px
-        img
-          width 10px
-          height 10px
-          cursor pointer
-      .picture
-        text-align center
-        img
-          max-width 100%
-          height auto
-          &.rotate90
-            _rotate(90deg)
-          &.rotate180
-            _rotate(180deg)
-          &.rotate270
-            _rotate(270deg)
   /*弹窗*/
   .belive-layer, .address-layer
     text-align center
