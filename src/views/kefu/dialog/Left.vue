@@ -10,7 +10,7 @@
     <happy-scroll color="rgba(100,100,100,0.8)" size="5" resize hide-horizontal
                   bigger-move-h="start" smaller-move-h="start" class="scrollPane">
       <ul class="persons">
-        <li v-for="(content, index) in srchText ? searchList : uls" :key="index" @click="onLiClick(index, content.user_id)" :class="{active: content.user_id === $store.state.serviceNow}">
+        <li v-for="(content, index) in srchText ? searchList : uls" :key="index" @click="onLiClick(index)" :class="{active: content.user_id === $store.state.serviceNow}">
           <img :src="content.user_icon ? `${HostUrl.http}image/${content.user_icon}` : `/static/images/default_avator.png`" alt="">
           <i v-show="content.unread">{{content.unread}}</i>
           <div class="pinfo">
@@ -47,12 +47,14 @@
         return this.$store.state.serviceMessage
       }
     },
-    mounted(){
+    created() {
+
+    },
+    mounted() {
       this.listenNews();
       this.parseUls();
-      this.userIdArr;
       this.initData();
-      this.selectNowUser()
+      this.$route.query.uid && this.selectNowUser()
     },
     methods: {
       listenNews() { //聊天信息监听
@@ -109,7 +111,7 @@
       },
       selectNowUser() {
         this.WsProxy.send('control', 'a_get_user_appeals', { // 初始化页面获得联系人
-          "user_id": this.$route.query.uid ? this.JsonBig.parse(this.$route.query.uid) : (this.uls ? this.JsonBig.parse(this.uls[0].user_id) : 0),
+          "user_id": this.JsonBig.parse(this.$route.query.uid),
         }).then(data => {
           data && data.forEach(v => {
             v.buyer_id = this.JsonBig.stringify(v.buyer_id) // 买家
@@ -118,12 +120,12 @@
             v.appellant_id = this.JsonBig.stringify(v.appellant_id) // 申述人
             v.appellee_id = this.JsonBig.stringify(v.appellee_id) // 被申述人
           })
-          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.$route.query.uid ? this.$route.query.uid : this.uls[0].user_id})}) // 存储右边聊天人员
+          this.$store.commit({type: 'changeServiceNowtalk', data: Object.assign({data}, {id: this.$route.query.uid})}) // 存储右边聊天人员
         }).catch(error=>{
           console.log('错误', error)
         })
       },
-      onLiClick(index, id) { // 点击列表
+      onLiClick(index) { // 点击列表
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人资料
           "user_id": this.JsonBig.parse(this.uls[index].user_id),
         }).then(data => {

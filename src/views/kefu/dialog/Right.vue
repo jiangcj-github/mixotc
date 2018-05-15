@@ -1,8 +1,8 @@
 <template>
-  <div class="right">
-    <div class="h1"><b v-show="serviceNow">{{user}}({{isBuyer}})</b></div>
+  <div class="right" v-show="serviceNow">
+    <div class="h1"><b>{{user}}({{isBuyer}})</b></div>
 
-    <!-- 对话框展示 -->
+  <!-- 对话框展示 -->
     <div style="height: 390px">
       <div class="swiper-container">
         <div class="swiper-wrapper">
@@ -27,7 +27,7 @@
       </div>
 
       <!-- 聊天-->
-      <happy-scroll color="rgba(200,200,200,0.8)" size="5" bigger-move-h="end" resize hide-horizontal class="scrollPane" v-show="serviceNow">
+      <happy-scroll color="rgba(200,200,200,0.8)" size="5" bigger-move-h="end" resize hide-horizontal class="scrollPane">
         <div class="msgBox">
           <p class="check-more" @click="checkMore(10)">查看更多</p>
           <div v-for="(item, index) in msgHis" :key="index" class="message">
@@ -56,9 +56,9 @@
         <img src="/static/images/kefu/album.png" @click="$refs.file.click()" title="发送图片">
         <input type="file" ref="file" v-show="0" accept="image/*" @change="chooseImage">
         <span class="br"></span>
-        <button class="b1" @click="onClickM0" :disabled="serviceNow === '' ? true : false">上传付款证明</button>
-        <button class="b2" @click="onClickM2" :disabled="serviceNow === '' ? true : false">证明无效</button>
-        <button class="b3" @click="onClickM1" :disabled="serviceNow === '' ? true : false">通知放币</button>
+        <button class="b1" @click="onClickM0">上传付款证明</button>
+        <button class="b2" @click="onClickM2">证明无效</button>
+        <button class="b3" @click="onClickM1">通知放币</button>
       </div>
       <div contenteditable="true"
            ref="textarea"
@@ -69,7 +69,7 @@
       </div>
       <div class="bottom">
         <span>按下Enter发送内容/Ctrl+Enter换行</span>
-        <button @click="send" :disabled="serviceNow === '' ? true : false">发送</button>
+        <button @click="send">发送</button>
       </div>
     </div>
     <!--图片弹出框-->
@@ -296,7 +296,7 @@
       this.Bus.$on("onIpClose", () => {
         this.showPopImg = false;
       });
-      //this.startSwiper()
+      this.startSwiper()
     },
     methods: {
       startSwiper() {
@@ -480,6 +480,8 @@
               time: create_time
             })
           })
+        }).catch(error=>{
+          console.log('错误', error)
         })
         this.$store.commit({type: 'moreServiceMessage', data:result })
       },
@@ -524,6 +526,16 @@
         this.$refs.textarea.innerHTML = this.noticeCoin;
         this.$refs.textarea.focus();
       },
+      judgeStopTradeOther(index) { // 终止交易时判断对方信息
+        this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人对方资料
+          "user_id": this.serviceNow === this.otherInfo[index].appellant_id ? this.JsonBig.parse(this.otherInfo[index].appellee_id) : this.JsonBig.parse(this.otherInfo[index].appellant_id)
+        }).then(data => {
+          console.log('终止交易对方信息', data);
+          this.$store.commit({type: 'stopTradeOther', data: data.length})
+        }).catch(error=>{
+          console.log('错误', error)
+        })
+      },
       // 强制放币部分
       forceIcon(index) { // 强制放币弹窗
         this.popIndex = index
@@ -537,6 +549,7 @@
           "buyer": this.JsonBig.parse(this.otherInfo[index].buyer_id),
           "responsible": this.JsonBig.parse(this.otherInfo[index].seller_id),
         }
+        this.judgeStopTradeOther(index)
       },
       onPop1Input() { // 填写强制放币理由(责任人已定)
         if (this.pop1Text.length > 50) {
@@ -587,7 +600,7 @@
           Object.assign(this.forceIconObj, {"info": this.pop1TextOld})
         ).then((data)=>{
           console.log('强制放币', data)
-          this.$store.commit({type: 'stopTrade', data: this.otherInfo[this.popIndex]})
+          this.$store.commit({type: 'stopTrade', data: {params: this.otherInfo[this.popIndex], length: this.otherInfo.length}})
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -600,6 +613,7 @@
         this.stopTradeUserIcon = this.serviceNow === this.otherInfo[index].buyer_id ? (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : "/static/images/default_avator.png") : (this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : "/static/images/default_avator.png")
         this.showPop3 = true
         this.comfirmStopTradeObj(index)
+        this.judgeStopTradeOther(index)
       },
       onPop3Input() { // 填写选择终止交易理由
         if (this.pop3Text.length > 50) {
@@ -701,12 +715,11 @@
             "info": this.pop3TextOld
           })
         ).then((data)=>{
-          this.$store.commit({type: 'stopTrade', data: this.otherInfo[this.popIndex]})
+          this.$store.commit({type: 'stopTrade', data: {params: this.otherInfo[this.popIndex], length: this.otherInfo.length}})
           console.log('终止交易', data)
         }).catch((msg)=>{
           console.log(msg);
         });
-        // this.$store.commit({type: 'stopTrade', data: this.otherInfo[this.popIndex]})
       },
 
       // 驳回申诉部分
@@ -717,6 +730,7 @@
         this.rejectAppealObj = {
           "id": this.JsonBig.parse(this.otherInfo[index].sid),
         }
+        this.judgeStopTradeOther(index)
       },
       onPop2Input() { // 填写驳回申述理由
         if (this.pop2Text.length > 50) {
@@ -768,7 +782,7 @@
           Object.assign(this.rejectAppealObj, {"type": 1}) // 1: 交易, 2: 担保转账
         ).then((data)=>{
           console.log('驳回申述', data)
-          this.$store.commit({type: 'stopTrade', data: this.otherInfo[this.popIndex = index]})
+          this.$store.commit({type: 'stopTrade', data: {params: this.otherInfo[this.popIndex], length: this.otherInfo.length}})
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -798,7 +812,7 @@
       letter-spacing 0.19px
       padding 0 20px
     .fixed
-      margin 15px 0 15px 5px
+      margin 15px 5px 15px 5px
       height 160px
       background #fff
       box-shadow 0 2px 4px 0 #999

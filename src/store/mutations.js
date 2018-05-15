@@ -368,23 +368,26 @@ export default {
       .concat(state.serviceMessage[state.serviceNow]);
     state.serviceMessage = Object.assign({}, state.serviceMessage);
   },
-
+  // 终止交易对方人信息
+  [types.stopTradeOther](state, { data }) {
+    state.stopTradeOtherInfo = data
+  },
   // 终止交易
   [types.stopTrade](state, { data }) {
-    // && length === 1
-    //  console.log('stopTrade 0', data.appellant_id, data.appellee_id)
+    // console.log('stopTrade 0', data)
     //  && !console.log('stopTrade 2', item.user_id) && stateArr.splice(index, 1),[]);
-    state.serviceData = state.serviceData.filter(
-      (item, index) =>
-        item.user_id !== data.appellant_id && item.user_id !== data.appellee_id
-    );
-    state.serviceNowOther = state.serviceNowOther.filter(
-      (item, index) => item.sid !== data.sid
-    );
-    state.serviceNow = "";
-    state.serviceUser = {};
-    //state.serviceNow = state.serviceData.length && state.serviceData[0].user_id;
-    //state.serviceUser = state.serviceData.length && state.serviceData[0];
-    // state.serviceNowOther = state.serviceData.length && state.serviceData[0].user_id
+    if (data.length === 1) {
+      if (state.stopTradeOtherInfo === 1) {
+        state.serviceData = state.serviceData.filter(item => item.user_id !== data.params.appellant_id && item.user_id !== data.params.appellee_id);
+      } else {
+        state.serviceData = state.serviceData.filter(item => item.user_id !== state.serviceNow)
+      }
+      state.serviceNow = '';
+      state.serviceUser = {}
+    } else {
+      state.serviceData = state.serviceNow === data.params.appellant_id ? state.serviceData.filter(item => item.user_id !== data.params.appellee_id) : state.serviceData.filter(item => item.user_id !== data.params.appellant_id)
+    }
+    state.serviceNowOther = state.serviceNowOther.filter(item => item.sid !== data.params.sid);
+
   }
 };

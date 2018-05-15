@@ -106,9 +106,11 @@
       });
       this.Bus.$on(this.fromTypeValue, (data) => { // from筛选
         this.fromText = data
+        this.toText = data === '法币账户' ? '币币账户' : '法币账户'
       });
       this.Bus.$on(this.toTypeValue, (data) => { // to筛选
         this.toText = data
+        this.fromText = data === '法币账户' ? '币币账户' : '法币账户'
       });
     },
     methods: {
