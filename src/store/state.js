@@ -4,6 +4,7 @@ export default {
   userInfo: null,
   showChat: false,
   evaluateOrderResult: {}, // 订单评论结果
+  transformInfo: 0, // 支付标识来源
   newOrder: false,
   trustList: [],
   friendList: [],

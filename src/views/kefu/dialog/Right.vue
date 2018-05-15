@@ -568,11 +568,11 @@
         this.WsProxy.sendMessage({ // 发送给买家
           type: 'text',
           // gid: this.JsonBig.parse("197129593973379072"),
-          tid: this.otherInfo[this.popIndex].buyer_id,
+          tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
           data:{
             uid: this.$store.state.userInfo.uid,
-            rid: this.otherInfo[this.popIndex].buyer_id,
-            tid: this.otherInfo[this.popIndex].buyer_id,
+            rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
             msg: text1
           }
         }).then(data => { // 发送消息成功后更改原保存信息
@@ -583,11 +583,11 @@
         this.WsProxy.sendMessage({ // 发送给买家
           type: 'text',
           // gid: this.JsonBig.parse("197129593973379072"),
-          tid: this.otherInfo[this.popIndex].seller_id,
+          tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
           data:{
             uid: this.$store.state.userInfo.uid,
-            rid: this.otherInfo[this.popIndex].seller_id,
-            tid: this.otherInfo[this.popIndex].seller_id,
+            rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
             msg: text2
           }
         }).then(data => { // 发送消息成功后更改原保存信息
@@ -648,11 +648,11 @@
           this.WsProxy.sendMessage({ // 发送给买家
             type: 'text',
             // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.otherInfo[this.popIndex].buyer_id,
+            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
             data:{
               uid: this.$store.state.userInfo.uid,
-              rid: this.otherInfo[this.popIndex].buyer_id,
-              tid: this.otherInfo[this.popIndex].buyer_id,
+              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
               msg: text1
             }
           }).then(data => { // 发送消息成功后更改原保存信息
@@ -663,11 +663,11 @@
           this.WsProxy.sendMessage({ // 发送给买家
             type: 'text',
             // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.otherInfo[this.popIndex].seller_id,
+            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
             data:{
               uid: this.$store.state.userInfo.uid,
-              rid: this.otherInfo[this.popIndex].seller_id,
-              tid: this.otherInfo[this.popIndex].seller_id,
+              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
               msg: text1
             }
           }).then(data => { // 发送消息成功后更改原保存信息
@@ -680,11 +680,11 @@
           this.WsProxy.sendMessage({ // 发送给买家
             type: 'text',
             // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.otherInfo[this.popIndex].buyer_id,
+            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
             data:{
               uid: this.$store.state.userInfo.uid,
-              rid: this.otherInfo[this.popIndex].buyer_id,
-              tid: this.otherInfo[this.popIndex].buyer_id,
+              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
               msg: text2
             }
           }).then(data => { // 发送消息成功后更改原保存信息
@@ -695,11 +695,11 @@
           this.WsProxy.sendMessage({ // 发送给卖家
             type: 'text',
             // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.otherInfo[this.popIndex].seller_id,
+            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
             data:{
               uid: this.$store.state.userInfo.uid,
-              rid: this.otherInfo[this.popIndex].seller_id,
-              tid: this.otherInfo[this.popIndex].seller_id,
+              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
               msg: text1
             }
           }).then(data => { // 发送消息成功后更改原保存信息
@@ -748,12 +748,12 @@
           this.WsProxy.sendMessage({ // 发送给买家
             type: 'text',
             // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.otherInfo[this.popIndex].buyer_id,
+            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
             data:{
               uid: this.$store.state.userInfo.uid,
-              rid: this.otherInfo[this.popIndex].buyer_id,
-              tid: this.otherInfo[this.popIndex].buyer_id,
-              msg: text1
+              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+              msg: text
             }
           }).then(data => { // 发送消息成功后更改原保存信息
 
@@ -765,12 +765,12 @@
           this.WsProxy.sendMessage({ // 发送给卖家
             type: 'text',
             // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.otherInfo[this.popIndex].seller_id,
+            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
             data:{
               uid: this.$store.state.userInfo.uid,
-              rid: this.otherInfo[this.popIndex].seller_id,
-              tid: this.otherInfo[this.popIndex].seller_id,
-              msg: text1
+              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+              msg: text
             }
           }).then(data => { // 发送消息成功后更改原保存信息
 

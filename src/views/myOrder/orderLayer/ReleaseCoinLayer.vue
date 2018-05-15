@@ -57,6 +57,10 @@
         </div>
       </div>
     </BasePopup>
+    <!-- 资金互转成功 -->
+    <BasePopup class="remind-layer" :show="remindLayer">
+      <p v-clickoutside="closeLayer"><span>{{remindText}}</span>成功转到{{toTitle}}</p>
+    </BasePopup>
   </div>
 </template>
 
@@ -66,7 +70,7 @@
 
   export default {
     name: "release-coin-layer",
-    props: ['releaseCoinShow', 'uid', 'id'],
+    props: ['releaseCoinShow', 'uid', 'id', 'curreny', 'amount', 'toTitle'],
     data() {
       return {
         buyLayer: this.releaseCoinShow,
@@ -82,7 +86,9 @@
         inputContent: '', // 聚焦谷歌输入框内容
         inputGroup: [], // 记录输入框内容,
         errorShow: false,
-        errText: ''
+        errText: '',
+        remindLayer: false,
+        remindText: '3456789',
       }
     },
     components: {
@@ -121,7 +127,7 @@
         if (this.$store.state.userInfo.email) {
           this.WsProxy.send('control','send_code',{ // 获取验证码
             type: 2, // 0 登录; 1 修改密码; 2 支付
-            uid: this.id,
+            uid: this.$store.state.transformInfo === 1 ? this.$store.state.userInfo.uid : this.id,
           }).then((data)=>{
             console.log('获取验证码', data)
           }).catch((msg)=>{
@@ -157,7 +163,7 @@
           let timer = setInterval(verifyFn, 1000)
           this.WsProxy.send('control','send_code',{ // 获取验证码
             type: 2, // 0 登录; 1 修改密码; 2 支付
-            uid: this.id,
+            uid: this.$store.state.transformInfo === 1 ? this.$store.state.userInfo.uid : this.id,
           }).then((data)=>{
             console.log('获取验证码', data)
           }).catch((msg)=>{
@@ -187,15 +193,18 @@
         }
       },
       succPopup() { // 点击确定
-        this.WsProxy.send('otc','send_order',{
-          uid: this.uid,
-          id: this.id,
+        this.WsProxy.send(this.$store.state.transformInfo === 1 ? 'wallet' : 'otc', this.$store.state.transformInfo === 1 ? 'transfer_stock' : 'send_order',{
+          uid: this.$store.state.transformInfo === 1 ? this.$store.state.userInfo.uid : this.uid,
+          id: this.$store.state.transformInfo === 1 ? 0 : this.id,
+          curreny:  this.$store.state.transformInfo === 1 ? this.curreny : '',
+          amount: this.$store.state.transformInfo === 1 ? this.amount * 1 : '',
+          //pass: "yEQQka401NQ2LjlRM60VEBHSmgkl/YzVlspqBwGnics=",
           pass: this.PaymentValue,
           code: this.messageVerify
-        }).then((data)=>{
+        }).then((data) => {
           console.log('确定', data)
           this.verifyLayer = false
-          window.location.reload()
+          this.$store.state.transformInfo === 1 ? this.remindLayer = true : window.location.reload()
         }).catch((msg)=>{
           msg.ret !== 0 && (this.errorShow = true)
           switch (msg.ret) {
@@ -207,6 +216,10 @@
               break;
             case 8:
               this.errText = '验证码错误'
+              break;
+            case 31:
+            case 32:
+              this.errText = '钱包金额不足'
               break;
           }
           console.log('你错了', msg.ret);
@@ -228,6 +241,9 @@
         }
         // return an array of bytes
         return re;
+      },
+      closeLayer() {
+        this.remindLayer = false
       },
       getSafePass(plainPass) {
         // '197102307060486144'
@@ -356,6 +372,12 @@
         padding 0
         text-align center
         line-height 40px
+
+  .remind-layer
+    text-align center
+    line-height 94px
+    span
+      color #FFB422
 
 
 </style>
