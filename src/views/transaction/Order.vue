@@ -201,7 +201,7 @@
         await this.Proxy.getPrice().then(res => {
           this.priceList = res.data.prices;
           this.selectPrice = this.priceList.filter(item => {
-            return item.currency == this.contentData.currency;
+            return item.currency === this.contentData.currency;
           })
         }).catch((msg)=>{
           alert(JSON.stringify(msg));

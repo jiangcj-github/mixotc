@@ -67,8 +67,8 @@
 
         fltTypes:[
           {text:"全部广告",value:null},
-          {text:"购买",value:1},
-          {text:"出售",value:2},
+          {text:"购买",value:2},
+          {text:"出售",value:1},
         ],
         fltTypeSel: 0,
         fltTypeShow: false,
@@ -142,7 +142,7 @@
         });
       },
       toOrder(e){
-        let res=beforeOrder({
+        beforeOrder({
           ws: this.WsProxy,
           id : e.id,
           sid : this.uid,
@@ -150,12 +150,11 @@
           loginUid: this.$store.state.userInfo.uid,
           isLogin: this.$store.state.isLogin,
           isVerify: this.$store.state.userInfo.verify,
-        });
-        if(!res){
+        }).then(()=>{
           this.$router.push({ name: 'order', query: { id:e.id}})
-        }else{
+        }).catch((res)=>{
           alert(res);
-        }
+        });
       },
     }
   }
