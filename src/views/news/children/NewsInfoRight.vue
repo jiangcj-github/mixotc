@@ -408,7 +408,9 @@
           uid: this.$store.state.userInfo.uid,
           origin: 0
         }).then(data => {
-          data.accounts && this.$store.commit({type: 'moneyAddress', data: data.accounts})
+          let arr = [];
+          data.accounts && (arr = data.accounts);
+          this.$store.commit({type: 'moneyAddress', data: arr})
         }).catch(error=>{})
       },
       async fetchFriendList() {
