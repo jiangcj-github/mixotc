@@ -48,6 +48,7 @@ const evaluateOrder = "evaluateOrder"; // 订单评论结果
  const changeServiceImgsrc = 'changeServiceImgsrc'; // 改变图片
  const moreServiceMessage = 'moreServiceMessage'; // 添加更多消息
  const stopTrade = 'stopTrade'; // 终止交易
+ const stopTradeOther = 'stopTradeOther'; // 终止交易对方信息
 
 
 export {
@@ -98,6 +99,7 @@ export {
   transformServiceUser,
   changeServiceImgsrc, // 改变图片
   moreServiceMessage,
-  stopTrade
+  stopTrade,
+  stopTradeOther
 
 };
