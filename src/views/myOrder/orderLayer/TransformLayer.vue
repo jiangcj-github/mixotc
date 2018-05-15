@@ -1,77 +1,87 @@
 <template>
-  <BasePopup :show="codeLayer"
-             :width=600
-             :height=516
-             :top=50>
-    <div  class="transform-layer">
-      <img class="close-btn" src="/static/images/close_btn.png" alt="" @click="closePopup">
-      <h2>资金互转</h2>
-      <ul>
-        <li>
-          <p>币种</p>
-          <ChoiceBox :choiceClass="transforB"
-                     title="BTC"
-                     :classify="coinType"
-                     :emitValue="coinTypeValue"
-                     :width=470
-                     :widthSelect=478
-                     :top=40
-                     :widthWrap=480>
-          </ChoiceBox>
-        </li>
-        <li>
-          <ol>
-            <li>
-              <p>从</p>
-              <ChoiceBox :choiceClass="transforB"
-                         title="法币账户"
-                         :classify="fromType"
-                         :emitValue="fromTypeValue"
-                         :width=210
-                         :top=40
-                         :widthSelect=218
-                         :widthWrap=220>
-              </ChoiceBox>
-              <span>({{fromText}}余额为：1.12345678 BTC)</span>
-            </li>
-            <li>
-              <img src="/static/images/huansuan.png"/>
-            </li>
-            <li>
-              <p>转至</p>
-              <ChoiceBox :choiceClass="transforB"
-                         title="币币账户"
-                         :classify="toType"
-                         :emitValue="toTypeValue"
-                         :width=210
-                         :top=40
-                         :widthSelect=218
-                         :widthWrap=220>
-              </ChoiceBox>
-              <span>({{toText}}余额为：1.12345678 BTC)</span>
-            </li>
-          </ol>
-        </li>
-        <li>
-          <p>数量</p>
-          <div class="amount-input">
-            <input type="text" v-model.trim="amount"/><button>全部</button>
-            <span>可划转数量为：1.12345678 BTC</span>
-          </div>
-          <b v-show="amount">数量应不大于可划转数量</b>
-        </li>
-      </ul>
-      <div class="btn-group">
-        <i @click="closePopup">取消</i>
-        <em>立即划转</em>
+  <div>
+    <BasePopup :show="codeLayer"
+               :width=600
+               :height=516
+               :top=50>
+      <div  class="transform-layer">
+        <img class="close-btn" src="/static/images/close_btn.png" alt="" @click="closePopup">
+        <h2>资金互转</h2>
+        <ul>
+          <li>
+            <p>币种</p>
+            <ChoiceBox :choiceClass="transforB"
+                       title="BTC"
+                       :classify="coinType"
+                       :emitValue="coinTypeValue"
+                       :width=470
+                       :widthSelect=478
+                       :top=40
+                       :widthWrap=480>
+            </ChoiceBox>
+          </li>
+          <li>
+            <ol>
+              <li>
+                <p>从</p>
+                <ChoiceBox :choiceClass="transforB"
+                           :title="fromTitle"
+                           :classify="fromType"
+                           :emitValue="fromTypeValue"
+                           :width=210
+                           :top=40
+                           :widthSelect=218
+                           :widthWrap=220>
+                </ChoiceBox>
+                <span>({{fromText}}余额为：{{fromAmount}} {{fromCoin}})</span>
+              </li>
+              <li>
+                <img src="/static/images/huansuan.png"/>
+              </li>
+              <li>
+                <p>转至</p>
+                <ChoiceBox :choiceClass="transforB"
+                           :title="toTitle"
+                           :classify="toType"
+                           :emitValue="toTypeValue"
+                           :width=210
+                           :top=40
+                           :widthSelect=218
+                           :widthWrap=220>
+                </ChoiceBox>
+                <span>({{toText}}余额为：1.12345678 BTC)</span>
+              </li>
+            </ol>
+          </li>
+          <li>
+            <p>数量</p>
+            <div class="amount-input">
+              <input type="text" v-model.trim="amount" @input="checkInput"/><button @click="allCheck">全部</button>
+              <span>可划转数量为：{{fromAmount}} {{fromCoin}}</span>
+            </div>
+            <b>{{errText}}</b>
+          </li>
+        </ul>
+        <div class="btn-group">
+          <i @click="closePopup">取消</i>
+          <em @click="openReleaseCoin">立即划转</em>
+        </div>
       </div>
-    </div>
-  </BasePopup>
+    </BasePopup>
+    <ReleaseCoinLayer
+      :releaseCoinShow="showReleaseCoin"
+      :curreny="paymentCurreny"
+      :amount="paymentAmount"
+      :toTitle="toPayment"
+      @offRelease="openReleaseCoin">
+    </ReleaseCoinLayer>
+  </div>
 </template>
 
 <script>
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
   import ChoiceBox from '@/components/common/ChoiceBox' // 引入下拉选择框
+  import ReleaseCoinLayer from '@/views/myOrder/orderLayer/ReleaseCoinLayer' // 支付弹窗
 
   export default {
     name: "transform-layer",
@@ -80,7 +90,8 @@
       return {
         codeLayer: this.transformShow,
         transforB: 'transforB',
-        coinType: ['BTC', 'ETH'],
+        coinType: [],
+        coinValue: 'BTC',
         fromType: ['法币账户', '币币账户'],
         toType: ['法币账户', '币币账户'],
         coinTypeValue: 'coinTypeValue',
@@ -88,12 +99,23 @@
         toTypeValue: 'toTypeValue',
         fromText: '法币账户',
         toText: '币币账户',
-        amount: ''
+        amount: '',
+        fromTitle: '法币账户',
+        toTitle: '币币账户',
+        fromAmount: 0,
+        fromCoin: 'BTC',
+
+        showReleaseCoin: false, // 支付
+        errText: '',
+        paymentCurreny: '',
+        paymentAmount: '',
+        toPayment: ''
       }
     },
     components: {
       BasePopup,
-      ChoiceBox
+      ChoiceBox,
+      ReleaseCoinLayer
     },
     watch: {
       transformShow(state) {
@@ -102,20 +124,66 @@
     },
     mounted() {
       this.Bus.$on(this.coinTypeValue, (data) => { // 币种筛选
-
+        this.coinValue = data
+        console.log('333', data)
+        this.initData()
       });
       this.Bus.$on(this.fromTypeValue, (data) => { // from筛选
         this.fromText = data
-        this.toText = data === '法币账户' ? '币币账户' : '法币账户'
+        this.toTitle = this.toText = data === '法币账户' ? '币币账户' : '法币账户'
       });
       this.Bus.$on(this.toTypeValue, (data) => { // to筛选
         this.toText = data
-        this.fromText = data === '法币账户' ? '币币账户' : '法币账户'
+        this.fromTitle = this.fromText = data === '法币账户' ? '币币账户' : '法币账户'
       });
+      this.initData()
+    },
+    destroyed() {
+      this.Bus.$off(this.coinTypeValue);
+      this.Bus.$off(this.fromTypeValue);
+      this.Bus.$off(this.toTypeValue);
     },
     methods: {
       closePopup() {
         this.$emit('offTransform', 'false')
+      },
+      openReleaseCoin(st, content) { // 支付弹窗
+        if (st === 'false') {
+          this.showReleaseCoin = false
+        } else {
+          this.showReleaseCoin = true
+          this.closePopup()
+          this.$store.commit({type: 'showTransform', data: 1}) // 支付标识来源
+        }
+      },
+      initData() {
+        let balanceArr = [];
+        this.coinType = [];
+        this.WsProxy.send('wallet', 'wallets', {
+          id: this.$store.state.userInfo.uid, // 用户id
+        }).then((data)=>{
+          console.log('钱包', data)
+          data.wallets.forEach(v => {
+            this.coinType.push(v.currency.toUpperCase())
+          })
+          balanceArr = data.wallets.filter(v => {
+            return v.currency === this.coinValue.toLowerCase()
+          })
+          console.log('aaa', balanceArr)
+          this.fromAmount = (this.JsonBig.stringify(balanceArr[0].balance) * 1).toFixed(6)
+          this.fromCoin = balanceArr[0].currency.toUpperCase()
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
+      allCheck() {
+        this.amount = this.fromAmount
+      },
+      checkInput() {
+        this.paymentCurreny = this.coinValue
+        this.paymentAmount = this.amount
+        this.toPayment = this.toTitle
+        this.errText = this.amount > this.fromAmount ? '数量应不大于可划转数量' : ''
       }
     }
   }

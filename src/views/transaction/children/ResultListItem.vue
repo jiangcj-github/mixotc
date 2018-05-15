@@ -38,14 +38,10 @@ export default {
       this.$router.push({ name: 'homepage', query: { uid: this.JsonBig.stringify(sid) }})
     },
     _toOrder(data){
-      beforeOrder({
-        ws: this.WsProxy,
+      beforeOrder(this,{
         id :data.id,
         sid :data.sid,
         currency: data.currency,
-        loginUid: this.$store.state.userInfo.uid,
-        isLogin: this.$store.state.isLogin,
-        isVerify: this.$store.state.userInfo.verify,
       }).then(()=>{
         this.$router.push({ name: 'order', query: { id: data.id}});
       }).catch((res)=>{
@@ -102,6 +98,7 @@ export default {
       button
         width 100px
         height 30px
+        line-height 30px
         font-size $fz14
         margin-bottom 27px
         color #FFF

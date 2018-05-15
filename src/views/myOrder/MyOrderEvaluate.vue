@@ -73,6 +73,7 @@
         // console.log('111', data)
         this.showContent = data
       })
+      console.log('this.orderList', this.orderList)
     }
     // beforeRouteUpdate(to, from, next) { // 路由更新获取新的值
     //   this.showContent = to.query.type;

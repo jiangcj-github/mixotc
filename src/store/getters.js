@@ -80,6 +80,7 @@ export default {
         item.nickName && (result = item.nickName);
         item.isSingle && (result = infoDiction[item.uid] && infoDiction[item.uid].name);
         !item.nickName && !item.isSingle && (result = infoDiction[item.id] && infoDiction[item.id].name);
+        item.group && (result += `(${item.length})`)
       }
     });
     return result;

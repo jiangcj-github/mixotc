@@ -79,6 +79,10 @@
         this.$emit('offDelGroup', 'false')
       },
       async doDelete() {
+        if(this.deleteArray.length === 0) {
+          this.closeGroup()
+          return;
+        };
         await this.WsProxy.send('control', 'del_g_member',{
           id: this.JsonBig.parse(this.curChat),
           ids: this.deleteArray

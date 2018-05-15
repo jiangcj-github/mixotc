@@ -18,6 +18,10 @@ export default {
     // 订单评论结果
     state.evaluateOrderResult = data;
   },
+  [types.showTransform](state, { data }) {
+    // 判断支付来源
+    state.transformInfo = data;
+  },
   [types.changeChatBox](state, { data }) {
     // 控制右下方消息框显示
     if (data) state.unreadNumber = 0;

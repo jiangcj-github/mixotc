@@ -142,14 +142,10 @@
         });
       },
       toOrder(e){
-        beforeOrder({
-          ws: this.WsProxy,
+        beforeOrder(this,{
           id : e.id,
           sid : this.uid,
           currency: e.currency,
-          loginUid: this.$store.state.userInfo.uid,
-          isLogin: this.$store.state.isLogin,
-          isVerify: this.$store.state.userInfo.verify,
         }).then(()=>{
           this.$router.push({ name: 'order', query: { id:e.id}})
         }).catch((res)=>{

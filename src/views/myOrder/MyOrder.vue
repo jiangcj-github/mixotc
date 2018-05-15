@@ -297,6 +297,8 @@
         curPage: 1, // 当前页
         // changePage: 'changePage', // 监听自组件数量
         // page: 0 // 分页
+
+
       }
     },
     created() {
@@ -322,40 +324,9 @@
         this.initData()
       });
       this.Bus.$on(this.allStatusValue, (data) => { // 类型筛选
-        // if (data.indexOf('6,7') > -1 || data.indexOf('8,9') > -1) {
-        //   if (data.indexOf('6,7') > -1) {
-        //     if (data.indexOf('8,9') > -1) {
-        //       this.comment = 0
-        //       this.selectState = data.length && data.join(',')
-        //     } else {
-        //       this.comment = 1
-        //       data.splice(data.indexOf('6,7'), 1)
-        //       this.selectState = data.length ? data.join(',') : ''
-        //     }
-        //   }
-        //   if (data.indexOf('8,9') > -1) {
-        //     if (data.indexOf('6,7') > -1) {
-        //       this.comment = 0
-        //       this.selectState = data.length && data.join(',')
-        //     } else {
-        //       this.comment = 2
-        //       data.splice(data.indexOf('8,9'), 1)
-        //       this.selectState = data.length ? data.join(',') : ''
-        //     }
-        //   }
-        // } else {
-        //   this.comment = 0
-        //   this.selectState = data.length && data.join(',')
-        // }
         let a = data.indexOf('6,7'), b = data.indexOf('8,9'), selectStateArr = ['1,2,3', '4,5,6,7,8,9,10,11']
         !((a + 1) && (b + 1)) && ((a + 1) && (this.comment = 1) && data.splice(a, 1) || (b + 1) && (this.comment = 2) && data.splice(b, 1)) || (this.comment = 0)
         this.selectState = data.length && data.join(',') || !this.comment && (this.selectState = selectStateArr[this.contentTabIndex - 1]) || ''
-        // if (this.contentTabIndex === 1) { // 进行中的全部状态
-        //   this.selectState === '' && !this.comment && (this.selectState = "1,2,3")
-        // }
-        // if (this.contentTabIndex === 2) { // 已完成中的全部状态
-        //   this.selectState === '' && !this.comment && (this.selectState = "4,5,6,7,8,9,10,11")
-        // }
         // console.log('a', a, 'b', b, !((a + 1) && (b + 1)))
         console.log('selectState', this.selectState, this.comment)
         this.initData()
@@ -432,18 +403,32 @@
         this.Bus.$emit('contactSomeone', {id: this.JsonBig.stringify(id)})
       },
       appealTimer(){
-        let s=0;
-        this.contentList && this.contentList.forEach((e,i)=>{
-          if(e.timeToAppeal>0){
+        let s = 0;
+        this.contentList && this.contentList.forEach((e,i) => {
+          if (e.timeToAppeal > 0) {
             s++;
             e.timeToAppeal--;
             this.$set(this.contentList,i,e);
           }
         });
         if(s<=0) return;
-        setTimeout(()=>{
+        setTimeout(() => {
           this.appealTimer();
         },1000);
+      },
+      showOverTimer() {
+        this.contentList && this.contentList[0].overtime--
+        if (this.contentList && this.contentList[0].overtime < 0) {
+          this.contentList[0].state = 5;
+          this.contentTabIndex = 2;
+          this.conductNum--;
+          this.completeNum++;
+          return
+        }
+        setTimeout(() => {
+          this.showOverTimer()
+        },1000);
+        //console.log(1111)
       },
       initData() {
         let ws = this.WebSocket; // 创建websocket连接
@@ -497,6 +482,7 @@
               v.timeToAppeal= 30 * 60 - (Math.floor(Date.now() / 1000) - v.paytime);
             });
             this.appealTimer();
+            this.showOverTimer();
           },
           date:new Date()
         };
@@ -534,8 +520,8 @@
                 if (this.JsonBig.stringify(v.id) == res.body.data.order) {
                   v.state = 6
                   this.selectState = "4,5,6,7,8,9,10,11"
-                  this.conductNum = this.conductNum - 1
-                  this.completeNum = this.completeNum + 1
+                  this.conductNum--
+                  this.completeNum++
                 }
               })
             }
@@ -636,6 +622,7 @@
           this.showReleaseCoin = true
           this.updateId = content.id
           this.updateUid = content.sid
+          this.$store.commit({type: 'showTransform', data: 0}) // 支付标识来源
         }
       },
       openTransform(st) { // 资金互转弹窗

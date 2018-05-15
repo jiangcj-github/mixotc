@@ -39,7 +39,7 @@
         </div>
         <div class="tb-head">
           <span class="tjsj sortable" @click="sort=(sort+1)%2">提交时间<i class="sort" :class="{up:sort===0,down:sort===1}"></i></span>
-          <span class="ddxx">订单信息</span>
+          <span class="ddxx">币种</span>
           <span class="sqr">申诉人</span>
           <span class="sqdx">被申诉人</span>
           <span class="zcr">处理人</span>
@@ -154,7 +154,7 @@
     },
     watch:{
       days:function(){
-        let date2=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000);
+        let date2=new Date(new Date(new Date().toDateString()).getTime()+24*60*60*1000);
         this.$refs.di.date2=date2;
         this.$refs.di.date1=new Date(date2.getTime()-24*60*60*1000*this.days);
       },
@@ -297,8 +297,7 @@
             createTime: new Date(e.create*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
             createTime1: new Date(e.create*1000).dateHandle("yyyy/MM/dd"),
             createTime2: new Date(e.create*1000).dateHandle("HH:mm:ss"),
-            orderType: e.type && ["出售","购买","担保"][e.type-1],
-            orderCoin: e.currency || "-",
+            orderCoin: e.currency && e.currency.toUpperCase() || "-",
             applyU: e.appellant_name || "-",
             applyUid: e.appellant_id,
             applyUid_str: this.JsonBig.stringify(e.appellant_id),

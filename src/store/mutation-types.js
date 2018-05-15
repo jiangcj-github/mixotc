@@ -31,7 +31,7 @@ const agreeAddFriend = "agreeAddFriend";
 const delFriend = "delFriend";
 
 
-
+const showTransform = "showTransform"; // 支付弹窗来源
 const evaluateOrder = "evaluateOrder"; // 订单评论结果
 
 
@@ -85,6 +85,7 @@ export {
   delFriend,
 
   evaluateOrder,
+  showTransform,
 
 
 
