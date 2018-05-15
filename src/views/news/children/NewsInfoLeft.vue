@@ -41,6 +41,7 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
   import { HappyScroll } from 'vue-happy-scroll'
   export default {
     name: "new-info-left",
@@ -61,63 +62,14 @@
       document.querySelector('.news-info-left .happy-scroll-container').className = 'happy-scroll-container import';
     },
     computed: {
+      ...mapGetters([
+        'chatIds',
+        'friendIds',
+        'friendGid',
+        'infoDiction'
+      ]),
       userList() {
         return this.$store.state.chat
-      },
-      chatIds() {
-        return this.$store.state.chat.map(item => {
-          return item.id
-        })
-      },
-      infoDiction() {
-        let obj = {};
-        this.$store.state.groupList.forEach(item => {
-          item.members.forEach(ite => {
-            let id = this.JsonBig.stringify(ite.id);
-            !obj[id] && (obj[id] = {
-              icon: ite.icon ? `${this.HostUrl.http}image/${ite.icon}` : "/static/images/default_avator.png",
-              name: ite.name
-            })
-          })
-        })
-        let strangerInfo = this.$store.state.strangerInfo;
-        for (const key in strangerInfo) {
-         !obj[key] && (obj[key] = {
-           icon: strangerInfo[key].icon,
-           name: strangerInfo[key].name
-         })
-        }
-        this.$store.state.friendList.forEach(item => {
-          let id = this.JsonBig.stringify(item.id);
-          !obj[id] && (obj[id] = {
-            icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
-            name: item.name
-          })
-        })
-       let icon = this.$store.state.userInfo.icon
-        !obj[this.userId] && (obj[this.userId] = {
-          icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-          name: this.$store.state.userInfo.name
-        })
-        return obj;
-      },
-      friendGid() {
-        let obj = {};
-        this.$store.state.groupList.forEach( item =>{
-          if(item.type !== 0) return;
-          item.members.forEach(itm=>{
-            let id = this.JsonBig.stringify(itm.id);
-            if(id !== this.JsonBig.stringify(this.$store.state.userInfo.uid)) {
-              obj[id] = this.JsonBig.stringify(item.id);
-            }
-          })
-        })
-        return obj
-      },
-      friendIds() {
-        return this.$store.state.friendList.map(item => {
-          return this.JsonBig.stringify(item.id)
-        })
       }
     },
     components: {
@@ -125,24 +77,14 @@
     },
     methods: {
       async fetchGroup() {
-        await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
-          if(!data) data = []
-          this.$store.commit({type: 'getGroupList', data})
-        }).catch(error=>{
-          console.log(error)
-        })
+        await this.$store.dispatch({ type: 'getGroupList', ws: this.WsProxy})
       },
       //初始化拉取加工数据
       async initData() {
         let result = [];
         //拉取好友列表
         // console.log('sdfsdfdsfsdf', this.WebSocket.ws.readyState)
-        await this.WsProxy.send('control', 'friend_list', {uid: this.$store.state.userInfo.uid}).then(data => {
-          if(!data) data = []
-          this.$store.commit({type: 'getFriendList', data})
-        }).catch(error=>{
-          console.log(error)
-        })
+        await this.$store.dispatch({ type: 'getFriendList', ws: this.WsProxy})
         //拉取群組列表
         await this.fetchGroup();
         //拉取近十天对话列表

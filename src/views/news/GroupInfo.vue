@@ -152,11 +152,7 @@
     },
     methods: {
       async fetchGroup() {
-        await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
-          this.$store.commit({type: 'getGroupList', data})
-        }).catch(error=>{
-          console.log(error)
-        })
+        await this.$store.dispatch({ type: 'getGroupList', ws: this.WsProxy});
       },
       async quit() {
         await this.WsProxy.send('control', 'quit_group', {uid: this.$store.state.userInfo.uid, id: this.JsonBig.parse(this.id)}).then(data => {
@@ -181,7 +177,6 @@
         })
       },
       closeGroup() {
-
         this.$emit('offCheckGroup', 'false')
       },
       openDelGroup(st) {

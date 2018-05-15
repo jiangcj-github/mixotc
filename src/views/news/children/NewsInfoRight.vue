@@ -25,8 +25,7 @@
       bigger-move-h="end" 
       hide-horizontal 
       class="main-content"
-      :scroll-top="9999999"
-    >
+      :scroll-top="9999999">
       <div class="wrap">
         <!-- 空白消息框 -->
         <div class="blank" v-if="!title && curChat !== 'system'"></div>
@@ -205,6 +204,7 @@
 </template>
 
 <script>
+  import { mapGetters } from 'vuex'
   import AddFriend from '@/views/news/AddFriend' // 添加好友
   import AddGroup from '@/views/news/AddGroup' // 添加群
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
@@ -264,10 +264,16 @@
       this.Bus.$off('contactSomeone');
     },
     computed: {
+      ...mapGetters([
+        'chatIds',
+        'friendIds',
+        'friendGid',
+        'infoDiction'
+      ]),
       title() {
         let result = '';
-        this.$store.state.chat.forEach(item=> {
-          if (item.id === this.$store.state.curChat) {
+        this.chat.forEach(item=> {
+          if (item.id === this.curChat) {
            item.nickName && (result = item.nickName);
            item.isSingle && (result = this.infoDiction[item.uid] && this.infoDiction[item.uid].name);
            !item.nickName && !item.isSingle && (result = this.infoDiction[item.id] && this.infoDiction[item.id].name)
@@ -304,11 +310,6 @@
       },
       messages() {
         return this.$store.state.messages[this.curChat] ? this.$store.state.messages[this.curChat] : []
-      },
-      chatIds() {
-        return this.$store.state.chat.map(item=>{
-          return item.id;
-        })
       },
       membersInfo() {
         let obj = {}
@@ -349,77 +350,16 @@
             return {text: `${item.bank + '****' + (item.number.slice(-4))}`, sendText: `收款人:${item.name}<br>银行卡号:${item.number}<br> 开户行:${item.bank}`}
           }
         })
-      },
-      friendIds() {
-        return this.$store.state.friendList.map(item => {
-          return this.JsonBig.stringify(item.id)
-        })
-      },
-      friendGid() {
-        let obj = {};
-        this.$store.state.groupList.forEach( item =>{
-          if(item.type !== 0) return; 
-          item.members.forEach(itm=>{
-            let id = this.JsonBig.stringify(itm.id);
-            if(id !== this.userId) {
-              obj[id] = this.JsonBig.stringify(item.id);
-            }
-          })
-        })
-        return obj
-      },
-      infoDiction() {
-        let obj = {};
-        this.$store.state.groupList.forEach(item => {
-          item.members.forEach(ite => {
-            let id = this.JsonBig.stringify(ite.id);
-            !obj[id] && (obj[id] = {
-              icon: ite.icon ? `${this.HostUrl.http}image/${ite.icon}` : "/static/images/default_avator.png",
-              name: ite.name
-            })
-          })
-        })
-        this.$store.state.friendList.forEach(item => {
-          let id = this.JsonBig.stringify(item.id);
-          !obj[id] && (obj[id] = {
-            icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
-            name: item.name
-          })
-        })
-        let strangerInfo = this.$store.state.strangerInfo;
-        for (const key in strangerInfo) {
-         !obj[key] && (obj[key] = {
-           icon: strangerInfo[key].icon,
-           name: strangerInfo[key].name
-         })
-        }
-        let icon = this.$store.state.userInfo.icon
-        !obj[this.userId] && (obj[this.userId] = {
-          icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-          name: this.$store.state.userInfo.name
-        })
-        return obj;
       }
     },
     methods: {
       // 拉取收款地址数据
       async fetchAddress() {
-        await this.WsProxy.send('wallet', 'my_accounts', {
-          uid: this.$store.state.userInfo.uid,
-          origin: 0
-        }).then(data => {
-          let arr = [];
-          data.accounts && (arr = data.accounts);
-          this.$store.commit({type: 'moneyAddress', data: arr})
-        }).catch(error=>{})
+        if(this.showAddress) return;
+        await this.$store.dispatch({ type: 'moneyAddress', ws: this.WsProxy})
       },
       async fetchFriendList() {
-         await this.WsProxy.send('control', 'friend_list', {uid: this.$store.state.userInfo.uid}).then(data => {
-          if(!data) data = []
-          this.$store.commit({type: 'getFriendList', data})
-        }).catch(error=>{
-          console.log(error)
-        })
+        await this.$store.dispatch({ type: 'getFriendList', ws: this.WsProxy})
       },
       //其余页面入口-联系他
       async contactSomeone(id, msg) {
@@ -434,7 +374,6 @@
         if(friendFlag) id = this.friendGid[id];
         await this.dealNewChat(id, friendFlag ? 1 : 0);
         friendFlag && (flag = this.chatIds.indexOf(id));
-        // console.log(id, this.friendGid)
         this.$store.commit({type: 'changeChatBox', data: true})
         if(flag !== -1) {
           this.$store.commit({type: 'chatTop', data: flag})
@@ -576,6 +515,7 @@
                   isFail: false,
                   time: new Date() - 0
                 }
+                console.log(_this.JsonBig.stringify(gid))
                 await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
                 _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
               })
@@ -719,53 +659,50 @@
               unread: 0
            }})
         })
-        flag && !this.chatIds.includes(id) && await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
-          this.$store.commit({type: 'getGroupList', data})
-          // console.log(this.friendGid[id])
-          let group = this.$store.state.groupList.filter(item => {
-            return this.friendGid[id] === this.JsonBig.stringify(item.id)
+        flag && !this.chatIds.includes(id) && await this.$store.dispatch({ type: 'getGroupList', ws: this.WsProxy});
+        if(this.chatIds.includes(id)) return;
+        let group = this.$store.state.groupList.filter(item => {
+          return this.friendGid[id] === this.JsonBig.stringify(item.id)
+        })[0];
+        !group && (group = this.$store.state.groupList.filter(item => {
+          return id === this.JsonBig.stringify(item.id)
+        })[0])
+        if(group.type === 1){
+          this.$store.commit({type: 'newChat', data:{
+            id: this.JsonBig.stringify(group.id),
+            group: true,
+            length: group.members.length,
+            service: false,
+            icon: "/static/images/groupChat_icon.png",
+            nickName: !group.name ? group.members.map(item =>{
+              return item.name
+            }).join('、') : `${group.name}`,
+            phone: false,
+            email: false,
+            unread: 0,
+            moreFlag: false,
+            exists: true
+          }})
+        }else {
+          let other = group.members.filter( item => {
+            return this.JsonBig.stringify(item.id) !== this.userId
           })[0];
-          !group && (group = this.$store.state.groupList.filter(item => {
-            return id === this.JsonBig.stringify(item.id)
-          })[0])
-          if(group.type === 1){
-              this.$store.commit({type: 'newChat', data:{
-                id: this.JsonBig.stringify(group.id),
-                group: true,
-                length: group.members.length,
-                service: false,
-                icon: "/static/images/groupChat_icon.png",
-                nickName: !group.name ? group.members.map(item =>{
-                  return item.name
-                }).join('、') : `${group.name}`,
-                phone: false,
-                email: false,
-                unread: 0,
-                moreFlag: false,
-                exists: true
-              }})
-            }else {
-              let other = group.members.filter( item => {
-                return this.JsonBig.stringify(item.id) !== this.userId
-              })[0]
-              let uid = this.JsonBig.stringify(other.id)
-              // console.log(uid, this.$store.state.messages)
-              this.$store.commit({type: 'newChat', data:{
-                id: this.friendGid[uid],
-                uid: uid,
-                isSingle: true,
-                group: false,
-                service: false,
-                phone: other.phone,
-                email: other.email,
-                exists: true,
-                moreFlag: this.$store.state.messages[uid] ?  (this.$store.state.messages[uid].length === 0 ? false : true): false,
-                unread: 0
-              }})
+          let uid = this.JsonBig.stringify(other.id)
+          this.$store.commit({
+            type: 'newChat', data:{
+              id: this.friendGid[uid],
+              uid: uid,
+              isSingle: true,
+              group: false,
+              service: false,
+              phone: other.phone,
+              email: other.email,
+              exists: true,
+              moreFlag: this.$store.state.messages[uid] ?  (this.$store.state.messages[uid].length === 0 ? false : true): false,
+              unread: 0
             }
-          }).catch(error=>{
-            console.log(error)
-        })
+          })
+        }
       },
       sendImg(tid, time) {
         this.addStoreMessages(tid, 1, '', time);

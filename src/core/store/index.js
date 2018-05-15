@@ -17,8 +17,9 @@ const STORE = {
       state: Object.assign(config.state, {}),
       mutations: Object.assign(config.mutations, {}),
       actions: Object.assign(config.actions, {}),
+      getters: Object.assign(config.getters, {}),
       plugins: [vuexLocal.plugin, createLogger()]
-    })
+    });
   }
 };
 

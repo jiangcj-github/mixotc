@@ -109,37 +109,8 @@
         return idx
       },
       infoDiction() {
-        let obj = {};
-        this.$store.state.groupList.forEach(item => {
-          item.members.forEach(ite => {
-            let id = this.JsonBig.stringify(ite.id);
-            !obj[id] && (obj[id] = {
-              icon: ite.icon ? `${this.HostUrl.http}image/${ite.icon}` : "/static/images/default_avator.png",
-              name: ite.name
-            })
-          })
-        })
-        this.$store.state.friendList.forEach(item => {
-          let id = this.JsonBig.stringify(item.id);
-          !obj[id] && (obj[id] = {
-            icon: item.icon ? `${this.HostUrl.http}image/${item.icon}` : "/static/images/default_avator.png",
-            name: item.name
-          })
-        })
-        let strangerInfo = this.$store.state.strangerInfo;
-        for (const key in strangerInfo) {
-         !obj[key] && (obj[key] = {
-           icon: strangerInfo[key].icon,
-           name: strangerInfo[key].name
-         })
-        }
-        let icon = this.$store.state.userInfo.icon
-        !obj[this.userId] && (obj[this.userId] = {
-          icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-          name: this.$store.state.userInfo.name
-        })
-        return obj;
-      }
+        return this.$store.getters.infoDiction;
+      },
     },
     watch: {
       addGroupShow(state) {
@@ -155,13 +126,6 @@
         return this.addList.map(item => {
           return item.name
         }).join('、')
-      },
-      async fetchGroup() {
-        await this.WsProxy.send('control', 'group_list', {uid: this.$store.state.userInfo.uid}).then(data => {
-          this.$store.commit({type: 'getGroupList', data})
-        }).catch(error=>{
-          console.log(error)
-        })
       },
       async createGroup() {
         let array = [];
@@ -197,7 +161,7 @@
           ids: array,
           uid: this.userInfo.uid
         }).then(data => {})
-        await this.fetchGroup()
+        await this.$store.dispatch({ type: 'getGroupList', ws: this.WsProxy});
         this.$store.commit({'type':'updateGroupInfo', data: {id: this.nowChat }})
         this.closeGroup()
       },

@@ -55,6 +55,7 @@ export default {
     // 初始化聊天部分数据
     state.chat = data;
   },
+  
   [types.delChat](state, { data }) {
     state.curChat = "";
     // 删除聊天
@@ -75,7 +76,7 @@ export default {
     // 新建聊天窗口
     let idx, id;
     state.chat.forEach((item, index)=>{
-      if(data.id === item.uid || data.uid === item.uid) {
+      if(data.id === item.uid || (data.uid === item.uid && !item.group)) {
         idx = index;
         id = item.id;
       }

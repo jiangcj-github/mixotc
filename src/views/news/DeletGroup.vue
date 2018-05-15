@@ -45,7 +45,6 @@
       }
     },
     mounted() {
-      console.log(this.members)
     },
     watch: {
       delGroupShow(state) {
