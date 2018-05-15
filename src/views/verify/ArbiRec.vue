@@ -154,7 +154,7 @@
     },
     watch:{
       days:function(){
-        let date2=new Date(new Date(new Date().toLocaleDateString()).getTime()+24*60*60*1000);
+        let date2=new Date(new Date(new Date().toDateString()).getTime()+24*60*60*1000);
         this.$refs.di.date2=date2;
         this.$refs.di.date1=new Date(date2.getTime()-24*60*60*1000*this.days);
       },
