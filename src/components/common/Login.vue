@@ -245,8 +245,10 @@
           return "Opera" + ver;
         }else if (explorer.indexOf("Safari") >= 0) {
           var ver = explorer.match(/version\/([\d.]+)/)[1];
-           return "Safari" + ver;
-          }
+          return "Safari" + ver;
+        }else{
+          return "Unknow";
+        }
       }
     },
     mounted() {

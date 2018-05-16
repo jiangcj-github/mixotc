@@ -207,9 +207,9 @@
       beKickGroup() {
          this.WebSocket.onMessage['kick_g_notify'] = {
           callback:async (res) => {
-            if (res.body && res.body.type === 'kick_g') {
-              let {id} = res.body.data;
-              this.$store.commit({type: 'beKick', data: this.JsonBig.stringify(id)})
+            if (res.body && res.body.type === 'kicked_g') {
+              let {gid} = res.body.data;
+              this.$store.commit({type: 'beKick', data: this.JsonBig.stringify(gid)})
             }
           }
         }

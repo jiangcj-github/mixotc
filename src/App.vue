@@ -1,9 +1,9 @@
 <template>
   <div id="app">
-    <Header v-show="$route.meta.headerShow"></Header>
+    <Header v-if="$route.path !== '/verify/service'"></Header>
     <router-view class="main-container" v-if="showView" :key="$route.path + JsonBig.stringify($route.query)"/>
-    <Footer v-show="$route.meta.footerShow"></Footer>
-    <News v-if="$store.state.userInfo && !$store.state.userInfo.is_admin"></News>
+    <Footer v-if="$route.path !== '/verify/service'"></Footer>
+    <News v-if="!$store.state.userInfo.is_admin"></News>
   </div>
 </template>
 
