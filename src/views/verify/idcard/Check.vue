@@ -1,6 +1,7 @@
 <template>
     <!--已审核-->
     <div class="check">
+      <!--过滤字段-->
       <div class="filter">
         <div class="f1">
           <input type="text" placeholder="搜索用户昵称/账号" v-model="srchText" v-clickoutside="()=>{srchShowTip=false}"
@@ -22,16 +23,13 @@
           <a href="javascript:void(0)" @click="days=7">七天</a>
         </div>
       </div>
+      <!--表头-->
       <div class="tb-head">
         <span class="tjsj">提交时间</span>
         <span class="yh">用户</span>
         <span class="shr">审批人</span>
-        <span class="shsj sortable" @click="sort=(sort+1)%2">
-          审核时间<i class="sort" :class="{up:sort===0,down:sort===1}"></i>
-        </span>
-        <span class="ys sortable" @click="sort=(sort+1)%2+2">
-          用时<i class="sort" :class="{up:sort===2,down:sort===3}"></i>
-        </span>
+        <span class="shsj sortable" @click="sort=(sort+1)%2">审核时间<i class="sort" :class="{up:sort===0,down:sort===1}"></i></span>
+        <span class="ys sortable" @click="sort=(sort+1)%2+2">用时<i class="sort" :class="{up:sort===2,down:sort===3}"></i></span>
         <span class="zt drop">
           <a href="javascript:void(0)" v-clickoutside="()=>{statusDropShow=false}" @click="statusDropShow=!statusDropShow">{{status[statusDropSel].text}}</a>
           <ul v-show="statusDropShow">
@@ -40,7 +38,9 @@
         </span>
         <span class="cz">操作</span>
       </div>
+      <!--条件渲染-->
       <div v-if="err===0">
+        <!--列表-->
         <div class="li" v-for="(e,i) in list" :key="i">
           <div class="booth">
             <div class="tjsj">
@@ -60,7 +60,9 @@
           <div class="division"></div>
           <div class="remark">备注：{{e.checkRemark}}</div>
         </div>
+        <!--翻页-->
         <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
+        <!--弹框-->
         <BasePopup :show="pop" :width="764" :height="382" :top="50">
           <div class="pop">
             <p class="inf-li"><label>提交时间</label><span>{{list[popSel].submitTime}}</span></p>
@@ -104,31 +106,30 @@
     },
     data() {
       return {
-        srchText: "",
-        srchShowTip: false,
-        tips: [],     //模糊搜索结果
+        srchText: "",            // 搜索关键字
+        srchShowTip: false,     // 是否显示搜索结果
+        tips: [],                 // 搜索结果列表
 
-        days: 0,
+        days: 0,    // 【提交时间】筛选快捷键【1-一天,3-三天,7-七天】
+        sort: 1,    // 排序状态【0-审核时间升序,1-审核时间降序,2-用时升序,3-用时降序】
 
-        sort: 1, //0-审核时间升序,1-审核时间降序,2-用时升序,3-用时降序
-
-        statusDropShow: false,    //审核结果下拉框
-        statusDropSel: 0,
-        status:[
-          {text:"全部结果",value:0},
-          {text:"通过",value:1},
-          {text:"不通过",value:2},
-          {text:"恶意上传",value:3},
+        statusDropShow: false,        // 【审核结果】筛选下拉框
+        statusDropSel: 0,              // 选中项
+        status:[                        // 下拉框选项
+          {text: "全部结果", value: 0},
+          {text: "通过", value: 1},
+          {text: "不通过", value: 2},
+          {text: "恶意上传", value: 3},
         ],
 
-        err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败
-        list: [],   //分页数据
-        total: 0,   //数据长度
-        pageSize:20,  //分页大小
-        curPage: 1, //第几页
+        err: -1,      // 数据加载状态【0-正常,1-无相应数据,2-网络异常,3-加载失败,4-加载中,other-无数据】
+        list: [],     // 审核数据列表
+        total: 0,     // 记录总数
+        pageSize:20,  // 每页记录数
+        curPage: 1,   // 当前页数
 
-        popSel: 0,
-        pop: false,  //弹窗-查看
+        pop: false,   // 是否显示弹框-【查看】按钮
+        popSel: 0,    // 弹框数据项
       }
     },
     watch:{
@@ -161,7 +162,7 @@
         this.pop=true;
       },
       loadCheckedList(){
-        //
+        //提交参数
         let srchKey=this.srchText;
         let start= this.$refs.di.date1;
         let end= this.$refs.di.date2;
@@ -178,7 +179,7 @@
         }
         //更新已审核数量
         this.Bus.$emit("onUpdateCheck");
-        //
+        //WebSocket请求
         this.WsProxy.send("control","a_get_identity_list",{
           type:1,
           state:2,

@@ -1,6 +1,6 @@
 <template>
-  <!--发布列表-->
   <div>
+    <!--过滤条件-->
     <div class="filter">
       <a href="javascript:void(0)" class="drop-down" @click="fltTypeShow=!fltTypeShow" @blur="fltTypeShow=false">
         <span>{{fltTypes[fltTypeSel].text}}</span>
@@ -15,6 +15,7 @@
         </ul>
       </a>
     </div>
+    <!--表头-->
     <ul class="head">
       <li class="time"></li>
       <li class="type">广告类型</li>
@@ -25,7 +26,9 @@
       <li class="pay-time">订单期限</li>
       <li class="operation">操作</li>
     </ul>
+    <!--条件渲染-->
     <div v-if="err===0">
+      <!--列表项-->
       <div class="li" v-for="(e,i) in sales" :key="i">
         <div class="booth">
           <span class="time">{{e.create}}</span>
@@ -60,28 +63,28 @@
   export default {
     data() {
       return {
-        uid: 0,
+        uid: 0,           // 用户ID
 
-        sales:[],
-        err: -1,
+        sales:[],         // 广告列表
+        err: -1,          // 广告列表请求状态
 
-        fltTypes:[
+        fltTypes:[                          // 广告类型过滤下拉列表
           {text:"全部广告",value:null},
           {text:"购买",value:2},
           {text:"出售",value:1},
         ],
-        fltTypeSel: 0,
-        fltTypeShow: false,
+        fltTypeSel: 0,                     // 选中项
+        fltTypeShow: false,               // 是否显示广告类型下拉列表
 
-        fltCoins:[
+        fltCoins:[                          // 币种过滤下拉列表
           {text:"全部币种",value:null},
           {text:"BTC",value:"btc"},
           {text:"ETH",value:"eth"},
           {text:"LTC",value:"ltc"},
           {text:"其他",value:"other"},
         ],
-        fltCoinSel: 0,
-        fltCoinShow: false,
+        fltCoinSel: 0,                      // 选中项
+        fltCoinShow: false,                // 是否显示币种下拉列表
       }
     },
     computed:{

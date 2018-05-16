@@ -298,7 +298,6 @@
         // changePage: 'changePage', // 监听自组件数量
         // page: 0 // 分页
 
-
       }
     },
     created() {
@@ -419,16 +418,16 @@
       showOverTimer() {
         this.contentList && this.contentList[0].overtime--
         if (this.contentList && this.contentList[0].overtime < 0) {
+          console.log(222)
           this.contentList[0].state = 5;
-          this.contentTabIndex = 2;
-          this.conductNum--;
-          this.completeNum++;
+          this.selectState = '4,5,6,7,8,9,10,11'
+          clearTimeout(timer)
           return
         }
-        setTimeout(() => {
+        let timer = setTimeout(() => {
           this.showOverTimer()
         },1000);
-        //console.log(1111)
+       console.log(1111, this.contentList[0].overtime)
       },
       initData() {
         let ws = this.WebSocket; // 创建websocket连接
@@ -451,6 +450,7 @@
               // 倒计时数据
               if (v.state == 1) {
                 this.endTime = (v.limit - (Math.floor(new Date().getTime() / 1000) - v.create * 1) / 60) * 60000
+                this.showOverTimer();
               }
               // 状态数组
               let stateListObject = {
@@ -482,7 +482,7 @@
               v.timeToAppeal= 30 * 60 - (Math.floor(Date.now() / 1000) - v.paytime);
             });
             this.appealTimer();
-            this.showOverTimer();
+
           },
           date:new Date()
         };

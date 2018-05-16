@@ -44,9 +44,6 @@
           } else {
             clearInterval(timer);
             _this.countDownShow = false;
-            // setTimeout(() => {
-            //   location.reload()
-            // }, 10000)
           }
         }, 1000);
       }

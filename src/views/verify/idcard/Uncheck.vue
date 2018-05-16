@@ -1,18 +1,23 @@
 <template>
     <!--待审核-->
     <div class="uncheck">
+      <!--左边栏-->
       <div class="srch">
+        <!--搜索框-->
         <div class="head" >
           <input type="text" placeholder="查找昵称/帐号" v-model="srchText" @input="fuzzyInput">
           <img src="/static/images/search_gray.png" @click="search">
         </div>
+        <!--搜索结果列表-->
         <ul>
           <li :class="{active:candSel===i}" v-for="(o,i) in cands" :key="i" @click="clickCand(o,i)">
             <p>{{o.nickname}}</p><p class="account">{{o.account}}</p>
           </li>
         </ul>
+        <!--简单翻页-->
         <SimplePagination :total="total" :pageSize="pageSize" :curPage="curPage"></SimplePagination>
       </div>
+      <!--右边表单-->
       <UploadInfo :infos="infos" :err="infoErr"></UploadInfo>
     </div>
 </template>
@@ -26,16 +31,16 @@
     },
     data() {
       return {
-        srchText: "",
+        srchText: "",   // 搜索内容
 
-        curPage: 1,
-        total: 0,
-        pageSize: 20,
-        cands: [],
-        candSel: 0,
+        curPage: 1,     // 当前页数
+        total: 0,       // 记录总数
+        pageSize: 20,   // 每页记录数
+        cands: [],      // 待审核数据列表
+        candSel: 0,     // 当前选中项
 
-        infos: {},
-        infoErr: -1,
+        infos: {},      // 待审核数据
+        infoErr: -1,    // 待审核数据加载状态【0-正常,1-无相应的数据,2-网络异常,3-加载出错,4-加载中,other-无数据】
       }
     },
     methods: {
@@ -50,6 +55,7 @@
       search(){
         this.loadUncheckList();
       },
+      //
       loadUncheckList(p=0){
         let srchKey=this.srchText;
         //更新未审核数量
@@ -130,7 +136,6 @@
       },
     },
     mounted(){
-      //ws-获取待审核列表
       this.loadUncheckList();
       this.Bus.$on("onPageChange",(p)=>{
         this.curPage=p;

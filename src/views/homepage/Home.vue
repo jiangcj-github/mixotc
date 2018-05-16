@@ -29,9 +29,11 @@
         <div class="unit"><label>{{info.trustNum}}</label><span>信任</span></div>
         <div class="unit"><label>{{info.securedNum}}</label><span>担保</span></div>
       </div>
+
     </div>
+    <!--发布和评价-->
     <div v-if="isLogin" @click="isShowPop=false">
-      <!--菜单项tab-->
+      <!--Tab项-->
       <ul class="menu-tab">
         <li :class="{active:tab===0}" @click="tab=0">他的发布({{saleNum}})</li>
         <li :class="{active:tab===1}" @click="tab=1">收到的评价({{rateNum}})</li>
@@ -40,11 +42,11 @@
       <Sales :uid="uid" v-show="tab===0"></Sales>
       <!--评价列表-->
       <Rates :uid="uid" v-show="tab===1"></Rates>
-      <!--信任操作弹框-->
-      <BasePopup :show="isShowPop">
-        <div class="popContent">{{["取消信任成功","加入信任成功"][info.isTrust]}}</div>
-      </BasePopup>
     </div>
+    <!--提示弹框-->
+    <BasePopup :show="isShowPop">
+      <div class="popContent">{{["取消信任成功","加入信任成功"][info.isTrust]}}</div>
+    </BasePopup>
   </div>
 </template>
 <script>
@@ -60,14 +62,14 @@
     },
     data() {
       return {
-        uid: "",
-        isOnline: true,
-        info:{},
+        uid: "",                // 用户ID
+        isOnline: true,       // 是否在线
+        info:{},               // 用户信息
 
-        tab:0,  //他的发布，他的评价
-        rateNum:0,
-        saleNum:0,
-        isShowPop:false,
+        tab:0,                 // tab项【0-他的发布，1-他的评价】
+        rateNum:0,            // 评价数量
+        saleNum:0,            // 广告数量
+        isShowPop:false,    // 是否显示弹框
       }
     },
     computed:{
