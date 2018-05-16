@@ -113,7 +113,7 @@ function clearMessage() {
   let obj = pool.onMessage,
     date = new Date();
   for (const key in obj) {
-    if (obj[key].date && date - obj[key].date > 15000) {
+    if (obj[key].date && date - obj[key].date > 25000) {
       obj[key].callback(false);
       delete obj[key];
     }
