@@ -74,15 +74,26 @@ export default {
   
   title: state => {
     let result = "";
-    let infoDiction = this.a.infoDiction(state);
+    let infoDiction = this.a.infoDiction(state),
+      length = this.a.groupLength(state)[state.curChat];
     state.chat.forEach(item => {
       if (item.id === state.curChat) {
         item.nickName && (result = item.nickName);
         item.isSingle && (result = infoDiction[item.uid] && infoDiction[item.uid].name);
         !item.nickName && !item.isSingle && (result = infoDiction[item.id] && infoDiction[item.id].name);
-        item.group && (result += `(${item.length})`)
+        item.group && (result += `(${length})`)
       }
     });
     return result;
+  },
+
+  groupLength: state => {
+    let obj = {};
+    state.groupList.filter(item => {
+      return item.type === 1;
+    }).forEach(item => {
+      obj[JsonBig.stringify(item.id)] = item.members.length;
+    })
+    return obj;
   }
 };

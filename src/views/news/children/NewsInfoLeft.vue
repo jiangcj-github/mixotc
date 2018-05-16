@@ -17,7 +17,7 @@
           <ul class="firend-list" v-else>
             <li v-for="(content) in searchRange" :key="content.id" :class="{cur: content.id === $store.state.curChat}" @click="newChat(content)">
               <img :src="content.icon ? content.icon : (content.isSingle ?  infoDiction[content.uid].icon : infoDiction[content.id].icon)" alt="" class="head-portrait">
-              <span>{{content.nickName ? content.nickName : (content.isSingle ? infoDiction[content.uid].name : infoDiction[content.id].name)}}{{content.length ? `(${content.length})` : ''}}</span>
+              <span>{{content.nickName ? content.nickName : (content.isSingle ? infoDiction[content.uid].name : infoDiction[content.id].name)}}{{content.group ? `(${groupLength[content.id]})` : ''}}</span>
             </li>
           </ul>
         </div>
@@ -66,7 +66,8 @@
         'chatIds',
         'friendIds',
         'friendGid',
-        'infoDiction'
+        'infoDiction',
+        'groupLength'
       ]),
       userList() {
         return this.$store.state.chat

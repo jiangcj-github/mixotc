@@ -87,6 +87,8 @@
           id: this.JsonBig.parse(this.curChat),
           ids: this.deleteArray
         }).then(data => {})
+        await this.$store.dispatch({ type: 'getGroupList', ws: this.WsProxy});
+        this.$store.commit({'type':'updateGroupInfo', data: {id: this.curChat }})
         this.closeGroup()
       }
     }

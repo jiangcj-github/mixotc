@@ -111,29 +111,14 @@
         showBig: false,
         showBigSrc: '',
         bigLoading: true,
-        userId: this.JsonBig.stringify(this.$store.state.userInfo.uid),
-        reqMessage: ''
+        userId: this.JsonBig.stringify(this.$store.state.userInfo.uid)
       }
     },
     components: {
       HappyScroll
     },
-    mounted() {
-      this.listenChat()//监听消息
-      this.beAddedGroup()//监听被加入群
-      //监听其他页面调用聊天窗口
-      this.Bus.$on('contactSomeone',({id, msg})=> {
-        this.contactSomeone(id, msg)
-      });
-    },
-    destroyed() {
-      this.Bus.$off('contactSomeone');
-    },
     computed: {
       ...mapGetters([
-        'chatIds',
-        'friendIds',
-        'friendGid',
         'infoDiction',
         'title'
       ]),
@@ -219,190 +204,15 @@
           })
         })
       },
-      //其余页面入口-联系他
       async fetchFriendList() {
         await this.$store.dispatch({ type: 'getFriendList', ws: this.WsProxy})
-      },
-      async contactSomeone(id, msg) {
-        if(this.userId === id) {
-          alert('不能和自己聊天')
-          return;
-        }
-        let flag = this.chatIds.indexOf(id),
-            friendFlag = false;
-        await this.fetchFriendList();
-        friendFlag = this.friendIds.includes(id);
-
-        // 好友以gid为匹配条件
-        if(friendFlag) id = this.friendGid[id];
-        friendFlag && (flag = this.chatIds.indexOf(id));
-        // 1为群聊（好友实质为群聊），0为单聊
-        await this.dealNewChat(id, friendFlag ? 1 : 0);
-        // 打开聊天窗口
-        this.$store.commit({type: 'changeChatBox', data: true})
-        // 不在左侧列表的新联系人需置顶
-        if(flag !== -1) {
-          this.$store.commit({type: 'chatTop', data: flag})
-        }
-        // 改变当前聊天框
-        this.$store.commit({type: 'changeCurChat', data: {id: id }})
-        if (msg) this.sendMs(msg);
-      },
-      // 不在消息列表的人来消息时的处理
-      async dealNewChat(id, flag) {
-        !flag && !this.chatIds.includes(id) && await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(id)}).then( ({name, phone, email, icon }) => {
-          this.$store.commit(
-            {type: 'updateStrangerInfo', 
-              data: {
-                id: id,
-                icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                name: name
-              }
-          })
-           this.$store.commit({type: 'newChat', data:{
-              id: id,
-              uid: id,
-              group: false,
-              service: false,
-              phone: phone,
-              email: email,
-              moreFlag: false,
-              unread: 0
-           }})
-        })
-        flag && !this.chatIds.includes(id) && await this.$store.dispatch({ type: 'getGroupList', ws: this.WsProxy});
-        if(this.chatIds.includes(id)) return;
-        let group = this.$store.state.groupList.filter(item => {
-          return this.friendGid[id] === this.JsonBig.stringify(item.id)
-        })[0];
-        !group && (group = this.$store.state.groupList.filter(item => {
-          return id === this.JsonBig.stringify(item.id)
-        })[0])
-        if(group.type === 1){
-          this.$store.commit({type: 'newChat', data:{
-            id: this.JsonBig.stringify(group.id),
-            group: true,
-            length: group.members.length,
-            service: false,
-            icon: "/static/images/groupChat_icon.png",
-            nickName: !group.name ? group.members.map(item =>{
-              return item.name
-            }).join('、') : `${group.name}`,
-            phone: false,
-            email: false,
-            unread: 0,
-            moreFlag: false,
-            exists: true
-          }})
-        }else {
-          let other = group.members.filter( item => {
-            return this.JsonBig.stringify(item.id) !== this.userId
-          })[0];
-          let uid = this.JsonBig.stringify(other.id)
-          this.$store.commit({
-            type: 'newChat', data:{
-              id: this.friendGid[uid],
-              uid: uid,
-              isSingle: true,
-              group: false,
-              service: false,
-              phone: other.phone,
-              email: other.email,
-              exists: true,
-              moreFlag: this.$store.state.messages[uid] ?  (this.$store.state.messages[uid].length === 0 ? false : true): false,
-              unread: 0
-            }
-          })
-        }
-      },
-      // 监听消息
-      listenChat() {
-        //聊天信息监听
-        let _this = this;
-        this.WebSocket.onMessage['sms']={
-          async callback(res){
-            // op为7单人(陌生人)聊天信息，对象类型, op为6群聊信息，数组第0项
-            // 单聊
-            if (res.op && res.op === 7) {
-              let {id, uid, icon, name, data, type } = res.body;
-              let obj = {},
-                  messageContent = {
-                    text: data.msg && data.msg.br(),
-                    image: `${_this.HostUrl.http}file/${data.id}`,
-                    audio: `您收到一条语音信息，请在手机端查看`,
-                    video: `您收到一条视频信息，请在手机端查看`,
-                    gift: `您收到一条红包信息，请在手机端查看`
-                  }
-                obj = {
-                  id: _this.JsonBig.stringify(id),
-                  from: _this.JsonBig.stringify(uid), 
-                  to: _this.userId,
-                  msg:{
-                    type: type === 'image' ? 1 : 0,
-                    content: messageContent[type]
-                  },
-                  isLoding: type === 'image' ? true : false, 
-                  isFail: false,
-                  time: new Date() - 0
-                }
-                _this.$store.commit({
-                  type: 'updateStrangerInfo', data: 
-                    {
-                      id: _this.JsonBig.stringify(id),
-                      icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
-                      name: name
-                    }
-                })
-                await _this.dealNewChat(_this.JsonBig.stringify(uid), 0)
-                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(uid), msg: obj }})
-            }
-            // 群聊（好友单聊实质为群聊）
-            if (Array.isArray(res) && res[0].op === 6) {
-              res.forEach(async (ite) => {
-                let {id, uid, gid, data, type } = res[0].body;
-                let obj = {},
-                    messageContent = {
-                      text: data.msg && data.msg.br(),
-                      image: `${_this.HostUrl.http}file/${data.id}`,
-                      audio: `您收到一条语音信息，请在手机端查看`,
-                      video: `您收到一条视频信息，请在手机端查看`,
-                      gift: `您收到一条红包信息，请在手机端查看`
-                    };
-                if (_this.userId === _this.JsonBig.stringify(uid)) return;
-                let group = _this.$store.state.groupList.filter(item => {
-                  return _this.JsonBig.stringify(gid) === _this.JsonBig.stringify(item.id)
-                })[0];
-                let other = group.members.filter(item => {
-                  return _this.JsonBig.stringify(uid) === _this.JsonBig.stringify(item.id)
-                })[0]
-                let {icon, name} = other;
-                obj = {
-                  id: _this.JsonBig.stringify(id),
-                  from: _this.JsonBig.stringify(uid), 
-                  to: _this.userId,
-                  name: name,
-                  msg:{
-                    type: type === 'image' ? 1 : 0,
-                    content: messageContent[type]
-                  },
-                  isLoding: type === 'image' ? true : false, 
-                  isFail: false,
-                  time: new Date() - 0
-                }
-                console.log(_this.JsonBig.stringify(gid))
-                await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
-                _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
-              })
-            }
-          }
-        }
       },
       toHomepage(id) {
         this.$router.push({ name: 'homepage', query: { uid: id }})
       },
-       // 同意好友请求
+      // 同意好友请求
       addFriend(id, info) {
-        this.reqMessage = info;
+        this.Bus.$emit('addReqInfo', info);
         this.$store.commit({type: 'agreeAddFriend', data:{id: id}})
         this.WsProxy.send('control', 'add_friend', {
           ack: 0,
@@ -410,47 +220,6 @@
         }).then(data => {
           this.fetchFriendList();
         })
-      },
-      // 监听被加入群聊
-      beAddedGroup() {
-        this.WebSocket.onMessage['add_g_notify'] = {
-          callback:async (res) => {
-            if (res.body && ["add_g", "cre_g"].includes(res.body.type)) {
-              let {id, aid, type, members} = res.body.data;
-              let idstr =  this.JsonBig.stringify(id);
-              if(this.chatIds.includes(idstr)) this.$store.commit({type: 'beAdd', data: idstr})
-              await this.dealNewChat(idstr, 1)
-              if(type === 0) {
-                let other = members.filter(item => {
-                  return this.JsonBig.stringify(item.id) !== this.userId
-                })[0];
-                //处理加好友后的陌生人对话框
-                let idx = '', otherId = this.JsonBig.stringify(other.id);
-                this.chat.forEach((item, index)=>{
-                  if (item.id === otherId) idx = index;
-                })
-                if(idx !== '') {
-                  this.$store.commit({type: 'delStranger', data:{id: otherId, index: idx }})
-                }
-                //加好友后的处理
-                let obj = {
-                  id: 0,
-                  from: otherId,
-                  to: this.userId,
-                  msg:{
-                    type: 0,
-                    content: this.JsonBig.stringify(aid) === this.userId ? this.reqMessage : '已通过验证，开始对话吧'
-                  },
-                  isLoding: false,
-                  isFail: false,
-                  time: new Date() - 0
-                }
-                this.$store.commit({type: 'addMessages', data:{id: idstr, msg: obj }})
-              }
-              this.$store.commit({type: 'changeCurChat', data: {id: idstr}})
-            }
-          }
-        }
       },
       showBigPicture(flag, src, id) {
         if (!flag || this.showBigSrc === src) return;
