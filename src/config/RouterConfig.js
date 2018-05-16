@@ -85,8 +85,16 @@ const ROUTES = [
   {
     path: "/verify/service",
     name: "Service",
-    component: resolve => require(["@/views/kefu/Dialog"], resolve) // 客服交易对话框
-  }
+    component: resolve => require(['@/views/kefu/Dialog'], resolve), // 客服交易对话框
+  },
+  // 钱包
+  {
+    path: "/wallet",
+    component: resolve => require(['@/views/wallet/Account'], resolve), // 客服交易对话框
+  },
+
+
+
 ];
 
 export default {
