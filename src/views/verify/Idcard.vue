@@ -28,9 +28,9 @@
     },
     data() {
       return {
-        uncheckNum: 0,
-        checkNum: 0,
-        tab:1,  //1-待审核，2-已审核
+        uncheckNum: 0,    // 待审核数量
+        checkNum: 0,      // 已审核数量
+        tab:1,            // 选项卡【1-待审核，2-已审核】
       }
     },
     mounted(){

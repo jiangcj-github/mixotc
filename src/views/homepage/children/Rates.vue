@@ -1,5 +1,7 @@
 <template>
+  <!--条件渲染-->
   <div v-if="err===0">
+    <!--评价列表-->
     <div class="li" v-for="(e,i) in rates">
       <div class="p1">
         <p class="text">{{e.comment}}</p>
@@ -16,6 +18,7 @@
         <span>{{e.name}}</span>
       </div>
     </div>
+    <!--翻页-->
     <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
   </div>
   <div class="err no-result" v-else-if="err===1">无相应的数据</div>
@@ -30,13 +33,13 @@
     components:{Pagination},
     data() {
       return {
-        uid: "",
+        uid: "",        // 用户ID
 
-        rates:[],
-        pageSize:10,
-        curPage: 1,
-        total: 1,
-        err: -1,
+        rates:[],        // 评价列表
+        pageSize:10,    // 每页记录数
+        curPage: 1,     // 当前页数
+        total: 1,       // 记录总数
+        err: -1,        // 评价列表请求状态，【0-正常,1-无相应数据,2-网络异常,3-加载失败,4-加载中,other-无数据】
       }
     },
     mounted() {

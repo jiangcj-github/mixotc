@@ -1,9 +1,12 @@
 <template>
+  <!--条件渲染-->
   <div class="upload-info" v-if="err===0">
     <h3>{{infos.nickname}}<small>{{infos.account}}</small></h3>
+    <!--认证列表-->
     <div v-for="(e,i) in infos.his">
       <sup>第{{infos.his.length-i}}次认证</sup>
       <div v-if="e.flag===1">
+        <!--认证信息-->
         <p class="inf-li"><label>提交时间</label><span>{{e.submitTime}}</span></p>
         <p class="inf-li"><label>真实姓名</label><span>{{e.name}}</span></p>
         <p class="inf-li"><label>身份证号</label><span>{{e.idcard}}</span></p>
@@ -12,6 +15,7 @@
           <img :src="e.img2">
           <img :src="e.img3">
         </p>
+        <!--表单-->
         <div class="form">
           <p style="margin-bottom:12px">
             <span class="checkbox" :class="{check:formResult===1}" @click="checkPass">审核通过</span>
@@ -59,10 +63,10 @@
     },
     data(){
       return{
-        formResult: -1,   //0-不通过,1-通过
-        formMali: false,
-        formRemark: '',
-        formRemarkOld: '',
+        formResult: -1,     // 审核结果【0-不通过,1-通过】
+        formMali: false,    // 是否恶意上传
+        formRemark: '',     // 审核不通过原因
+        formRemarkOld: '',  // formRemark的备份，用于有效性检查
       }
     },
     computed:{
@@ -92,14 +96,14 @@
       },
       submit(i){
         if(!this.canSubmit) return;
-        //
+        //上传参数
         let id=this.infos.his[i].id;
         let uid=this.infos.his[i].uid;
         let type=1;
         let result=2-this.formResult;
         let spite=2-(this.formMali?0:1);
         let info=this.formRemark;
-        //ws-提交审核
+        //WebSocket请求
         this.WsProxy.send("control","a_identify",{
           id:id,uid:uid,type:type,result:result,spite:spite,info:info
         }).then((data)=>{

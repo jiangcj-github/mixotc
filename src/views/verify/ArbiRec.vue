@@ -4,8 +4,9 @@
     <div class="main">
       <!--左侧菜单栏-->
       <Left :leftBar="4"></Left>
-      <!--右侧-->
+      <!--右侧内容-->
       <div class="right">
+        <!--过滤条件-->
         <div class="filter">
           <div class="f1">
             <div class="search">
@@ -37,6 +38,7 @@
             <a href="javascript:void(0)" :class="{active:days===7}" @click="days=7">七天</a>
           </div>
         </div>
+        <!--表头-->
         <div class="tb-head">
           <span class="tjsj sortable" @click="sort=(sort+1)%2">提交时间<i class="sort" :class="{up:sort===0,down:sort===1}"></i></span>
           <span class="ddxx">币种</span>
@@ -54,7 +56,9 @@
           <span class="zrr">责任人</span>
           <span class="cz">操作</span>
         </div>
+        <!--列表内容-->
         <div v-if="err===0">
+          <!--列表-->
           <div class="li" v-for="(e,i) in arbis" :key="i">
             <div class="booth">
               <div class="tjsj"><p>{{e.createTime1}}</p><p>{{e.createTime2}}</p></div>
@@ -80,6 +84,7 @@
               <span class="remark">备注：{{e.remark}}</span>
             </div>
           </div>
+          <!--翻页-->
           <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
         </div>
         <div v-else-if="err===1">
@@ -115,28 +120,27 @@
       data() {
       return {
 
-        srchUls: [
-          {text: "申诉人", key:0,},
-          {text: "被申诉人",key:1},
-          {text: "处理人",key:2},
-          {text: "责任人",key:3},
-          {text: "订单号",key:4},
+        srchUls: [                    // 搜索框条件下拉列表
+          {text: "申诉人", key: 0,},
+          {text: "被申诉人",key: 1},
+          {text: "处理人",key: 2},
+          {text: "责任人",key: 3},
+          {text: "订单号",key: 4},
         ],
-        srchUlSel: 0,
-        srchUlShow: false,
-        srchTipShow: false,
-        srchText: "",
+        srchUlSel: 0,                 // 下拉选中项
+        srchUlShow: false,           // 是否显示下拉框
+        srchTipShow: false,          // 是否显示模糊搜索结果
+        srchText: "",                 // 搜索关键字
 
-        tips: [],
-        tipsCount: 10,
+        tips: [],                      // 模糊搜索结果
+        tipsCount: 10,                // 模糊搜索结果候选数量
 
-        days: 0,
+        days: 0,                      // 【提交时间】筛选快捷键【1-一天,3-三天,7-七天】
+        sort: 1,                      // 排序状态【0-提交时间升序，1-提交时间降序，2-用时升序，3-用时降序】
 
-        sort: 1, //0-提交时间升序，1-提交时间降序，2-用时升序，3-用时降序
-
-        resUlShow: false,
-        resUlSel: 0,
-        resUls:[
+        resUlShow: false,           // 【申诉结果】筛选下拉框
+        resUlSel: 0,                 // 下拉选中项
+        resUls:[                     // 下拉列表
           {text:"全部结果",key:0},
           {text:"申诉中",key:1},
           {text:"撤销申诉",key:2},
@@ -145,11 +149,11 @@
           {text:"驳回申诉",key:3},
         ],
 
-        err: -1, //0-正常,1-无相应的用户，2-网络异常，3-加载失败,4-加载中
-        arbis: [],
-        pageSize: 20,
-        curPage: 1,
-        total: 1,
+        arbis: [],                    // 申诉列表
+        err: -1,                      // 申诉列表请求状态【0-正常,1-无相应的数据,2-网络异常,3-加载失败,4-加载中,other-无数据】
+        pageSize: 20,                 // 每页记录数
+        curPage: 1,                   // 当前页数
+        total: 1,                     // 记录总数
       }
     },
     watch:{
@@ -188,7 +192,7 @@
         this.loadArbiLists();
       },
       loadArbiLists(){
-        //
+        //请求参数
         let srchKey1=null;  //申诉人
         let srchKey2=null;  //被申诉人
         let srchKey3=null;  //受理人
@@ -214,7 +218,7 @@
           case 2: sortByDuration=2;break;
           case 3: sortByDuration=1;break;
         }
-        //获取列表
+        //发送请求
         this.WsProxy.send("control","a_get_appeal_list",{
           sid: srchKey5,
           appellant: srchKey1,
@@ -246,6 +250,7 @@
         });
       },
       loadTips(){
+        //请求参数
         let srchKey=this.srchText;
         let key=this.srchUls[this.srchUlSel].key;
         let action="";
@@ -261,7 +266,7 @@
           case 2:type=4;break;
           case 3:type=3;break;
         }
-        //
+        //发送请求
         this.WsProxy.send("control",action,{
           keyword:srchKey,
           type: type,
