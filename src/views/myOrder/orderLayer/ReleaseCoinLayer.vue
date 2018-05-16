@@ -59,7 +59,7 @@
     </BasePopup>
     <!-- 资金互转成功 -->
     <BasePopup class="remind-layer" :show="remindLayer">
-      <p v-clickoutside="closeLayer"><span>{{remindText}}</span>成功转到{{toTitle}}</p>
+      <p v-clickoutside="closeLayer"><span>{{amount}}{{currency}}</span>成功转到{{toTitle}}</p>
     </BasePopup>
   </div>
 </template>
@@ -70,7 +70,7 @@
 
   export default {
     name: "release-coin-layer",
-    props: ['releaseCoinShow', 'uid', 'id', 'curreny', 'amount', 'toTitle'],
+    props: ['releaseCoinShow', 'uid', 'id', 'currency', 'amount', 'toTitle'],
     data() {
       return {
         buyLayer: this.releaseCoinShow,
@@ -196,7 +196,7 @@
         this.WsProxy.send(this.$store.state.transformInfo === 1 ? 'wallet' : 'otc', this.$store.state.transformInfo === 1 ? 'transfer_stock' : 'send_order',{
           uid: this.$store.state.transformInfo === 1 ? this.$store.state.userInfo.uid : this.uid,
           id: this.$store.state.transformInfo === 1 ? 0 : this.id,
-          curreny:  this.$store.state.transformInfo === 1 ? this.curreny : '',
+          currency:  this.$store.state.transformInfo === 1 ? this.currency.toLowerCase() : '',
           amount: this.$store.state.transformInfo === 1 ? this.amount * 1 : '',
           //pass: "yEQQka401NQ2LjlRM60VEBHSmgkl/YzVlspqBwGnics=",
           pass: this.PaymentValue,
@@ -234,7 +234,7 @@
             st.push( ch & 0xFF );  // push byte to stack
             ch = ch >> 8;          // shift value down by 1 byte
           }
-          while ( ch );
+          while (ch);
           // add stack contents to result
           // done because chars have "wrong" endianness
           re = re.concat( st.reverse() );

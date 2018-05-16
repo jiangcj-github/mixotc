@@ -70,7 +70,7 @@
     </BasePopup>
     <ReleaseCoinLayer
       :releaseCoinShow="showReleaseCoin"
-      :curreny="paymentCurreny"
+      :currency="paymentCurreny"
       :amount="paymentAmount"
       :toTitle="toPayment"
       @offRelease="openReleaseCoin">
@@ -119,7 +119,14 @@
     },
     watch: {
       transformShow(state) {
-        this.codeLayer = state === true ?  true : false
+        // this.codeLayer = state === true ? true : false
+        if (state === true) {
+          this.amount = ''
+          this.errText = ''
+          this.codeLayer = true
+        } else {
+          this.codeLayer = false
+        }
       }
     },
     mounted() {
@@ -148,15 +155,22 @@
         this.$emit('offTransform', 'false')
       },
       openReleaseCoin(st, content) { // 支付弹窗
+        if (this.amount === '') {
+          this.errText = '请输入数量'
+          return
+        }
+        if (this.amount * 1 > this.fromAmount * 1) {
+          return
+        }
         if (st === 'false') {
           this.showReleaseCoin = false
         } else {
-          this.showReleaseCoin = true
           this.closePopup()
+          this.showReleaseCoin = true
           this.$store.commit({type: 'showTransform', data: 1}) // 支付标识来源
         }
       },
-      initData() {
+      initData() { // 初始化弹窗数据
         let balanceArr = [];
         this.coinType = [];
         this.WsProxy.send('wallet', 'wallets', {
@@ -169,21 +183,23 @@
           balanceArr = data.wallets.filter(v => {
             return v.currency === this.coinValue.toLowerCase()
           })
-          console.log('aaa', balanceArr)
-          this.fromAmount = (this.JsonBig.stringify(balanceArr[0].balance) * 1).toFixed(6)
+          console.log('aaa', balanceArr, typeof balanceArr[0].balance)
+          this.fromAmount = typeof balanceArr[0].balance == 'number' ? balanceArr[0].balance : (this.JsonBig.stringify(balanceArr[0].balance) * 1).toFixed(6)
           this.fromCoin = balanceArr[0].currency.toUpperCase()
         }).catch((msg)=>{
           console.log(msg);
         });
       },
-      allCheck() {
+      allCheck() { // 数量下的全部按钮
         this.amount = this.fromAmount
       },
-      checkInput() {
+      checkInput() { // 输入框事件
+        console.log('errText', this.amount, this.fromAmount, this.amount * 1 > this.fromAmount * 1)
         this.paymentCurreny = this.coinValue
         this.paymentAmount = this.amount
-        this.toPayment = this.toTitle
-        this.errText = this.amount > this.fromAmount ? '数量应不大于可划转数量' : ''
+        this.toPayment = this.toText
+        this.errText = this.amount * 1 > this.fromAmount * 1 ? '数量应不大于可划转数量' : ''
+        //this.errText = !(/^\d{n}$/.test(this.amount)) ? '请输入数字' : ''
       }
     }
   }
