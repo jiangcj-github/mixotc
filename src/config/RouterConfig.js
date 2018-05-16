@@ -128,7 +128,21 @@ const ROUTES = [
       footerShow:false,
       newsShow: false
     }
-  }
+  },
+
+  // 钱包
+  {
+    path: "/wallet",
+    component: resolve => require(['@/views/wallet/Account'], resolve), // 客服交易对话框
+    meta: {
+      headerShow: true,
+      footerShow:true,
+      newsShow: true
+    }
+  },
+
+
+
 ];
 
 export default {
