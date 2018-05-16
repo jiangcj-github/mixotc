@@ -3,54 +3,56 @@
     <happy-scroll 
       style="width:399px;height:325px" 
       :resize="true" 
+      smaller-move-h="end"
       bigger-move-h="end" 
       hide-horizontal 
       class="main-content"
-      :scroll-top="9999999">
+      :scroll-top="99999999">
       <div class="wrap">
         <!-- 空白消息框 -->
         <div class="blank" v-if="!title && curChat !== 'system'"></div>
-
         <!-- 聊天消息框 -->
         <div class="news-info-talk clearfix" v-if="title && curChat !== 'system'">
           <p class="more-info" v-if="chat[index].moreFlag" @click="fetchMore(10, 1)">查看更多消息</p>
           <p class="more-info" v-else></p>
-          <div class="messages clearfix" v-for="(item, idx) of messages" :key="item.id ? item.id :item.time">
-            <p class="time-info" v-if="idx > 0 && dealTime(messages[idx - 1].time, item.time)">{{dealTime(messages[idx-1].time, item.time)}}</p>
-            <div :class="{'left-people': item.from !== JsonBig.stringify($store.state.userInfo.uid), 'right-people': item.from === JsonBig.stringify($store.state.userInfo.uid)}">
-              
-              <img 
-                class="avator" 
-                :src="infoDiction[item.from] && infoDiction[item.from].icon"
-                alt="" 
-                @click="toHomepage(item.from)"
-              >
-              <p>
-                <i :class="{name: chat[index].group && userId !== item.from}"></i>
+          <div v-for="(value, key) of mapmessages" :key="key" v-show="key === curChat">
+            <div class="messages clearfix" v-for="(item, idx) of value" :key="item.id ? item.id : item.time">
+              <p class="time-info" v-if="idx > 0 && dealTime(value[idx - 1].time, item.time)">{{dealTime(value[idx-1].time, item.time)}}</p>
+              <div :class="{'left-people': item.from !== JsonBig.stringify($store.state.userInfo.uid), 'right-people': item.from === JsonBig.stringify($store.state.userInfo.uid)}">
+                
+                <img 
+                  class="avator" 
+                  :src="infoDiction[item.from] && infoDiction[item.from].icon"
+                  alt="" 
+                  @click="toHomepage(item.from)"
+                >
+                <p>
+                  <i :class="{name: chat[index].group && userId !== item.from}"></i>
 
-                <b v-if="chat[index].group && userId !== item.from">{{infoDiction[item.from] && infoDiction[item.from].name}}</b>
+                  <b v-if="chat[index].group && userId !== item.from">{{infoDiction[item.from] && infoDiction[item.from].name}}</b>
 
-                <span v-if="item.msg.type === 1" class="images">
-                  <img
-                    :id="'img' + item.time"
-                    :src="item.msg.content"
-                    alt=""
-                    @load="imgLoad(curChat, item.time, 'img' + item.time)"
-                    @error="imgError(curChat, item.time, item.msg.content)"
-                    @click="showBigPicture(!item.isLoding && !item.isFail, item.msg.content, 'img' + item.time)"
-                  >
-                </span>
-                <span v-if="item.msg.type === 0" v-html="item.msg.content" class="msg-text"></span>
-                <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding">
-                <img src="/static/images/hint.png" class="failFlag" v-if="!item.isLoding && item.isFail">
-              </p>
+                  <span v-if="item.msg.type === 1" class="images">
+                    <img
+                      :id="'img' + item.time"
+                      :src="item.msg.content"
+                      alt=""
+                      @load="imgLoad(curChat, item.time, 'img' + item.time)"
+                      @error="imgError(curChat, item.time, item.msg.content)"
+                      @click="showBigPicture(!item.isLoding && !item.isFail, item.msg.content, 'img' + item.time)"
+                    >
+                  </span>
+                  <span v-if="item.msg.type === 0" v-html="item.msg.content" class="msg-text"></span>
+                  <img src="/static/images/loding.png" class="lodingFlag" v-if="item.isLoding">
+                  <img src="/static/images/hint.png" class="failFlag" v-if="!item.isLoding && item.isFail">
+                </p>
+              </div>
             </div>
           </div>
           <p class="time-info" v-if="!chat[index].service &&  chat[index].uid !== chat[index].id && !chat[index].exists">{{chat[index].group ? '您已被管理员移出群聊' : '对方已将您从好友列表移除'}}</p>
         </div>
 
         <!-- 系统消息 -->
-        <div class="system-info" v-if="curChat === 'system'">
+        <div class="system-info" v-show="curChat === 'system'">
           <div v-for="item of $store.state.messages['system']" :key="item.sid">
             <img :src="infoDiction[item.id] && infoDiction[item.id].icon" alt="">
             <ul>
@@ -119,6 +121,7 @@
     },
     computed: {
       ...mapGetters([
+        'chatIds',
         'infoDiction',
         'title'
       ]),
@@ -134,6 +137,16 @@
           if (item.id === this.curChat) idx = index;
         })
         return idx
+      },
+      mapmessages() {
+        let obj = {},
+            messages = this.$store.state.messages;
+        for (const key in messages) {
+          if(this.chatIds.includes(key)) {
+            obj[key] = messages[key]
+          }
+        }
+        return obj;
       },
       messages() {
         return this.$store.state.messages[this.curChat] ? this.$store.state.messages[this.curChat] : []
