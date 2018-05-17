@@ -72,9 +72,9 @@ export default {
     });
   },
 
-  title: state => {
+  title: (state, getters) => {
     let result = "";
-    let infoDiction = this.a.infoDiction(state);
+    let infoDiction = getters.infoDiction;
     state.chat.forEach(item => {
       if (item.id === state.curChat) {
         item.nickName && (result = item.nickName);

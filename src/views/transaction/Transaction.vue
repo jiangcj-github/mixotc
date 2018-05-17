@@ -242,8 +242,8 @@
       loadTips() {
         let srchKey = this.srchText;
         if (this.srchType === 0) {
-          this.coinTips = [];
           this.Proxy["coinSearch"]({keyword: srchKey}).then(res => {
+            this.coinTips = [];
             res.data.coins && res.data.coins.forEach(v => {
               this.coinTips.push({
                 name: v.currency || "-",
