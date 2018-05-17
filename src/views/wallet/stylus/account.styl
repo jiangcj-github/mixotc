@@ -1,4 +1,4 @@
-*{box-sizing:border-box;}
+.account{margin-bottom:40px;}
 .right{margin-left:200px;}
 
 .right .asset{padding:0 30px;height:130px;background:#fff;box-shadow: 0 2px 4px 0 #e1e1e1;}
@@ -17,8 +17,7 @@
 .filter .f1>input{padding:0 10px;flex-grow:1;}
 .filter .f1>img{align-self:center; margin-right:10px;}
 .filter .f1>img:hover{cursor:pointer; opacity:0.8;}
-.filter .f1>button{display:inline-block; width:72px;cursor:pointer;
-  background:url(/static/images/search.png) no-repeat center center #ffb422;}
+.filter .f1>button{display:inline-block; width:72px; background:url(/static/images/search.png) no-repeat center center #ffb422;}
 .filter .f1>button:hover{background-color:#fea350;}
 
 .filter .f2{flex-grow:1;text-align:right;}
@@ -31,19 +30,18 @@
 .radio{font-size:13px; color:#333333; letter-spacing:0.27px; display:inline-block; padding-left:27px; cursor:pointer;
   background  url(/static/images/unselect.png) no-repeat 3px center;}
 .radio.check{ background-image:url(/static/images/selected.png);}
-.radio:hover{ color:#666;}
+.radio:hover{ color:#fea350;}
 .radio.disabled{pointer-events:none;color:#999;}
 
-.right .tb-tab{height:50px;padding:0 30px;background:#fff;}
+.right .tb-tab{height:50px;padding:0 30px;background:#fff;user-select:none;}
 .tb-tab>ul{display:inline-block;line-height:48px;}
 .tb-tab>ul>li{float:left;cursor:pointer;margin-right:40px;font-size:16px;color:#999;letter-spacing:0.33px;}
 .tb-tab>ul>li.active{border-bottom:2px solid #ffb422;color:#333;}
-.tb-tab>button{float:right;height:25px;margin-top:12px;width:74px;border-radius:2px;cursor:pointer;
-  background:#ffb422;color:#fff;font-size:13px;letter-spacing:0.27px;}
-.tb-tab>button:hover{background:#fea350;}
+.tb-tab>button{float:right;height:25px;margin-top:12px;width:74px;}
 
-.right .thead{height:50px;padding:0 30px;}
-.thead>p{display:inline-block;line-height:50px;font-size: 13px;color: #999;letter-spacing: 0.27px;}
+/*表头*/
+.right .thead{height:50px;padding:0 30px;user-select:none;}
+.thead>p{display:inline-block;vertical-align:top;line-height:50px;font-size: 13px;color: #999;letter-spacing: 0.27px;}
 .thead>p.sortable{cursor:pointer;}
 .thead>p.sortable .sort{ position:relative; margin-left:3px;}
 .thead>p.sortable .sort:before{content:''; border-left:5px solid transparent; border-right:5px solid transparent;
@@ -54,25 +52,35 @@
 .thead>p.sortable .sort.down:after{border-top-color:#ffb422;}
 .thead>p.sortable:hover{color:#fea350;}
 
-.coin{width:90px;}
-.name{width:90px;}
- .avail{width:110px;}
-.frozen{width:120px;}
-.confirm{width:120px;}
-.total{width:110px;}
-.assess{width:110px;}
-.opera{width:160px;}
+/*列表项*/
+.right .li{background:#fff;padding:0 30px;height:65px;margin-bottom:10px;font-size: 13px; color: #333; letter-spacing: 0.27px;}
+.li>p{display:inline-block;line-height:65px;vertical-align:top;font-size:13px;color:#333;letter-spacing:0.27px;}
+.li .frozen{color:#ff794c;}
+.li .confirm{color:#57a100;}
+.li .coin>img{width:16px;height:auto;margin-right:6px;vertical-align:-3px;}
+.li .op1>button{width:40px;height:25px;margin:0 2px;}
+.li .op2{line-height:20px;padding:10px 0;}
+.li .op2>button{display:block;height:25px;line-height:25px;width:140px;}
+.li .op2>a{color:#ffb422;width:140px;display:block;text-align:center;margin-top:5px;}
+.li .op2>a:hover{color:#fea350;}
+.li .op3>button{width:80px;height:25px;}
 
-.right .li{background:#fff;padding:0 30px;height:50px;margin-bottom:10px;font-size: 13px; color: #333; letter-spacing: 0.27px;}
-.li>p{display:inline-block;line-height:50px;}
+.fb .coin{width:90px;}
+.fb .name{width:90px;}
+.fb .avail{width:110px;}
+.fb .frozen{width:120px;}
+.fb .confirm{width:120px;}
+.fb .total{width:110px;}
+.fb .assess{width:110px;}
+.fb .opera{width:160px;}
 
-.li .op1>button{border-radius:2px;border:1px solid #ffb422;color:#ffb422;font-size:13px;width:40px;height:25px;
-  letter-spacing:0.27px;background:#fff;cursor:pointer;margin:0 2px;}
-.li .op1>button:hover{background:#fea350;color:#fff;}
+.bb .coin{width:100px;}
+.bb .name{width:100px;}
+.bb .avail{width:120px;}
+.bb .frozen{width:130px;}
+.bb .confirm{width:130px;}
+.bb .total{width:120px;}
+.bb .assess{width:120px;}
+.bb .opera{width:90px;}
 
-.li .op2>button{display:block;height:25px;line-height:25px;color:#fff;background:#ffb422;border-radius:2px;width:140px;}
-placeholder()
-
-button{}
-
-
+.right .err{background-position:center 100px; height:400px;padding-top:250px;}

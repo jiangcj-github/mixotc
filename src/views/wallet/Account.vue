@@ -1,5 +1,5 @@
 <template>
-  <div class="accont">
+  <div class="account">
     <Notify></Notify>
     <div class="inner">
       <div class="main">
@@ -23,77 +23,134 @@
           </div>
           <div class="filter">
             <div class="f1">
-              <input type="text" placeholder="搜索币种">
-              <img src="/static/images/cancel_icon.png">
+              <input type="text" placeholder="搜索币种" v-model="srchText">
+              <img src="/static/images/cancel_icon.png" v-show="srchText.length>0" @click="srchText=''">
               <button @click=""></button>
             </div>
             <div class="f2">
-              <span class="radio check r1">隐藏小额资产</span>
-              <span class="radio check r2">隐藏0余额币种</span>
-              <span class="radio check r3">隐藏非钱包币种</span>
+              <span class="radio r1" :class="{check:isPetty}" @click="isPetty=!isPetty">隐藏小额资产</span>
+              <span class="radio r2" :class="{check:isZero}" @click="isZero=!isZero">隐藏0余额币种</span>
+              <span class="radio r3" :class="{check:isNoWa}" @click="isNoWa=!isNoWa">隐藏非钱包币种</span>
             </div>
           </div>
           <div class="tb-tab">
             <ul>
-              <li class="active">mixOTC法币账户</li>
-              <li>币币账户</li>
+              <li :class="{active:tab===0}" @click="tab=0">mixOTC法币账户</li>
+              <li :class="{active:tab===1}" @click="tab=1">币币账户</li>
             </ul>
-            <button>币币交易</button>
+            <button class="btn green" v-show="tab===1">币币交易</button>
           </div>
           <!--法币账户-->
-          <div class="fb" v-if="1">
+          <div class="fb" v-show="tab===0">
+            <!--表头-->
             <div class="thead">
               <p class="coin">币种</p>
               <p class="name">全称</p>
-              <p class="avail sortable">可用余额<i class="sort up"></i></p>
-              <p class="frozen sortable">冻结中余额<i class="sort up"></i></p>
-              <p class="confirm sortable">确认中余额<i class="sort up"></i></p>
-              <p class="total sortable">总额<i class="sort up"></i></p>
-              <p class="assess sortable">估值<i class="sort up"></i></p>
+              <p class="avail sortable" @click="fbSort=++fbSort%2">可用余额
+                <i class="sort" :class="{up:fbSort===0,down:fbSort===1}"></i></p>
+              <p class="frozen sortable" @click="fbSort=++fbSort%2+2">冻结中余额
+                <i class="sort" :class="{up:fbSort===2,down:fbSort===3}"></i></p>
+              <p class="confirm sortable" @click="fbSort=++fbSort%2+4">确认中余额
+                <i class="sort" :class="{up:fbSort===4,down:fbSort===5}"></i></p>
+              <p class="total sortable" @click="fbSort=++fbSort%2+6">总额
+                <i class="sort" :class="{up:fbSort===6,down:fbSort===7}"></i></p>
+              <p class="assess sortable" @click="fbSort=++fbSort%2+8">估值
+                <i class="sort" :class="{up:fbSort===8,down:fbSort===9}"></i></p>
               <p class="opera">操作</p>
             </div>
-            <div class="li">
-              <p class="coin"><img src="">BTC</p>
-              <p class="name">Bitcoin</p>
-              <p class="avail">0.0001</p>
-              <p class="frozen">0.0001</p>
-              <p class="confirm">0.0001</p>
-              <p class="total">0.0001</p>
-              <p class="assess">0.0001</p>
-              <p class="opera op1">
-                <button>充币</button>
-                <button>提币</button>
-                <button>交易</button>
-              </p>
+            <!--fb返回结果-->
+            <div v-if="fbErr===0">
+              <div class="li">
+                <p class="coin"><img src="http://192.168.113.26//image/B012F109359B4872">BTC</p>
+                <p class="name">Bitcoin</p>
+                <p class="avail">0.0001</p>
+                <p class="frozen">0.0001</p>
+                <p class="confirm">0.0001</p>
+                <p class="total">0.0001</p>
+                <p class="assess">0.0001</p>
+                <p class="opera op1">
+                  <button class="btn white">充币</button>
+                  <button class="btn white">提币</button>
+                  <button class="btn white">交易</button>
+                </p>
+              </div>
+              <div class="li">
+                <p class="coin"><img src="http://192.168.113.26//image/B012F109359B4872">BTC</p>
+                <p class="name">Bitcoin</p>
+                <p class="avail">0.0001</p>
+                <p class="frozen">0.0001</p>
+                <p class="confirm">0.0001</p>
+                <p class="total">0.0001</p>
+                <p class="assess">0.0001</p>
+                <p class="opera op2">
+                  <button class="btn green">加入钱包</button>
+                  <a href="#">查看币种资料</a>
+                </p>
+              </div>
+              <Pagination :total="fbTotal" :pageSize="fbPageSize" :curPage="fbCurPage" onPageChange="onFbPageChange"></Pagination>
             </div>
-            <div class="li">
-              <p class="coin"><img src="">BTC</p>
-              <p class="name">Bitcoin</p>
-              <p class="avail">0.0001</p>
-              <p class="frozen">0.0001</p>
-              <p class="confirm">0.0001</p>
-              <p class="total">0.0001</p>
-              <p class="assess">0.0001</p>
-              <p class="opera op2">
-                <button>加入钱包</button>
-                <a href="#">查看币种资料</a>
-              </p>
+            <div v-else-if="fbErr===1">
+              <div class="err no-result">无相应的数据</div>
+            </div>
+            <div v-else-if="fbErr===2">
+              <div class="err load-failed">网络异常</div>
+            </div>
+            <div v-else-if="fbErr===3">
+              <div class="err net-error">加载失败</div>
+            </div>
+            <div v-else-if="fbErr===4">
+              <div class="err net-error">数据加载中...</div>
+            </div>
+            <div v-else>
+              <div class="err empty">无账户数据</div>
             </div>
           </div>
           <!--币币账户-->
-          <div class="bb" v-else="">
+          <div class="bb" v-show="tab===1">
+            <!--表头-->
             <div class="thead">
               <p class="coin">币种</p>
               <p class="name">全称</p>
-              <p class="avail sortable">可用余额<i class="sort up"></i></p>
-              <p class="frozen sortable">冻结中余额<i class="sort up"></i></p>
-              <p class="confirm sortable">确认中余额<i class="sort up"></i></p>
-              <p class="total sortable">总额<i class="sort up"></i></p>
-              <p class="assess sortable">估值<i class="sort up"></i></p>
+              <p class="avail sortable" @click="bbSort=++bbSort%2">可用余额
+                <i class="sort" :class="{up:bbSort===0,down:bbSort===1}"></i></p>
+              <p class="frozen sortable" @click="bbSort=++bbSort%2+2">冻结中余额
+                <i class="sort" :class="{up:bbSort===2,down:bbSort===3}"></i></p>
+              <p class="confirm sortable" @click="bbSort=++bbSort%2+4">确认中余额
+                <i class="sort" :class="{up:bbSort===4,down:bbSort===5}"></i></p>
+              <p class="total sortable" @click="bbSort=++bbSort%2+6">总额
+                <i class="sort" :class="{up:bbSort===6,down:bbSort===7}"></i></p>
+              <p class="assess sortable" @click="bbSort=++bbSort%2+8">估值
+                <i class="sort" :class="{up:bbSort===8,down:bbSort===9}"></i></p>
               <p class="opera">操作</p>
             </div>
-            <div class="li">
-
+            <!--bb返回结果-->
+            <div v-if="bbErr===0">
+              <div class="li">
+                <p class="coin"><img src="http://192.168.113.26//image/B012F109359B4872">BTC</p>
+                <p class="name">Bitcoin</p>
+                <p class="avail">0.0001</p>
+                <p class="frozen">0.0001</p>
+                <p class="confirm">0.0001</p>
+                <p class="total">0.0001</p>
+                <p class="assess">0.0001</p>
+                <p class="opera op3"><button class="btn white">资产转出</button></p>
+              </div>
+              <Pagination :total="bbTotal" :pageSize="bbPageSize" :curPage="bbCurPage" onPageChange="onBbPageChange"></Pagination>
+            </div>
+            <div v-else-if="bbErr===1">
+              <div class="err no-result">无相应的数据</div>
+            </div>
+            <div v-else-if="bbErr===2">
+              <div class="err load-failed">网络异常</div>
+            </div>
+            <div v-else-if="bbErr===3">
+              <div class="err net-error">加载失败</div>
+            </div>
+            <div v-else-if="bbErr===4">
+              <div class="err net-error">数据加载中...</div>
+            </div>
+            <div v-else>
+              <div class="err empty">无账户数据</div>
             </div>
           </div>
         </div>
@@ -104,22 +161,66 @@
 <script>
   import Notify from "./layout/Notify";
   import LeftBar from "./layout/LeftBar";
+  import Pagination from "../verify/component/Pagination";
   export default {
     components: {
+      Pagination,
       Notify,
       LeftBar,
     },
     data() {
       return {
+        tab: 0,  //0-法币账户,1-币币账户
+        srchText: "",
+        isPetty: false,
+        isZero: false,
+        isNoWa: false,
 
+        fbSort: -1, //0-可用余额升序,1-可用余额降序，...
+        fb: [],
+        fbCurPage: 1,
+        fbPageSize: 20,
+        fbTotal: 0,
+        fbErr: 0,
+
+        bbSort: -1, //...
+        bb: [],
+        bbCurPage: 1,
+        bbPageSize: 20,
+        bbTotal: 0,
+        bbErr: 0,
       }
     },
     methods:{
+      loadFb(){
 
-    }
+      },
+      parseFb(){
+
+      },
+      loadBb(){
+
+      },
+      parseBb(){
+
+      },
+    },
+    mounted(){
+      this.Bus.$on("onFbPageChange",(p)=>{
+        this.fbCurPage=p;
+      });
+      this.Bus.$on("onBbPageChange",(p)=>{
+        this.bbCurPage=p;
+      });
+    },
+    destroyed(){
+      this.Bus.$off("onFbPageChange");
+      this.Bus.$off("onBbPageChange");
+    },
   }
 </script>
 <style scoped lang="stylus">
   @import "../../stylus/base";
+  @import "./stylus/common"
   @import "./stylus/account"
 </style>
