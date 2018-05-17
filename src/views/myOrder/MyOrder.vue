@@ -111,7 +111,7 @@
       </div>
     </div>
     <!-- 订单无内容 -->
-    <MyOrderNothing v-if="!contentList"></MyOrderNothing>
+    <MyOrderNothing v-if="!contentList.length"></MyOrderNothing>
     <!-- 分页 -->
     <Pagination  v-if="contentList && contentList.length"
                 :total="pageTotal"
@@ -297,6 +297,7 @@
         curPage: 1, // 当前页
         // changePage: 'changePage', // 监听自组件数量
         // page: 0 // 分页
+        flagNow: true // 倒计时标志
 
       }
     },
@@ -416,18 +417,23 @@
         },1000);
       },
       showOverTimer() {
-        this.contentList && this.contentList[0].overtime--
-        if (this.contentList && this.contentList[0].overtime < 0) {
-          console.log(222)
-          this.contentList[0].state = 5;
-          this.selectState = '4,5,6,7,8,9,10,11'
-          clearTimeout(timer)
-          return
-        }
-        let timer = setTimeout(() => {
-          this.showOverTimer()
-        },1000);
-       console.log(1111, this.contentList[0].overtime)
+        let timer
+        this.contentList && this.contentList.forEach((v, i) => {
+          if (v.state === 1 && v.overtime >= 0) {
+            v.overtime--
+            timer = setTimeout(() => {
+              this.showOverTimer()
+            },1000);
+          } else {
+            console.log(222, this.contentList.length)
+            this.contentList = this.contentList.filter(item => item.state !== 1)
+            this.conductNum = this.contentList.length
+            this.completeNum ++;
+            this.flagNow = false;
+            clearTimeout(timer)
+          }
+          console.log(1111, v.overtime)
+        });
       },
       initData() {
         let ws = this.WebSocket; // 创建websocket连接
@@ -437,7 +443,7 @@
           callback: (data) => {
             if(!data || data.body.ret !== 0) return;
             console.log('order', data.body)
-            this.contentList = data.body.data.orders
+            this.contentList = data.body.data.orders ? data.body.data.orders : []
             this.pageTotal = data.body.data.amount
             // 购买成功的订单显示弹窗
             if (this.$store.state.newOrder) {
@@ -448,7 +454,7 @@
             // 根据状态进行判断
             this.contentList && this.contentList.forEach((v,i) => {
               // 倒计时数据
-              if (v.state == 1) {
+              if (this.flagNow && v.state == 1) {
                 this.endTime = (v.limit - (Math.floor(new Date().getTime() / 1000) - v.create * 1) / 60) * 60000
                 this.showOverTimer();
               }

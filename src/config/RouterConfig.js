@@ -40,6 +40,26 @@ const ROUTES = [
     component: resolve => require(["@/views/homepage/Home"], resolve) // 买卖家个人中心-他的发布
   },
   {
+    path: "/advertisement/release", // 发广告
+    name: "ReleaseAd",
+    component: resolve => require(['@/views/advertisement/ReleaseAd'], resolve), // 发广告
+    meta: {
+      headerShow: true,
+      footerShow: true,
+      newsShow: true
+    }
+  },
+  {
+    path: "/advertisement", // 我的广告
+    name: "MyAd",
+    component: resolve => require(['@/views/advertisement/MyAd'], resolve), // 我的广告
+    meta: {
+      headerShow: true,
+      footerShow: true,
+      newsShow: true
+    }
+  },
+  {
     path: "/verify",
     name: "verify",
     redirect: "/verify/identifyAuth" // 审核中心
