@@ -47,7 +47,7 @@
               <p>{{e.submitTime1}}</p>
               <p>{{e.submitTime2}}</p>
             </div>
-            <div class="yh"><a :href="'/homepage?uid='+e.uid" target="_blank">{{e.nickname}}</a></div>
+            <div class="yh"><a :href="'#/homepage?uid='+e.uid" target="_blank">{{e.nickname}}</a></div>
             <div class="shr">{{e.nicknameCk}}</div>
             <div class="shsj">
               <p>{{e.checkTime1}}</p>

@@ -18,7 +18,7 @@
             </ol>
           </li>
           <router-link to="/order" tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">订单<span v-if="newOrder"><i>{{newOrder}}</i></span></router-link>
-          <!--<li><a href="">钱包</a></li>-->
+          <router-link to="/wallet" tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">钱包</router-link>
           <li class="itag" @mouseenter="showQr" @mouseleave="hideQr">
             <img class="top-logo" src="/static/images/phoneicon.png" alt="">
             <div class="show-qr" v-show="isHover">
