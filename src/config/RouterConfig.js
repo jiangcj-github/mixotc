@@ -110,10 +110,32 @@ const ROUTES = [
   // 钱包
   {
     path: "/wallet",
-    component: resolve => require(['@/views/wallet/Account'], resolve), // 客服交易对话框
+    redirect: "/wallet/account"          // 钱包
   },
-
-
+  {
+    path: "/wallet/account",
+    component: resolve => require(['@/views/wallet/Account'], resolve), // 账户余额
+  },
+  {
+    path: "/wallet/charge",
+    component: resolve => require(['@/views/wallet/Charge'], resolve), // 充币
+  },
+  {
+    path: "/wallet/withdraw",
+    component: resolve => require(['@/views/wallet/Withdraw'], resolve), // 提币
+  },
+  {
+    path: "/wallet/conversion",
+    component: resolve => require(['@/views/wallet/Conversion'], resolve), // 资产互转
+  },
+  {
+    path: "/wallet/history",
+    component: resolve => require(['@/views/wallet/Account'], History), // 账单明细
+  },
+  {
+    path: "/wallet/address",
+    component: resolve => require(['@/views/wallet/Address'], History), // 地址管理
+  },
 
 ];
 
