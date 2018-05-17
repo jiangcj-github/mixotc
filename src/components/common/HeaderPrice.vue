@@ -17,9 +17,9 @@
     <ul class="upper-right">
       <li><span>简体中文</span></li>
       <li><router-link tag="span" to="/transaction/tradeRules" class="line">帮助</router-link></li>
-      <li v-if="isAdmin"><router-link tag="span" to="/verify/largeTransaction" class="line">大额交易申请</router-link></li>
-      <li v-if="isAdmin"><router-link tag="span" to="/verify/identifyAuth" class="line">审核</router-link></li>
-      <li v-if="isAdmin"><router-link tag="span" to="/verify/service">申诉</router-link></li>
+      <li v-if="isAdmin && isLogin"><router-link tag="span" to="/verify/largeTransaction" class="line">大额交易申请</router-link></li>
+      <li v-if="isAdmin && isLogin"><router-link tag="span" to="/verify/identifyAuth" class="line">审核</router-link></li>
+      <li v-if="isAdmin && isLogin"><router-link tag="span" to="/verify/service">申诉</router-link></li>
     </ul>
   </div>
 </template>
@@ -48,6 +48,9 @@
         if(!this.$store.state.userInfo) return false;
         return this.$store.state.userInfo.is_admin;
       },
+      isLogin(){
+        return this.$store.state.isLogin
+      }
     },
     methods: {
       async _initGetdata() {
