@@ -8,7 +8,7 @@
       <img src="/static/images/close_btn.png" alt="" @click="closePopup">
       <div class="buy-layer-content">
         <h1>请输入支付密码</h1>
-        <input type="password" v-model="PaymentValue"/>
+        <input type="password" v-model="PaymentValue" class="passInput"/>
         <div>
           <em @click="closePopup">取消</em>
           <i @click="buyNext">下一步</i>
@@ -318,6 +318,8 @@
     .buy-layer-content
       margin-top 32.4px
       margin-left 60px
+      .passInput
+        letter-spacing 5px
       input
         width 340px
         height 40px

@@ -24,15 +24,16 @@
             <ol>
               <li>
                 <p>从</p>
-                <ChoiceBox :choiceClass="transforB"
-                           :title="fromTitle"
-                           :classify="fromType"
-                           :emitValue="fromTypeValue"
-                           :width=210
-                           :top=40
-                           :widthSelect=218
-                           :widthWrap=220>
-                </ChoiceBox>
+                <!--<ChoiceBox :choiceClass="transforB"-->
+                           <!--:title="fromTitle"-->
+                           <!--:classify="fromType"-->
+                           <!--:emitValue="fromTypeValue"-->
+                           <!--:width=210-->
+                           <!--:top=40-->
+                           <!--:widthSelect=218-->
+                           <!--:widthWrap=220>-->
+                <!--</ChoiceBox>-->
+                <p class="from-p">法币账户</p>
                 <span>({{fromText}}余额为：{{fromAmount}} {{fromCoin}})</span>
               </li>
               <li>
@@ -40,15 +41,16 @@
               </li>
               <li>
                 <p>转至</p>
-                <ChoiceBox :choiceClass="transforB"
-                           :title="toTitle"
-                           :classify="toType"
-                           :emitValue="toTypeValue"
-                           :width=210
-                           :top=40
-                           :widthSelect=218
-                           :widthWrap=220>
-                </ChoiceBox>
+                <!--<ChoiceBox :choiceClass="transforB"-->
+                           <!--:title="toTitle"-->
+                           <!--:classify="toType"-->
+                           <!--:emitValue="toTypeValue"-->
+                           <!--:width=210-->
+                           <!--:top=40-->
+                           <!--:widthSelect=218-->
+                           <!--:widthWrap=220>-->
+                <!--</ChoiceBox>-->
+                <p class="to-p">币币账户</p>
                 <span>({{toText}}余额为：1.12345678 BTC)</span>
               </li>
             </ol>
@@ -58,6 +60,7 @@
             <div class="amount-input">
               <input type="text" v-model.trim="amount" @input="checkInput"/><button @click="allCheck">全部</button>
               <span>可划转数量为：{{fromAmount}} {{fromCoin}}</span>
+              <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-if="amount" @click="amount = ''">
             </div>
             <b>{{errText}}</b>
           </li>
@@ -109,7 +112,7 @@
         errText: '',
         paymentCurreny: '',
         paymentAmount: '',
-        toPayment: ''
+        toPayment: '',
       }
     },
     components: {
@@ -135,33 +138,32 @@
         console.log('333', data)
         this.initData()
       });
-      this.Bus.$on(this.fromTypeValue, (data) => { // from筛选
-        this.fromText = data
-        this.toTitle = this.toText = data === '法币账户' ? '币币账户' : '法币账户'
-      });
-      this.Bus.$on(this.toTypeValue, (data) => { // to筛选
-        this.toText = data
-        this.fromTitle = this.fromText = data === '法币账户' ? '币币账户' : '法币账户'
-      });
+      // this.Bus.$on(this.fromTypeValue, (data) => { // from筛选
+      //   this.fromText = data
+      //   this.toTitle = this.toText = data === '法币账户' ? '币币账户' : '法币账户'
+      // });
+      // this.Bus.$on(this.toTypeValue, (data) => { // to筛选
+      //   this.toText = data
+      //   this.fromTitle = this.fromText = data === '法币账户' ? '币币账户' : '法币账户'
+      // });
       this.initData()
     },
     destroyed() {
       this.Bus.$off(this.coinTypeValue);
-      this.Bus.$off(this.fromTypeValue);
-      this.Bus.$off(this.toTypeValue);
+      // this.Bus.$off(this.fromTypeValue);
+      // this.Bus.$off(this.toTypeValue);
     },
     methods: {
       closePopup() {
         this.$emit('offTransform', 'false')
       },
-      openReleaseCoin(st, content) { // 支付弹窗
-        if (this.amount === '') {
+      openReleaseCoin(st, content) { // 跳转支付弹窗
+        if (this.amount === '') { // 未输入内容
           this.errText = '请输入数量'
           return
         }
-        if (this.amount * 1 > this.fromAmount * 1) {
-          return
-        }
+        if (this.amount * 1 > this.fromAmount * 1) return // 大于划转资金
+        //if(!(/^\d{n}$/.test(this.amount))) return // 非数字
         if (st === 'false') {
           this.showReleaseCoin = false
         } else {
@@ -199,7 +201,7 @@
         this.paymentAmount = this.amount
         this.toPayment = this.toText
         this.errText = this.amount * 1 > this.fromAmount * 1 ? '数量应不大于可划转数量' : ''
-        //this.errText = !(/^\d{n}$/.test(this.amount)) ? '请输入数字' : ''
+        // this.errText = !(/^\d{n}$/.test(this.amount)) ? '请输入数字' : ''
       }
     }
   }
@@ -271,6 +273,15 @@
       ol
         display flex
         align-items center
+        .from-p, .to-p
+          width 210px
+          height 40px
+          padding-left 10px
+          color #333
+          line-height 40px
+          border-radius 2px
+          background #F4F6FA
+          font-size 13px
         li
           span
             display block
@@ -286,11 +297,16 @@
       position relative
       span
         position absolute
-        top 12px
-        right 80px
+        top -25px
+        right 0
         font-size 11px
-        color #999
+        color #333
         letter-spacing 0.12px
+      img
+        position absolute
+        top 15px
+        right 80px
+        cursor pointer
     .btn-group
       text-align center
       i,em

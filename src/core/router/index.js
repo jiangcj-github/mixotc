@@ -3,7 +3,6 @@ import Router from 'vue-router'
 const ROUTE = {
   install(app, config) {
     let router = new Router({
-      mode: 'history',
       routes: config.routes
     })
 

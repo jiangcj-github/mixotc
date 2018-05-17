@@ -10,9 +10,15 @@
         <ul class="down-tag">
           <li><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></li>
           <router-link to="/transaction" tag="li" class="tag transaction" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
-          <!--<li><a href="">广告</a></li>-->
+          <li class="tag ad"  @mouseenter="adChild = true" @mouseleave="adChild = false" :class="{active: $route.path=='/advertisement/release' || $route.path=='/advertisement'}">
+            <span>广告</span>
+            <ol v-show="adChild">
+              <li @click="adChild = false"><router-link to="/advertisement/release" tag="li">发广告</router-link></li>
+              <li @click="adChild = false"><router-link to="/advertisement">我的广告</router-link></li>
+            </ol>
+          </li>
           <router-link to="/order" tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">订单<span v-if="newOrder"><i>{{newOrder}}</i></span></router-link>
-          <!--<li><a href="">钱包</a></li>-->
+          <router-link to="/wallet" tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">钱包</router-link>
           <li class="itag" @mouseenter="showQr" @mouseleave="hideQr">
             <img class="top-logo" src="/static/images/phoneicon.png" alt="">
             <div class="show-qr" v-show="isHover">
@@ -52,6 +58,7 @@
       return {
         isHover: false,
         showMenu: false,
+        adChild: false,
         newOrder: 0,
         items: [
           {title: 'BitFunex', value: '$9.244.70↑'}, {title: 'Kraken', value: '€7.468.30↑'}, {title: 'Bithumb', value: '₩10.186.000.00↑'}, {title: 'Bitflyer', value: '￥995.759.00↑'}
@@ -163,8 +170,7 @@
       .down-tag
         flex 1
         font-size 14px
-
-        li
+        >li
           position relative
           float left
           margin-right 50px
@@ -196,7 +202,26 @@
                 letter-spacing 0.12px
           &.transaction
             width 80px
+          &.ad
+            width 70px
+            ol
+              position absolute
+              top 73px
+              width 70px
+              background #FFF
+              box-shadow 0 2px 4px 0 #E1E1E1
+              font-size 13px
+              cursor pointer
+              li
+                width 70px
+                height 40px
+                text-align center
+                line-height 40px
+                &:hover
+                  background: #FFF3EB
           &.selected
+            border-bottom 2px solid $col422
+          &.active
             border-bottom 2px solid $col422
         .itag
           line-height 60px
@@ -204,7 +229,6 @@
         .tag, .itag
           &:hover
             border-bottom 2px solid $col422
-
           .show-qr
             position absolute
             left 1px

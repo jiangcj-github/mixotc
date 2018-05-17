@@ -5,6 +5,7 @@ import Vue from 'vue';
 import App from './App';
 
 import { DatePicker } from "element-ui";
+import { Slider } from "element-ui";
 import '@/stylus/rest.styl'
 import "vue-happy-scroll/docs/happy-scroll.css";
 
@@ -35,7 +36,7 @@ RUN_APP(
     PrototypeConfig: PrototypeConfig.core,
     LoopTaskConfig
   },
-  [DatePicker]
+  [DatePicker, Slider]
 );
 
 
