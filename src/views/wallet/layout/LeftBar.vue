@@ -1,13 +1,3 @@
-<style scoped lang="stylus">
-  @import "../../../stylus/base";
-  ul{}
-  ul>li{}
-  ul>li.active{}
-  ul>li:hover{}
-  ul>li>a{}
-  ul>li>a>i{}
-  ul>li>a>img{}
-</style>
 <template>
   <ul>
     <li :class="{active:leftBar===1}">
@@ -35,3 +25,15 @@
     props:["leftBar"],
   }
 </script>
+<style scoped lang="stylus">
+  @import "../../../stylus/base";
+  *{box-sizing:border-box;}
+
+  ul{width:180px;background:#fff;float:left;}
+  ul>li{height:60px;border-bottom:2px solid #fff;}
+  ul>li:hover{background:#fff3eb;border-bottom-color:#fff3eb !important;}
+  ul>li.active{border-bottom-color:#ffb422;background:#fff3eb;}
+  ul>li>a{height:58px;line-height:58px;padding:0 20px 0 30px;display:block;}
+  ul>li>a>i{font-size: 14px;color: #333333;letter-spacing: 0.16px;}
+  ul>li>a>img{width:auto;height:14px;float:right;margin-top:22px;}
+</style>
