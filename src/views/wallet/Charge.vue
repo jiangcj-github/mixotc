@@ -24,7 +24,7 @@
               <span>认中：0.67899765 BTC</span>
             </div>
             <div class="card">
-              <p class="warring">
+              <p class="warning">
                 <img src="/static/images/hint.png">注意：禁止向BTC地址充值除BTC之外的资产，任何充入BTC地址的非BTC资产将不可找回。
               </p>
               <p class="addr">
@@ -196,5 +196,5 @@
 <style scoped lang="stylus">
   @import "../../stylus/base";
   @import "./stylus/common"
-  @import "./stylus/change"
+  @import "./stylus/charge"
 </style>

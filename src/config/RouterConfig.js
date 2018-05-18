@@ -120,11 +120,11 @@ const ROUTES = [
   },
   {
     path: "/wallet/history",
-    component: resolve => require(['@/views/wallet/Account'], History), // 账单明细
+    component: resolve => require(['@/views/wallet/History'], resolve), // 账单明细
   },
   {
     path: "/wallet/address",
-    component: resolve => require(['@/views/wallet/Address'], History), // 地址管理
+    component: resolve => require(['@/views/wallet/Address'], resolve), // 地址管理
   },
 
 ];
