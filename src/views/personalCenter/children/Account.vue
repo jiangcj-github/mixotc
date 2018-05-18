@@ -6,13 +6,13 @@
 </template>
 
 <script>
-// import Avator from "../components/Avator"
+import Avator from "../components/Avator"
   export default {
     data(){
       return {}
     },
     components:{
-      // Avator
+      Avator
     }
   }
 </script>
