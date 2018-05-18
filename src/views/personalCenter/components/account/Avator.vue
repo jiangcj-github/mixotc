@@ -5,20 +5,21 @@
     <div class="wrap1" v-show="panel">
       <div class="wrap2">
           <div class="container">  
-            <img id="image" src="/static/images/default_avator.png" alt="Picture" style="width: 100%">  
+            <img id="image" :src="url ? url : '/static/images/default_avator.png'" alt="Picture" style="width: 100%">  
           </div>
         <button type="button" class="button" @click="crop">确定</button>
         <button type="button" class="button cancel" @click="panel = false">取消</button>
       </div>
     </div>
 
-    <div style="padding:20px;">  
+    <div>  
         <div class="show" @click="()=>{
             this.$refs.change.value = '';
             this.$refs.change.click();
           }">  
-          <div class="picture" :style="'backgroundImage:url('+headerImage+')'">  
+          <div class="picture" :style="`backgroundImage:url(${headerImage ? headerImage : icon})`">  
           </div>  
+          <b>上传</b>
         </div>
         <div style="margin-top:20px;">  
           <input type="file" id="change" ref="change" accept="image/png, image/jpeg" @change="change" v-show="false">  
@@ -32,7 +33,7 @@
 <script>
   import Cropper from 'cropperjs'  
 export default {  
-  // props: ['url', 'emitValue'],
+  props: ['icon', 'emitValue'],
   data () {  
     return {  
       viewMode: 0,
@@ -88,9 +89,10 @@ export default {
       if(this.cropper){  
         this.cropper.replace(this.url);  
       }
-      this.image.onload = function(){
-        self.panel = true;  
-      }
+      this.panel = true;  
+      // this.image.onload = function(){
+      //   console.log(99)
+      // }
     },  
     crop () {  
         this.panel = false;  
@@ -143,6 +145,9 @@ export default {
     postImg () {  
       let blob = this.dataURItoBlob(this.headerImage);
       // Blobbase64处理为FormData对象;
+      if(blob.size > 2097152) {
+        alert('上传头像大小不得超过2M')
+      }
       let fd = new FormData(document.forms[0]);
       fd.append("uploadfile", blob, blob.type);
       console.log(fd);
@@ -181,18 +186,33 @@ export default {
 #cropper .show {  
   width: 60px;  
   height: 60px;  
-  /* overflow: hidden;   */
+  overflow: hidden;  
   position: relative;  
   border-radius: 50%;  
-  border: 1px solid #d5d5d5;  
 }  
+#cropper .show b{
+  position: absolute;
+  bottom:-3px;
+  left: 3px;
+  width: 59px;
+  height: 20px;
+  text-align: center;
+  font-size:11px;
+  -webkit-transform: scale(0.916666666);
+  -webkit-transform-origin: 0 0;
+  color: #eee;
+  letter-spacing: 0.23px;
+  background: rgba(0,0,0,0.4);
+  cursor:pointer;
+}
 #cropper .picture {  
   width: 100%;  
-  height: 100%;  
+  height: 100%;
   /* overflow: hidden;   */
   background-position: center center;  
   background-repeat: no-repeat;  
-  background-size: cover;   
+  background-size: cover;  
+  cursor: pointer; 
 }  
 #cropper .wrap1 {
   position: fixed;

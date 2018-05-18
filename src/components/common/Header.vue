@@ -36,7 +36,7 @@
             <img class="select-icon" src='/static/images/triangle_black.png' v-if="!showMenu" alt="">
             <img class="select-icon" src='/static/images/triangle_black_up.png' v-else alt="">
             <ul v-if="showMenu" v-clickoutside="hideShowMenu">
-              <li class="center">个人中心</li>
+              <router-link to="/personal" tag="li" active-class="selected" class="center">个人中心</router-link>
               <!-- <li class="safe">安全设置</li>
               <li class="auth">身份认证</li> -->
               <li class="logout" @click="logout">退出</li>

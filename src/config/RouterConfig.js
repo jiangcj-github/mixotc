@@ -42,12 +42,12 @@ const ROUTES = [
   {
     path: "/advertisement/release", // 发广告
     name: "ReleaseAd",
-    component: resolve => require(['@/views/advertisement/ReleaseAd'], resolve), // 发广告
+    component: resolve => require(["@/views/advertisement/ReleaseAd"], resolve) // 发广告
   },
   {
     path: "/advertisement", // 我的广告
     name: "MyAd",
-    component: resolve => require(['@/views/advertisement/MyAd'], resolve), // 我的广告
+    component: resolve => require(["@/views/advertisement/MyAd"], resolve) // 我的广告
   },
   {
     path: "/verify",
@@ -64,7 +64,7 @@ const ROUTES = [
       //账户设置
       {
         path: "/personal/account",
-        name: "account",
+        name: "personal-account",
         component: resolve =>
           require(["@/views/personalCenter/children/Account"], resolve)
       },
@@ -95,38 +95,37 @@ const ROUTES = [
   {
     path: "/verify/service",
     name: "Service",
-    component: resolve => require(['@/views/kefu/Dialog'], resolve), // 客服交易对话框
+    component: resolve => require(["@/views/kefu/Dialog"], resolve) // 客服交易对话框
   },
   // 钱包
   {
     path: "/wallet",
-    redirect: "/wallet/account"          // 钱包
+    redirect: "/wallet/account" // 钱包
   },
   {
     path: "/wallet/account",
-    component: resolve => require(['@/views/wallet/Account'], resolve), // 账户余额
+    component: resolve => require(["@/views/wallet/Account"], resolve) // 账户余额
   },
   {
     path: "/wallet/charge",
-    component: resolve => require(['@/views/wallet/Charge'], resolve), // 充币
+    component: resolve => require(["@/views/wallet/Charge"], resolve) // 充币
   },
   {
     path: "/wallet/withdraw",
-    component: resolve => require(['@/views/wallet/Withdraw'], resolve), // 提币
+    component: resolve => require(["@/views/wallet/Withdraw"], resolve) // 提币
   },
   {
     path: "/wallet/conversion",
-    component: resolve => require(['@/views/wallet/Conversion'], resolve), // 资产互转
+    component: resolve => require(["@/views/wallet/Conversion"], resolve) // 资产互转
   },
   {
     path: "/wallet/history",
-    component: resolve => require(['@/views/wallet/Account'], History), // 账单明细
+    component: resolve => require(["@/views/wallet/Account"], History) // 账单明细
   },
   {
     path: "/wallet/address",
-    component: resolve => require(['@/views/wallet/Address'], History), // 地址管理
-  },
-
+    component: resolve => require(["@/views/wallet/Address"], History) // 地址管理
+  }
 ];
 
 export default {

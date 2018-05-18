@@ -136,7 +136,10 @@
             this.Loop.isOverTime.set(() => {
               // 10分钟无操作则自动退出
               let flag = new Date() - 0 - this.Storage.loginTime.get() > 600000;
-              if(flag) this.logout();
+              if(flag) {
+                console.log('十分钟无操作， 退出', new Date(), new Date(this.Storage.loginTime.get()))
+                this.logout()
+              };
             }, 1000)
             this.Loop.isOverTime.start()
 

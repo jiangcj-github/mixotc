@@ -43,7 +43,14 @@ String.prototype.br = function(){
   }).join('');
   return result;
 };
-
+// 显示银行卡号
+String.prototype.showBank = function(){
+  return `****${this.slice(-4)}`;
+}
+// 显示身份证等卡号格式：123****128
+String.prototype.showOther = function() {
+  return this.length > 6 ? `${this.slice(0, 3)}****${this.slice(-3)}` : this;
+};
 //格式化秒-短格式
 /*
  * 传入：124
