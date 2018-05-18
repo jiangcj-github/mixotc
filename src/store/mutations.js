@@ -59,7 +59,7 @@ export default {
     // 初始化聊天部分数据
     state.chat = data;
   },
-  
+
   [types.delChat](state, { data }) {
     state.curChat = "";
     // 删除聊天
@@ -365,11 +365,8 @@ export default {
   },
   // 查看更多消息
   [types.moreServiceMessage](state, { data }) {
-    !state.serviceMessage[state.serviceNow] &&
-      (state.serviceMessage[state.serviceNow] = []);
-    state.serviceMessage[state.serviceNow] = data
-      .reverse()
-      .concat(state.serviceMessage[state.serviceNow]);
+    !state.serviceMessage[state.serviceNow] && (state.serviceMessage[state.serviceNow] = []);
+    state.serviceMessage[state.serviceNow] = data.reverse().concat(state.serviceMessage[state.serviceNow]);
     state.serviceMessage = Object.assign({}, state.serviceMessage);
   },
   // 终止交易对方人信息

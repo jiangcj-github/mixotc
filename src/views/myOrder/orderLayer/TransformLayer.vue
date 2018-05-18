@@ -6,7 +6,7 @@
                :top=50>
       <div  class="transform-layer">
         <img class="close-btn" src="/static/images/close_btn.png" alt="" @click="closePopup">
-        <h2>资金互转</h2>
+        <h2>资金划转</h2>
         <ul>
           <li>
             <p>币种</p>
@@ -37,7 +37,7 @@
                 <span>({{fromText}}余额为：{{fromAmount}} {{fromCoin}})</span>
               </li>
               <li>
-                <img src="/static/images/huansuan.png"/>
+                <img src="/static/images/transOne.png"/>
               </li>
               <li>
                 <p>转至</p>
@@ -290,9 +290,9 @@
             text-align right
             letter-spacing 0.12px
           img
-            width 16.3px
-            height 12.9px
-            margin 15px 12px 0
+            width 17px
+            height 10px
+            margin 6px 12px 0
     .amount-input
       position relative
       span

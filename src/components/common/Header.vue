@@ -10,7 +10,7 @@
         <ul class="down-tag">
           <li><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></li>
           <router-link to="/transaction" tag="li" class="tag transaction" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
-          <li class="tag ad"  @mouseenter="adChild = true" @mouseleave="adChild = false" :class="{active: $route.path=='/advertisement/release' || $route.path=='/advertisement'}">
+          <li class="tag ad" @mouseenter="adChild = true" @mouseleave="adChild = false" :class="{active: $route.path=='/advertisement/release' || $route.path=='/advertisement'}">
             <span>广告</span>
             <ol v-show="adChild">
               <li @click="adChild = false"><router-link to="/advertisement/release" tag="li">发广告</router-link></li>

@@ -26,7 +26,7 @@
         </div>
         <div class="buy-wrap" v-if="showActive == 2">
           <h2>如何购买数字币</h2>
-          <span>在 OTCBTC 上您有两种方式可以出售数字币，一种是搜索广告，另一种是刊登出售数字币广告。</span>
+          <span>在 MIXOTC 上您有两种方式可以购买数字币，一种是搜索广告，另一种是刊登购买数字币广告。</span>
           <h3>第一种：搜索购买广告，并下单购买（此处以购买BTC为例）</h3>
           <div v-for="content in buyListFirst">
             <h4>{{content.title}}</h4>

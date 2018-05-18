@@ -474,7 +474,6 @@
               headimg: sender_id === uid ? `/static/images/kefu/kefu.png` : (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : `/static/images/default_avator.png`),
               type: item.type === 'image' ? 1 : 0,
               content: item.type === 'image' ? `${this.HostUrl.http}file/${item.data.id}` : item.data.msg,
-              // isLoding: item.type === 'image' ? true : false,
               isLoding: false,
               err: false,
               time: create_time
@@ -1220,6 +1219,9 @@
     margin-top -7px
   .swiper-button-prev
     transform rotate(-135deg)
+
+
+
 
 
 </style>

@@ -43,21 +43,11 @@ const ROUTES = [
     path: "/advertisement/release", // 发广告
     name: "ReleaseAd",
     component: resolve => require(['@/views/advertisement/ReleaseAd'], resolve), // 发广告
-    meta: {
-      headerShow: true,
-      footerShow: true,
-      newsShow: true
-    }
   },
   {
     path: "/advertisement", // 我的广告
     name: "MyAd",
     component: resolve => require(['@/views/advertisement/MyAd'], resolve), // 我的广告
-    meta: {
-      headerShow: true,
-      footerShow: true,
-      newsShow: true
-    }
   },
   {
     path: "/verify",

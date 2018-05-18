@@ -126,6 +126,22 @@
         content ''
         triangle_down(#333)
 
+    .adB
+      position relative
+      color #333
+      height 38px
+      line-height 40px
+      padding-left 10px
+      background #FFF
+      border 1px solid #E1E1E1
+      border-radius 2px
+      &:after
+        position absolute
+        top 18px
+        right 10px
+        content ''
+        triangle_down(#FFB422)
+
     ul
       position absolute
       background #FFF

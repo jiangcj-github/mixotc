@@ -98,7 +98,7 @@
         this.WebSocket.reConnectFlag = false;
         //websocket链接关闭
         this.WebSocket.close();
-        //其他页面跳转至主页
+        //其他页面跳转至主页'
         if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) return;
         this.$router.push('transaction')
       }
