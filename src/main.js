@@ -4,8 +4,9 @@ import Vue from 'vue';
 
 import App from './App';
 
-import { DatePicker } from "element-ui";
-import { Slider } from "element-ui";
+import { DatePicker } from "element-ui"; // 引入日历组件
+import { Slider } from "element-ui"; // 引入滑块
+import { Switch } from "element-ui"; // 引入开关
 import '@/stylus/rest.styl'
 import "vue-happy-scroll/docs/happy-scroll.css";
 
@@ -36,7 +37,7 @@ RUN_APP(
     PrototypeConfig: PrototypeConfig.core,
     LoopTaskConfig
   },
-  [DatePicker, Slider]
+  [DatePicker, Slider, Switch]
 );
 
 

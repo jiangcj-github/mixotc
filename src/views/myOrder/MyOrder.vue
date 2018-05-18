@@ -7,7 +7,7 @@
     <div class="order-item clearfix">
       <span @click="selectStatus(1)" :class="contentTabIndex === 1 ? 'content-btn-active' : 'content-btn'">进行中({{conductNum}})</span>
       <span @click="selectStatus(2)" :class="contentTabIndex === 2 ? 'content-btn-active' : 'content-btn'">完成({{completeNum}})</span>
-      <button @click="openTransform()">资金互转</button>
+      <button @click="openTransform()">资金划转</button>
     </div>
     <div class="order-select clearfix">
       <SearchInput :content="content"
@@ -746,16 +746,7 @@
         border 1px solid #FFB422
         border-radius 2px
         cursor pointer
-        &:before
-          display inline-block
-          width 12px
-          height 9px
-          position relative
-          top 0
-          left 0
-          content ''
-          margin-right 6px
-          background url(/static/images/transform.png) no-repeat
+        text-align center
 
     .order-select
       height 50px
