@@ -63,14 +63,39 @@ const ROUTES = [
     children: [
       //账户设置
       {
-        path: "/personal/account",
+        path: "account",
         name: "personal-account",
+        redirect: "/personal/account/baseInfo",
         component: resolve =>
-          require(["@/views/personalCenter/children/Account"], resolve)
+          require(["@/views/personalCenter/children/account"], resolve),
+        children: [
+          {
+            path: "baseInfo",
+            name: "personal-baseInfo",
+            component: resolve =>
+              require([
+                "@/views/personalCenter/children/account/BaseInfo"
+              ], resolve)
+          },
+          {
+            path: "apply",
+            name: "personal-apply",
+            component: resolve =>
+              require([
+                "@/views/personalCenter/children/account/Apply"
+              ], resolve)
+          },
+          {
+            path: "auth",
+            name: "personal-auth",
+            component: resolve =>
+              require(["@/views/personalCenter/children/account/Auth"], resolve)
+          }
+        ]
       },
       //安全设置
       {
-        path: "/personal/safe",
+        path: "safe",
         name: "safe",
         component: resolve =>
           require(["@/views/personalCenter/children/safe"], resolve)
@@ -120,13 +145,12 @@ const ROUTES = [
   },
   {
     path: "/wallet/history",
-    component: resolve => require(['@/views/wallet/History'], resolve), // 账单明细
+    component: resolve => require(["@/views/wallet/History"], resolve) // 账单明细
   },
   {
     path: "/wallet/address",
-    component: resolve => require(['@/views/wallet/Address'], resolve), // 地址管理
-  },
-
+    component: resolve => require(["@/views/wallet/Address"], resolve) // 地址管理
+  }
 ];
 
 export default {

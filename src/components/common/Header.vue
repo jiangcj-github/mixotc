@@ -59,10 +59,7 @@
         isHover: false,
         showMenu: false,
         adChild: false,
-        newOrder: 0,
-        items: [
-          {title: 'BitFunex', value: '$9.244.70↑'}, {title: 'Kraken', value: '€7.468.30↑'}, {title: 'Bithumb', value: '₩10.186.000.00↑'}, {title: 'Bitflyer', value: '￥995.759.00↑'}
-        ]
+        newOrder: 0
       }
     },
     components: {

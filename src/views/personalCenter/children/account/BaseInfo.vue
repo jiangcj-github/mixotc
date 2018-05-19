@@ -6,7 +6,7 @@
       </div>
       <div class="right  clearfix">
         <div class="avator">
-          <Avator icon="/static/images/default_avator.png" emitValue="avatorUrl"></Avator>
+          <Avator :icon="userInfo.icon ? `${HostUrl.http}image/${userInfo.icon}` : '/static/images/default_avator.png'" emitValue="avatorUrl"></Avator>
         </div>
         <div class="info">
           <p>
@@ -15,14 +15,14 @@
           </p>
           <p>
             <span>昵称</span>
-            <i></i>
+            <i v-if="!isSetting">{{userInfo.name}}</i>
             <i class="set" v-if="!isSetting" @click="isSetting=true">设置</i>
-            <input type="text" placeholder="输入昵称" v-if="isSetting">
-            <i class="confirm" v-if="isSetting" @click="isSetting=false">确定</i>
+            <input type="text" placeholder="输入昵称" v-if="isSetting" v-model="name" @blur="updateName">
+            <i class="confirm" v-if="isSetting" @click="updateName">确定</i>
           </p>
           <p>
-            <span>手机号</span>
-            <i>13890087654</i>
+            <span>{{userInfo.phone ? '手机号' : '邮箱'}}</span>
+            <i>{{userInfo.phone ? userInfo.phone.showOther() : userInfo.email.showEmail()}}</i>
           </p>
         </div>
       </div>
@@ -37,66 +37,102 @@
             <i>{{item.bank}}</i>
             <b>{{item.number.showBank()}}</b>
             <img src="/static/images/personal/card.png" alt="">
-            <em class="edit"></em>
-            <em class="del"></em>
+            <em class="edit" v-if="!item.changeable" @click="alter(item)"></em>
+            <em class="del" v-if="!item.changeable" @click="delAddress(item.id)"></em>
           </li>
-          <li class="add" v-if="bankCard.length < 2">
+          <li class="add" v-if="bankCard.length < 2" @click="newAddress(4)">
             <i></i>
             <b>添加银行卡</b>
           </li>
         </ul>
         <p class="zhifubao">
-          <span class="add" v-if="!alipay">
+          <span class="add" v-if="!alipay" @click="newAddress(1)">
             <i></i>
             <b>添加支付宝</b>
           </span>
-          <span class="exist">
+          <span class="exist" v-else>
             <i>{{alipay.name}}</i>
             <b>{{alipay.number.showOther()}}</b>
             <img src="/static/images/personal/zhifubao.png" alt="">
-            <em class="edit"></em>
-            <em class="del"></em>
+            <em class="edit" v-if="!alipay.changeable" @click="alter(alipay)"></em>
+            <em class="del" v-if="!alipay.changeable" @click="delAddress(alipay.id)"></em>
           </span>
         </p>
         <p class="weixin">
-          <span class="add" v-if="!alipay">
+          <span class="add" v-if="!weChat" @click="newAddress(2)">
             <i></i>
             <b>添加微信</b>
           </span>
-          <span class="exist">
+          <span class="exist" v-else>
             <i>{{weChat.name}}</i>
             <b>{{weChat.number.showOther()}}</b>
             <img src="/static/images/personal/wechat.png" alt="">
-            <em class="edit"></em>
-            <em class="del"></em>
+            <em class="edit" v-if="!weChat.changeable" @click="alter(weChat)"></em>
+            <em class="del" v-if="!weChat.changeable" @click="delAddress(weChat.id)"></em>
           </span>
         </p>
       </div>
     </div>
-    <AddressInfo></AddressInfo>
+    
+    <AddressInfo v-if="isShowInfo" :isNew="isNew" :accountInfo="accountInfo"></AddressInfo>
+  <!-- 删除确认弹窗 -->
+    <BasePopup :show="isShowConfirm" :top="40" :width="470" :height="194">
+      <slot>
+        <div class="main">
+          <img src="/static/images/close_btn_tr2.png" alt="" @click="isShowConfirm = false">
+          <p class="tip">是否确定删除？</p>
+          <p class="button">
+            <button class="cancel" @click="isShowConfirm = false">取消</button>
+            <button class="confirm" @click="confirm">确定</button>
+          </p>
+        </div>
+      </slot>
+    </BasePopup>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex';
-import Avator from "./Avator";
-import AddressInfo from "./AddressInfo";
+import BasePopup from '@/components/common/BasePopup';
+import Avator from "../../components/account/Avator";
+import AddressInfo from "../../components/account/AddressInfo";
   export default {
     data() {
       return {
-        isSetting: false
+        isSetting: false,
+        isNew: true,
+        accountInfo: null,
+        isShowInfo: false,
+        isShowConfirm: false,
+        delId: null,
+        name: ''
       }
     },
     components: {
       Avator,
+      BasePopup,
       AddressInfo
     },
     mounted() {
+      this.name = this.userInfo.name
       this.fetchAddress();
+      this.Bus.$on("hideAddressPoup", () => {
+        this.isShowInfo = false;
+      })
+      this.Bus.$on("avatorUrl", (icon)=>{
+        this.WsProxy.send('control', 'user_update', { icon }).then(res =>{
+          this.$store.commit({type: 'updateUserInfo', data:{icon: icon}})
+        })
+      })
+    },
+    destroyed() {
+      this.Bus.$off("hideAddressPoup");
+      this.Bus.$off("avatorUrl");
     },
     computed: {
       ...mapState([
-        'moneyAddress'
+        'moneyAddress',
+        'userInfo'
       ]),
       bankCard(){
         if(!this.moneyAddress) return [];
@@ -118,6 +154,41 @@ import AddressInfo from "./AddressInfo";
     methods: {
       fetchAddress() {
         this.$store.dispatch({ type: 'moneyAddress', ws: this.WsProxy})
+      },
+      updateName() {
+        this.WsProxy.send('control', 'user_update', { name: this.name }).then(res =>{
+          this.$store.commit({type: 'updateUserInfo', data:{name: this.name}})
+        })
+        this.isSetting=false;
+      },
+      alter(obj){
+        this.isNew = false;
+        this.accountInfo = obj;
+        this.isShowInfo = true;
+      },
+      newAddress(type){
+        this.isNew = true;
+        this.accountInfo = {
+          type: type,
+          name: '',
+          number: '',
+          bank: '',
+          remark: ''
+        }
+        this.isShowInfo = true;
+      },
+      confirm(){
+        this.WsProxy.send('wallet', 'del_account', {
+          id: this.delId,
+          uid: this.userInfo.uid
+        }).then(data => {
+          this.$store.dispatch({ type: 'moneyAddress', ws: this.WsProxy})
+          this.isShowConfirm = false;
+        })
+      },
+      delAddress(id) {
+        this.isShowConfirm = true;
+        this.delId = id
       }
     }
   }
@@ -129,6 +200,38 @@ import AddressInfo from "./AddressInfo";
     box-sizing()
     width 1000px
     padding 40px 30px 44px
+    .main
+      position relative
+      width 100%
+      height 100%
+      letter-spacing 0.29px
+      text-align center
+      img
+        position absolute
+        right 10.4px
+        top 10.4px
+        cursor pointer
+      p.tip
+        padding-top 56px
+      p.button
+        padding-top 56px
+        button
+          width 160px
+          height 40px
+          font-size $fz14
+          color #FFF
+          letter-spacing 0.29px
+          background $col422
+          border-radius 2px
+          cursor pointer
+          &.confirm:hover
+            background $col350
+          &.cancel
+            margin-right 25px
+            color $col422
+            border 1px solid $col422
+            background #FFF
+            border-radius: 2px
     .user-info
       position relative
       padding-bottom 20px
@@ -194,6 +297,9 @@ import AddressInfo from "./AddressInfo";
               background $col6FA
               border 1px solid $col1E1
               border-radius 2px
+              &:focus
+                border 1px solid $col422
+                background #FFF
     .beneficiary-address
       padding-top 40px
       .left
@@ -206,6 +312,7 @@ import AddressInfo from "./AddressInfo";
           width 835px
           li
             float left
+            margin-bottom 50px
           .exist
             background-image: linear-gradient(245deg, $col94C 0%, $col422 100%);
             border-radius: 4px;
@@ -214,6 +321,7 @@ import AddressInfo from "./AddressInfo";
             background-image: linear-gradient(245deg, #3F80F4 0%, #3CB7F9 100%);
             border-radius: 4px;
         .weixin
+          margin-top 50px
           .exist
             background-image: linear-gradient(245deg, #18CB84 0%, #67BD05 100%);
             border-radius: 4px;
@@ -295,6 +403,4 @@ import AddressInfo from "./AddressInfo";
               height 16px
               background-color #909090
               content ''
-        p
-          margin-top 50px
 </style>

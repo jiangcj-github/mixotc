@@ -51,6 +51,29 @@ String.prototype.showBank = function(){
 String.prototype.showOther = function() {
   return this.length > 6 ? `${this.slice(0, 3)}****${this.slice(-3)}` : this;
 };
+// 显示邮箱账号123***@163.com
+String.prototype.showEmail = function() {
+  let index = this.indexOf('@');
+  let left = this.slice(0, index);
+  let right = this.slice(index, this.length);
+  if(left.length >3) {
+    left = left.slice(0,3);
+    return `${left}***${right}`;
+  };
+  return this;
+};
+// 输入银行卡显示
+String.prototype.formatCard = function() {
+  let str = '';
+  for (let i = 0; i < this.length; i++) {
+    if(i !== 0 && i%4 === 0){
+      str += ' '
+    }
+    str += this[i]
+  }
+  return str;
+}
+
 //格式化秒-短格式
 /*
  * 传入：124

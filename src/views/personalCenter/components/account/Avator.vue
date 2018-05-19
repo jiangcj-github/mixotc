@@ -149,13 +149,15 @@ export default {
         alert('上传头像大小不得超过2M')
       }
       let fd = new FormData(document.forms[0]);
-      fd.append("uploadfile", blob, blob.type);
+      fd.append("uploadimage", blob, blob.type);
       console.log(fd);
-      fetch(`${this.HostUrl.http}file/`, {
+      fetch(`${this.HostUrl.http}image/`, {
           method: 'Post',
           body: fd
         }).then(res => res.text())
-        .then(res => console.log(res))
+        .then(res => {
+          this.Bus.$emit(this.emitValue, res);
+        })
         .catch(error=>{})
     }  
   }  

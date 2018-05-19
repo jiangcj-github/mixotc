@@ -35,6 +35,8 @@ const showTransform = "showTransform"; // 支付弹窗来源
 const evaluateOrder = "evaluateOrder"; // 订单评论结果
 
 
+const updateUserInfo = "updateUserInfo";//更新个人信息
+
 
 /**
  * 审核申述客服部分
@@ -75,20 +77,20 @@ export {
   moreMessage,
   moneyAddress,
   newSystemMes,
-  beKick,// 被踢出群
+  beKick, // 被踢出群
   beAdd,
   chatTop,
   delStranger,
-  initState,//改变登陆用户时初始化必要的state
+  initState, //改变登陆用户时初始化必要的state
   updateStrangerInfo,
   agreeAddFriend,
   delFriend,
-
   evaluateOrder,
   showTransform,
-
-
-
+  /**
+   * 个人中心
+   */
+  updateUserInfo,
   /**
    * 审核申述客服部分
    */
@@ -102,5 +104,4 @@ export {
   moreServiceMessage,
   stopTrade,
   stopTradeOther
-
 };

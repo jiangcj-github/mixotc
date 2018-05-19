@@ -2,6 +2,7 @@ import * as types from "./mutation-types";
 import JsonBig from "json-bigint";
 // 同步改变状态时
 export default {
+  /**************聊天模块 *********/
   [types.changeLoginForm](state, { data }) {
     //登录框展示隐藏
     state.showLoginForm = data;
@@ -79,12 +80,12 @@ export default {
   [types.newChat](state, { data }) {
     // 新建聊天窗口
     let idx, id;
-    state.chat.forEach((item, index)=>{
-      if(data.id === item.uid || (data.uid === item.uid && !item.group)) {
+    state.chat.forEach((item, index) => {
+      if (data.id === item.uid || (data.uid === item.uid && !item.group)) {
         idx = index;
         id = item.id;
       }
-    })
+    });
     idx !== undefined && state.chat.splice(idx, 1);
     state.messages[id] && delete state.messages[id];
     state.chat.unshift(data);
@@ -281,15 +282,29 @@ export default {
     state.strangerInfo = Object.assign({}, state.strangerInfo);
   },
 
-  [types.delFriend](state, { data: { id, index } }) {
+  [types.delFriend](
+    state,
+    {
+      data: { id, index }
+    }
+  ) {
     //被删除好友
-    state.friendList.splice(index, 1)
+    state.friendList.splice(index, 1);
     state.chat.forEach(item => {
       if (item.id === id) {
         item.exists = false;
-        if(id !== state.curChat) item.unread++;
+        if (id !== state.curChat) item.unread++;
       }
     });
+  },
+  /**************个人中心部分 *********/
+  // 更新个人信息
+  [types.updateUserInfo](state, { data }) {
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        state.userInfo[key] = data[key];
+      }
+    }
   },
 
   /**
@@ -365,13 +380,16 @@ export default {
   },
   // 查看更多消息
   [types.moreServiceMessage](state, { data }) {
-    !state.serviceMessage[state.serviceNow] && (state.serviceMessage[state.serviceNow] = []);
-    state.serviceMessage[state.serviceNow] = data.reverse().concat(state.serviceMessage[state.serviceNow]);
+    !state.serviceMessage[state.serviceNow] &&
+      (state.serviceMessage[state.serviceNow] = []);
+    state.serviceMessage[state.serviceNow] = data
+      .reverse()
+      .concat(state.serviceMessage[state.serviceNow]);
     state.serviceMessage = Object.assign({}, state.serviceMessage);
   },
   // 终止交易对方人信息
   [types.stopTradeOther](state, { data }) {
-    state.stopTradeOtherInfo = data
+    state.stopTradeOtherInfo = data;
   },
   // 终止交易
   [types.stopTrade](state, { data }) {
@@ -379,16 +397,30 @@ export default {
     //  && !console.log('stopTrade 2', item.user_id) && stateArr.splice(index, 1),[]);
     if (data.length === 1) {
       if (state.stopTradeOtherInfo === 1) {
-        state.serviceData = state.serviceData.filter(item => item.user_id !== data.params.appellant_id && item.user_id !== data.params.appellee_id);
+        state.serviceData = state.serviceData.filter(
+          item =>
+            item.user_id !== data.params.appellant_id &&
+            item.user_id !== data.params.appellee_id
+        );
       } else {
-        state.serviceData = state.serviceData.filter(item => item.user_id !== state.serviceNow)
+        state.serviceData = state.serviceData.filter(
+          item => item.user_id !== state.serviceNow
+        );
       }
-      state.serviceNow = '';
-      state.serviceUser = {}
+      state.serviceNow = "";
+      state.serviceUser = {};
     } else {
-      state.serviceData = state.serviceNow === data.params.appellant_id ? state.serviceData.filter(item => item.user_id !== data.params.appellee_id) : state.serviceData.filter(item => item.user_id !== data.params.appellant_id)
+      state.serviceData =
+        state.serviceNow === data.params.appellant_id
+          ? state.serviceData.filter(
+              item => item.user_id !== data.params.appellee_id
+            )
+          : state.serviceData.filter(
+              item => item.user_id !== data.params.appellant_id
+            );
     }
-    state.serviceNowOther = state.serviceNowOther.filter(item => item.sid !== data.params.sid);
-
+    state.serviceNowOther = state.serviceNowOther.filter(
+      item => item.sid !== data.params.sid
+    );
   }
 };
