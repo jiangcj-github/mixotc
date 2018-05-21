@@ -13,6 +13,19 @@ ul.drop{background:#fff;border:1px solid #e1e1e1;z-index:1000;}
 ul.drop>li{line-height:30px;padding:0 10px;cursor:pointer;color:#333;font-size:13px;}
 ul.drop>li:hover{background:#fff3eb;}
 
+/*复合型输入框*/
+.input-group{width:380px;height:30px;position:relative;display:flex;border:1px solid #e1e1e1;border-radius:2px;background:#fff;}
+.input-group.active{border-color:#fea350;}
+.input-group .input{flex-grow:1;line-height:28px;font-size:13px;padding:0 10px;}
+.input-group .select{position:relative;line-height:28px;padding:0 10px;}
+.input-group .clear{align-self:center;width:12px;cursor:pointer;}
+.input-group .clear:hover{opacity:0.8;}
+.input-group .addin-label{font-size:12px;color:#333;letter-spacing:0.16px;padding:0 10px;}
+.input-group .addin-button{}
+.input-group .drop-trangle{width:30px;position:relative;}
+.input-group .drop-trangle:after{content:"";border:5px solid transparent;border-top-color:#ffb422;position:absolute;top:12px;right:10px;}
+.input-group .drop{position:absolute;left:-1px;right:-1px;top:29px;border-top:none;}
+
 .ecli{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;}
 
 /*错误*/

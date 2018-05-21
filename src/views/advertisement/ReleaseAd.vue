@@ -8,6 +8,7 @@
       <ul>
         <li class="buy-ad" :class="{active: $route.path=='/advertisement/release/buy'}" @click="buyAd">购买广告</li>
         <li class="sale-ad" :class="{active: $route.path=='/advertisement/release/sale'}" @click="saleAd">出售广告</li>
+        <!--{{buyObj}}-->
       </ul>
       <div class="release-ad-content">
         <h1>余额超过0.05BTC才能在交易中心展示广告</h1>
@@ -22,7 +23,7 @@
     name: "releaseAd",
     data() {
       return {
-        //buyObj: {},
+        buyObj: {},
         saleObj: {}
       }
     },
@@ -30,14 +31,7 @@
 
     },
     computed: {
-      buyObj() {
-        let aaa
-        this.Bus.$on('buyInfo', data => {
-          console.log('购买父组件接收', data)
-          aaa = data
-        })
-        return aaa
-      }
+
     },
     created() {
 
@@ -45,6 +39,7 @@
     mounted() {
       this.Bus.$on('buyInfo', data => {
         console.log('购买父组件接收', data)
+        this.buyObj = data
       })
     },
     destroyed() {
@@ -52,12 +47,14 @@
     },
     methods: {
       buyAd() {
-        this.$router.push({path: '/advertisement/release/buy'})
         this.Bus.$emit('buyRelease', this.buyObj)
+        this.$router.push({path: '/advertisement/release/buy'})
+
       },
       saleAd(){
-        this.$router.push({path: '/advertisement/release/sale'})
         this.Bus.$emit('saleRelease', this.saleObj)
+        this.$router.push({path: '/advertisement/release/sale'})
+
       }
     }
   }

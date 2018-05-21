@@ -28,10 +28,16 @@
 
 /*radio*/
 .radio{font-size:13px; color:#333333; letter-spacing:0.27px; display:inline-block; padding-left:27px; cursor:pointer;
-  background  url(/static/images/unselect.png) no-repeat 3px center;}
-.radio.check{ background-image:url(/static/images/selected.png);}
-.radio:hover{ color:#fea350;}
+  background  url(/static/images/unselect.png) no-repeat 3px center;background-size:16px 16px;}
+.radio.check{background-image:url(/static/images/selected.png);}
+.radio:hover{color:#fea350;}
 .radio.disabled{pointer-events:none;color:#999;}
+
+.checkbox{font-size:13px; color:#333333; letter-spacing:0.27px; display:inline-block; padding-left:23px;
+  cursor:pointer; background url(/static/images/rules_unchecked.png) no-repeat 3px center;background-size:14px 14px;}
+.checkbox.check{background-image:url(/static/images/rules_checked.png);}
+.checkbox:hover{color:#fea350;}
+.checkbox.disabled{pointer-events:none;color:#999;}
 
 .right .tb-tab{height:50px;padding:0 30px;background:#fff;user-select:none;}
 .tb-tab>ul{display:inline-block;line-height:48px;}
