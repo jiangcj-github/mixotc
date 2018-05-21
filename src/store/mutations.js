@@ -23,6 +23,9 @@ export default {
     // 判断支付来源
     state.transformInfo = data;
   },
+
+
+  // 消息部分
   [types.changeChatBox](state, { data }) {
     // 控制右下方消息框显示
     if (data) state.unreadNumber = 0;

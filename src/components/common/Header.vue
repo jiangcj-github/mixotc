@@ -10,11 +10,11 @@
         <ul class="down-tag">
           <li><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></li>
           <router-link to="/transaction" tag="li" class="tag transaction" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
-          <li class="tag ad" @mouseenter="adChild = true" @mouseleave="adChild = false" :class="{active: $route.path=='/advertisement/release' || $route.path=='/advertisement'}">
+          <li class="tag ad" @mouseenter="adChild = true" @mouseleave="adChild = false" :class="{active: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
             <span>广告</span>
             <ol v-show="adChild">
               <li @click="adChild = false"><router-link to="/advertisement/release" tag="li">发广告</router-link></li>
-              <li @click="adChild = false"><router-link to="/advertisement">我的广告</router-link></li>
+              <li @click="adChild = false"><router-link to="/advertisement" tag="li">我的广告</router-link></li>
             </ol>
           </li>
           <router-link to="/order" tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">订单<span v-if="newOrder"><i>{{newOrder}}</i></span></router-link>
@@ -165,9 +165,11 @@
       border 1px solid #E1E1E1
       background #FFF
       .down-tag
+        height 70px
         flex 1
         font-size 14px
         >li
+          height 68px
           position relative
           float left
           margin-right 50px
@@ -203,7 +205,7 @@
             width 70px
             ol
               position absolute
-              top 73px
+              top 70px
               width 70px
               background #FFF
               box-shadow 0 2px 4px 0 #E1E1E1
@@ -217,8 +219,10 @@
                 &:hover
                   background: #FFF3EB
           &.selected
+            background #FFF3EB
             border-bottom 2px solid $col422
           &.active
+            background #FFF3EB
             border-bottom 2px solid $col422
         .itag
           line-height 60px

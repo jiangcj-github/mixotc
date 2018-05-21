@@ -34,6 +34,9 @@ const delFriend = "delFriend";
 const showTransform = "showTransform"; // 支付弹窗来源
 const evaluateOrder = "evaluateOrder"; // 订单评论结果
 
+const saveAdMessageBuy = "saveAdMessageBuy"; // 广告输入结果
+const saveAdMessageSale = "saveAdMessageSale"; // 广告输入结果
+
 
 const updateUserInfo = "updateUserInfo";//更新个人信息
 
@@ -87,10 +90,16 @@ export {
   delFriend,
   evaluateOrder,
   showTransform,
+
   /**
    * 个人中心
    */
   updateUserInfo,
+
+
+
+
+
   /**
    * 审核申述客服部分
    */

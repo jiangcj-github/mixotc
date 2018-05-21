@@ -7,6 +7,7 @@
       inactive-color="#999">
     </el-switch>
   </div>
+
 </template>
 
 <script>
