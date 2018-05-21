@@ -2,7 +2,7 @@
   <div class="payment-wrap"  v-clickoutside="()=>{showPayment=false}">
     <span :class="{'select-title': paymentTitle !== '选择支付方式' }" @click.stop="showPayment=!showPayment">{{paymentTitle}}</span>
     <ul v-show="showPayment" class="clearfix">
-      <li v-for="(item, index) of payment" :class="{selected: item.state}" @mousedown="item.state = !item.state">
+      <li v-for="(item, index) of payment" :class="{selected: item.state}" @mousedown="item.state = !item.state" @click="choicePayment()">
         <img :src="item.url">
         <b>{{item.type}}</b>
       </li>
@@ -12,9 +12,7 @@
 
 <script>
   export default {
-    props: {
-
-    },
+    props: {},
     data() {
       return {
         showPayment: false,
@@ -34,16 +32,16 @@
         });
         if (title.length === 0) return '选择支付方式';
         return title.join('/');
+      },
+      paymentScore() {
+        let score = 0;
+        this.payment.filter(item => {
+          return item.state;
+        }).forEach(item => {
+          score += item.score;
+        });
+        return score;
       }
-      // paymentScore() {
-      //   let score = 0;
-      //   this.payment.filter(item => {
-      //     return item.state;
-      //   }).forEach(item => {
-      //     score += item.score;
-      //   });
-      //   return score;
-      // }
     },
     created() {
 
@@ -55,7 +53,9 @@
 
     },
     methods: {
-
+      choicePayment() {
+        this.Bus.$emit('choicePayment', this.paymentScore);
+      }
     }
   }
 </script>
@@ -98,6 +98,7 @@
         float left
         position relative
         height 20px
+        padding-left 0
         line-height 20px
         font-size 13px
         letter-spacing 0.27px
@@ -124,7 +125,7 @@
           vertical-align middle
         b
           padding-right 45px
-
+          color #333
       li:last-child
         margin-right 0
 

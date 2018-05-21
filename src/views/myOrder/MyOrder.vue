@@ -338,6 +338,7 @@
       });
       // 监听搜索框值
       this.Bus.$on('changeInputContent', ({type, data}) => {
+        //this.orderId=type == 'order_id'?
         if (type == 'order_id') {
           this.orderId = data
         } else if (type == 'order_tradecode') {

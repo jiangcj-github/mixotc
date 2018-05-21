@@ -19,7 +19,7 @@
       choiceClass: String,
       width: {
         type: Number,
-        default: 70
+        //default: 70
       },
       top: {
         type: Number,
@@ -27,7 +27,7 @@
       },
       widthWrap: {
         type: Number,
-        default: 80
+        //default: 80
       },
       widthSelect: {
         type: Number,
@@ -100,6 +100,7 @@
     /*margin-right 30px*/
     b
       display inline-block
+      padding-right 15px
       font-size $fz13
       color #999
       position relative
@@ -107,7 +108,7 @@
       &:after
         position absolute
         top 8px
-        right  0px
+        right 0px
         content ''
         triangle_down(#999)
 

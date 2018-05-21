@@ -42,6 +42,10 @@
       </div>
       <!--筛选栏-->
       <div class="filtrate">
+        <ol class="select-type clearfix">
+          <li>购买</li>
+          <li>出售</li>
+        </ol>
         <div class="select" @click.stop="showPayment=!showPayment" v-clickoutside="()=>{showPayment=false}">
           <i :class="{'select-item': payTitle !== '选择支付方式' }">{{payTitle}}</i>
           <ul class="payment" v-show="showPayment">
@@ -449,18 +453,38 @@
   @import "stylus/topSearch";
   @import "stylus/transaction";
   .transacation
-    margin-top 40px
     margin-bottom 40px
     .filtrate
       position relative
       height 70px
       background #FFF
+      .select-type
+        position absolute
+        height 40px
+        top 15px
+        left 30px
+        li
+          float left
+          width 200px
+          text-align center
+          line-height 40px
+          cursor pointer
+        li:first-child
+          width 198px
+          height 38px
+          border 1px solid #FFB422
+          border-radius 2px 0 0 2px
+          color #FFB422
+        li:last-child
+          background #FFB422
+          border-radius 0 2px 2px 0
+          color #FFF
       .select
         box-sizing()
         position absolute
-        left 252px
+        left 560px
         top 20px
-        width 270px
+        width 170px
         height 30px
         background #FFF
         border 1px solid $col1E1
@@ -468,7 +492,7 @@
         img
           position absolute
           top 9px
-          right 30px
+          right 23px
         i
           position absolute
           top 0px
@@ -527,7 +551,7 @@
               letter-spacing 0.27px
       .price
         position absolute
-        left 583px
+        left 791px
         top 20px
         width 260px
         height 50px
@@ -569,8 +593,8 @@
       .wholesale
         position absolute
         top 0
-        left 828px
-        width 371px
+        left 1035px
+        width 150px
         height 70px
         img
           position absolute

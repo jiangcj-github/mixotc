@@ -42,7 +42,22 @@ const ROUTES = [
   {
     path: "/advertisement/release", // 发广告
     name: "ReleaseAd",
-    component: resolve => require(["@/views/advertisement/ReleaseAd"], resolve) // 发广告
+    redirect: "/advertisement/release/buy",
+    component: resolve => require(['@/views/advertisement/ReleaseAd'], resolve), // 发广告
+    children: [
+      // 购买广告
+      {
+        path: "/advertisement/release/buy",
+        name: "releaseBuy",
+        component: resolve => require(['@/views/advertisement/child/ReleaseAdBuy'], resolve), // 购买广告
+      },
+      // 出售广告
+      {
+        path: "/advertisement/release/sale",
+        name: "releaseSale",
+        component: resolve => require(['@/views/advertisement/child/ReleaseAdSale'], resolve), // 购买广告
+      },
+    ]
   },
   {
     path: "/advertisement", // 我的广告

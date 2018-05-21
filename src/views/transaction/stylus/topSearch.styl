@@ -1,5 +1,11 @@
 /*TopSearch样式*/
-.header{margin-bottom:50px;display:flex;}
+.header{
+  display:flex;
+  height:100px;
+  padding 0 30px
+  align-items: center;
+  background: #FFF;
+}
 
 .header>h2{ float:left; width:129px; height:30px; line-height:30px; letter-spacing:0.23px; font-size:$fz20; font-weight:bold; color $col333}
 .header>h2:before{position:relative; top:2px; left:0; display:inline-block; content:''; width:3px;
@@ -23,9 +29,20 @@
 .search>a:hover{background-color:#fea350;}
 
 .header .top5{display:inline-block;}
-.top5 li{position:relative; float:left; width:80px; height:30px; margin-right:20px; text-align:center; line-height:30px;
-  font-size:13px; color:$col422; letter-spacing:0.15px; box-shadow:0 2px 4px 0 #e1e1e1;
-  border-radius:2px; cursor pointer}
+.top5 li{
+  position:relative;
+  float:left;
+  width:80px;
+  height:30px;
+  margin-right:20px;
+  text-align:center;
+  line-height:30px;
+  font-size:13px;
+  color:$col422;
+  letter-spacing:0.15px;
+  box-shadow:0 2px 4px 0 #e1e1e1;
+  border-radius:2px; cursor pointer
+}
 .top5 li:hover{color:#fea350;}
 .top5 li:last-child{margin-right:0;}
 .top5 li.tuijian{color:#FFF;}

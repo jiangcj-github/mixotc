@@ -36,7 +36,8 @@
       maxText: {
         type: String,
         default: '30min'
-      }
+      },
+      selectSliderValue: String,
     },
     data() {
       return {
@@ -45,8 +46,8 @@
     },
     methods: {
       changeInput(data) {
-        ! /^d+$/.test(data) ?  this.sliderValue = Math.floor(data) : this.sliderValue = data
-        console.log(111, this.sliderValue)
+        ! /^d+$/.test(data) ? this.sliderValue = Math.floor(data) : this.sliderValue = data
+        this.Bus.$emit(this.selectSliderValue, this.sliderValue);
       }
     }
   };
@@ -60,7 +61,7 @@
       right 330px
       top 10px
       font-size 13px
-      color #999
+      color #999 !important
       z-index 2
     span
       display inline-block
@@ -97,6 +98,7 @@
       margin-top 0
       .el-input--small
         .el-input__inner
+          width 120px
           height 40px
           padding 0 10px
           background #FFF
