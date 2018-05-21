@@ -11,7 +11,7 @@
         <div class="info">
           <p>
             <span>用户ID</span>
-            <i>18998878899</i>
+            <i>{{JsonBig.stringify(userInfo.uid).showOther()}}</i>
           </p>
           <p>
             <span>昵称</span>
