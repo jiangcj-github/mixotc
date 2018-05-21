@@ -1,7 +1,6 @@
 <template>
   <div class="account">
     <div class="tab">
-      {{authData}}
       <ul class="clearfix">
         <!-- <li :class="{active: !type || type === 'base'}"> -->
           <router-link :to="{name:'personal-baseInfo', params: {num: 123}}" tag="li" active-class="active">基本设置</router-link>
@@ -27,6 +26,7 @@
           surname: '',
           name: '',
           type: 1,
+          number: '',
           iconArr: ['', '', '']
         }
       }

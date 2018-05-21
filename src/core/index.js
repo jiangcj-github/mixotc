@@ -158,19 +158,14 @@ const RUN_APP = (App, config, plugin) => {
         isReload: isNewTab
       };
     },
+    beforeCreate(){
+    },
     methods: {
       reload() {
         console.log('this.isReload', this.isReload)
         this.isReload = true;
         this.$nextTick(() => {
           this.isReload = false;
-          if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) {
-            return;
-          }
-          !this.$store.state.token &&
-            this.$router.push({
-              name: "transaction"
-            });
         });
       }
     }
@@ -182,10 +177,10 @@ const RUN_APP = (App, config, plugin) => {
       return;
     }
     if (!store.state.token) {
-      if (to.path === "/homepage") {
-        next({ path: "/homepage" });
-        return;
-      }
+      // if (to.path === "/homepage") {
+      //   next({ path: "/homepage" });
+      //   return;
+      // }
       next({ path: "/transaction" });
       return;
     }

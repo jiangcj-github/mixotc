@@ -44,5 +44,27 @@ export default {
         console.log("grouplistOver");
       })
       .catch(error => {});
+  },
+
+  async [types.updateUserInfo]({ commit, state }, { ws }) {
+    // 更新群组信息
+    await ws
+      .send("control", "user_info", {
+        id: state.userInfo.uid
+      })
+      .then(({name, phone, email, icon, verify, btverify}) => {
+        commit({
+          type: "updateUserInfo",
+          data: {
+            name,
+            phone,
+            email,
+            icon,
+            verify,
+            btverify
+          }
+        });
+      })
+      .catch(error => {});
   }
 };

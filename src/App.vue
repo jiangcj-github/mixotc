@@ -24,7 +24,6 @@
       return {
         timer1: null,
         timer2: null
-        // watchTokenFlag: true
       }
     },
     created() {
@@ -57,7 +56,7 @@
         if (!this.token){
           ws.reConnectFlag = false;
           this.$store.commit({type: 'changeLogin', data: false});
-          if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) {
+          if (this.authority(this.$route.path)) {
             return;
           }
           this.$router.push('/transaction');
@@ -82,11 +81,13 @@
       }
     },
     destroyed() {
-      // this.timer1 && (this.timer1 = clearTimeout(this.timer1));
       this.timer2 && (this.timer2 = clearInterval(this.timer2));
       window.onmousedown = null
     },
     methods: {
+      authority(path){
+        return ["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(path);
+      },
       //退出登录逻辑
       logout() {
         // 一个选项卡退出，所有选项卡均退出
@@ -99,13 +100,16 @@
         //websocket链接关闭
         this.WebSocket.close();
         //其他页面跳转至主页'
-        if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) return;
+        if (this.authority(this.$route.path)) return;
         this.$router.push('transaction')
       }
     },
     computed: {
+      path(){
+        return this.$route.path
+      },
       showView() {
-        if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(this.$route.path)) {
+        if (this.authority(this.$route.path)) {
           return true;
         }
         if (["/verify", "/verify/identifyAuth", "/verify/largeTransaction", "/verify/arbitrationRecord", "/verify/service"].includes(this.$route.path) && this.$store.state.userInfo && !this.$store.state.userInfo.is_admin) {
@@ -158,6 +162,14 @@
           this.$store.commit({type: 'changeTrustList', data: []});
         },
         immediate: true
+      },
+      path:{
+        handler: function(curVal, oldVal) {
+          if (this.authority(curVal)) return;
+          !this.$store.state.token && this.$router.push({
+              name: "transaction"
+            });
+        }
       }
     }
   }

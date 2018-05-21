@@ -86,7 +86,7 @@
     methods: {
       dealCard() {
         let value = this.$refs.account.value.trim().replace(/\s/g,"");
-        if(!(/(^[1-9]\d*$)/.test(value))){
+        if(!(/(^[0-9]\d*$)/.test(value))){
           value = value.replace(/[^0-9]/g,"");
         };
         if(value.length > 19 ) {
@@ -149,6 +149,8 @@
         width 12px
         height 12px
         background url('/static/images/hint.png') no-repeat center center;
+    input
+      padding-right 10px
     img
       position absolute
       right 10.4px
@@ -189,6 +191,9 @@
         padding-left 10px
         background $col6FA
         border-radius 2px
+        &:focus
+          background-color #FFF
+          border 1px solid $col422
       .account
         position relative
         .tip
@@ -210,6 +215,9 @@
         height 40px
         padding-left 10px
         background $col6FA
+        &:focus
+          background-color #FFF
+          border 1px solid $col422
     .remark
       position relative
       textarea

@@ -62,7 +62,7 @@ String.prototype.showEmail = function() {
   };
   return this;
 };
-// 输入银行卡显示
+// 输入银行卡显示1234 1234 1234 1234
 String.prototype.formatCard = function() {
   let str = '';
   for (let i = 0; i < this.length; i++) {
@@ -73,6 +73,19 @@ String.prototype.formatCard = function() {
   }
   return str;
 }
+// 输入身份证等卡号显示123124 1234 5566 0098
+String.prototype.formatCertificate = function() {
+  if(this.length < 6) return this;
+  let str = this.slice(0, 6),
+    right = this.slice(6);
+  for (let i = 0; i < right.length; i++) {
+    if (i % 4 === 0) {
+      str += " ";
+    }
+    str += right[i];
+  }
+  return str;
+};
 
 //格式化秒-短格式
 /*

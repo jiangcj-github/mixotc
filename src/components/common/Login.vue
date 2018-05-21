@@ -199,8 +199,8 @@
               data: data.body
             });
             this.saveAccount(this.account)
-            data.body.msg && this.$store.commit({ type: 'changeToken', data: data.body.msg })
-            data.body.msg && localStorage.setItem('getToken', data.body.msg);
+            data.body.token && this.$store.commit({ type: 'changeToken', data: data.body.token })
+            data.body.token && localStorage.setItem('getToken', data.body.token);
             this.$store.commit({ type: 'changeLogin', data: true });
             this.Storage.loginTime.set(new Date() - 0)
             localStorage.removeItem('getToken')
@@ -220,7 +220,7 @@
               version: 1,
               mode: 0,
               device: this.getExplorerInfo(),
-              os: 3
+              os: 3,
             }
           }))
         }
