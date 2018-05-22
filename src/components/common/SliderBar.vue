@@ -5,6 +5,8 @@
       v-model="sliderValue"
       :min="min"
       :max="max"
+      :step="step"
+      :disabled="disabled"
       :show-input-controls="false"
       @change="changeInput"
       show-input>
@@ -20,6 +22,10 @@
       min:{
         type: Number,
         default: 10
+      },
+      step:{
+        type: Number,
+        default: 1
       },
       max:{
         type: Number,
@@ -37,16 +43,33 @@
         type: String,
         default: '30min'
       },
+      disabled: {
+        type: Boolean,
+        default: false
+      },
       selectSliderValue: String,
+      choiceValue: {
+        type: Number,
+        default: 0
+      }
+    },
+    mounted() {
+      console.log('this.max', this.max)
+    },
+    watch: {
+      choiceValue(data) {
+        console.log('max', this.max)
+        this.sliderValue = data
+      }
     },
     data() {
       return {
-        sliderValue: 0
+        sliderValue: this.choiceValue
       };
     },
     methods: {
       changeInput(data) {
-        ! /^d+$/.test(data) ? this.sliderValue = Math.floor(data) : this.sliderValue = data
+        this.sliderValue = this.step === 1 && (! /^d+$/.test(data) ? Math.floor(data) : data) || (data)
         this.Bus.$emit(this.selectSliderValue, this.sliderValue);
       }
     }

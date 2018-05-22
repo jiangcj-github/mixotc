@@ -12,7 +12,7 @@
 
 <script>
   export default {
-    props: {},
+    props: ['paymentItem'],
     data() {
       return {
         showPayment: false,
@@ -43,6 +43,37 @@
         return score;
       }
     },
+    watch: {
+      paymentItem(data) {
+        switch (data) {
+          case 1:
+            this.payment[0].state = true
+            break;
+          case 2:
+            this.payment[1].state = true
+            break;
+          case 3:
+            this.payment[0].state = true
+            this.payment[1].state = true
+            break;
+          case 4:
+            this.payment[2].state = true
+            break;
+          case 5:
+            this.payment[0].state = true
+            this.payment[2].state = true
+            break;
+          case 6:
+            this.payment[1].state = true
+            this.payment[2].state = true
+            break;
+          default:
+            this.payment[0].state = true
+            this.payment[1].state = true
+            this.payment[2].state = true
+        }
+      }
+    },
     created() {
 
     },
@@ -50,7 +81,7 @@
 
     },
     destroyed() {
-
+      this.Bus.$off('showPayment');
     },
     methods: {
       choicePayment() {

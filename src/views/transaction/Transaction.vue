@@ -33,11 +33,42 @@
           </div>
         </div>
         <ul class="top5">
-          <li class="eth tuijian" @click="filte.currency='eth'">ETH</li>
-          <li class="btc tuijian" @click="filte.currency='btc'">BTC</li>
-          <li class="ada tuijian" @click="filte.currency='ada'">ADA</li>
-          <li class="bat" @click="filte.currency='bat'">BAT</li>
-          <li class="ltc" @click="filte.currency='ltc'">LTC</li>
+          <li v-for="(item, index) in hotCoinList" @click="hotCoinSelect(item, index)" :class="{'top-active': index == hotNum}">
+            <p>
+              <img :src="item.imgUrl" alt="">
+              <b>{{item.name}}</b>
+            </p>
+            <span>{{item.cName}}</span>
+          </li>
+          <!--<li class="eth" @click="filte.currency='eth'">-->
+            <!--<p>-->
+              <!--<img src="" alt="">-->
+              <!--<b>ETH</b>-->
+            <!--</p>-->
+            <!--<span>Ethereum</span>-->
+          <!--</li>-->
+          <!--<li class="btc" @click="filte.currency='btc'">-->
+            <!--<p>-->
+              <!--<img src="" alt="">-->
+              <!--<b>BTC</b>-->
+            <!--</p>-->
+            <!--<span>Bitcoin</span>-->
+          <!--</li>-->
+          <!--<li class="eth" @click="filte.currency='eth'">-->
+            <!--<p>-->
+              <!--<img src="" alt="">-->
+              <!--<b>ETH</b>-->
+            <!--</p>-->
+            <!--<span>Ethereum</span>-->
+          <!--</li>-->
+          <!--<li class="xvg" @click="filte.currency='xvg'">-->
+            <!--<p>XVG</p>-->
+            <!--<span>Bitcoin</span>-->
+          <!--</li>-->
+          <!--<li class="usdt" @click="filte.currency='usdt'">-->
+            <!--<p>USDT</p>-->
+            <!--<span>Bitcoin</span>-->
+          <!--</li>-->
         </ul>
       </div>
       <!--筛选栏-->
@@ -168,6 +199,13 @@
         coinTips: [],
         userTips: [],
 
+        hotCoinList: [
+          {name: 'BTC', secName: 'btc', cName: 'Bitcoin', imgUrl: ''},
+          {name: 'ETH', secName: 'eth', cName: 'Ethereum', imgUrl: ''},
+          {name: 'BTC', secName: 'btc', cName: 'Bitcoin', imgUrl: ''},
+          {name: 'ETH', secName: 'eth', cName: 'Ethereum', imgUrl: ''},
+        ],
+        hotNum: 0,
         tip: false,//限额错误文案提示
         showPayment: false,
         payment:[{type: '支付宝', score: 1, state: true}, {type: '微信', score: 2, state: true}, {type: '银行卡', score:4, state: true}],
@@ -381,8 +419,12 @@
         this.showPopup = true;
         timeout(()=>{
           this.showPopup=false;
-        },3000);
+        },3000);npm
       },
+      hotCoinSelect(item, index) { // 热门选择
+        this.filte.currency = item.secName
+        this.hotNum = index
+      }
     },
     computed: {
       isLogin() {

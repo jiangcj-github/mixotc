@@ -13,9 +13,15 @@
 <script>
   export default {
     name: "switch-block",
+    props: ['showSwitch'],
     data() {
       return {
-        switchValue: false
+        switchValue: this.showSwitch
+      }
+    },
+    watch: {
+      showSwitch(state) {
+        this.switchValue = state === true ?  true : false
       }
     },
     methods: {
