@@ -32,26 +32,38 @@
 .top5 li{
   position:relative;
   float:left;
-  width:80px;
-  height:30px;
+  width: 88px;
+  height: 30px;
+  padding 8px 10px 10px
   margin-right:20px;
-  text-align:center;
-  line-height:30px;
   font-size:13px;
-  color:$col422;
-  letter-spacing:0.15px;
-  box-shadow:0 2px 4px 0 #e1e1e1;
-  border-radius:2px; cursor pointer
+  background: #FFF
+  border: 1px solid #E1E1E1;
+  border-radius: 2px;
+  cursor pointer
 }
-.top5 li:hover{color:#fea350;}
+.top5 li:hover {
+  box-shadow: 0 2px 13px 0 #D6D6D6;
+}
+.top5 li.top-active {
+  box-shadow: 0 2px 13px 0 #D6D6D6;
+}
+.top5 li p img {
+  width: 13px;
+  height: 13px;
+  margin-right: 10px;
+  background: aqua;
+  border-radius: 50%;
+  vertical-align: middle
+}
+.top5 li span {
+  font-size: 11px;
+  color: #999;
+  letter-spacing: 0.12px;
+  margin-left: 27px
+}
 .top5 li:last-child{margin-right:0;}
-.top5 li.tuijian{color:#FFF;}
 .top5 li.tuijian:before{ position:absolute; left:10px; top:10px; content:''; width:6px; height:9px;
   background:url(/static/images/recommend_.png) no-repeat;}
 .top5 li.tuijian:hover{box-shadow:none;}
 
-.top5 .btc{background:#FFB422;}
-.top5 .eth{background:#FF914C;}
-.top5 .ada{background:#FFCE16;}
-.top5 .bat{background:#fff;}
-.top5 .ltc{background:#fff;}
