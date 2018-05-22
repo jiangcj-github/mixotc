@@ -1,32 +1,40 @@
-*{box-sizing:border-box;}
+*{box-sizing:border-box;font-size:13px;color:#333;letter-spacing:0.27px;}
+a{color:#ffb422;font-size:14px;letter-spacing:0.16px;}
+a:hover{color:#fea350;}
 
-.btn{display:inline-block;cursor:pointer;border-radius:2px;font-size:13px;letter-spacing:0.27px;text-align:center;}
+/*按钮*/
+.btn{display:inline-block;cursor:pointer;border-radius:2px;text-align:center;}
 .btn.white{background:#fff;color:#ffb422;border:1px solid #ffb422;}
 .btn.white:hover{background:#fea350;color:#fff;border-color:#fea350;}
 .btn.green{background:#ffb422;color:#fff;}
 .btn.green:hover{background:#fea350;}
 
-a{color:#ffb422;font-size:14px;letter-spacing:0.16px;}
-a:hover{color:#fea350;}
-
+/*下拉列表*/
 ul.drop{background:#fff;border:1px solid #e1e1e1;z-index:1000;}
-ul.drop>li{line-height:30px;padding:0 10px;cursor:pointer;color:#333;font-size:13px;}
+ul.drop>li{line-height:30px;padding:0 10px;cursor:pointer;}
 ul.drop>li:hover{background:#fff3eb;}
 
 /*复合型输入框*/
-.input-group{width:380px;height:30px;position:relative;display:flex;border:1px solid #e1e1e1;border-radius:2px;background:#fff;}
+.input-group{width:380px;height:30px;line-height:28px;position:relative;display:flex;border:1px solid #e1e1e1;border-radius:2px;background:#fff;}
 .input-group.active{border-color:#fea350;}
-.input-group .input{flex-grow:1;line-height:28px;font-size:13px;padding:0 10px;}
-.input-group .select{position:relative;line-height:28px;padding:0 10px;}
-.input-group .clear{align-self:center;width:12px;cursor:pointer;}
+.input-group .term{background:#f4f6fa;line-height:28px;padding:0 10px;cursor:pointer;border-right:1px solid #e1e1e1;letter-spacing:0;}
+.input-group .term:hover{color:#666;}
+.input-group .term:after{content:"";display:inline-block;border:5px solid transparent;border-top-color:#999;vertical-align:-3px;margin-left:5px;}
+.input-group .input{flex-grow:1;padding:0 10px;}
+.input-group .clear{align-self:center;width:12px;cursor:pointer;margin-right:10px;}
 .input-group .clear:hover{opacity:0.8;}
-.input-group .addin-label{font-size:12px;color:#333;letter-spacing:0.16px;padding:0 10px;}
-.input-group .addin-button{}
+.input-group .addin{font-size:12px;padding:0 10px;}
 .input-group .drop-trangle{width:30px;position:relative;}
 .input-group .drop-trangle:after{content:"";border:5px solid transparent;border-top-color:#ffb422;position:absolute;top:12px;right:10px;}
 .input-group .drop{position:absolute;left:-1px;right:-1px;top:29px;border-top:none;}
 
-.ecli{white-space:nowrap;text-overflow:ellipsis;overflow:hidden;}
+/*警告*/
+.warn{line-height:24px;font-size:12px;letter-spacing:0.12px;}
+.warn>label{float:left;color:#ff794c;}
+.warn>label>img{vertical-align:-1px;margin-right:6px;width:12px;height:auto;}
+.warn>p{margin-left:60px;color:#ff794c;}
+
+ecli(){white-space:nowrap;text-overflow:ellipsis;overflow:hidden;}
 
 /*错误*/
 .err{background-repeat:no-repeat; background-position:center 100px; background-size:140px 140px; height:400px; background-color:#fff;
@@ -35,5 +43,30 @@ ul.drop>li:hover{background:#fff3eb;}
 .err.load-failed{background-image:url(/static/images/verify/err_load_failed.png);}
 .err.net-error{background-image:url(/static/images/verify/err_net_error.png);}
 .err.empty{background-image:url(/static/images/rectangle.png);}
+
+/*列表头*/
+.thead{user-select:none;height:50px;padding:0 30px;}
+.thead .th{display:inline-block;vertical-align:top;line-height:50px;color:#999;position:relative;}
+
+.thead .select{cursor:pointer;}
+.thead .select>p{color:#999;}
+.thead .select:hover>p{color:#fea350;}
+.thead .select>p:after{content:"";display:inline-block;border:5px solid transparent;border-top-color:#999;
+  vertical-align:-3px;margin-left:7px;}
+.thead .select>ul{position:absolute;top:40px;left:-10px;right:0;}
+.thead .select.multi>ul img{float:right;margin-top:7px;}
+
+.thead .sortable{cursor:pointer;}
+.thead .sortable:hover{color:#fea350;}
+.thead .sortable>i{ position:relative; margin-left:3px;}
+.thead .sortable>i:before{content:''; border-left:5px solid transparent; border-right:5px solid transparent;
+  border-bottom:5px solid #999; position:absolute; right:-15px; top:50%; margin-top:-6px;}
+.thead .sortable>i:after{content:''; border-left:5px solid transparent; border-right:5px solid transparent;
+  border-top:5px solid #999; position:absolute; right:-15px; top:50%; margin-top:1px;}
+.thead .sortable>i.up:before{border-bottom-color:#ffb422;}
+.thead .sortable>i.down:after{border-top-color:#ffb422;}
+
+/*提醒框*/
+.alert{width:290px;height:90px;line-height:90px;text-align:center;}
 
 placeholder()

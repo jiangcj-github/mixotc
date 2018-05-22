@@ -5,23 +5,24 @@
         <!--{{$route.params}}-->
         <p>选择币种</p>
         <ChoiceBox :choiceClass="adB"
-                   :title="adObj.currency && adObj.currency.toUpperCase()"
+                   :title="adBuyObj.currency && adBuyObj.currency.toUpperCase()"
                    :classify="coinType"
                    :emitValue="selectCoin"
                    :selectValue="coinData"
                    :width=593
                    :top=39
+                   :showDisabled="isDisabled"
                    :widthSelect=618
                    :widthWrap=620>
         </ChoiceBox>
       </li>
       <li>
         <p>货币</p>
-        <span class="coin-span">{{adObj.money.toUpperCase()}}</span>
+        <span class="coin-span">{{adBuyObj.money.toUpperCase()}}</span>
       </li>
       <li class="pay-li">
         <p>收款方式</p>
-        <PaymentSelect :paymentItem="adObj.payment"></PaymentSelect>
+        <PaymentSelect :soreItem="adBuyObj.payment"></PaymentSelect>
       </li>
     </ol>
     <ol>
@@ -29,19 +30,19 @@
         <i>是否溢价</i>
         <em class="sel-premium"><b>*</b>根据市场价的溢价比例</em>
         <em v-show="switchValue">当前市场最低价：</em>
-        <b v-show="switchValue">{{priceNow}} CNY/{{adObj.currency && adObj.currency.toUpperCase()}}</b>
-        <SwitchBlock class="switch-block" :showSwitch="switchValue = adObj.mode == 1 ? false : true"></SwitchBlock>
+        <b v-show="switchValue">{{priceNow}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
+        <SwitchBlock class="switch-block" :showSwitch="switchValue = adBuyObj.mode == 1 ? false : true"></SwitchBlock>
       </li>
       <li v-show="switchValue">
         <i>溢价</i>
         <em>参考价：</em>
-        <b>{{priceNow}} CNY/{{adObj.currency && adObj.currency.toUpperCase()}}</b>
+        <b>{{priceNow}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
       </li>
       <li v-show="switchValue">
         <SliderBar
           :min="-99"
           :max="99"
-          :choiceValue="adObj.premium"
+          :choiceValue="adBuyObj.premium"
           :minText="minText"
           :maxText="maxText"
           :selectSliderValue="premiumValue"
@@ -52,51 +53,51 @@
         <p>
           <i>{{switchValue == true ? '最高单价' : '固定单价'}}</i>
           <em v-show="!switchValue">当前市场最低价：</em>
-          <b v-show="!switchValue">{{priceNow}} CNY/{{adObj.currency && adObj.currency.toUpperCase()}}</b>
+          <b v-show="!switchValue">{{priceNow}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
         </p>
-        <input type="text" v-model="adObj.price"/>
+        <input type="text" v-model="adBuyObj.price"/>
         <span>CNY</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adObj.price" @click="adObj.price=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.price" @click="adBuyObj.price=''">
       </li>
       <li class="input-li">
         <p class="num-p clearfix">
           <i>购买数量</i>
-          <strong :class="{selected: adObj.vary == 2}" @click="showVary">不限量</strong>
+          <strong :class="{selected: adBuyObj.vary == 2}" @click="showVary">不限量</strong>
         </p>
-        <input type="text" :disabled="adObj.vary == 2" :class="{disabledInput: adObj.vary == 2}" v-model="adObj.tradeable"/>
+        <input type="text" :disabled="adBuyObj.vary == 2" :class="{disabledInput: adBuyObj.vary == 2}" v-model="adBuyObj.tradeable"/>
         <span>BTC</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adObj.tradeable" @click="adObj.tradeable=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.tradeable" @click="adBuyObj.tradeable=''">
       </li>
       <li class="input-li">
         <p>最小订单额<b class="limit">最小200</b></p>
-        <input type="text" v-model="adObj.min"/>
+        <input type="text" v-model="adBuyObj.min"/>
         <span>CNY</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adObj.min" @click="adObj.min=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.min" @click="adBuyObj.min=''">
       </li>
       <li class="input-li">
         <p>最大订单额<b class="limit">最大{{maxLimit}}</b></p>
-        <input type="text" v-model="adObj.max"/>
+        <input type="text" v-model="adBuyObj.max"/>
         <span>CNY</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adObj.max" @click="adObj.max=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.max" @click="adBuyObj.max=''">
       </li>
       <li>付款期限</li>
       <li>
         <SliderBar :selectSliderValue="limitValue"
-                   :choiceValue="adObj.limit">
+                   :choiceValue="adBuyObj.limit">
         </SliderBar>
       </li>
     </ol>
     <ol>
       <li class="message-li">
         <p>备注留言</p>
-        <textarea placeholder="请填写广告备注留言（选填）" maxlength="50" v-model.trim="adObj.info"></textarea>
-        <span>{{adObj.info.length}}/50</span>
+        <textarea placeholder="请填写广告备注留言（选填）" maxlength="50" v-model.trim="adBuyObj.info"></textarea>
+        <span>{{adBuyObj.info.length}}/50</span>
       </li>
       <li>
         <button class="release-btn" :class="{'release-active': canSubmit}" @click="canSubmit && toRelease()">发布购买广告</button>
         <span class="reset-info" @click="reset()">重置信息</span>
       </li>
-      <li class="hint-li">广告成交后，手续费为成交量的0.18%</li>
+      <li class="hint-li">广告成交后，手续费为成交量的0.05%</li>
     </ol>
     <BasePopup :show="adSuccLayer"
                class="ad-succ-layer">
@@ -104,7 +105,7 @@
     </BasePopup>
     <BasePopup :show="adErrLayer"
                class="ad-err-layer">
-     {{errText}}
+      <span v-clickoutside="closeLayer">{{errText}}</span>
     </BasePopup>
   </div>
 </template>
@@ -131,7 +132,7 @@
         premiumValue: 'premiumValue',
         limitValue: 'limitValue',
         selectNum: false, // 是否限量
-        adObj: {
+        adBuyObj: {
           "uid": '', // 用户id
           "currency": 'btc', // 电子货币
           "money": 'cny', // 法币
@@ -151,9 +152,10 @@
         priceNow: '',
         maxLimit: '',
         adSuccLayer: false,
-        succNum: 3,
+        succNum: 4,
         adErrLayer: false,
-        errText: ''
+        errText: '',
+        isDisabled: false
       }
     },
     components: {
@@ -165,7 +167,7 @@
     },
     computed: {
       canSubmit() {
-        if(this.adObj.payment == 0 || !this.adObj.price || (!this.adObj.tradeable && this.adObj.vary == 1)) {
+        if(this.adBuyObj.payment == 0 || !this.adBuyObj.price || (!this.adBuyObj.tradeable && this.adBuyObj.vary == 1)) {
           return false;
         }
         return true;
@@ -175,40 +177,39 @@
 
     },
     created() {
-      // 获取用户id
-      // this.adObj.uid = typeof this.$store.state.userInfo.uid  === 'string' ? this.$store.state.userInfo.uid : this.JsonBig.stringify(this.$store.state.userInfo.uid);
-      // console.log('userId', this.userId)
-      this.adObj.uid = this.$store.state.userInfo.uid
+      if (this.$store.state.editFlag == 2) {
+        this.isDisabled = true
+        this.adBuyObj = this.$store.state.editContent
+      }
+      if (this.$route.params.buyCon) {
+        this.adBuyObj = this.$route.params.buyCon;
+        return;
+      }
+      this.Bus.$emit('buyInfo', this.adBuyObj)
+    },
+    mounted() {
+      this.adBuyObj.uid = this.$store.state.userInfo.uid
       this.selectUserCoin()
       this.getPrice()
       this.initData()
-    },
-    mounted() {
       this.Bus.$on(this.selectCoin, data => { // 币种筛选
-        this.adObj.currency = data
+        this.adBuyObj.currency = data
         this.getPrice()
       }),
       this.Bus.$on('switchValueType', data => { // 是否溢价
         this.switchValue = data
-        this.adObj.mode = this.switchValue ? 2 : 1
-        console.log('222', this.switchValue)
+        this.adBuyObj.mode = this.switchValue ? 2 : 1
       });
       this.Bus.$on(this.premiumValue, data => { // 溢价滑动价格
-        this.adObj.premium = data
+        this.adBuyObj.premium = data
 
       });
       this.Bus.$on(this.limitValue, data => { // 期限滑动价格
-        this.adObj.limit = data
+        this.adBuyObj.limit = data
       });
       this.Bus.$on('choicePayment', data => { // 选择支付方式
-        console.log('支付', data)
-        this.adObj.payment = data
+        this.adBuyObj.payment = data
       })
-      if(this.$route.params.buyObj){
-        this.adObj = this.$route.params.buyObj;
-        return;
-      }
-      this.Bus.$emit('buyInfo', this.adObj)
     },
     destroyed() {
       this.Bus.$off(this.selectCoin);
@@ -221,7 +222,6 @@
       async selectUserCoin() { // 选择币种
         this.coinType = []
         await this.Proxy.getCoinData().then(res => {
-          console.log('购买币种', res)
           res.data.coins.forEach(v => {
             this.coinType.push(v.currency.toUpperCase())
             this.coinData.push(v.currency)
@@ -232,9 +232,8 @@
       },
       async getPrice() { // 当前价格
         await this.Proxy.getPrice().then(res => {
-          console.log('价格', res)
           this.selectPrice = res.data.prices.filter(item => {
-            return item.currency === this.adObj.currency;
+            return item.currency === this.adBuyObj.currency;
           })
         }).catch((msg)=>{
           alert(JSON.stringify(msg));
@@ -244,55 +243,61 @@
       },
       initData() { // 数据初始化
         this.maxLimit = this.$store.state.userInfo.btverify !== 2 ? '100,000' : '10,000,000'
-        this.adObj.max = this.$store.state.userInfo.btverify !== 2 ? '100000' : '10000000'
+        this.adBuyObj.max = this.$store.state.userInfo.btverify !== 2 ? '100000' : '10000000'
       },
       showVary() {
         this.selectNum = !this.selectNum
-        this.adObj.vary = this.selectNum == true ? 2 : 1
+        this.adBuyObj.vary = this.selectNum == true ? 2 : 1
       },
       toRelease() { // 发布广告
-        this.adObj.max = this.adObj.max * 1
-        this.adObj.min = this.adObj.min * 1
-        this.adObj.price = this.adObj.price * 1
-        this.adObj.tradeable = this.adObj.tradeable * 1
-        this.WsProxy.send('otc','new_sale', this.adObj).then((data)=>{
+        this.adBuyObj.max = this.adBuyObj.max * 1
+        this.adBuyObj.min = this.adBuyObj.min * 1
+        this.adBuyObj.price = this.adBuyObj.price * 1
+        this.adBuyObj.tradeable = this.adBuyObj.tradeable * 1
+        this.WsProxy.send('otc', this.$store.state.editFlag == 2 ? 'update_sale' : 'new_sale', this.adBuyObj).then((data)=>{
           console.log('发布广告', data)
           this.adSuccLayer = true
-          let timer = setTimeout(() => {
-            this.succNum--
-            if (this.succNum < 0) {
-              this.adSuccLayer = false
-              this.$router.push({name:'MyAd'})
-              clearTimeout(timer)
+          let _this = this
+          let timerFn = function () {
+            _this.succNum--
+            if (_this.succNum <= 0) {
+              clearInterval(timer)
+              window.location.hash = '/advertisement'
             }
-          }, 1000)
+          }
+          timerFn()
+          let timer = setInterval(timerFn, 1000)
         }).catch((msg)=>{
           console.log('发布广告失败', msg)
-          this.adErrLayer = true
-          switch (msg.reg) {
+          switch (msg.ret) {
             case 22:
               this.errText = '一个币种同时只能上架一条广告'
               break;
-            case 7:
-
+            case 21:
+              this.errText = '最多可同时发布3条广告'
               break;
-            case 9:
-              break
+            case 82:
+              this.errText = '创建钱包失败'
+              break;
           }
+          this.adErrLayer = true
         });
       },
       reset() {
-        this.adObj.currency = 'btc'
-        this.adObj.mode = 1
-        this.adObj.premium = 0
-        this.adObj.price = ''
-        this.adObj.min = '200'
-        this.adObj.max = this.$store.state.userInfo.btverify !== 2 ? '100000' : '10000000'
-        this.adObj.payment = 0
-        this.adObj.limit = 10
-        this.adObj.info = ''
-        this.adObj.vary = 1
-        this.adObj.tradeable = ''
+        this.adBuyObj.currency = 'btc'
+        this.adBuyObj.mode = 1
+        this.adBuyObj.premium = 0
+        this.adBuyObj.price = ''
+        this.adBuyObj.min = '200'
+        this.adBuyObj.max = this.$store.state.userInfo.btverify !== 2 ? '100000' : '10000000'
+        this.adBuyObj.payment = 0
+        this.adBuyObj.limit = 10
+        this.adBuyObj.info = ''
+        this.adBuyObj.vary = 1
+        this.adBuyObj.tradeable = ''
+      },
+      closeLayer() {
+        this.adErrLayer = false
       }
     }
   }
@@ -301,7 +306,4 @@
 <style scoped lang="stylus">
   @import "../../../stylus/base.styl"
   @import "../../advertisement/css/release.styl"
-  .ad-succ-layer
-    text-align center
-    line-height 94px
 </style>

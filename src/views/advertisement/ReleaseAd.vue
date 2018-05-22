@@ -6,8 +6,8 @@
     </p>
     <div class="inner release-ad-box clearfix">
       <ul>
-        <router-link :to="{name:'releaseBuy', params: {buyObj}}" tag="li" class="buy-ad" :class="{active: $route.path=='/advertisement/release/buy'}">购买广告</router-link>
-        <li class="sale-ad" :class="{active: $route.path=='/advertisement/release/sale'}" @click="saleAd">出售广告</li>
+        <li class="buy-ad" :class="{active: $route.path=='/advertisement/release/buy', 'is-disabled': !buyCanClick}" @click="buyCanClick && buyAd()">购买广告</li>
+        <li class="sale-ad" :class="{active: $route.path=='/advertisement/release/sale', 'is-disabled': !saleCanClick}" @click="saleCanClick && saleAd()">出售广告</li>
         <!--{{buyObj}}-->
         <!--{{saleObj}}-->
       </ul>
@@ -32,12 +32,12 @@
       return {
         buyObj: {
           "uid": '', // 用户id
-          "currency": '', // 电子货币
-          "money": '', // 法币
+          "currency": 'btc', // 电子货币
+          "money": 'cny', // 法币
           "mode": 1, // 出售类型: 1 固定; 2 溢价
           "premium": 0, // 溢价
           "price": '', // 固定价格/最低价格
-          "min": '', // 每笔交易的最小限额
+          "min": '200', // 每笔交易的最小限额
           "max": '', // 每笔交易的最大限额
           "payment": 0, // 1支付宝;2微信;4银行卡
           "type": 2, // 1 出售; 2 购买
@@ -48,12 +48,12 @@
         },
         saleObj: {
           "uid": '', // 用户id
-          "currency": '', // 电子货币
-          "money": '', // 法币
+          "currency": 'btc', // 电子货币
+          "money": 'cny', // 法币
           "mode": 1, // 出售类型: 1 固定; 2 溢价
           "premium": 0, // 溢价
           "price": '', // 固定价格/最低价格
-          "min": '', // 每笔交易的最小限额
+          "min": '200', // 每笔交易的最小限额
           "max": '', // 每笔交易的最大限额
           "payment": 0, // 1支付宝;2微信;4银行卡
           "type": 1, // 1 出售; 2 购买
@@ -64,14 +64,25 @@
           "length": 0
         },
         adRemindLayer: false,
-        adRemindContent: ''
+        adRemindContent: '',
       }
     },
     components: {
       BasePopup
     },
     computed: {
-
+      saleCanClick() {
+        if (this.$store.state.editFlag == 2) { // 购买过来
+          return false
+        }
+        return true
+      },
+      buyCanClick() {
+        if (this.$store.state.editFlag == 1) { // 出售过来
+          return false
+        }
+        return true
+      }
     },
     created() {
       this.Bus.$on('saleSlideLength', data => {
@@ -103,6 +114,9 @@
         //   return
         // }
         this.$router.push({name:'releaseSale', params: {'saleCon': this.saleObj}})
+      },
+      buyAd() {
+        this.$router.push({name:'releaseBuy', params: {'buyCon': this.buyObj}})
       },
       closeLayer() {
         this.adRemindLayer = false

@@ -34,8 +34,9 @@ const delFriend = "delFriend";
 const showTransform = "showTransform"; // 支付弹窗来源
 const evaluateOrder = "evaluateOrder"; // 订单评论结果
 
-const saveAdMessageBuy = "saveAdMessageBuy"; // 广告输入结果
-const saveAdMessageSale = "saveAdMessageSale"; // 广告输入结果
+const editBuyCon = "editBuyCon"; // 广告编辑购买内容
+const editSaleCon = "editSaleCon"; // 广告编辑出售内容
+const releaseAd = 'releaseAd'; // 点击发广告
 
 
 const updateUserInfo = "updateUserInfo";//更新个人信息
@@ -90,6 +91,10 @@ export {
   delFriend,
   evaluateOrder,
   showTransform,
+  editBuyCon,
+  editSaleCon,
+  releaseAd,
+
 
   /**
    * 个人中心

@@ -13,7 +13,7 @@
           <li class="tag ad" @mouseenter="adChild = true" @mouseleave="adChild = false" :class="{active: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
             <span>广告</span>
             <ol v-show="adChild">
-              <li @click="adChild = false"><router-link to="/advertisement/release" tag="li">发广告</router-link></li>
+              <li @click="releaseAd()"><router-link to="/advertisement/release" tag="li">发广告</router-link></li>
               <li @click="adChild = false"><router-link to="/advertisement" tag="li">我的广告</router-link></li>
             </ol>
           </li>
@@ -59,7 +59,7 @@
         isHover: false,
         showMenu: false,
         adChild: false,
-        newOrder: 0
+        newOrder: 0,
       }
     },
     components: {
@@ -100,6 +100,13 @@
       hideShowMenu() {
         if (!this.showMenu) return;
         this.showMenu = false
+      },
+      releaseAd() {
+        this.adChild = false
+        if (this.$store.state.editFlag == 2 || this.$store.state.editFlag == 1) {
+          window.location.reload()
+        }
+        this.$store.commit({type: 'releaseAd', data:{flag: 0}})
       }
     },
     computed: {

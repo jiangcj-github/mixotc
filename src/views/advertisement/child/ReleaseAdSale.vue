@@ -1,6 +1,5 @@
 <template>
   <div class="release-ad-info">
-    <!--{{$route.params.saleCon}}-->
     <ol>
       <li>
         <p>选择币种</p>
@@ -11,6 +10,7 @@
                    :selectValue="coinData"
                    :width=593
                    :top=39
+                   :showDisabled="isDisabled"
                    :widthSelect=618
                    :widthWrap=620>
         </ChoiceBox>
@@ -21,7 +21,7 @@
       </li>
       <li class="pay-li">
         <p>收款方式</p>
-        <PaymentSelect :paymentItem="adSaleObj.payment"></PaymentSelect>
+        <PaymentSelect :soreItem="adSaleObj.payment"></PaymentSelect>
       </li>
     </ol>
     <ol>
@@ -110,8 +110,16 @@
         <button class="release-btn" :class="{'release-active': canSubmit}" @click="canSubmit && toRelease()">发布购买广告</button>
         <span class="reset-info" @click="reset()">重置信息</span>
       </li>
-      <li class="hint-li">广告成交后，手续费为成交量的0.18%</li>
+      <li class="hint-li">广告成交后，手续费为成交量的0.05%</li>
     </ol>
+    <BasePopup :show="adSuccLayer"
+               class="ad-succ-layer">
+      <span>发布成功，<b>{{succNum}}</b>秒后跳转至"我的广告"页面</span>
+    </BasePopup>
+    <BasePopup :show="adErrLayer"
+               class="ad-err-layer">
+      <span v-clickoutside="closeLayer">{{errText}}</span>
+    </BasePopup>
   </div>
 </template>
 
@@ -120,6 +128,7 @@
   import SliderBar from '@/components/common/SliderBar' // 引入滑块
   import PaymentSelect from '@/views/advertisement/child/PaymentSelect' // 引入支付下拉
   import SwitchBlock from '@/views/advertisement/child/SwitchBlock' // 引入开关
+  import BasePopup from '@/components/common/BasePopup' // 引入弹窗
 
   export default {
     name: "release-ad-sale",
@@ -152,11 +161,12 @@
           "min": '200', // 每笔交易的最小限额
           "max": '', // 每笔交易的最大限额
           "payment": 0, // 1支付宝;2微信;4银行卡
-          "type": 2, // 1 出售; 2 购买
+          "type": 1, // 1 出售; 2 购买
           "limit": 10, // 付款期限, 分钟
           "info": '', // 描述信息
           "vary": 1, // 余额随动标志 1 不随动 2 随动
-          "tradeable": 0// 可交易量
+          "tradeable": 0,// 可交易量
+          "length": 0
         },
 
         selectPrice: [], // 根据币种选择返回情况
@@ -164,14 +174,20 @@
         maxLimit: '',
 
         balanceList: [],
-        userBalance: '' // 用户余额
+        userBalance: '', // 用户余额
+        isDisabled: false,
+        adSuccLayer: false,
+        succNum: 4,
+        adErrLayer: false,
+        errText: ''
       }
     },
     components: {
       ChoiceBox,
       SliderBar,
       PaymentSelect,
-      SwitchBlock
+      SwitchBlock,
+      BasePopup
     },
     computed: {
       canSubmit() {
@@ -182,13 +198,21 @@
       }
     },
     created() {
-      // 获取用户id
-      this.adSaleObj.uid = typeof this.$store.state.userInfo.uid  === 'string' ? this.$store.state.userInfo.uid : this.JsonBig.stringify(this.$store.state.userInfo.uid);
+      if (this.$store.state.editFlag == 1) {
+        this.isDisabled = true
+        this.adSaleObj = this.$store.state.editContent
+      }
+      if(this.$route.params.saleCon){
+        this.adSaleObj = this.$route.params.saleCon;
+        return;
+      }
+      this.Bus.$emit('saleInfo', this.adSaleObj)
+    },
+    mounted() {
+      this.adSaleObj.uid = this.$store.state.userInfo.uid
       this.selectUserCoin()
       this.getPrice()
       this.initData()
-    },
-    mounted() {
       this.Bus.$on(this.selectCoin, data => { // 币种筛选
         this.adSaleObj.currency = data
         this.getPrice()
@@ -206,18 +230,10 @@
       });
       this.Bus.$on(this.currencyValue, data => { // 出售滑动价格
         this.adSaleObj.tradeable = data
-        // console.log('出售', data, this.adSaleObj.tradeable)
       });
       this.Bus.$on('choicePayment', data => { // 选择支付方式
-        // console.log('支付', data)
         this.adSaleObj.payment = data
       })
-      if(this.$route.params.saleCon){
-        console.log('111', this.$route.params.saleCon)
-        this.adSaleObj = this.$route.params.saleCon;
-        return;
-      }
-      this.Bus.$emit('saleInfo', this.adSaleObj)
     },
     destroyed() {
       this.Bus.$off(this.selectCoin);
@@ -248,7 +264,6 @@
         this.coinMinText = `0${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
         this.coinMaxText = `${this.userBalance}${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
         this.Bus.$emit('saleSlideLength', this.userBalance)
-        //this.adSaleObj.tradeable = this.userBalance * 1
       },
       async getPrice() { // 当前价格
         await this.Proxy.getPrice().then(res => {
@@ -267,7 +282,6 @@
       },
       showVary() {
         this.selectNum = !this.selectNum
-        // this.adSaleObj.vary = this.selectNum == true ? 2 : 1
         if (this.selectNum == true) {
           this.adSaleObj.vary = 2
           this.disabledSlide = true
@@ -278,10 +292,36 @@
         }
       },
       toRelease() { // 发布广告
-        this.WsProxy.send('otc','new_sale', this.adSaleObj).then((data)=>{
+        this.adSaleObj.max = this.adSaleObj.max * 1
+        this.adSaleObj.min = this.adSaleObj.min * 1
+        this.adSaleObj.price = this.adSaleObj.price * 1
+        this.WsProxy.send('otc', this.$store.state.editFlag == 1 ? 'update_sale' : 'new_sale', this.adSaleObj).then((data)=>{
           console.log('发布广告', data)
+          this.adSuccLayer = true
+          let _this = this
+          let timerFn = function () {
+            _this.succNum--
+            if (_this.succNum <= 0) {
+              clearInterval(timer)
+              window.location.hash = '/advertisement'
+            }
+          }
+          timerFn()
+          let timer = setInterval(timerFn, 1000)
         }).catch((msg)=>{
           console.log('发布广告失败', msg)
+          switch (msg.ret) {
+            case 22:
+              this.errText = '一个币种同时只能上架一条广告'
+              break;
+            case 21:
+              this.errText = '最多可同时发布3条广告'
+              break;
+            case 82:
+              this.errText = '创建钱包失败'
+              break;
+          }
+          this.adErrLayer = true
         });
       },
       reset() {
@@ -296,6 +336,9 @@
         this.adSaleObj.info = ''
         this.adSaleObj.vary = 1
         this.adSaleObj.tradeable = this.userBalance * 1
+      },
+      closeLayer() {
+        this.adErrLayer = false
       }
     }
   }

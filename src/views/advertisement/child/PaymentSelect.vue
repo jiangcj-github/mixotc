@@ -12,7 +12,7 @@
 
 <script>
   export default {
-    props: ['paymentItem'],
+    props: ['soreItem'],
     data() {
       return {
         showPayment: false,
@@ -44,6 +44,21 @@
       }
     },
     watch: {
+
+    },
+    created() {
+      this.paymentItem(this.soreItem)
+    },
+    mounted() {
+
+    },
+    destroyed() {
+      this.Bus.$off('showPayment');
+    },
+    methods: {
+      choicePayment() {
+        this.Bus.$emit('choicePayment', this.paymentScore);
+      },
       paymentItem(data) {
         switch (data) {
           case 1:
@@ -67,25 +82,16 @@
             this.payment[1].state = true
             this.payment[2].state = true
             break;
-          default:
+          case 7:
             this.payment[0].state = true
             this.payment[1].state = true
             this.payment[2].state = true
+            break;
+          default:
+            this.payment[0].state = false
+            this.payment[1].state = false
+            this.payment[2].state = false
         }
-      }
-    },
-    created() {
-
-    },
-    mounted() {
-
-    },
-    destroyed() {
-      this.Bus.$off('showPayment');
-    },
-    methods: {
-      choicePayment() {
-        this.Bus.$emit('choicePayment', this.paymentScore);
       }
     }
   }

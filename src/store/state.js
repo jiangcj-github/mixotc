@@ -19,7 +19,8 @@ export default {
     system:[]
   },
   strangerInfo: {},
-
+  editContent: {},
+  editFlag: 0,
   /**
    * 审核申述客服部分
    */

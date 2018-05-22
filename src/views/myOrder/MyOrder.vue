@@ -420,20 +420,21 @@
       showOverTimer() {
         let timer
         this.contentList && this.contentList.forEach((v, i) => {
-          if (v.state === 1 && v.overtime >= 0) {
+          if (v.state == 1 && v.overtime >= 0) {
             v.overtime--
             timer = setTimeout(() => {
               this.showOverTimer()
             },1000);
-          } else {
-            console.log(222, this.contentList.length)
+          }
+          if (v.state == 1 && v.overtime < 0) {
+            // console.log(222, this.contentList.length)
             this.contentList = this.contentList.filter(item => item.state !== 1)
             this.conductNum = this.contentList.length
             this.completeNum ++;
             this.flagNow = false;
             clearTimeout(timer)
           }
-          console.log(1111, v.overtime)
+          // console.log(1111, v.overtime)
         });
       },
       initData() {
@@ -679,18 +680,7 @@
         this.money = title.flag === 6 ? (this.sortActive ? 2 : 1) : 0;
         this.sortFlag = title.flag;
         this.initData()
-      },
-      // 分页操作
-      // clickPre() {
-      //   this.page <= 0 ? this.page = 0 : this.page--;
-      //   this.initData()
-      //   console.log(111, this.page)
-      // },
-      // clickNext() {
-      //   this.page++;
-      //   this.initData()
-      //   console.log(222, this.page)
-      // }
+      }
     }
   }
 </script>
