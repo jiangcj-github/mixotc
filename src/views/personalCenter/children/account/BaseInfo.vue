@@ -16,9 +16,15 @@
           <p>
             <span>昵称</span>
             <i v-if="!isSetting">{{userInfo.name}}</i>
-            <i class="set" v-if="!isSetting" @click="isSetting=true">设置</i>
-            <input type="text" placeholder="输入昵称" v-if="isSetting" v-model="name" @blur="updateName">
-            <i class="confirm" v-if="isSetting" @click="updateName">确定</i>
+            <i class="set" v-if="!isSetting" @click="()=>{name=userInfo.name;isSetting=true}">设置</i>
+            <input type="text" placeholder="输入昵称" v-if="isSetting" v-model="name" ref="name" maxlength="20" v-clickoutside="()=>{isSetting = false}">
+            <b 
+              v-if="name && isSetting"
+              @click.stop="()=>{name = ''; $refs.name.focus()}"
+            >
+              <img src="/static/images/cancel_icon.png" alt="">
+            </b>
+            <i class="confirm" v-if="isSetting" @click.stop="updateName">确定</i>
           </p>
           <p>
             <span>{{userInfo.phone ? '手机号' : '邮箱'}}</span>
@@ -156,6 +162,10 @@ import AddressInfo from "../../components/account/AddressInfo";
         this.$store.dispatch({ type: 'moneyAddress', ws: this.WsProxy})
       },
       updateName() {
+        if(this.name.trim() === '') {
+          this.isSetting=false;
+          return;
+        };
         this.WsProxy.send('control', 'user_update', { name: this.name }).then(res =>{
           this.$store.commit({type: 'updateUserInfo', data:{name: this.name}})
         })
@@ -263,10 +273,16 @@ import AddressInfo from "../../components/account/AddressInfo";
           color $col333
           letter-spacing 0.29px
           p
+            position relative
             height 34px
             line-height 34px
             margin-bottom 10px
             letter-spacing 0.29px
+            b
+              position absolute
+              right 42px
+              bottom -1px
+              cursor pointer
             i.set, i.confirm
               color $col422
               cursor pointer
@@ -292,7 +308,7 @@ import AddressInfo from "../../components/account/AddressInfo";
             input
               width 170px
               height 30px
-              padding-left 10px
+              padding 0 20px 0 10px
               font-size $fz14
               background $col6FA
               border 1px solid $col1E1

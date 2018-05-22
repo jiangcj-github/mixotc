@@ -1,9 +1,27 @@
 <template>
 <div>
+  <div class="kong" v-if="authState === ''"></div>
   <div class="underway" v-if="authState === 1">
-
+    <p>认证中…</p>
   </div>
-  <div class="auth" v-if="authState === 3">
+  <div class="pass" v-if="authState === 2">
+    <p>已通过认证</p>
+  </div>
+  <div class="fail" v-if="authState === 3">
+    <dl>
+      <dt>认证失败</dt>
+      <dd>{{faileReason}}</dd>
+    </dl>
+  </div>
+  <div class="close-three" v-if="authState === 4">
+    <p>认证失败</p>
+    <p class="hint">恶意上传实名认证信息，关闭实名认证功能3天</p>
+  </div>
+  <div class="close-forever" v-if="authState === 5">
+    <p>认证失败</p>
+    <p class="hint">恶意上传实名认证信息3次，本账号永久关闭实名认证功能</p>
+  </div>
+  <div class="auth" v-if="authState === 3 || authState === 0">
     <div class="name clearfix">
       <div class="title">
         实名认证
@@ -13,12 +31,24 @@
         <ul class="clearfix">
           <li class="input">
             <p>姓氏</p>
-            <input type="text" placeholder="输入姓氏" v-model="data.surname" maxlength="20">
+            <input type="text" placeholder="输入姓氏" v-model="data.surname" maxlength="20" ref="surname">
+            <i 
+              v-if="data.surname"
+              @click="()=>{data.surname = ''; $refs.surname.focus()}"
+            >
+              <img src="/static/images/cancel_icon.png" alt="">
+            </i>
             <b class="hint" v-if="surnameTip">姓氏不能为空</b>
           </li>
           <li class="input">
             <p>名字</p>
-            <input type="text" placeholder="输入名字" v-model="data.name" maxlength="20">
+            <input type="text" placeholder="输入名字" v-model="data.name" maxlength="20" ref='name'>
+            <i 
+              v-if="data.name"
+              @click="()=>{data.name = ''; $refs.name.focus()}"
+            >
+              <img src="/static/images/cancel_icon.png" alt="">
+            </i>
             <b class="hint" v-if="nameTip">名字不能为空</b>
           </li>
         </ul>
@@ -42,13 +72,20 @@
         <p class="input">
           <input 
             type="text" 
+            ref='number'
             placeholder="请填写身份证号码/护照号码" 
             v-model="data.number"
             @input="dealCertificate"
             style="ime-mode:disabled"
-            maxlength="30"
+            maxlength="25"
             >
-          <b class="hint" v-if="numberTip">证件号码不能为空</b>
+            <i 
+              v-if="data.number"
+              @click="()=>{data.number = ''; $refs.number.focus()}"
+            >
+              <img src="/static/images/cancel_icon.png" alt="">
+            </i>
+          <b class="hint" v-if="numberTip">{{data.number.length === 0 ? '证件号不能为空' : '请输入正确的证件号'}}</b>
         </p>
       </div>
     </div>
@@ -64,7 +101,7 @@
             <img :src="`${HostUrl.http}image/${data.iconArr[item - 1]}`" alt="" class="up-img" v-if="data.iconArr[item - 1]">
             <p>{{copy[data.type][item - 1]}}</p>
           </li>
-          <li class="hint" v-if="photoTip">照片信息缺失</li>
+          <li class="hint" v-if="photoTip || sizeTip">{{`${photoTip ? '照片信息缺失' : ''} ${sizeTip ? '图片大小需小于10M' : ''}`}}</li>
         </ul>
         <p class="guarantee">
           <img src="/static/images/rules_checked.png" alt="" v-if="guarantee" @click="guarantee=false">
@@ -99,12 +136,14 @@ import { mapState } from 'vuex';
   export default {
     data() {
       return {
-        authState:0,
+        authState:'',
         curPhoto:0,
         surnameTip: false,
         nameTip: false,
         numberTip: false,
         photoTip: false,
+        sizeTip: false,
+        faileReason: '证件照片不符',
         defaultIdentity:['identity_0.png','identity_1.png','identity_2.png'],
         defaultPassport:['passport_0.png','passport_1.png','passport_2.png'],
         copy:[
@@ -126,8 +165,18 @@ import { mapState } from 'vuex';
         'userInfo'
       ])
     },
-    async mounted() {
+    async created() {
       await this.$store.dispatch({ type: 'updateUserInfo', ws: this.WsProxy});
+      if(this.userInfo.verify === 3) {
+        this.failReason = await this.WsProxy.send("control", "get_identity", {
+          type: 1
+        }).then(data=> {
+          this.faileReason = data.info
+          console.log(data)
+        }).catch(error=>{
+          console.log(error)
+        })
+      }
       this.authState = this.userInfo.verify
       if(this.$route.params.authData){
         this.data = this.$route.params.authData;
@@ -146,14 +195,22 @@ import { mapState } from 'vuex';
       async uploadImage(){
         let a = new FormData(),
             file = this.$refs.up_img.files[0];
+          if(!file) return;
+          if(file && file.size > 10485760) {
+            this.sizeTip = true;
+            this.photoTip = false;
+            return;
+          }
+          this.sizeTip = false;
         a.append("uploadimage", file);
         this.$refs.up_img.value = ''
+        let index = this.curPhoto;
         await fetch(`${this.HostUrl.http}image/`, {
           method: 'Post',
           body: a
         }).then(res => res.text())
         .then(res =>{
-          this.data.iconArr[this.curPhoto] = res;
+          this.data.iconArr[index] = res;
           this.data.iconArr = this.data.iconArr.concat([])
         })
         .catch(error=>{
@@ -161,13 +218,19 @@ import { mapState } from 'vuex';
         })
       },
       verify(){
-        let { number, name, surname} = this.data;
+        let { number, name, surname, type} = this.data;
         name.trim() === '' ?  this.nameTip = true : this.nameTip = false; 
-        number.trim().replace(/\s/g,"") === '' ?  this.numberTip = true : this.numberTip = false;;
+        number.trim().replace(/\s/g,"") === '' ?  this.numberTip = true : this.numberTip = false;
         surname.trim() === '' ?  this.surnameTip = true :  this.surnameTip = false;
-        console.log(this.data.iconArr.filter(item=>{return item === ''}))
+        if(type === 1) {
+          // 身份证正则
+          /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/.test(number.trim().replace(/\s/g,"")) ? this.numberTip = false : this.numberTip = true;
+        }else{
+          // 护照正则
+          /^[a-zA-Z0-9]{3,21}$/.test(number.trim().replace(/\s/g,"")) ? this.numberTip = false : this.numberTip = true;
+        }
         this.data.iconArr.filter(item=>{return item === ''}).length === 0 ? this.photoTip = false :  this.photoTip = true;
-
+        if(this.photoTip) this.sizeTip = false;
         return !(this.nameTip || this.surnameTip || this.numberTip || this.photoTip)
       },
       submit(){
@@ -192,9 +255,43 @@ import { mapState } from 'vuex';
 
 <style scoped lang="stylus">
 @import "../../../../stylus/base";
-.underway
+.kong
   width 1000px
   height 577px
+.underway, .pass, .close-three, .close-forever
+  width 1000px
+  height 307px
+  padding-top 270px
+  background url('/static/images/personal/verifying.png') no-repeat 430px 100px;
+  background-size 140px 140px
+  p
+    text-align center
+    letter-spacing 0.16px
+    margin-bottom 20px
+    &.hint
+      color $col94C
+.pass
+  background url('/static/images/personal/verifypass.png') no-repeat 430px 100px;
+  background-size 140px 140px
+.close-three, .close-forever
+  background url('/static/images/personal/verifyfail.png') no-repeat 430px 100px;
+  background-size 140px 140px
+.fail
+  position relative
+  width 1000px
+  height 140px
+  margin-bottom 10px
+  background url('/static/images/personal/verifyfail.png') no-repeat 255px 0 $col6FA;
+  background-size 140px 140px
+  dl
+    position absolute
+    left 435px
+    top 45px
+    letter-spacing 0.16px
+    dt
+      margin-bottom 10px
+    dd
+      color $col94C
 .auth
   box-sizing()
   width 1000px
@@ -206,24 +303,17 @@ import { mapState } from 'vuex';
       position absolute
       left 0px
       bottom -23px
-      padding-left 15px
       fz11()
       color $col94C
       letter-spacing 0.23px
-      &::before
-        position absolute
-        left 0 
-        top 2px
-        content ''
-        width 12px
-        height 12px
-        background url('/static/images/hint.png') no-repeat center center;
+    i
+      cursor pointer
   input
     box-sizing()
     placeholder()
     font-size $fz14
     background $col6FA
-    padding-right 10px
+    padding-right 25px
     border 1px solid $col1E1
     border-radius: 2px
     &:focus
@@ -252,6 +342,10 @@ import { mapState } from 'vuex';
           padding-top 50px
           p
             font-size $fz13
+          i
+            position absolute
+            right 50px
+            bottom 8px
           input
             width 206px
             height 40px
@@ -270,6 +364,12 @@ import { mapState } from 'vuex';
             font-size $fz13
             margin 0 36px 0 8.5px
             letter-spacing 0
+      .input
+        width 453px
+        i
+          position absolute
+          right 10px
+          bottom 8px
       input
         width 453px
         height 40px

@@ -27,6 +27,7 @@
       }
     },
     created() {
+      console.log(this.$route)
       this.$store.commit({type: 'changeLoginForm', data: false})
       // this.$store.commit({type: 'changeLogin', data: false});
       // console.log(this.token)
@@ -38,6 +39,11 @@
           if (data.body.ret !== 0) {
             this.$store.commit({ type: 'changeToken', data: '' })
             ws.reConnectFlag = false;
+            if (!this.authority(this.toPath)) {
+              !this.$store.state.token && this.$router.push({
+                name: "transaction"
+              });
+            }
             return;
           }
           ws.reConnectFlag = true;
@@ -163,14 +169,14 @@
         },
         immediate: true
       },
-      path:{
-        handler: function(curVal, oldVal) {
-          if (this.authority(curVal)) return;
-          !this.$store.state.token && this.$router.push({
-              name: "transaction"
-            });
-        }
-      }
+      // path:{
+      //   handler: function(curVal, oldVal) {
+      //     if (this.authority(curVal)) return;
+      //     !this.$store.state.token && this.$router.push({
+      //         name: "transaction"
+      //       });
+      //   }
+      // }
     }
   }
 </script>

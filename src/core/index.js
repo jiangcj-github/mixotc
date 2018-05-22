@@ -84,8 +84,9 @@ Vue.directive('focus', {
 
 let _beforeUnloadTime = 0,
   _gapTime = 0,
-  tabIndex = 0,
+  tabIndex = Number(localStorage["tabIndex"]) ? Number(localStorage["tabIndex"]) : 0,
   isNewTab = false,
+  toPath = '',
   isFireFox = navigator.userAgent.indexOf("Firefox") > -1; //是否是火狐浏览器
 window.onunload = function() {
   _gapTime = Date.now() - _beforeUnloadTime;
@@ -115,7 +116,7 @@ window.onbeforeunload = function() {
 if (!sessionStorage.length) {
   // 这个调用能触发目标事件，从而达到共享数据的目的
   // console.log(1, 'sessionStorage.length')
-  // isNewTab = true;
+  isNewTab = true;
   localStorage.setItem("getSessionStorage", Date.now());
 }
 
@@ -146,6 +147,24 @@ const RUN_APP = (App, config, plugin) => {
   config.LoopTaskConfig && Object.keys(config.LoopTaskConfig).length && Loop.install(Vue.prototype, config.LoopTaskConfig);
   config.PrototypeConfig && Prototype.install(Vue.prototype, config.PrototypeConfig);
 
+  console.log(isNewTab, tabIndex)
+  router.beforeEach((to, from, next) => {
+    Vue.prototype.toPath = to.path;
+    if ((isNewTab && tabIndex)) {
+      toPath = to.path;
+      next();
+      return;
+    } 
+    if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(to.path)) {
+      next();
+      return;
+    }
+    if (!store.state.token) {
+      next({ path: "/transaction" });
+      return;
+    }
+    next();
+  });
 
   let vm = new Vue({
     el: "#app",
@@ -155,10 +174,8 @@ const RUN_APP = (App, config, plugin) => {
     store,
     data() {
       return {
-        isReload: isNewTab
+        isReload: false 
       };
-    },
-    beforeCreate(){
     },
     methods: {
       reload() {
@@ -166,26 +183,19 @@ const RUN_APP = (App, config, plugin) => {
         this.isReload = true;
         this.$nextTick(() => {
           this.isReload = false;
+          console.log(this.$route.path)
+          if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(toPath)) {
+            return;
+          }
+          !this.$store.state.token &&
+            this.$router.push({
+              name: "transaction"
+            });
         });
       }
     }
   });
 
-  router.beforeEach((to, from, next) => {
-    if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(to.path)) {
-      next();
-      return;
-    }
-    if (!store.state.token) {
-      // if (to.path === "/homepage") {
-      //   next({ path: "/homepage" });
-      //   return;
-      // }
-      next({ path: "/transaction" });
-      return;
-    }
-    next();
-  });
 
 
   let changeTabIndex = function() {
@@ -218,7 +228,7 @@ const RUN_APP = (App, config, plugin) => {
       // 已存在的标签页会收到这个事件
       // 一个页面退出其他页面删除token
       store.commit({ type: "changeToken", data: "" });
-    } else if (event.key == "sessionStorage") {
+    } else if (event.key == "sessionStorage" && isNewTab) {
       // 新开启的标签页会收到这个事件
       console.log('新开启的标签页')
       let data = JsonBig.parse(event.newValue);
@@ -229,8 +239,17 @@ const RUN_APP = (App, config, plugin) => {
         sessionStorage[key] = data[key];
         store.replaceState(JsonBig.parse(sessionStorage[key]));
         store.state.isLogin = false;
+
+        // store.state.unreadNumber = 0;
+        // store.state.curChat = ""; //当前聊天
+        // store.state.systemMessage = 0; //未读系统消息
+        // store.state.chat = [];
+        store.state.showChat = false;
+        // store.state.messages = { system: [] };
+
         vm.reload();
       }
+      isNewTab = false;
     } else if (event.key == "getToken") {
       // 已存在的标签页会收到这个事件;
       // 一个页面登录，让其他页面获取token

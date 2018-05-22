@@ -3,7 +3,7 @@
     <BasePopup :show="true" :top="50" :width="566" :height="info.type === 4 ? 494 : 411">
       <slot>
         <div class="main">
-          <img src="/static/images/close_btn_tr2.png" alt="" @click="Bus.$emit('hideAddressPoup')">
+          <img class="close-btn" src="/static/images/close_btn_tr2.png" alt="" @click="Bus.$emit('hideAddressPoup')">
           <h3>{{title.h3}}</h3>
           <div class="mid" :style="{marginBottom: info.type === 4 ? '26px' : '36px'}">
             <div class="name">
@@ -11,7 +11,13 @@
               <input 
                 type="text" 
                 :placeholder="info.type === 4 ? '例：李某' : '名称'" 
-                v-model="info.name">
+                v-model="info.name"
+                maxlength="20"
+                ref="infoname"
+                >
+              <i class="cancel" v-if="info.name" @click="()=>{info.name = ''; $refs.infoname.focus()}">
+                <img src="/static/images/cancel_icon.png" alt="">
+              </i>
               <b class="hint" v-if="nameTip">姓名不能为空</b>
             </div>
             <div class="account">
@@ -29,9 +35,16 @@
                 type="text"
                 placeholder='名称'
                 v-model="info.number"
+                ref="account"
                 maxlength="20"
                 >
-              <b class="hint" v-if="accountTip">银行卡号为16位或19位</b>
+              <i v-if="info.type === 4 && info.number.length > 0" class="cancel" @click="()=>{info.number = ''; $refs.account.vaule = '', $refs.account.focus()}">
+                <img src="/static/images/cancel_icon.png" alt="">
+              </i>
+              <i v-if="info.type !== 4 && info.number.length > 0" class="cancel" @click="()=>{info.number = ''; $refs.account.focus()}">
+                <img src="/static/images/cancel_icon.png" alt="">
+              </i>
+              <b class="hint" v-if="accountTip">请输入正确的卡号</b>
               <div class="tip">*可查询的账号</div>
             </div>
           </div>
@@ -40,8 +53,13 @@
             <input 
               type="text" 
               placeholder='例：北京银行中关村支行'
-              maxlength="12" 
-              v-model="info.bank">
+              maxlength="20" 
+              v-model="info.bank"
+              ref="bank"
+            >
+            <i v-if="info.bank" class="cancel" @click="()=>{info.bank = ''; $refs.bank.focus()}">
+              <img src="/static/images/cancel_icon.png" alt="">
+            </i>
             <b class="hint" v-if="bankTip">开户行不能为空</b>
           </div>
           <div class="remark">
@@ -98,7 +116,7 @@
       verify() {
         let { number, name, bank, type} = this.info;
         name.trim() === '' ?  this.nameTip = true : this.nameTip = false; 
-        number.length !== 16 && number.length !== 19 && type === 4 ? this.accountTip = true : this.accountTip = false;
+        !(/(^([1-9]{1})(\d{15}|\d{18})$)/.test(number)) && type === 4 ? this.accountTip = true : this.accountTip = false;
         bank.trim() === '' && type === 4 ?  this.bankTip = true :  this.bankTip = false;
         return !(this.nameTip || this.accountTip || this.bankTip)
       },
@@ -137,21 +155,17 @@
       position absolute
       left 0px
       bottom -18px
-      padding-left 15px
       fz11()
       color $col94C
       letter-spacing 0.23px
-      &::before
-        position absolute
-        left 0 
-        top 2px
-        content ''
-        width 12px
-        height 12px
-        background url('/static/images/hint.png') no-repeat center center;
+    .cancel
+      position absolute
+      top 40px
+      right 10px
+      cursor pointer
     input
       padding-right 10px
-    img
+    .close-btn
       position absolute
       right 10.4px
       top 10.4px

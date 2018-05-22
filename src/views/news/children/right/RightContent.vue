@@ -22,7 +22,7 @@
                 
                 <img 
                   class="avator" 
-                  :src="infoDiction[item.from] && infoDiction[item.from].icon"
+                  :src="chat[index].service ? '/static/images/service_icon.png' : infoDiction[item.from] && infoDiction[item.from].icon"
                   alt="" 
                   @click="toHomepage(item.from)"
                 >
