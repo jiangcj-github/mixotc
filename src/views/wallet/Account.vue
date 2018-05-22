@@ -35,7 +35,7 @@
           </div>
           <div class="tb-tab">
             <ul>
-              <li :class="{active:tab===0}" @click="tab=0">mixOTC法币账户</li>
+              <li :class="{active:tab===0}" @click="tab=0">法币账户</li>
               <li :class="{active:tab===1}" @click="tab=1">币币账户</li>
             </ul>
             <button class="btn green" v-show="tab===1">币币交易</button>
@@ -44,21 +44,21 @@
           <div class="fb" v-show="tab===0">
             <!--表头-->
             <div class="thead">
-              <p class="coin sortable" @click="fbSort=++fbSort%2+10">币种
-                <i class="sort" :class="{up:fbSort===10,down:fbSort===11}"></i></p>
-              <p class="name sortable" @click="fbSort=++fbSort%2+12">全称
-                <i class="sort" :class="{up:fbSort===12,down:fbSort===13}"></i></p>
-              <p class="avail sortable" @click="fbSort=++fbSort%2">可用余额
-                <i class="sort" :class="{up:fbSort===0,down:fbSort===1}"></i></p>
-              <p class="frozen sortable" @click="fbSort=++fbSort%2+2">冻结中余额
-                <i class="sort" :class="{up:fbSort===2,down:fbSort===3}"></i></p>
-              <p class="confirm sortable" @click="fbSort=++fbSort%2+4">确认中余额
-                <i class="sort" :class="{up:fbSort===4,down:fbSort===5}"></i></p>
-              <p class="total sortable" @click="fbSort=++fbSort%2+6">总额
-                <i class="sort" :class="{up:fbSort===6,down:fbSort===7}"></i></p>
-              <p class="assess sortable" @click="fbSort=++fbSort%2+8">估值
-                <i class="sort" :class="{up:fbSort===8,down:fbSort===9}"></i></p>
-              <p class="opera">操作</p>
+              <p class="th coin sortable" @click="fbSort=++fbSort%2+10">币种
+                <i :class="{up:fbSort===10,down:fbSort===11}"></i></p>
+              <p class="th name sortable" @click="fbSort=++fbSort%2+12">全称
+                <i :class="{up:fbSort===12,down:fbSort===13}"></i></p>
+              <p class="th avail sortable" @click="fbSort=++fbSort%2">可用余额
+                <i :class="{up:fbSort===0,down:fbSort===1}"></i></p>
+              <p class="th frozen sortable" @click="fbSort=++fbSort%2+2">冻结中余额
+                <i :class="{up:fbSort===2,down:fbSort===3}"></i></p>
+              <p class="th confirm sortable" @click="fbSort=++fbSort%2+4">确认中余额
+                <i :class="{up:fbSort===4,down:fbSort===5}"></i></p>
+              <p class="th total sortable" @click="fbSort=++fbSort%2+6">总额
+                <i :class="{up:fbSort===6,down:fbSort===7}"></i></p>
+              <p class="th assess sortable" @click="fbSort=++fbSort%2+8">估值
+                <i :class="{up:fbSort===8,down:fbSort===9}"></i></p>
+              <p class="th opera">操作</p>
             </div>
             <!--fb返回结果-->
             <div v-if="fbErr===0">
@@ -72,9 +72,9 @@
                   <p class="total">{{e.total}}</p>
                   <p class="assess">{{e.assess}}</p>
                   <p class="opera op1">
-                    <button class="btn white">充币</button>
-                    <button class="btn white">提币</button>
-                    <button class="btn white">交易</button>
+                    <a class="btn white" href="/#/wallet/withdraw">充币</a>
+                    <a class="btn white" href="/#/wallet/charge">提币</a>
+                    <a class="btn white" href="/#/">交易</a>
                   </p>
                 </div>
                 <div class="li" v-else="">
@@ -86,8 +86,8 @@
                   <p class="total">{{e.total}}</p>
                   <p class="assess">{{e.assess}}</p>
                   <p class="opera op2">
-                    <button class="btn green">加入钱包</button>
-                    <a href="#">查看币种资料</a>
+                    <button class="btn green" @click="createWallet(i)">加入钱包</button>
+                    <a href="/#/coinData" target="_blank">查看币种资料</a>
                   </p>
                 </div>
               </div>
@@ -113,21 +113,21 @@
           <div class="bb" v-show="tab===1">
             <!--表头-->
             <div class="thead">
-              <p class="coin sortable" @click="bbSort=++bbSort%2+10">币种
-                <i class="sort" :class="{up:bbSort===10,down:bbSort===11}"></i></p>
-              <p class="name sortable" @click="bbSort=++bbSort%2+12">全称
-                <i class="sort" :class="{up:bbSort===12,down:bbSort===13}"></i></p>
-              <p class="avail sortable" @click="bbSort=++bbSort%2">可用余额
-                <i class="sort" :class="{up:bbSort===0,down:bbSort===1}"></i></p>
-              <p class="frozen sortable" @click="bbSort=++bbSort%2+2">冻结中余额
-                <i class="sort" :class="{up:bbSort===2,down:bbSort===3}"></i></p>
-              <p class="confirm sortable" @click="bbSort=++bbSort%2+4">确认中余额
-                <i class="sort" :class="{up:bbSort===4,down:bbSort===5}"></i></p>
-              <p class="total sortable" @click="bbSort=++bbSort%2+6">总额
-                <i class="sort" :class="{up:bbSort===6,down:bbSort===7}"></i></p>
-              <p class="assess sortable" @click="bbSort=++bbSort%2+8">估值
-                <i class="sort" :class="{up:bbSort===8,down:bbSort===9}"></i></p>
-              <p class="opera">操作</p>
+              <p class="th coin sortable" @click="bbSort=++bbSort%2+10">币种
+                <i :class="{up:bbSort===10,down:bbSort===11}"></i></p>
+              <p class="th name sortable" @click="bbSort=++bbSort%2+12">全称
+                <i :class="{up:bbSort===12,down:bbSort===13}"></i></p>
+              <p class="th avail sortable" @click="bbSort=++bbSort%2">可用余额
+                <i :class="{up:bbSort===0,down:bbSort===1}"></i></p>
+              <p class="th frozen sortable" @click="bbSort=++bbSort%2+2">冻结中余额
+                <i :class="{up:bbSort===2,down:bbSort===3}"></i></p>
+              <p class="th confirm sortable" @click="bbSort=++bbSort%2+4">确认中余额
+                <i class="{up:bbSort===4,down:bbSort===5}"></i></p>
+              <p class="th total sortable" @click="bbSort=++bbSort%2+6">总额
+                <i :class="{up:bbSort===6,down:bbSort===7}"></i></p>
+              <p class="th assess sortable" @click="bbSort=++bbSort%2+8">估值
+                <i :class="{up:bbSort===8,down:bbSort===9}"></i></p>
+              <p class="th opera">操作</p>
             </div>
             <!--bb返回结果-->
             <div v-if="bbErr===0">
@@ -160,6 +160,10 @@
             </div>
           </div>
         </div>
+        <!--提示框-->
+        <BasePopup :show="isShowAlert" :width="290" :height="90" v-on:click.native="isShowAlert=false">
+          <div class="alert">{{this.alert}}</div>
+        </BasePopup>
       </div>
     </div>
   </div>
@@ -168,8 +172,11 @@
   import Notify from "./layout/Notify";
   import LeftBar from "./layout/LeftBar";
   import Pagination from "../verify/component/Pagination";
+  import BasePopup from "@/components/common/BasePopup";
+  import timeout from "@/js/Timeout.js";
   export default {
     components: {
+      BasePopup,
       Pagination,
       Notify,
       LeftBar,
@@ -196,9 +203,27 @@
         bbPageSize: 20,
         bbTotal: 0,
         bbErr: 0,
+
+        alert:"222",
+        isShowAlert:false,
       }
     },
     methods:{
+      showAlert(txt){
+        this.alert=txt;
+        this.isShowAlert = true;
+        timeout(()=>{
+          this.isShowAlert=false;
+        },3000);
+      },
+      createWallet(i){
+        let curr=this.bb[i].abbr;
+        this.WsProxy.send("wallet", "new_wallet",{currency:curr}).then((data)=> {
+          this.$set(this.fb[i],"hasWallet",true);
+        }).catch(()=>{
+          this.showAlert("创建钱包失败");
+        });
+      },
       loadBalance(){
         this.parseBalance();
       },
@@ -212,6 +237,7 @@
       },
       loadFb(){
         this.fbErr=0;
+        this.fbTotal=60;
         this.parseFb([1,2,3,4,5]);
       },
       parseFb(data){
@@ -221,17 +247,18 @@
             icon: "http://192.168.113.26//image/B012F109359B4872",
             abbr: "BTC",
             name: "Bitcoin",
-            avail: 0.0001+"BTC",
-            frozen: 0.0001+"BTC",
-            confirm: 0.0001+"BTC",
-            total: 0.0003+"BTC",
-            assess: 12000+"CNY",
+            avail: 0.0001,
+            frozen: 0.0001,
+            confirm: 0.0001,
+            total: 0.0003,
+            assess: 12000+" CNY",
             hasWallet: Math.random()>0.5,
           });
         });
       },
       loadBb(){
         this.bbErr=0;
+        this.bbTotal=60;
         this.parseBb([1,2,3,4,5]);
       },
       parseBb(data){
@@ -241,11 +268,11 @@
             icon: "http://192.168.113.26//image/B012F109359B4872",
             abbr: "BTC",
             name: "Bitcoin",
-            avail: 0.0001+"BTC",
-            frozen: 0.0001+"BTC",
-            confirm: 0.0001+"BTC",
-            total: 0.0003+"BTC",
-            assess: 12000+"CNY",
+            avail: 0.0001,
+            frozen: 0.0001,
+            confirm: 0.0001,
+            total: 0.0003,
+            assess: 1+" BTC",
             hasWallet: Math.random()>0.5,
           });
         });
