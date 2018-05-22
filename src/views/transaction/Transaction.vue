@@ -3,7 +3,14 @@
     <div class="transacation inner" @click="showPopup=false">
       <!--头部搜索栏-->
       <div class="header">
-        <h2>{{filte.currency && "购买"+filte.currency.toUpperCase() || "购买BTC"}}</h2>
+        <!--<h2>{{filte.currency && "购买"+filte.currency.toUpperCase() || "购买BTC"}}</h2>-->
+        <h2 class="clearfix">
+          <img :src="filte.coinImg && `${HostUrl.http}image/${filte.coinImg}` || `${HostUrl.http}image/B012F109359B4872`" alt="">
+          <p>
+            <span>{{filte.currency && filte.currency.toUpperCase() || 'BTC'}}</span>
+            <b>{{filte.cName && filte.cName || 'Bitcoin'}}</b>
+          </p>
+        </h2>
         <div class="f1">
           <div class="search">
             <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">搜索{{srchUls[srchUlSel].title}}</span>
@@ -15,16 +22,16 @@
             <a href="javascript:void(0)" @click="searchStr"></a>
             <!--币种模糊搜索结果-->
             <ul v-show="srchTipShow" v-if="this.srchType===0">
-              <li v-for="e in coinTips" @click="search">
+              <li v-for="e in coinTips" @click="search(e)">
                 <div @mousedown="srchText=e.name">
-                  <img class="coin" :src="e.icon"/><span>{{e.name}}</span><span class="gray">{{e.cname}}</span>
+                  <img class="coin" :src="`${HostUrl.http}image/${e.icon}`"/><span>{{e.name}}</span><span class="gray">{{e.cname}}</span>
                 </div>
               </li>
               <li class="notip" v-show="coinTips.length<=0">暂无该币种信息</li>
             </ul>
             <!--商家模糊搜索结果-->
             <ul v-show="srchTipShow && userTips.length>0" v-else-if="this.srchType===1">
-              <li v-for="e in userTips" @click="search">
+              <li v-for="e in userTips" @click="search(e)">
                 <div @mousedown="srchText=e.name">
                   <span>{{e.name}}</span><span class="gray">{{e.account}}</span>
                 </div>
@@ -34,41 +41,13 @@
         </div>
         <ul class="top5">
           <li v-for="(item, index) in hotCoinList" @click="hotCoinSelect(item, index)" :class="{'top-active': index == hotNum}">
+            <img src="/static/images/hot_coin.png" alt="">
             <p>
-              <img :src="item.imgUrl" alt="">
+              <img :src="`${HostUrl.http}image/${item.imgUrl}`" alt="">
               <b>{{item.name}}</b>
             </p>
             <span>{{item.cName}}</span>
           </li>
-          <!--<li class="eth" @click="filte.currency='eth'">-->
-            <!--<p>-->
-              <!--<img src="" alt="">-->
-              <!--<b>ETH</b>-->
-            <!--</p>-->
-            <!--<span>Ethereum</span>-->
-          <!--</li>-->
-          <!--<li class="btc" @click="filte.currency='btc'">-->
-            <!--<p>-->
-              <!--<img src="" alt="">-->
-              <!--<b>BTC</b>-->
-            <!--</p>-->
-            <!--<span>Bitcoin</span>-->
-          <!--</li>-->
-          <!--<li class="eth" @click="filte.currency='eth'">-->
-            <!--<p>-->
-              <!--<img src="" alt="">-->
-              <!--<b>ETH</b>-->
-            <!--</p>-->
-            <!--<span>Ethereum</span>-->
-          <!--</li>-->
-          <!--<li class="xvg" @click="filte.currency='xvg'">-->
-            <!--<p>XVG</p>-->
-            <!--<span>Bitcoin</span>-->
-          <!--</li>-->
-          <!--<li class="usdt" @click="filte.currency='usdt'">-->
-            <!--<p>USDT</p>-->
-            <!--<span>Bitcoin</span>-->
-          <!--</li>-->
         </ul>
       </div>
       <!--筛选栏-->
@@ -200,10 +179,10 @@
         userTips: [],
 
         hotCoinList: [
-          {name: 'BTC', secName: 'btc', cName: 'Bitcoin', imgUrl: ''},
-          {name: 'ETH', secName: 'eth', cName: 'Ethereum', imgUrl: ''},
-          {name: 'BTC', secName: 'btc', cName: 'Bitcoin', imgUrl: ''},
-          {name: 'ETH', secName: 'eth', cName: 'Ethereum', imgUrl: ''},
+          {name: 'BTC', secName: 'btc', cName: 'Bitcoin', imgUrl: 'B012F109359B4872'},
+          {name: 'ETH', secName: 'eth', cName: 'Ethereum', imgUrl: '7F3F87A10AB4DA1F'},
+          {name: 'DASH', secName: 'dash', cName: 'Dash', imgUrl: 'C4E2A2F3837B7067'},
+          {name: 'LSK', secName: 'lsk', cName: 'Lisk', imgUrl: '5518F8A720045CA3'},
         ],
         hotNum: 0,
         tip: false,//限额错误文案提示
@@ -212,7 +191,9 @@
         filte:{
           type: 1,// 1出售，2购买
           payment: '',//1支付宝，2微信，4银行卡，可相加，共6种
-          currency: '',//字符串
+          currency: '',// 币种全称
+          coinImg: '', // 币种图片
+          cName: '',
           min: null,
           max: null,
           user: '',//用户名昵称模糊搜索
@@ -251,7 +232,7 @@
       this.Bus.$off("onPageChange");
     },
     methods: {
-      fuzzyInput() {
+      fuzzyInput() { // 搜索框数据
         if (this.srchText.length <= 0) {
           this.srchTipShow = false;
         } else {
@@ -260,10 +241,12 @@
         }
       },
       //列表项搜索
-      search() {
+      search(e) {
         if (this.srchType === 0) {
           this.filte.user = "";
           this.filte.currency = this.srchText || "btc";
+          this.filte.cName = e.cname;
+          this.filte.coinImg = e.icon;
         } else {
           this.filte.user = this.srchText;
         }
@@ -290,7 +273,7 @@
               this.coinTips.push({
                 name: v.currency || "-",
                 cname: v.cname || "-",
-                icon: this.HostUrl.http + "/image/" + v.icon,
+                icon: v.icon,
                 type: 0
               });
             });
@@ -419,10 +402,12 @@
         this.showPopup = true;
         timeout(()=>{
           this.showPopup=false;
-        },3000);npm
+        },3000);
       },
       hotCoinSelect(item, index) { // 热门选择
         this.filte.currency = item.secName
+        this.filte.cName = item.cName
+        this.filte.coinImg = item.imgUrl
         this.hotNum = index
       }
     },

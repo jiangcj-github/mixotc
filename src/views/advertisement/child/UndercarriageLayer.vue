@@ -16,7 +16,7 @@
 
   export default {
     name: "undercarriageLayer",
-    props: ['underShow'],
+    props: ['underShow', 'id'],
     data() {
       return {
         underLayer: this.underShow,
@@ -38,7 +38,15 @@
         this.$emit('offUnder', 'false')
       },
       sureUnder() {
-
+        this.WsProxy.send('otc','handle_sale',{
+          "id": this.id,
+          "online": 2 //1在售 2下架
+        }).then((data)=>{
+          console.log('下架', data)
+          window.location.reload()
+        }).catch((msg)=>{
+          console.log(msg);
+        });
       }
     }
   }

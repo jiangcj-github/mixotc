@@ -21,7 +21,9 @@
         <!-- 表格表头 -->
         <thead>
           <tr>
-            <th v-for="(title, index) in titleList" :class="{sort: title.canSort}">
+            <th v-for="(title, index) in titleList"
+                :class="{sort: title.canSort, 'sort-up': clickUp === index && sortActive, 'sort-down': clickUp === index && !sortActive}"
+                @click="title.canSort && toSort(title, index)">
               <p>
                 <span>
                   {{title.content}}
@@ -41,64 +43,76 @@
                 v-if="title.currencyShow"
                 :classify="currencyType"
                 title="币种"
-                :emitValue="currencyValue">
+                :emitValue="currencyValue"
+                :selectValue="currencyValueData">
               </ChoiceBox>
               <ChoiceBox
                 v-if="title.statusShow"
                 title="模式"
                 :classify="statusType"
-                :emitValue="allStatusValue">
+                :emitValue="statusValue"
+                :selectValue="statusValueData">
               </ChoiceBox>
               <ChoiceBox
                 v-if="title.payShow"
                 title="支付方式"
                 :classify="payType"
-                :emitValue="payValue">
+                :emitValue="payValue"
+                :selectValue="payValueData">
               </ChoiceBox>
             </th>
           </tr>
         </thead>
         <!--表格内容-->
         <tbody>
-          <tr>
+          <tr v-for="(content, index) in saleList">
             <td>
-              <p class="frist-p">2016/3/09</p>
-              <p>13:43</p>
+              <p class="frist-p">{{content.update.toDate('yyyy/MM/dd')}}</p>
+              <p>{{content.update.toDate('HH:ss')}}</p>
             </td>
-            <td>购买</td>
-            <td>BTC</td>
-            <td>固定</td>
+            <td :class="content.type === 1 ? 'text-r' : 'text-g'">{{content.type === 1 ? '出售' : '购买'}}</td>
+            <td>{{content.currency && content.currency.toUpperCase()}}</td>
+            <td>{{content.mode === 1 ? '固定' : '溢价'}}</td>
             <td class="offer-td">
-              <p class="frist-p">90%</p>
-              <p>1234.00</p>
+              <p class="frist-p" v-show="content.premium">{{content.premium}}</p>
+              <p>{{content.price}}</p>
             </td>
-            <td>200.00~10000.00</td>
-            <td>支付方式</td>
-            <td>30min</td>
-            <td>1.123456</td>
-            <td>1.123456</td>
+            <td>{{content.min}}~{{content.max}}</td>
+            <td>
+              <img src="/static/images/OTC_zhifubao.png" alt="" v-if="[1, 3, 5, 7].includes(content.payments)">
+              <img src="/static/images/OTC_wechat.png" alt="" v-if="[2, 3, 6, 7].includes(content.payments)">
+              <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(content.payments)">
+            </td>
+            <td>{{content.limit}}</td>
+            <td>{{content.tradeable}}</td>
+            <td>{{content.volume}}</td>
             <td>1.123456</td>
             <td class="operation-td">
-              <p class="frist-p"><router-link to="/advertisement/release">编辑</router-link></p>
-              <p @click="contentTabIndex === 1 && openUnder()">{{contentTabIndex === 1 ? '下架': '上架'}}</p>
+              <p class="frist-p" @click="edit(content)">编辑</p>
+              <p @click="contentTabIndex === 1 ? openUnder($event, content) : grounding(content)">{{contentTabIndex === 1 ? '下架': '上架'}}</p>
             </td>
           </tr>
         </tbody>
       </table>
     </div>
-    <!-- 订单无内容 -->
-    <!--<MyOrderNothing v-if="!contentList.length"></MyOrderNothing>-->
-    <!-- 分页 -->
-    <Pagination  v-if="contentList && contentList.length"
+     <!--订单无内容-->
+    <AdNothing v-if="!saleList.length"></AdNothing>
+     <!--分页-->
+    <Pagination  v-if="saleList.length"
                  :total="pageTotal"
-                 :pageSize="15"
+                 :pageSize="20"
                  :curPage="curPage">
     </Pagination >
     <!-- 确定下架弹窗 -->
     <UndercarriageLayer :underShow="showUnder"
+                        :id='layerAdId'
                         @offUnder="openUnder">
     </UndercarriageLayer>
-
+    <!-- 弹窗 -->
+    <BasePopup :show="adremindLayer"
+               class="ad-remind-layer">
+      <span v-clickoutside="closeLayer">{{errText}}</span>
+    </BasePopup>
   </div>
 </template>
 
@@ -106,7 +120,7 @@
   import ChoiceBox from '@/components/common/ChoiceBox' // 引入下拉选择框
   import DateInterval from '@/components/common/DateInterval' // 引入日历
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
-  import MyOrderNothing from '@/views/myOrder/MyOrderNothing' // 引入无订单页面
+  import AdNothing from '@/views/advertisement/child/AdNothing' // 引入无广告页面
   import Pagination from "@/views/verify/component/Pagination" // 引入分页
   import UndercarriageLayer from "@/views/advertisement/child/UndercarriageLayer" // 引入分页
 
@@ -117,14 +131,12 @@
       Pagination,
       DateInterval,
       BasePopup,
-      MyOrderNothing,
+      AdNothing,
       UndercarriageLayer
     },
     data() {
       return {
-        sortFlag: "", // 控制排序箭头每次朝上
-
-        titleList:[
+        titleList:[ // 表格表头内容
           {content: '更新时间', sortTab: true, canSort: true, flag: 0},
           {adTypeShow: true},
           {currencyShow: true},
@@ -137,7 +149,8 @@
           {content: '已成交数量', sortTab: true, canSort: true, flag: 9},
           {content: '平均成交价', mark: '(CNY)', sortTab: true, canSort: true, flag: 10},
           {content: '操作'}
-        ], // 表格表头内容
+        ],
+        saleList: [], // 表格内容
 
         contentTabIndex: 1, // 控制tab切换
 
@@ -148,102 +161,171 @@
 
         adType: ['全部类型', '购买', '出售'], // 类型下拉显示
         adTypeValue: 'adTypeValue', // 传递给子组件
-        adTypeValueData: [3, 1, 2],
+        adTypeValueData: [0, 2, 1],
+        saleType: 0, // 选择购买类型
 
         currencyValue: 'currencyValue', // 传递给子组件
-        currencyType:['全部币种', 'BTC', 'ETH'],// 币种下拉显示
+        currencyType: ['全部币种', 'BTC', 'ETH'],// 币种下拉显示
+        currencyValueData: ['', 'btc', 'eth'],
+        saleCoin: '',
 
-        allStatusValue: 'allStatusValue',
+        statusValue: 'statusValue',
         statusType: ['全部模式', '固定', '溢价'],
+        statusValueData: [0, 1, 2],
+        saleStatus: 0,
 
         payValue: '',
-        payType: ['全部支付方式', '支付宝', '微信', '银行卡'],
-
-        contentList: [], // 表格内容数组
-        dateSort: 0,// 时间排序 1降序 2升序
-        price: 0,// 单价排序 1降序 2升序
-        amount: 0,// 电子币数量排序 1降序 2升序
-        money: 0,// 法币金额排序 1降序 2升序
+        payType: ['全部方式', '支付宝', '微信', '银行卡'],
+        payValueData: [7, 1, 2, 4],
+        salePay: 0,
 
         conductNum: 0, // 进行数量
         completeNum: 0, // 完成数量
 
-        // pageTotal: 0, // 分页总数
-        // curPage: 1, // 当前页
+        showUnder: false, // 下架弹窗
+        layerAdId: '',
+        myObj: {}, // 编辑内容
 
-        showUnder: false // 下架弹窗
+        clickUp: 20,
+        sortActive: false, // 控制箭头开始无active
+        sortFlag: 0, // 控制排序箭头每次朝上
 
+        dateSort: 0,// 时间排序 1降序 2升序
+        limitSort: 0,// 单价排序 1降序 2升序
+        priceSort: 0,
+        volumeSort: 0,//  1降序 2升序
+        tradeableSort: 0,//  1降序 2升序
+
+        pageTotal: 0, // 分页总数
+        curPage: 1, // 当前页
+
+        adremindLayer: false,
+        errText: ''
       }
     },
     created() {
-
+      this.initData()
+      this.getInitNum()
     },
     mounted() {
       // 监听下拉框值，将值传给子组件
-      this.Bus.$on(this.orderTypeValue, (data) => { // 类型筛选
-
+      this.Bus.$on(this.adTypeValue, (data) => { // 类型筛选
+        this.saleType = data
+        console.log('222', this.saleType)
+        this.initData()
       });
       this.Bus.$on(this.currencyValue, (data) => { // 币种筛选
-
+        this.saleCoin = data
+        this.initData()
       });
-      this.Bus.$on(this.allStatusValue, (data) => { // 类型筛选
-
+      this.Bus.$on(this.statusValue, (data) => { // 类型筛选
+        this.saleStatus = data
+        this.initData()
       });
-      this.Bus.$on(this.payValue, (data) => { // 币种筛选
-
+      this.Bus.$on(this.payValue, (data) => { // 支付筛选
+        this.salePay = data
+        this.initData()
       });
 
       // 时间框值
       this.Bus.$on('onDiChange', () => {
         this.startValueDate = this.$refs.di.date1 ? Math.floor(new Date(this.$refs.di.date1).getTime() / 1000) : null;
         this.endValueDate = this.$refs.di.date2 ? Math.floor(new Date(this.$refs.di.date2).getTime() / 1000) : null;
-        // if (this.startValueDate && this.endValueDate) {
-        //   this.initData()
-        // }
+        if (this.startValueDate && this.endValueDate) {
+          this.initData()
+        }
       });
-
-      // this.Bus.$on('onPageChange', data => {
-      //   this.curPage = data;
-      // });
+      this.Bus.$on('onPageChange', data => {
+        this.curPage = data;
+        this.initData()
+      });
     },
     destroyed() {
-      this.Bus.$off(this.orderTypeValue);
+      this.Bus.$off(this.adTypeValue);
       this.Bus.$off(this.currencyValue);
       this.Bus.$off(this.allStatusValue);
       this.Bus.$off('onDiChange');
-      // this.Bus.$off(this.searchValue);
-      // this.Bus.$off('changeInputContent');
-      // this.Bus.$off('onPageChange');
+      this.Bus.$off('onPageChange');
     },
     methods: {
-      // getInitNum() {
-      //   // 获取进行中和已完成数量
-      //   this.WsProxy.send('otc','get_orders_num',{
-      //     type: 1 // 1: 进行中, 2: 已完成
-      //   }).then((data)=>{
-      //     console.log('num', data)
-      //     this.conductNum = data.amount ? data.amount : 0
-      //   }).catch((msg)=>{
-      //     console.log(msg);
-      //   });
-      //   this.WsProxy.send('otc','get_orders_num',{
-      //     type: 2 // 1: 进行中, 2: 已完成
-      //   }).then((data)=>{
-      //     console.log('num', data)
-      //     this.completeNum = data.amount ? data.amount : 0
-      //   }).catch((msg)=>{
-      //     console.log(msg);
-      //   });
-      // },
+      getInitNum() {
+        // 获取进行中和已完成数量
+        this.WsProxy.send('otc','get_sales_num',{
+          "id": this.$store.state.userInfo.uid,
+          "state": 1 // 1在架 2下架
+        }).then((data)=>{
+          this.conductNum = data.amount ? data.amount : 0
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+        this.WsProxy.send('otc','get_sales_num',{
+          "id": this.$store.state.userInfo.uid,
+          "state": 2 // 1在架 2下架
+        }).then((data)=>{
+          this.completeNum = data.amount ? data.amount : 0
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
+      initData() {
+        this.WsProxy.send('otc','my_sales',{
+          "state": this.contentTabIndex, // 1在架 2下架
+          "type":  this.saleType, // 1 出售 2 购买
+          "currency": this.saleCoin,
+          "price": 0, // 1降序 2升序
+          "start": this.startValueDate,
+          "end": this.endValueDate,
+          "payment": this.salePay, // 1支付宝 2微信 4银行卡
+          "date": this.dateSort, // 1降序 2升序
+          "mode": this.saleStatus, // 是否可溢价 1固定价格 2溢价
+          "volume": this.volumeSort, // 交易量排序 1降序 2升序
+          "tradeable": this.tradeableSort, // 可交易量排序 1降序 2升序
+          "limit": this.limitSort, // 付款期限排序 1降序 2升序
+          "origin": this.curPage - 1, // 分页
+          "count": 20
+        }).then((data)=>{
+          console.log('广告列表', data)
+          this.saleList = data.sales ? data.sales : []
+          this.pageTotal = data.amount
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
       selectStatus(type) { // Tab切换
         this.contentTabIndex = type;
+        this.initData()
       },
-      openUnder(st) {
+      openUnder(st, content) { // 下架
         if (st === 'false') {
           this.showUnder = false
         } else {
           this.showUnder = true
+          this.layerAdId = content.id
         }
+      },
+      grounding(content) { // 上架
+        this.WsProxy.send('otc','handle_sale',{
+          "id": content.id,
+          "online": 1 //1在售 2下架
+        }).then((data)=>{
+          console.log('上架', data)
+          window.location.reload()
+          // this.router.go(0)
+        }).catch((msg)=>{
+          console.log(msg);
+          switch (msg.ret) {
+            case 22:
+              this.errText = '一个币种同时只能上架一条广告'
+              break;
+            case 21:
+              this.errText = '最多可同时发布3条广告'
+              break;
+            case 82:
+              this.errText = '创建钱包失败'
+              break;
+          }
+          this.adremindLayer = true
+        });
       },
       selectTime(index) { // 时间切换
         this.num = index;
@@ -259,6 +341,45 @@
           this.$refs.di.date1 = new Date(date2.getTime() - (24 * 60 * 60 * 7 * 1000))
         }
       },
+      edit(content) { // 编辑
+        this.myObj= {
+          "uid": '', // 用户id
+          "currency": content.currency, // 电子货币
+          "money": 'cny', // 法币
+          "mode": content.mode, // 出售类型: 1 固定; 2 溢价
+          "premium": content.premium, // 溢价
+          "price": content.price, // 固定价格/最低价格
+          "min": content.min, // 每笔交易的最小限额
+          "max": content.max, // 每笔交易的最大限额
+          "payment": content.payments, // 1支付宝;2微信;4银行卡
+          "type": 2, // 1 出售; 2 购买
+          "limit": content.limit, // 付款期限, 分钟
+          "info": content.info, // 描述信息
+          "vary": content.vary, // 余额随动标志 1 不随动 2 随动
+          "tradeable": content.tradeable// 可交易量
+        }
+        if (content.type === 1) {
+          this.$router.push({name:'releaseSale'})
+          this.$store.commit({type: 'editSaleCon', data:{content: this.myObj, flag: 1 }})
+        } else {
+          this.$router.push({name:'releaseBuy'})
+          this.$store.commit({type: 'editBuyCon', data:{content: this.myObj, flag: 2 }})
+        }
+      },
+      toSort(title, index) { // 排序操作
+        this.clickUp = index;
+        this.sortActive = this.sortFlag === index ? !this.sortActive : true;
+        this.dateSort = title.flag === 0 ? (this.sortActive ?  2 : 1) : 0;
+        this.limitSort = title.flag === 7 ? (this.sortActive ? 2 : 1) : 0;
+        this.tradeableSort = title.flag === 8 ? (this.sortActive ? 2 : 1) : 0;
+        this.volumeSort = title.flag === 9 ? (this.sortActive ? 2 : 1) : 0;
+        //this.money = title.flag === 10 ? (this.sortActive ? 2 : 1) : 0;
+        this.sortFlag = title.flag;
+        this.initData()
+      },
+      closeLayer() {
+        this.adremindLayer = false
+      }
     }
   }
 </script>
@@ -369,6 +490,10 @@
         tbody
           font-size 13px
           letter-spacing 0.27px
+          .text-r
+            color #ff794c
+          .text-g
+            color #57a100
           tr:last-child
             border-bottom none
           td
@@ -385,9 +510,14 @@
           .operation-td
             p:first-child
               cursor pointer
-              a
-                color #FFA21C
+              color #FFA21C
+
             p:last-child
               cursor pointer
+
+  .ad-remind-layer
+    text-align center
+    line-height 94px
+    cursor pointer
 
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <div class="choice-box" v-clickoutside="closeSelect" :style="{width: `${widthWrap}px`}">
+  <div class="choice-box" v-clickoutside="closeSelect" :style="{width: `${widthWrap}px`}" :class="{'is-disabled': showDisabled}">
     <b @click="showChoice()" :class="`${choiceClass}`" :style="{width: `${width}px`}">{{items}}</b>
     <ul v-show="show" :style="{width: `${widthSelect}px`, top: `${top}px`}">
       <li v-for="(content, index) in classify" @click="changeSelect(content, index)" :key="index" :class="{active:(index === selectNum && isActive)}">{{content}}</li>
@@ -16,6 +16,10 @@
         type: Boolean,
         default: true
       }, // 是否替换显示内容
+      showDisabled: {
+        type: Boolean,
+        default: false
+      },
       choiceClass: String,
       width: {
         type: Number,
@@ -156,6 +160,14 @@
         background #FFF3EB
       .active
         background #FFF3EB
+
+
+  .is-disabled
+    .adB
+      background #999
+      cursor not-allowed
+    ul
+      display none
 
 
 

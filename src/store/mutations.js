@@ -23,8 +23,20 @@ export default {
     // 判断支付来源
     state.transformInfo = data;
   },
-
-
+  [types.editBuyCon](state, { data }) {
+    // 编辑模块
+    state.editContent = data.content;
+    state.editFlag = data.flag
+  },
+[types.editSaleCon](state, { data }) {
+  // 编辑模块
+  state.editContent = data.content;
+  state.editFlag = data.flag
+},
+  [types.releaseAd](state, { data }) {
+    // 编辑模块
+    state.editFlag = data.flag
+  },
   // 消息部分
   [types.changeChatBox](state, { data }) {
     // 控制右下方消息框显示
