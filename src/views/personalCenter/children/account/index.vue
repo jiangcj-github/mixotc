@@ -3,9 +3,9 @@
     <div class="tab">
       <ul class="clearfix">
         <!-- <li :class="{active: !type || type === 'base'}"> -->
-          <router-link :to="{name:'personal-baseInfo', params: {num: 123}}" tag="li" active-class="active">基本设置</router-link>
-          <router-link :to="{name:'personal-auth', params: {authData}}" tag="li" active-class="active">实名认证</router-link>
-          <router-link :to="{name:'personal-apply',  params: {num: 123}}" tag="li" active-class="active">大额交易申请</router-link>
+          <router-link :to="{name:'personal-baseInfo'}" tag="li" active-class="active">基本设置</router-link>
+          <router-link :to="{name:'personal-auth'}" tag="li" active-class="active">实名认证</router-link>
+          <router-link :to="{name:'personal-apply'}" tag="li" active-class="active">大额交易申请</router-link>
           <!-- 基本设置 -->
         <!-- </li> -->
         <!-- <li :class="{active: type === 'auth'}">实名认证</li>
@@ -22,19 +22,7 @@
   export default {
     data(){
       return {
-        authData:{
-          surname: '',
-          name: '',
-          type: 1,
-          number: '',
-          iconArr: ['', '', '']
-        }
       }
-    },
-    created(){
-       this.Bus.$on('upLoadAuth', (data)=>{
-        this.authData = data
-      })
     },
     components: {},
     computed: {}

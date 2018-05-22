@@ -178,11 +178,6 @@ import { mapState } from 'vuex';
         })
       }
       this.authState = this.userInfo.verify
-      if(this.$route.params.authData){
-        this.data = this.$route.params.authData;
-        return;
-      }
-      this.Bus.$emit('upLoadAuth', this.data)
     },
     methods: {
       dealCertificate() {
