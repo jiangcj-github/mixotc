@@ -18,7 +18,7 @@
     </div>
     <BasePopup :show="adRemindLayer"
                class="ad-remind-layer">
-      <router-link to="/personal/account/baseInfo" v-clickoutside="closeLayer">{{adRemindContent}}</router-link>
+      <router-link to="/personal/account/baseInfo" v-clickoutside="closeLayer">请先设置支付密码</router-link>
     </BasePopup>
   </div>
 </template>
@@ -64,7 +64,6 @@
           "length": 0
         },
         adRemindLayer: false,
-        adRemindContent: '',
       }
     },
     components: {
@@ -90,13 +89,12 @@
         this.saleObj.tradeable = this.saleObj.tradeable ? this.saleObj.tradeable : data * 1
       }),
       this.Bus.$on('buyInfo', data => {
-        console.log('购买父组件接收', data)
         this.buyObj = data
       }),
       this.Bus.$on('saleInfo', data => {
-        console.log('出售父组件接收', data)
         this.saleObj = data
       })
+      this.initPayment()
     },
     mounted() {
 
@@ -108,11 +106,10 @@
     },
     methods: {
       saleAd() {
-        // if (this.$store.state.userInfo.is_new === 1) { // 提醒设置支付密码
-        //   this.adRemindLayer = true
-        //   this.adRemindContent = '请先设置支付密码'
-        //   return
-        // }
+        if (this.$store.state.userInfo.is_new === 1) { // 提醒设置支付密码
+          this.adRemindLayer = true
+          return
+        }
         this.$router.push({name:'releaseSale', params: {'saleCon': this.saleObj}})
       },
       buyAd() {
@@ -120,7 +117,33 @@
       },
       closeLayer() {
         this.adRemindLayer = false
-      }
+      },
+      async initPayment() {
+        await this.WsProxy.send('wallet', 'my_accounts', {
+          uid: this.$store.state.userInfo.uid,
+          origin: 0
+        }).then((data)=>{
+          let paymentList = [], filterList = [], sum = 0
+          data.accounts.forEach(v => { // 取得原始数组
+            paymentList.push(v.type)
+          })
+          paymentList.forEach(v => { // 数组去重
+            if (filterList.indexOf(v) < 0) {
+              filterList.push(v)
+            }
+          })
+          filterList.forEach(v => { // 数组求和
+            sum = sum + v;
+            return sum
+          });
+          this.buyObj.payment = sum
+          this.saleObj.payment = sum
+          this.Bus.$emit('paymentNum', sum)
+          console.log('我的支付', paymentList, filterList, sum, this.buyObj.payment)
+        }).catch((msg)=>{
+          console.log(msg)
+        });
+      },
     }
   }
 </script>

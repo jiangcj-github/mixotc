@@ -86,7 +86,7 @@
             <td>{{content.limit}}</td>
             <td>{{content.tradeable}}</td>
             <td>{{content.volume}}</td>
-            <td>1.123456</td>
+            <td>{{content.price_avg}}</td>
             <td class="operation-td">
               <p class="frist-p" @click="edit(content)">编辑</p>
               <p @click="contentTabIndex === 1 ? openUnder($event, content) : grounding(content)">{{contentTabIndex === 1 ? '下架': '上架'}}</p>
@@ -165,8 +165,8 @@
         saleType: 0, // 选择购买类型
 
         currencyValue: 'currencyValue', // 传递给子组件
-        currencyType: ['全部币种', 'BTC', 'ETH'],// 币种下拉显示
-        currencyValueData: ['', 'btc', 'eth'],
+        currencyType: ['全部币种'],// 币种下拉显示
+        currencyValueData: [''],
         saleCoin: '',
 
         statusValue: 'statusValue',
@@ -190,11 +190,11 @@
         sortActive: false, // 控制箭头开始无active
         sortFlag: 0, // 控制排序箭头每次朝上
 
-        dateSort: 0,// 时间排序 1降序 2升序
-        limitSort: 0,// 单价排序 1降序 2升序
-        priceSort: 0,
-        volumeSort: 0,//  1降序 2升序
-        tradeableSort: 0,//  1降序 2升序
+        dateSort: 0, // 时间排序 1降序 2升序
+        limitSort: 0, // 订单期限排序 1降序 2升序
+        volumeSort: 0, // 可交易数量排序 1降序 2升序
+        tradeableSort: 0,// 已成交数量排序 1降序 2升序
+        avgSort: 0, // 评价成交价 1降序 2升序
 
         pageTotal: 0, // 分页总数
         curPage: 1, // 当前页
@@ -206,12 +206,12 @@
     created() {
       this.initData()
       this.getInitNum()
+      this.getCoin()
     },
     mounted() {
       // 监听下拉框值，将值传给子组件
       this.Bus.$on(this.adTypeValue, (data) => { // 类型筛选
         this.saleType = data
-        console.log('222', this.saleType)
         this.initData()
       });
       this.Bus.$on(this.currencyValue, (data) => { // 币种筛选
@@ -248,8 +248,7 @@
       this.Bus.$off('onPageChange');
     },
     methods: {
-      getInitNum() {
-        // 获取进行中和已完成数量
+      getInitNum() {  // 获取进行中和已完成数量
         this.WsProxy.send('otc','get_sales_num',{
           "id": this.$store.state.userInfo.uid,
           "state": 1 // 1在架 2下架
@@ -267,12 +266,27 @@
           console.log(msg);
         });
       },
-      initData() {
+      getCoin() { // 获取币种资料
+        this.currencyType = ['全部币种']
+        this.currencyValueData = ['']
+        this.WsProxy.send('otc','get_sales_currency',{
+          "state": this.contentTabIndex // 1在架 2下架
+        }).then((data)=>{
+          console.log('币种', data)
+          data.coins.forEach(v => {
+            this.currencyType.splice(1, 0, v.currency.toUpperCase()) // 显示币种数据
+            this.currencyValueData.splice(1, 0, v.currency) // 传递后台数据
+          })
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
+      initData() { // 初始化信息
         this.WsProxy.send('otc','my_sales',{
           "state": this.contentTabIndex, // 1在架 2下架
           "type":  this.saleType, // 1 出售 2 购买
           "currency": this.saleCoin,
-          "price": 0, // 1降序 2升序
+          "price": this.avgSort, // 1降序 2升序
           "start": this.startValueDate,
           "end": this.endValueDate,
           "payment": this.salePay, // 1支付宝 2微信 4银行卡
@@ -282,7 +296,7 @@
           "tradeable": this.tradeableSort, // 可交易量排序 1降序 2升序
           "limit": this.limitSort, // 付款期限排序 1降序 2升序
           "origin": this.curPage - 1, // 分页
-          "count": 20
+          "count": 20,
         }).then((data)=>{
           console.log('广告列表', data)
           this.saleList = data.sales ? data.sales : []
@@ -293,7 +307,9 @@
       },
       selectStatus(type) { // Tab切换
         this.contentTabIndex = type;
+        this.clickUp = 20;
         this.initData()
+        this.getCoin()
       },
       openUnder(st, content) { // 下架
         if (st === 'false') {
@@ -310,7 +326,6 @@
         }).then((data)=>{
           console.log('上架', data)
           window.location.reload()
-          // this.router.go(0)
         }).catch((msg)=>{
           console.log(msg);
           switch (msg.ret) {
@@ -352,11 +367,12 @@
           "min": content.min, // 每笔交易的最小限额
           "max": content.max, // 每笔交易的最大限额
           "payment": content.payments, // 1支付宝;2微信;4银行卡
-          "type": 2, // 1 出售; 2 购买
+          "type": content.type, // 1 出售; 2 购买
           "limit": content.limit, // 付款期限, 分钟
           "info": content.info, // 描述信息
           "vary": content.vary, // 余额随动标志 1 不随动 2 随动
-          "tradeable": content.tradeable// 可交易量
+          "tradeable": content.tradeable,// 可交易量
+          "id": content.id
         }
         if (content.type === 1) {
           this.$router.push({name:'releaseSale'})
@@ -373,7 +389,7 @@
         this.limitSort = title.flag === 7 ? (this.sortActive ? 2 : 1) : 0;
         this.tradeableSort = title.flag === 8 ? (this.sortActive ? 2 : 1) : 0;
         this.volumeSort = title.flag === 9 ? (this.sortActive ? 2 : 1) : 0;
-        //this.money = title.flag === 10 ? (this.sortActive ? 2 : 1) : 0;
+        this.avgSort = title.flag === 10 ? (this.sortActive ? 2 : 1) : 0;
         this.sortFlag = title.flag;
         this.initData()
       },

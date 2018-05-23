@@ -5,6 +5,7 @@ let beforeOrder=async function(vue,param) {
     id: param.id,   //广告ID,BigInt
     sid: param.sid,   //发布人ID，BigInt
     currency: param.currency.toLowerCase(),   //广告货币,btc
+    type: param.type
   };
 
   //是否登录
@@ -12,13 +13,19 @@ let beforeOrder=async function(vue,param) {
     return Promise.reject("未登录");
   }
 
-  let ws=vue.WsProxy;
-  let isVerify=vue.$store.state.userInfo.verify;
-  let loginUid=vue.$store.state.userInfo.uid;
+  let ws = vue.WsProxy;
+  let isVerify = vue.$store.state.userInfo.verify;
+  let loginUid = vue.$store.state.userInfo.uid;
+  let fundPass = vue.$store.state.userInfo.is_new
 
   //是否实名认证
   // if(!isVerify){
   //   return Promise.reject("未实名认证");
+  // }
+
+  // 是否设置资金密码
+  // if (opt.type == 2 && fundPass === 1) { // 提醒设置支付密码
+  //   return Promise.reject("请设置资金密码");
   // }
 
   //是否自己的广告
@@ -45,10 +52,10 @@ let beforeOrder=async function(vue,param) {
       if(data.wallets){
         resolve();
       } else{
-        ws.send('wallet', 'new_wallet',{currency:currency}).then((data)=> {
+        ws.send('wallet', 'new_wallet',{currency: opt.currency}).then((data)=> {
           resolve();
         }).catch(()=>{
-          reject("创建"+currency+"钱包失败");
+          reject("创建" + opt.currency + "钱包失败");
         });
       }
     }).catch(()=>{

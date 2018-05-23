@@ -53,8 +53,7 @@
       <!--筛选栏-->
       <div class="filtrate">
         <ol class="select-type clearfix">
-          <li>购买</li>
-          <li>出售</li>
+          <li v-for="(item, index) in transTypeList" :class="{'type-active': typeNum == index}" @click="selectType(item, index)">{{item}}</li>
         </ol>
         <div class="select" @click.stop="showPayment=!showPayment" v-clickoutside="()=>{showPayment=false}">
           <i :class="{'select-item': payTitle !== '选择支付方式' }">{{payTitle}}</i>
@@ -184,7 +183,9 @@
           {name: 'DASH', secName: 'dash', cName: 'Dash', imgUrl: 'C4E2A2F3837B7067'},
           {name: 'LSK', secName: 'lsk', cName: 'Lisk', imgUrl: '5518F8A720045CA3'},
         ],
-        hotNum: 0,
+        hotNum: 0, // 热门币种选择
+        transTypeList: ['购买', '出售'],
+        typeNum: 0, // 购买出售选择
         tip: false,//限额错误文案提示
         showPayment: false,
         payment:[{type: '支付宝', score: 1, state: true}, {type: '微信', score: 2, state: true}, {type: '银行卡', score:4, state: true}],
@@ -317,6 +318,7 @@
             this.err = 0;
             this.total=res.data.amount;
             this.parseResult(res.data.sales);
+            console.log('广告2', res.data.sales)
           }
         }).catch((msg) => {
           if (!msg)
@@ -345,8 +347,10 @@
             price: e.price && (e.price + "").formatFixed(2) || 0,
             currency: e.currency,
             isLargeTran: e.bt_verify===2?1:0,
+            type: this.filte.type
           });
         });
+        console.log('广告', this.result)
       },
       //最小限额输入处理
       inputDealMin() {
@@ -409,6 +413,16 @@
         this.filte.cName = item.cName
         this.filte.coinImg = item.imgUrl
         this.hotNum = index
+      },
+      selectType(item, index) { // 出售购买tab切换选择
+        this.typeNum = index
+        this.filte.price = 0,
+        this.filte.date = 0,
+        this.filte.order = 0,
+        this.filte.volume = 0,
+        this.filte.rate = 0,
+        this.filte.tradeable = 0,
+        this.filte.type = index + 1
       }
     },
     computed: {
@@ -490,22 +504,19 @@
         height 40px
         top 15px
         left 30px
+        border 1px solid #FFB422
+        border-radius 2px
         li
           float left
           width 200px
           text-align center
           line-height 40px
           cursor pointer
-        li:first-child
-          width 198px
-          height 38px
-          border 1px solid #FFB422
-          border-radius 2px 0 0 2px
+          height 40px
           color #FFB422
-        li:last-child
-          background #FFB422
-          border-radius 0 2px 2px 0
-          color #FFF
+          &.type-active
+            background #FFB422
+            color #FFF
       .select
         box-sizing()
         position absolute

@@ -10,9 +10,13 @@
         <ul class="down-tag">
           <li><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></li>
           <router-link to="/transaction" tag="li" class="tag transaction" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
-          <li class="tag ad" @mouseenter="adChild = true" @mouseleave="adChild = false" :class="{active: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
+          <li class="tag ad"
+              @mouseenter="adChild = true"
+              @mouseleave="adChild = false"
+              @click="!$store.state.isLogin && changeLoginForm(true) || $store.state.isLogin && !$store.state.userInfo.verif && (realLayer = true)"
+              :class="{active: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
             <span>广告</span>
-            <ol v-show="adChild">
+            <ol v-show="$store.state.isLogin && $store.state.userInfo.verify && adChild">
               <li @click="releaseAd()"><router-link to="/advertisement/release" tag="li">发广告</router-link></li>
               <li @click="adChild = false"><router-link to="/advertisement" tag="li">我的广告</router-link></li>
             </ol>
@@ -46,12 +50,19 @@
         <Login v-if="showLoginForm"/>
       </div>
     </section>
+    <BasePopup :show="realLayer"
+               class="real-layer">
+      <span v-clickoutside="closeLayer">
+        <router-link to="/personal/account/auth">请先进行实名认证</router-link>
+      </span>
+    </BasePopup>
   </article>
 </template>
 
 <script>
   import Login from '@/components/common/Login'
   import HeaderPrice from '@/components/common/HeaderPrice'
+  import BasePopup from '@/components/common/BasePopup' // 引入弹窗
 
   export default {
     data() {
@@ -60,11 +71,13 @@
         showMenu: false,
         adChild: false,
         newOrder: 0,
+        realLayer: false
       }
     },
     components: {
       Login,
-      HeaderPrice
+      HeaderPrice,
+      BasePopup
     },
     mounted() {
       // console.log('header')
@@ -107,6 +120,9 @@
           window.location.reload()
         }
         this.$store.commit({type: 'releaseAd', data:{flag: 0}})
+      },
+      closeLayer() {
+        this.realLayer = false
       }
     },
     computed: {
@@ -127,6 +143,7 @@
       path: {
          handler(curVal, oldValue) {
           curVal === '/order' && (this.newOrder = 0);
+          curVal === '/personal/account/auth' && (this.realLayer = false)
           // if (["/verify", "/verify/identifyAuth", "/verify/largeTransaction", "/verify/arbitrationRecord", "/verify/service"].includes(this.$route.path) && this.$store.state.userInfo && !this.$store.state.userInfo.is_admin) {
           //   console.log(9999)
           //   this.$router.push('/transaction');
@@ -330,5 +347,8 @@
                 background url('/static/images/safe.png')
               &.logout::before
                 background url('/static/images/logout.png')
+  .real-layer
+    text-align center
+    line-height 94px
 
 </style>

@@ -3,6 +3,7 @@
     <b @click="showChoice()" :class="`${choiceClass}`" :style="{width: `${width}px`}">{{items}}</b>
     <ul v-show="show" :style="{width: `${widthSelect}px`, top: `${top}px`}">
       <li v-for="(content, index) in classify" @click="changeSelect(content, index)" :key="index" :class="{active:(index === selectNum && isActive)}">{{content}}</li>
+      <router-link to="/wallet/account" tag="li" v-show="createWallet">创建钱包</router-link>
     </ul>
   </div>
 </template>
@@ -17,6 +18,10 @@
         default: true
       }, // 是否替换显示内容
       showDisabled: {
+        type: Boolean,
+        default: false
+      },
+      createWallet: { // 是否显示创建钱包
         type: Boolean,
         default: false
       },

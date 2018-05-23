@@ -1,29 +1,26 @@
 <template>
   <div class="order inner">
-    <h2>{{copy.type[type]}}{{contentData.currency && contentData.currency.toUpperCase()}}</h2>
     <div class="main">
       <!-- 交易对方的信息 -->
-      <div class="counterparty clearfix">
+      <div class="counterparty">
+        <div class="coin-info">
+          <img :src="coinIcon && `${HostUrl.http}image/${coinIcon}`" alt="">
+          <span>{{titleType[type-1]}}{{contentData.currency && contentData.currency.toUpperCase()}}</span>
+        </div>
         <div class="info">
           <div class="avatar">
             <img :src="contentData.icon ? `${HostUrl.http}image/${contentData.icon}` : `/static/images/default_avator.png`" alt="">
           </div>
-          <span class="nickname">{{contentData.trader}}</span>
+          <p class="nickname">{{contentData.trader}}</p>
         </div>
-        <div class="contact clearfix">
-          <span @click="contactSomeone(JsonBig.stringify(contentData.sid))" class="conversation">
-            <img src="/static/images/conversation_icon.png" alt="">
-            <i>联系TA</i>
-          </span>
-          <router-link class="self-page" :to="{path:'/homepage', query:{uid: contentData.sid}}" tag="span">
-            <img src="/static/images/selfpage_icon.png" alt="">
-            <i>访问TA的主页</i>
-          </router-link>
-        </div>
+        <ol class="contact clearfix">
+          <li @click="contactSomeone(JsonBig.stringify(contentData.sid))">联系TA</li>
+          <router-link class="self-page" :to="{path:'/homepage', query:{uid: contentData.sid}}" tag="li">访问TA的主页</router-link>
+        </ol>
       </div>
       <!-- 订单信息 -->
       <div class="order-info">
-        <p class="tip">下单后此交易的比特币将托管锁定，请放心{{copy.type[type]}}</p>
+        <p class="tip">下单后此交易的比特币将托管锁定，请放心{{titleType[type-1]}}</p>
         <ul>
           <li class="price clearfix">
             <span class="title">价格</span>
@@ -57,34 +54,35 @@
       </div>
       <!-- 交易数量 -->
       <div class="amount">
-        <h3>
-          {{copy.type[type]}}多少？
-          <router-link to="" tag="span" v-if="!type">去充币</router-link>
-        </h3>
-        <p class="rate">{{selectPrice[0] && selectPrice[0].cny}} CNY = {{selectPrice[0] && selectPrice[0].btc}} {{contentData.currency && contentData.currency.toUpperCase()}}</p>
-        <span class="error-text">{{errorText[errorFlag]}}</span>
+        <div class="amount-title">
+          <h3>{{titleType[type-1]}}多少？</h3>
+          <router-link to="/wallet/charge" tag="span" v-if="contentData.type == 2">去充币</router-link>
+        </div>
+        <p class="rate" v-if="contentData.type == 1">{{selectPrice[0] && selectPrice[0].cny}} CNY = {{selectPrice[0] && selectPrice[0].btc}} {{contentData.currency && contentData.currency.toUpperCase()}}</p>
+        <p class="balance" v-if="contentData.type == 2"><span>可用余额{{balance}}{{contentData.currency && contentData.currency.toUpperCase()}}</span></p>
+        <span class="error-text" :class="{'sale-err': contentData.type == 2}">{{errorText[errorFlag]}}</span>
         <div class="input">
           <div>
-            <input type="number" :placeholder="`输入${copy.type[type]}金额`" v-model="money"
+            <input type="number" :placeholder="`输入${titleType[type-1]}金额`" v-model="money"
                    @input="changeMoney" @keydown="checkMoney(money)" autofocus="autofocus" @wheel.prevent="">
             <b>CNY</b>
           </div>
           <img src="/static/images/huansuan.png" alt="">
           <div>
-            <input type="number" :placeholder="`输入${copy.type[type]}数量`" v-model="amount"
+            <input type="number" :placeholder="`输入${titleType[type-1]}数量`" v-model="amount"
                    @input="changeAmount" @keydown="checkAmount(amount)" @wheel.prevent="">
             <b>{{contentData.currency && contentData.currency.toUpperCase()}}</b>
           </div>
         </div>
-        <p class="charge" v-if="!type">手续费：0.2% 0BTC</p>
+        <p class="charge" v-if="contentData.type == 2">手续费：0.2% {{processNum}}{{contentData.currency && contentData.currency.toUpperCase()}}</p>
         <div class="rules" @click="agree = !agree">
           <img src="/static/images/rules_checked.png" alt="" v-if="agree">
           <img src="/static/images/rules_unchecked.png" alt="" v-else>
-          <span>我已阅读</span><a href="#/transaction/tradeRules" @click.stop="" target="_blank">《OTC购买流程规则》</a>
+          <span>我已阅读</span><a href="#/transaction/tradeRules" @click.stop="" target="_blank">{{`《OTC${titleType[type-1]}流程规则》`}}</a>
         </div>
       </div>
-      <button class="able" @click="openOrderLayer()" v-if="canSubmit">{{copy.type[type]}}</button>
-      <button v-else="">{{copy.type[type]}}</button>
+      <button class="able" @click="openOrderLayer()" v-if="canSubmit">{{titleType[type-1]}}</button>
+      <button v-else="">{{titleType[type-1]}}</button>
       <p class="tishi">
         <img src="/static/images/hint.png" alt="">
         <span>新用户首次交易前请务必查阅本平台交易流程及规则，如交易出现问题请及时与客服人员沟通</span>
@@ -96,6 +94,7 @@
                 :price="priceLayer"
                 :currency="currencyLayer"
                 :money="moneyLayer"
+                :type="typeLayer"
                 @offOrderLayer="openOrderLayer">
     </OrderLayer>
     <!-- 引入勾选购买规则弹窗 -->
@@ -125,19 +124,17 @@
   export default {
     data() {
       return {
-        type: 1,//0表示出售，1表示购买
-        balance: 1.242342,
+        type: 1,
+        titleType: ['购买', '出售'],
+        balance: 0,
         rate: 0,
+        processNum: 0, // 手续费
         avatar: '',
         amount: '',
         money: '',
         moneyValue: '',
         amountValue: '',
         agree: true, //true已阅读规则，false未阅读
-        copy:{
-          type: ['出售', '购买'],
-          // rate: [`可用余额1.242342BTC`, `${cnyPrice} CNY = ${btcPrice} BTC` ]
-        },
         errorText: ['', '交易量不能超过最大限额', '交易量不能低于最小限额', '交易量不能超过可交易量'],
         errorFlag: 0,
         contentData: {},
@@ -150,7 +147,9 @@
         priceLayer: '',
         currencyLayer: '',
         moneyLayer: '',
-        tradeable: ''
+        typeLayer: '',
+        tradeable: '',
+        coinIcon: '' // 币种图标
       }
     },
     components: {
@@ -164,12 +163,16 @@
       this.WsProxy.send('otc','sale_detail',{
         id: this.JsonBig.parse(this.$route.query.id)
       }).then((data)=>{
+        console.log('下单内容', data)
         this.contentData = data;
+        this.type = data.type;
         this.tradeable = this.contentData.tradeable && (this.contentData.tradeable * 1 + "").formatFixed(6) || 0
       }).catch((msg)=>{
         alert(JSON.stringify(msg));
       });
       this.getPrice();
+      this.getCoinIcon();
+      this.getBalance();
     },
     destroyed(){
       this.Bus.$off("offOrderLayer");
@@ -199,6 +202,7 @@
       // 获取价格
       async getPrice() {
         await this.Proxy.getPrice().then(res => {
+          console.log('价格', res.data.prices)
           this.priceList = res.data.prices;
           this.selectPrice = this.priceList.filter(item => {
             return item.currency === this.contentData.currency;
@@ -208,6 +212,33 @@
         });
         this.rate = this.selectPrice[0] && (this.selectPrice[0].cny / this.selectPrice[0].btc);
       },
+      // 获取币种图标
+      async getCoinIcon() {
+        let selectIconList = []
+        await this.Proxy.coinSearch().then(res => {
+          selectIconList = res.data.coins.filter(item => {
+            return item.currency === this.contentData.currency;
+          })
+        }).catch((msg)=>{
+          alert(JSON.stringify(msg));
+        });
+        this.coinIcon = selectIconList[0] && (selectIconList[0].icon);
+      },
+      // 获取可用余额
+      async getBalance() {
+        let balanceList = []
+        await this.WsProxy.send('wallet', 'wallets', {
+          id: this.$store.state.userInfo.uid, // 用户id
+        }).then((data)=>{
+          balanceList = data.wallets.filter(item => {
+            return item.currency === this.contentData.currency;
+          })
+          console.log('this.balanceList', this.balanceList)
+        }).catch((msg)=>{
+          alert(JSON.stringify(msg));
+        });
+        this.balance = balanceList[0] && (this.JsonBig.stringify(balanceList[0].balance)).formatFixed(6) || 0
+      },
       contactSomeone(id){
         this.Bus.$emit('contactSomeone', {id: id});
       },
@@ -215,6 +246,8 @@
         this.money = /^\d+\.?\d{0,2}$/.test(this.money) || this.money === '' ? this.money : this.moneyValue;
         this.amount = (this.money / (this.rate)).toFixed(6);
         this.money === '' && (this.amount = '');
+        this.processNum = 0.002 * (this.amount * 1)
+        console.log('222', this.amount, this.processNum)
       },
       checkMoney(value) {
         this.moneyValue = value
@@ -223,6 +256,7 @@
         this.amount = /^\d+\.?\d{0,6}$/.test(this.amount) || this.amount === '' ? this.amount : this.amountValue;
         this.money = (this.amount * this.rate).toFixed(2);
         this.amount === '' && (this.money = '');
+        this.processNum = 0.002 * (this.amount * 1)
       },
       checkAmount(value) {
         this.amountValue = value;
@@ -240,6 +274,7 @@
           this.layerId = this.contentData.id; // 弹窗id
           this.currencyLayer = this.amount;
           this.moneyLayer = this.money;
+          this.typeLayer = this.contentData.type;
           this.showOrderLayer = true;
         }
       },
@@ -254,7 +289,7 @@
 @import "../../stylus/base.styl";
 @import "stylus/order";
   .order
-    margin-top 40px
+    margin-top 20px
     margin-bottom 40px
     h2
       height 30px
@@ -277,60 +312,69 @@
     .main
       box-sizing()
       width 100%
-      padding 30px
-      margin-top 25px
+      padding 0 30px 44px
       background-color #FFF
       .counterparty
-        padding-bottom 20px
+        display flex
+        align-items center
+        height 95px
         border-bottom 1px solid $col1E1
+        .coin-info
+          margin-right 287px
+          img
+            position relative
+            top -3px
+            width 37px
+            height 37px
+            border-radius 50%
+            vertical-align middle
+            margin-right 20px
+          span
+            font-size 20px
+            color #333
+            letter-spacing 0.23px
         .info
-          float left
-          width 230px
-          height 45px
-          line-height 45px
+          margin-right 50px
+          text-align center
           .avatar
             display inline-block
             width 45px
             height 45px
-            margin-right 20px
             border-radius 50%
             img
               width 45px
               height 45px
               border-radius 50%
-              vertical-align middle
+              margin-bottom 5px
         .contact
-          float left
-          line-height 45px
-          height 45px
-          i
-            display inline-block
-            fz11()
-          span
-            float left
-            letter-spacing 0.23px
+          li
             cursor pointer
-            &.conversation
-              position relative
-              padding-left 30px
-              margin-right 30px
-              img
-                position absolute
-                top 50%
-                left 0
-                width 20px
-                height 20px
-                margin-top -10px
-            &.self-page
-              position relative
-              padding-left 30px
-              img
-                position absolute
-                top 50%
-                left 0
-                width 20px
-                height 20px
-                margin-top -10px
+            fz11()
+          li:first-child
+            position relative
+            padding-left 30px
+            margin-bottom 15px
+            &:before
+              position absolute
+              top 1px
+              left 0
+              width 18px
+              height 17px
+              content ''
+              background url(/static/images/conversation_icon.png) no-repeat
+              background-size 18px 17px
+          li:last-child
+            position relative
+            padding-left 30px
+            &:before
+              position absolute
+              top 0
+              left 0
+              width 20px
+              height 20px
+              content ''
+              background url(/static/images/selfpage_icon.png) no-repeat
+              background-size 20px 20px
       .order-info
         padding 20px 0 10px
         border-bottom 1px solid $col1E1
@@ -360,24 +404,37 @@
       .amount
         position relative
         margin-bottom 30px
-        h3
+        .amount-title
           width 620px
           height 60px
-          line-height 60px
-          letter-spacing 0.23px
-          font-weight bold
-          font-size $fz20
+          display flex
+          align-items center
+          justify-content space-between
+          h3
+            letter-spacing 0.23px
+            font-weight bold
+            font-size $fz20
           span
-            float right
-            font-weight normal
+            display block
+            padding 3px 8px
+            border 1px solid #FFB422
+            border-radius 2px
             font-size $fz13
             color $col422
-            letter-spacing 0.15px
+            letter-spacing  0.27px
             cursor pointer
+
         .rate
           letter-spacing 0.12px
           margin-bottom 10px
           fz11()
+        .balance
+          width 620px
+          letter-spacing 0.12px
+          margin-bottom 10px
+          text-align right
+          span
+            fz11()
         .error-text
           position absolute
           top 60px
@@ -385,6 +442,8 @@
           font-size 11px
           color #ff794c
           letter-spacing 0.23px
+          &.sale-err
+            left 0
         .input
           margin-bottom 10px
           div
@@ -405,12 +464,13 @@
             b
               position absolute
               top 0
-              right 0
+              right 10px
               width 36px
               height 40px
               line-height 40px
               font-size $fz13
               letter-spacing 0.15px
+              text-align right
           img
             margin 0 28px
       .charge

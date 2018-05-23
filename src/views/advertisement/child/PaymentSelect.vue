@@ -12,9 +12,10 @@
 
 <script>
   export default {
-    props: ['soreItem'],
+    props: ['soreTab'],
     data() {
       return {
+        soreItem: 0,
         showPayment: false,
         payment:[
           {type: '支付宝', url: '/static/images/OTC_zhifubao.png', score: 1, state: false},
@@ -47,13 +48,18 @@
 
     },
     created() {
-      this.paymentItem(this.soreItem)
-    },
-    mounted() {
 
+    },
+    mounted() { // 第一次加载接收值
+      this.Bus.$on('paymentNum', data => {
+        this.soreItem = data
+        this.paymentItem(this.soreItem)
+      })
+      this.paymentItem(this.soreTab) // tab切换值
     },
     destroyed() {
       this.Bus.$off('showPayment');
+      this.Bus.$off('paymentNum');
     },
     methods: {
       choicePayment() {

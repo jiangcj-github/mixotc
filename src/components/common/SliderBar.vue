@@ -54,11 +54,9 @@
       }
     },
     mounted() {
-      console.log('this.max', this.max)
     },
     watch: {
       choiceValue(data) {
-        console.log('max', this.max)
         this.sliderValue = data
       }
     },
