@@ -7,10 +7,9 @@
         <LeftBar :leftBar="5"></LeftBar>
         <!--右边内容-->
         <div class="right">
-          <JsonExcel class="export" :data="excelJsonData" :fields="excelJsonField"
-                     type="csv" name="MixOTC-账单明细.csv">
-            <a href="javascript:void(0);" @mousedown="exportCsv"><img src="/static/images/date_icon.png">导出账单</a>
-          </JsonExcel>
+          <div class="export">
+            <a href="javascript:void(0);" @click="exportCsv"><img src="/static/images/wallet/export.png">导出账单</a>
+          </div>
           <div class="filter">
             <div class="input-group">
               <p class="term" v-clickoutside="()=>isShowUl0=false" @click="isShowUl0=!isShowUl0">{{ul0[ul0Sel].text}}</p>
@@ -19,20 +18,19 @@
                 <li v-for="(e,i) in ul0" @click="ul0Sel=i">{{e.text}}</li>
               </ul>
               <input class="input" type="text" v-model="srchText"
-                     v-clickoutside="()=>isShowTip=false" @focus="onFuzzyFocus" @input="onFuzzyInput">
+                     v-clickoutside="()=>isShowTip=false" @input="onFuzzyInput">
               <img class="clear" src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
-              <button class="addin"><img src="/static/images/search.png"></button>
+              <button class="addin" @click="loadBills"><img src="/static/images/search.png"></button>
               <!--模糊搜索结果-->
-              <ul class="drop" v-show="isShowTip && tips.length>0">
-                <li v-for="(e,i) in tips">
-                  <p v-if="e.type===1">
-                    <span v-if="e.isUser===1"><i>{{e.nickname}}</i><i class="gray">{{e.account}}</i></span>
-                    <span v-else=""><i>{{e.addr}}</i></span>
+              <ul class="drop" v-show="isShowTip">
+                <li v-for="(e,i) in tips" @click="loadBills">
+                  <p v-if="e.type===2 && e.isUser===1" @mousedown="srchText=e.nickname">
+                    <span>{{e.nickname}}</span><span class="fz-gray">{{e.account}}</span>
                   </p>
-                  <p v-else="">
-                    <span><i>{{e.orderId}}</i></span>
-                  </p>
+                  <p v-if="e.type===2 && e.isUser===0" @mousedown="srchText=e.addr" class="fz-addr">{{e.addr}}</p>
+                  <p v-if="e.type===1" @mousedown="srchText=e.orderId">{{e.orderId}}</p>
                 </li>
+                <li v-show="tips.length<=0" class="empty">无搜索结果</li>
               </ul>
             </div>
             <div class="f2">
@@ -48,7 +46,7 @@
             <div class="th time sortable" @click="sort=++sort%2">创建时间
               <i :class="{up:sort===0,down:sort===1}"></i></div>
             <div class="th type select multi" v-clickoutside="()=>isShowUl1=false">
-              <p @click="isShowUl1=!isShowUl1" class="ecli">{{ul1Text}}</p>
+              <p @click="isShowUl1=!isShowUl1">{{ul1Text}}</p>
               <ul class="drop" v-show="isShowUl1">
                 <li v-for="(e,i) in ul1" @click="e.check=!e.check">
                   {{e.text}}
@@ -90,9 +88,9 @@
                   <p v-if="e.billType===1">
                     <a :href="'/#/homepage?id='+e.uid" target="_blank"><img src="/static/images/talk.png">联系他</a>
                   </p>
-                  <p v-if="e.billType===2">担保对方</p>
-                  <p v-if="e.billType===3">红包对方</p>
-                  <p v-if="e.billType===4">转账对方</p>
+                  <p v-if="e.billType===2">{{e.nickname}}</p>
+                  <p v-if="e.billType===3">{{e.nickname}}</p>
+                  <p v-if="e.billType===4">{{e.addr}}</p>
                 </div>
                 <div class="num"><p :class="{in:!e.inOrOut,out:e.inOrOut}">{{e.num}}</p><p>{{e.fee}}</p></div>
                 <div class="state">
@@ -131,8 +129,7 @@
   import LeftBar from "./layout/LeftBar";
   import DateInterval from "@/components/common/DateInterval";
   import Pagination from "../verify/component/Pagination";
-  import JsonExcel from "vue-json-excel";
-
+  import JsonExcel from "./js/JsonExcel.js";
   export default {
     components: {
       Notify,
@@ -148,47 +145,45 @@
         isShowUl0: false,
         ul0Sel: 0,
         ul0: [
-          {text:"订单号",value:0},
-          {text:"对方/地址",value:1},
+          {text:"对方/地址",value:2},
+          {text:"订单号",value:1},
         ],
 
         isShowTip: false,
         tips: [],
+        tipCount: 10,
 
         isShowUl1: false,
         ul1: [
-          {text:"充币",value:0,check:1},
-          {text:"提币",value:1,check:1},
-          {text:"购买",value:2,check:1},
-          {text:"出售",value:3,check:1},
-          {text:"担保-入账",value:4,check:1},
-          {text:"担保-出账",value:5,check:1},
-          {text:"转账-入账",value:6,check:1},
-          {text:"转账-出账",value:7,check:1},
-          {text:"红包-入账",value:8,check:1},
-          {text:"红包-出账",value:9,check:1},
+          {text:"充币",value:1,check:1},
+          {text:"提币",value:2,check:1},
+          {text:"购买",value:3,check:1},
+          {text:"出售",value:4,check:1},
+          {text:"担保-入账",value:7,check:1},
+          {text:"担保-出账",value:8,check:1},
+          {text:"转账-入账",value:5,check:1},
+          {text:"转账-出账",value:6,check:1},
+          {text:"红包-入账",value:9,check:1},
+          {text:"红包-出账",value:10,check:1},
+          {text:"资金互转-转入",value:11,check:1},
+          {text:"资金互转-转出",value:12,check:1},
         ],
 
         isShowUl2: false,
         ul2Sel: 0,
         ul2: [
-          {text:"全部",value:0},
-          {text:"BTC",value:1},
-          {text:"ETH",value:2},
-          {text:"LTC",value:3},
+          {text:"全部",value:null},
         ],
 
         isShowUl3: false,
         ul3: [
-          {text:"全部状态",value:0,check:1},
-          {text:"待付款",value:1,check:1},
-          {text:"待确认",value:2,check:1},
-          {text:"待放币",value:3,check:1},
-          {text:"申诉中",value:4,check:1},
-          {text:"完成",value:5,check:1},
-          {text:"失败-取消",value:6,check:1},
-          {text:"失败-拒收",value:7,check:1},
-          {text:"失败-超时",value:8,check:1},
+          {text:"已完成",check:1,value:0},
+          {text:"进行中",check:1,value:1},
+          {text:"取消",check:1,value:2},
+          {text:"超时",check:1,value:3},
+          {text:"申诉中",check:1,value:4},
+          {text:"强制放币",check:1,value:5},
+          {text:"终止交易",check:1,value:6},
         ],
 
         sort: 0,  // 0-时间升序,1-时间降序,2-数量升序,3-数量降序
@@ -199,10 +194,6 @@
         pageSize: 20,
         total: 0,
         err: 0,
-
-        excelJsonField: {},
-        excelJsonData:  [],
-        excelJsonMeta:  [[{key:"charset",value:"utf-8"}]],
       }
     },
     computed:{
@@ -219,6 +210,49 @@
           if(e.check) i++;
         });
         return i>=this.ul3.length?"状态(全部)":"状态(筛选"+i+"项)";
+      },
+      paramSort(){
+        let sort=this.sort;
+        switch(sort){
+          case 0:sort=1;break;
+          case 1:sort=0;break;
+          case 2:sort=3;break;
+          case 3:sort=2;break;
+          default:sort=0;break;
+        }
+        return sort;
+      },
+      paramCoin(){
+        return this.ul2[this.ul2Sel].value;
+      },
+      paramSrchType(){
+        return this.ul0[this.ul0Sel].value;
+      },
+      paramType(){
+        let type="";
+        this.ul1.forEach((e)=>{
+          if(e.check) type+=","+e.value;
+        });
+        type=type.substr(1);
+        return type;
+      },
+      paramState(){
+        let state="";
+        this.ul3.forEach((e)=>{
+          if(e.check) state+=","+e.value;
+        });
+        state=state.substr(1);
+        return state;
+      },
+      paramStart(){
+        let start= this.$refs.di.date1;
+        start=start?Math.floor(new Date(this.$refs.di.date1).getTime()/1000):null;
+        return start;
+      },
+      paramEnd(){
+        let end= this.$refs.di.date2;
+        end=end?Math.floor(new Date(this.$refs.di.date2).getTime()/1000):null;
+        return end;
       }
     },
     watch:{
@@ -241,93 +275,197 @@
       }
     },
     methods: {
-      onFuzzyFocus(){
-        if(this.tips.length<=0) return;
-        this.isShowTip=true;
+      async init(){
+        //加载币种列表
+        let data=await this.WsProxy.send("wallet","bill_currency_list", {}).catch((msg)=>{
+          console.log(msg);
+        });
+        data && data.forEach((e)=>{
+          this.ul2.push({text:e.toUpperCase(),value:e.toLowerCase()});
+        });
+        // 获取URL传入参数
+        let type=this.$route.query.type;        // type
+        if(type){
+          this.ul1.forEach((e)=>{
+            e.check=(e.value==type?1:0);
+          });
+        }
+        let coin=this.$route.query.coin;        // coin
+        if(coin){
+          coin=coin.toUpperCase();
+          let exist=0;
+          for(let i=0;i<this.ul2.length;i++){
+            if(this.ul2[i].text==coin){
+              exist++;
+              this.ul2Sel=i;
+            }
+          }
+          if(exist<=0){
+            this.ul2.push({text:coin.toUpperCase(),value:e.toLowerCase()});
+            this.ul2Sel=this.ul2.length-1;
+          }
+        }
+        //加载账单
+        this.loadBills();
       },
       onFuzzyInput(){
-        if(this.srchText.length<=0) return;
+        if(this.srchText.length<=0){
+          this.isShowTip=false;
+          return;
+        }
         this.loadTips();
       },
       loadTips(){
-        this.parseTips([1,2,3,4,5,6]);
-      },
-      loadBills(){
-        this.err=0;
-        this.total=50;
-        this.parseBills([1,2,3,4,4,6,7]);
+        let srchType=this.ul0[this.ul0Sel].value;
+        let srchText=this.srchText;
+        this.WsProxy.send("wallet","bill_tips", {
+          keyword_type: srchType,
+          keyword: srchText,
+          count: this.tipCount,
+        }).then((data)=>{
+          this.parseTips(data);
+        }).catch((msg)=>{
+          console.log(msg);
+        });
       },
       parseTips(data){
         this.tips=[];
         data && data.forEach((e)=>{
           this.tips.push({
-            orderId: 111111111111,
-            nickname: "user_987434223",
-            account: "398017990@qq.com",
-            addr: "0x046e59335aaffd964cfbb05c6c15a1238d7e3543",
+            orderId: e.bill_id || "-",
+            nickname: e.name || "-",
+            account: e.phone || e.email || "-",
+            addr: e.from || e.to || "-",
             type: this.ul0[this.ul0Sel].value,      // 0-订单号,1-对方/地址
-            isUser: 1,     // 0-地址,1-人
+            isUser: (e.phone||e.email||e.name)?1:0,     // 0-地址,1-人
           });
         });
         this.isShowTip=true;
       },
+      loadBills(){
+        this.WsProxy.send("wallet","bills_v2",{
+          keyword_type: this.paramSrchType,
+          keyword: this.srchText,
+          currency: this.paramCoin,
+          type: this.paramType,
+          state: this.paramState,
+          start: this.paramStart,
+          end: this.paramEnd,
+          page: this.curPage-1,
+          count: this.pageSize,
+          sort: this.paramSort,
+        }).then((data)=>{
+          if(!data||!data.bill||data.bill.length<=0){
+            this.err=1; //无数据
+          }else{
+            this.err=0;
+            this.total=data.count;
+            this.parseBills(data.bill);
+          }
+        }).catch((msg)=>{
+          if(!msg){
+            this.err=2; //网络异常
+          }else if(msg.ret!==0){
+            this.err=3; //加载异常
+          }
+        });
+      },
       parseBills(data){
         this.bills=[];
         data.forEach((e)=>{
-          this.bills.push({
-            time1: "2016/03/09",
-            time2: "13:43",
-            type: "充币",
-            coin: "BTC",
+          let item={
+            time1: new Date(e.date*1000).dateHandle("yyyy/MM/dd"),
+            time2: new Date(e.date*1000).dateHandle("HH:mm:ss"),
+            type: ["充币","提币","购买","出售","转账-入账","转账-出账","担保-入账","担保-出账",
+              "红包-入账","红包-出账","资金互转-转入","资金互转-转出"][e.type-1],
+            coin: e.currency && e.currency.toUpperCase(),
             coinIcon: "http://192.168.113.26//image/B012F109359B4872",
-            addr: "0x046eb......d7e3543",
-            nickname: "user_9823244",
-            uid: "232424234",
-            num: "+1.12 BTC",
-            fee: "0.00004",
-            state: "成功",
-            orderId: "xxxxxxxxxxxxxxxxxxxxx",
-            inOrOut: 0, // 进出账：0-进账,1-出账
-            billType: 0,  // 账单类型：0-充提,1-交易,2-担保,3-红包,4-转账
-          });
+            nickname: e.trader_name || "-",
+            uid: e.trader_id,
+            num: e.amount,
+            fee: e.fee,
+            state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
+            orderId: e.relation_id,
+            isIn: [1,3,5,7,9,11].indexOf(e.type)>=0, // 进出账：true-进账,false-出账
+            billType: Math.ceil(e.type/2),  // 账单类型：0-充提,1-交易,2-担保,3-红包,4-转账,5-资金互转
+          };
+          if(item.isIn){
+            item.addr=e.from && e.from.formatAddr();
+            item.addrName=e.from_name || "-";
+            item.amount="+"+item.amount+" "+item.coin;
+          }else{
+            item.addr=e.to && e.to.formatAddr();
+            item.addrName=e.to_name || "-";
+            item.amount="-"+item.amount+" "+item.coin;
+          }
+          this.bills.push(item);
         });
       },
       exportCsv(){
-        this.excelJsonField={};
-        this.excelJsonField["时间"]="time";
-        this.excelJsonField[this.ul1Text]="type";
-        this.excelJsonField["币种("+this.ul2[this.ul2Sel].text+")"]="coin";
-        this.excelJsonField["交易对方"]="user";
-        this.excelJsonField["发送地址名称"]="sendAddrName";
-        this.excelJsonField["发送地址"]="sendAddr";
-        this.excelJsonField["接收地址名称"]="recvAddrName";
-        this.excelJsonField["接收地址"]="recvAddr";
-        this.excelJsonField["数量"]="num";
-        this.excelJsonField["手续费"]="fee";
-        this.excelJsonField[this.ul3Text]="state";
-        this.excelJsonField["订单号"]="orderId";
+        let jsonField={};
+        jsonField["序号"]="index";
+        jsonField["时间"]="time";
+        jsonField[this.ul1Text]="type";
+        jsonField["币种("+this.ul2[this.ul2Sel]+")"]="coin";
+        jsonField["交易对方"]="user";
+        jsonField["发送地址名称"]="sendAddrName";
+        jsonField["发送地址"]="sendAddr";
+        jsonField["接收地址名称"]="recvAddrName";
+        jsonField["接收地址"]="recvAddr";
+        jsonField["数量"]="num";
+        jsonField["手续费"]="fee";
+        jsonField[this.ul3Text]="state";
+        jsonField["订单号"]="orderId";
         //
-        this.excelJsonData=[];
-        [1,2,3,4,5].forEach((e)=>{
-          this.excelJsonData.push({
-            time: "2016/08/09 12:32",
-            type: "充币",
-            coin: "BTC",
-            user: "user_1323232",
-            sendAddrName: "xxxxx",
-            sendAddr: "xxxxxxxxxxxxxx",
-            recvAddrName: "xxxxx",
-            recvAddr: "xxxxxxxxxxxxxxxxx",
-            num: "+0.1222 BTC",
-            fee: "0.000001 BTC",
-            state: "成功",
-            orderId: "xxxxxxxxxxxxx",
+        let jsonData=[];
+        this.WsProxy.send("wallet","bills_v2",{
+          keyword_type: this.paramSrchType,
+          keyword: this.srchText,
+          currency: this.paramCoin,
+          type: this.paramType,
+          state: this.paramState,
+          start: this.paramStart,
+          end: this.paramEnd,
+          count: 0,
+        }).then((data)=> {
+          data && data.forEach((e,i) => {
+            let item={
+              index: i+1,
+              time: new Date(e.date*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
+              type: ["充币","提币","购买","出售","转账-入账","转账-出账","担保-入账","担保-出账",
+                "红包-入账","红包-出账","资金互转-转入","资金互转-转出"][e.type-1],
+              coin: e.currency && e.currency.toUpperCase(),
+              user: e.trader_name,
+              sendAddrName: e.from_name,
+              sendAddr: e.from,
+              recvAddrName: e.to_name,
+              recvAddr: e.to,
+              num: e.amount,
+              fee: e.fee,
+              state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
+              orderId: e.relation_id,
+              isIn: [1,3,5,7,9,11].indexOf(e.type)>=0, // 进出账：true-进账,false-出账
+
+            };
+            if(item.isIn){
+              item.amount="+"+item.amount+" "+item.coin;
+            }else{
+              item.amount="-"+item.amount+" "+item.coin;
+            }
+            item.fee=item.fee+item.coin;
+            jsonData.push(item);
           });
+          JsonExcel.data=jsonData;
+          JsonExcel.fields=jsonField;
+          JsonExcel.name="MixOTC-账单.xls";
+          JsonExcel.generate();
+        }).catch((msg)=>{
+          alert(JSON.stringify(msg));
         });
       },
     },
     mounted(){
-      this.loadBills();
+      this.init();
       this.Bus.$on("onPageChange",(p)=>{
         this.curPage=p;
         this.loadBills();

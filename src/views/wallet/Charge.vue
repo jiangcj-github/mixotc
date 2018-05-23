@@ -11,8 +11,9 @@
           <div class="form">
             <div class="p1">
               <label>币种：</label>
-              <div class="select" tabindex="0">
-                <p @click="isShowCoinUl=!isShowCoinUl" v-clickoutside="()=>isShowCoinUl=false">{{coins[coinSel]}}</p>
+              <div class="input-group">
+                <p class="input" @click="isShowCoinUl=!isShowCoinUl" v-clickoutside="()=>isShowCoinUl=false">{{coins[coinSel]}}</p>
+                <i class="drop-trangle"></i>
                 <ul class="drop" v-show="isShowCoinUl">
                   <li v-for="(e,i) in coins" @click="coinSel=i">{{e}}</li>
                 </ul>
@@ -21,7 +22,7 @@
             <div class="p2">
               <span>总额：0.67899765 BTC</span>
               <span>可用余额：0.67899765 BTC</span>
-              <span>认中：0.67899765 BTC</span>
+              <span>确认中：0.67899765 BTC</span>
             </div>
             <div class="card">
               <p class="warning">
@@ -47,17 +48,17 @@
           <!--充值动态-->
           <div class="list">
             <div class="title">
-              <h3>充值动态</h3>
+              <h3>充值记录</h3>
               <a href="#" class="btn white a1">去交易</a>
               <a href="#" class="a2">查看全部</a>
             </div>
             <div class="thead">
-              <p class="time">时间</p>
-              <p class="coin">币种</p>
-              <p class="chargeNum">充值数量</p>
-              <p class="sendAddr">发送地址</p>
-              <p class="recvAddr">接收地址</p>
-              <p class="confirm">确认数</p>
+              <p class="th time">时间</p>
+              <p class="th coin">币种</p>
+              <p class="th chargeNum">充值数量</p>
+              <p class="th sendAddr">发送地址</p>
+              <p class="th recvAddr">接收地址</p>
+              <p class="th confirm">确认数</p>
             </div>
             <div class="li">
             <div class="time">
@@ -124,7 +125,7 @@
                 <p>BTC</p>
                 <p>Bitcoin</p>
               </div>
-              <div class="chargeNum">+ 13.0949</div>
+              <div class="chargeNum in">+ 13.0949</div>
               <div class="sendAddr">13693691162</div>
               <div class="recvAddr">morXXEXFS3ZjP6qk8VD3bnJJm2go4HsFvS</div>
               <div class="confirm"><i>1</i>/5</div>

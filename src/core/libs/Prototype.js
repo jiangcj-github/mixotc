@@ -131,6 +131,12 @@ String.prototype.formatFixed=function(n){
   return this.substr(0,i+n+1);
 };
 
+//格式化地址，msHdsbs......dxkdkdw
+String.prototype.formatAddr=function(){
+  if(!this || this.length<=14) return;
+  return this.substr(0,7)+"......"+this.substr(-7);
+};
+
 // 时间格式化
 Number.prototype.toDate = function (fmt) {
   let date = new Date(this * 1000);

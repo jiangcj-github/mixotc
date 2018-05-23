@@ -13,7 +13,7 @@
       <a href="/#/wallet/conversion"><i>资产互转</i><img src="/static/images/wallet/conversion.png"></a>
     </li>
     <li :class="{active:leftBar===5}">
-      <a href="/#/wallet/history"><i>账单明细</i><img src="/static/images/wallet/bid.png"></a>
+      <a href="/#/wallet/history"><i>账单</i><img src="/static/images/wallet/bid.png"></a>
     </li>
     <li :class="{active:leftBar===6}">
       <a href="/#/wallet/address"><i>地址管理</i><img src="/static/images/wallet/address.png"></a>
@@ -30,7 +30,7 @@
   *{box-sizing:border-box;}
   ul{width:180px;background:#fff;float:left;}
   ul>li{height:60px;background:#fff;}
-  ul>li.active{border-bottom:2px solid #ffb422;background:#fff3eb;}
+  ul>li.active{border-bottom:2px solid #ffb422;background:#fff3eb;pointer-events:none;}
   ul>li:hover{background:#fff3eb;}
   ul>li>a{height:58px;line-height:58px;padding:0 20px 0 30px;display:block;}
   ul>li>a:hover{background:#fff3eb;}
