@@ -11,6 +11,7 @@
                    :width=593
                    :top=39
                    :showDisabled="isDisabled"
+                   :createWallet="true"
                    :widthSelect=618
                    :widthWrap=620>
         </ChoiceBox>
@@ -21,7 +22,7 @@
       </li>
       <li class="pay-li">
         <p>收款方式</p>
-        <PaymentSelect :soreItem="adSaleObj.payment"></PaymentSelect>
+        <PaymentSelect :soreTab="adSaleObj.payment"></PaymentSelect>
       </li>
     </ol>
     <ol>
@@ -63,7 +64,7 @@
           <i>出售数量</i>
           <em>可用余额：</em>
           <b>{{userBalance}}{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
-          <button class="sale-btn">去充币</button>
+          <router-link to="/wallet/charge" tag="button" class="sale-btn">去充币</router-link>
           <strong :class="{selected: adSaleObj.vary == 2}" @click="showVary()">随可用余额变动</strong>
         </p>
         <!--<input type="text" :disabled="selectNum" v-model="numValue"/>-->
@@ -152,6 +153,7 @@
 
         selectNum: false, // 是否限量
         adSaleObj: {
+          "id": '', // 广告id
           "uid": '', // 用户id
           "currency": 'btc', // 电子货币
           "money": 'cny', // 法币
@@ -320,6 +322,8 @@
             case 82:
               this.errText = '创建钱包失败'
               break;
+            default:
+              this.errText = '请核实'
           }
           this.adErrLayer = true
         });

@@ -211,7 +211,6 @@
           {content: '操作'}
         ], // 表格表头内容
         clickUp: 20,
-        clickDown: 20,
         sortActive: false, // 控制箭头开始无active
 
         content: [
@@ -559,7 +558,6 @@
         this.contentTabIndex = type;
         this.$store.state.newOrder = false;
         this.clickUp = 20;
-        this.clickDown = 20;
 
         // 获取用户id
         this.userId = this.JsonBig.stringify(this.$store.state.userInfo.uid)
@@ -672,7 +670,6 @@
       },
       toSort(title, index) { // 排序操作
         this.clickUp = index;
-        this.clickDown = index;
         this.sortActive = this.sortFlag === index ? !this.sortActive : true;
         this.dateSort = title.flag === 0 ? (this.sortActive ?  2 : 1) : 0;
         this.price = title.flag === 4 ? (this.sortActive ? 2 : 1) : 0;

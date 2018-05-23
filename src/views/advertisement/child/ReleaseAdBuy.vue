@@ -2,7 +2,6 @@
   <div class="release-ad-info">
     <ol>
       <li>
-        <!--{{$route.params}}-->
         <p>选择币种</p>
         <ChoiceBox :choiceClass="adB"
                    :title="adBuyObj.currency && adBuyObj.currency.toUpperCase()"
@@ -22,7 +21,7 @@
       </li>
       <li class="pay-li">
         <p>收款方式</p>
-        <PaymentSelect :soreItem="adBuyObj.payment"></PaymentSelect>
+        <PaymentSelect :soreTab="adBuyObj.payment"></PaymentSelect>
       </li>
     </ol>
     <ol>
@@ -133,6 +132,7 @@
         limitValue: 'limitValue',
         selectNum: false, // 是否限量
         adBuyObj: {
+          "id": '', // 广告id
           "uid": '', // 用户id
           "currency": 'btc', // 电子货币
           "money": 'cny', // 法币
@@ -155,7 +155,8 @@
         succNum: 4,
         adErrLayer: false,
         errText: '',
-        isDisabled: false
+        isDisabled: false,
+        //aaa: 0
       }
     },
     components: {
@@ -185,6 +186,7 @@
         this.adBuyObj = this.$route.params.buyCon;
         return;
       }
+      //this.aaa= this.adBuyObj.payment
       this.Bus.$emit('buyInfo', this.adBuyObj)
     },
     mounted() {
@@ -192,6 +194,7 @@
       this.selectUserCoin()
       this.getPrice()
       this.initData()
+
       this.Bus.$on(this.selectCoin, data => { // 币种筛选
         this.adBuyObj.currency = data
         this.getPrice()
@@ -279,6 +282,8 @@
             case 82:
               this.errText = '创建钱包失败'
               break;
+            default:
+              this.errText = '请核实'
           }
           this.adErrLayer = true
         });

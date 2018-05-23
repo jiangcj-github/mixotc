@@ -5,12 +5,12 @@
                :height=282>
       <div class="order-layer">
         <ul>
-          <li class="clearfix"><span>购买单价</span><b>{{price}} CNY</b></li>
-          <li class="clearfix"><span>购买数量</span><b>{{currency}} BTC</b></li>
-          <li class="clearfix"><span>购买金额</span><b>{{money}} CNY</b></li>
+          <li class="clearfix"><span>{{titleType[type-1]}}单价</span><b>{{price}} CNY</b></li>
+          <li class="clearfix"><span>{{titleType[type-1]}}数量</span><b>{{currency}} BTC</b></li>
+          <li class="clearfix"><span>{{titleType[type-1]}}金额</span><b>{{money}} CNY</b></li>
         </ul>
         <p>提醒：请确认价格后立即下单</p>
-        <p>下单后此订单的比特币将托管锁定，请放心购买</p>
+        <p>下单后此订单的比特币将托管锁定，请放心{{titleType[type-1]}}</p>
         <div class="btn-group clearfix">
           <em @click="closeOrderLayer">取消</em>
           <i @click="firmOrder">确认订单</i>
@@ -28,9 +28,10 @@
 
   export default {
     name: "order-layer",
-    props: ['orderLayerShow', 'id', 'price', 'currency', 'money'],
+    props: ['orderLayerShow', 'id', 'price', 'currency', 'money', 'type'],
     data() {
       return {
+        titleType: ['购买', '出售'],
         orderLayer: this.orderLayerShow,
         remindLayer: false,
         remindText: ''

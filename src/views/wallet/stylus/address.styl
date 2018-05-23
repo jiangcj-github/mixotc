@@ -5,15 +5,14 @@
 .right .form-head{padding:10px 30px;background:#fff;height:50px;}
 .form-head .select{position:relative;display:inline-block;width:100px;}
 .form-head .select:hover>p{color:#fea350;}
-.form-head .select>p{line-height:30px;cursor:pointer;font-size:13px;color:#333;letter-spacing:0.27px;}
-.form-head .select>p:after{content:"";display:inline-block;border:5px solid transparent;border-top-color:#333;
-  vertical-align:-3px;margin-left:7px;}
+.form-head .select>p{line-height:30px;cursor:pointer;}
+.form-head .select>p:after{content:"";display:inline-block;border:5px solid transparent;border-top-color:#333;vertical-align:-3px;margin-left:7px;}
 .form-head .select>ul{position:absolute;top:30px;left:-10px;width:100px;}
 .form-head>a{float:right;line-height:30px;}
 .form-head>a>img{height:16px;width:auto;vertical-align:-3px;margin-right:7px;}
 
 .right .form{height:70px;background:#fff;padding:20px 30px;margin-bottom:20px;line-height:30px;border-top:1px solid #e1e1e1;display:flex;}
-.right .form>label{width:60px;color:#333;font-size:14px;}
+.right .form>label{width:60px;font-size:14px;}
 .right .form>input{flex-grow:1;background:#f4f6fa;padding:0 10px;border-radius:2px;}
 .right .form .in1{padding:0 40px 0 10px;}
 .right .form>i{color:#999;font-size:12px;margin-left:-40px;width:40px;text-align:center;margin-right:30px;}
@@ -24,28 +23,19 @@
 
 /*过滤*/
 .right .filter{padding:10px 30px;background:#fff;display:flex;user-select:none;height:50px;}
-.filter .f1{border-radius:2px;display:inline-flex;position:relative;border:1px solid #ffb422;width:450px;}
-.f1>input{padding:0 10px;flex-grow:1;min-width:0;}
-.f1>img{align-self:center; margin-right:10px;}
-.f1>img:hover{cursor:pointer; opacity:0.8;}
-.f1>button{width:72px;cursor:pointer;background:url(/static/images/search.png) no-repeat center center #ffb422;}
-.f1>button:hover{background-color:#fea350;}
+.filter .input-group{width:450px;border-color:#ffb422;}
+.input-group .addin{width:72px;cursor:pointer;background:#ffb422;}
+.input-group .addin>img{height:16px;vertical-align:-2px;}
+.input-group .addin:hover{background-color:#fea350;}
 .filter .f2{flex-grow:1;text-align:right;line-height:30px;}
-.f2>a{font-size:13px;}
+.f2>a{}
 .f2>a>img{width:auto;height:16px;vertical-align:-3px;margin-right:7px;}
 
 
 /*表头*/
-.right .thead{height:50px;padding:15px 30px 5px 30px;background:#fff;border-top:1px solid #e1e1e1;}
-.thead>p{display:inline-block;vertical-align:top;line-height:30px;font-size:13px;color:#999;letter-spacing:0.27px;}
-.thead .select{cursor:pointer;}
-.thead .select>p{color:#999;}
-.thead .select:hover>p{color:#fea350;}
-.thead .select>p:after{content:"";display:inline-block;border:5px solid transparent;border-top-color:#999;
-  vertical-align:-3px;margin-left:7px;}
-.thead .select>ul{position:absolute;top:40px;left:-10px;right:0;}
-.thead .multi p{}
-.thead .multi>ul>li img{float:right;margin-top:7px;}
+.right .thead{height:50px;background:#fff;border-top:1px solid #e1e1e1;padding:15px 30px 5px 30px}
+.right .thead .th{line-height:30px;}
+.right .thead .th .drop{width:100px;top:30px;}
 
 /*列表项*/
 .right .list{padding-bottom:10px;background:#fff;}

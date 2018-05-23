@@ -30,14 +30,14 @@
           </div>
           <!--搜索框-->
           <div class="filter">
-            <div class="f1">
+            <div class="input-group">
               <!--搜索条件-->
-              <input type="text" v-model="srchText" v-clickoutside="()=>isShowTip=false" placeholder="搜索地址名称">
-              <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
-              <button></button>
+              <input class="input" type="text" v-model="srchText" v-clickoutside="()=>isShowTip=false" placeholder="搜索地址名称">
+              <img class="clear" src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
+              <button class="addin" @click=""><img src="/static/images/search.png"></button>
               <!--模糊搜索结果-->
-              <ul v-show="isShowTip && tips.length>0" class="drop">
-                <li v-for="(e,i) in tips">
+              <ul v-show="isShowTip" class="drop">
+                <li v-for="(e,i) in []">
                   <span class="sp1">{{e}}</span><span class="sp2"></span>
                 </li>
               </ul>
@@ -48,10 +48,15 @@
           </div>
           <!--表头-->
           <div class="thead">
-            <p class="coin">币种</p>
-            <p class="name">名称</p>
-            <p class="addr">地址</p>
-            <p class="op">操作</p>
+            <div class="th coin select">
+              <p @click="isShowUl1=!isShowUl1">币种({{ul1[ul1Sel].text}})</p>
+              <ul class="drop" v-show="isShowUl1">
+                <li v-for="(e,i) in ul1" @click="ul1Sel=i">{{e.text}}</li>
+              </ul>
+            </div>
+            <div class="th name">名称</div>
+            <div class="th addr">地址</div>
+            <div class="th op">操作</div>
           </div>
           <!--请求结果-->
           <div v-if="err===0" class="list">
@@ -116,7 +121,14 @@
         coinUlSel: 0,
         coins: ["BTC","ETH","LTC"],
 
+        ul1:[
+          {text:"全部",value:null},
+        ],
+        ul1Sel:0,
+        isShowUl1: false,
+
         srchText: "",
+        isShowTip: false,
 
         list: [1,2,3,4,5,6,7,8,9,10],
         curPage: 1,
@@ -126,17 +138,23 @@
       }
     },
     computed:{
-      ul1Text(){
-        let i=0;
-        this.ul1.forEach((e)=>{
-          if(e.check) i++;
-        });
-        return i>0?"类型(筛选"+i+"项)":"全部类型";
-      },
+
     },
 
-    methods: {
+    methods:{
+      async init(){
+        //加载钱包币种列表
+        let data=await this.WsProxy.send("wallet","bill_currency_list", {}).catch((msg)=>{
+          console.log(msg);
+        });
+        data && data.forEach((e)=>{
+          this.ul2.push({text:e.toUpperCase(),value:e.toLowerCase()});
+        });
 
+      },
+    },
+    mounted(){
+      this.init();
     },
   }
 </script>

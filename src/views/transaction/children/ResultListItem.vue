@@ -24,7 +24,7 @@
     <div class="title amount">{{data.amount}}</div>
     <div class="title price">{{data.price}}</div>
     <div class="title button">
-      <button @click.stop="_toOrder(data)">购买</button>
+      <button @click.stop="_toOrder(data)">{{data.type == 1 ? '购买' : '出售'}}{{data.currency && data.currency.toUpperCase()}}</button>
     </div>
   </li>
 </template>
@@ -42,6 +42,7 @@ export default {
         id :data.id,
         sid :data.sid,
         currency: data.currency,
+        type: data.type
       }).then(()=>{
         this.$router.push({ name: 'order', query: { id: data.id}});
       }).catch((res)=>{

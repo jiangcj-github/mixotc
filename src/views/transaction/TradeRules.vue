@@ -273,20 +273,9 @@
     margin-top 21px
     margin-bottom 30px
     h1
-      font-size $fz20
-      font-weight bold
-      color $col333
-      margin-bottom 30px
-      &:before
-        display inline-block
-        width 3px
-        height 20px
-        position relative
-        top 2px
-        left 0
-        content ''
-        margin-right 9px
-        background-color $col422
+      font-size 12px
+      letter-spacing 0.25px
+      margin-bottom 20px
     h2
       font-size 24px
       margin-bottom 40px
@@ -320,15 +309,16 @@
       float left
       li
         height 60px
+        background #FFF
         line-height 60px
         cursor pointer
       li.active
-        background #FFF
-        color #FFB422
-        -moz-box-shadow 0 2px 4px 0 rgba(153,153,153,0.70)
+        background #FFF3EB
+        border-bottom 2px solid  #FFB422
+        /*-moz-box-shadow 0 2px 4px 0 rgba(153,153,153,0.70)
         -webkit-box-shadow 0 2px 4px 0 rgba(153,153,153,0.70)
         box-shadow 0 2px 4px 0 rgba(153,153,153,0.70)
-        border-radius 4px
+        border-radius 4px*/
 
     .child-ul
       margin 15px 0 30px 3px
