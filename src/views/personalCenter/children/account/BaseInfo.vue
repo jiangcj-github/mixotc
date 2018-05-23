@@ -84,7 +84,7 @@
   <!-- 删除确认弹窗 -->
     <BasePopup :show="isShowConfirm" :top="40" :width="470" :height="194">
       <slot>
-        <div class="main">
+        <div class="main" v-clickoutside="()=>{isShowConfirm = false}">
           <img src="/static/images/close_btn_tr2.png" alt="" @click="isShowConfirm = false">
           <p class="tip">是否确定删除？</p>
           <p class="button">

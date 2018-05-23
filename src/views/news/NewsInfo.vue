@@ -33,6 +33,7 @@
     right 0
     width 560px
     height  420px
+    z-index 99999
     background #FFF
      -webkit-box-shadow: -3px 0 3px 0 rgba(0,0,0,0.1), 0 -3px 3px 0 rgba(0,0,0,0.1)
     box-shadow: -3px 0 3px 0 rgba(0,0,0,0.1), 0 -3px 3px 0 rgba(0,0,0,0.1)

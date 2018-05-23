@@ -104,6 +104,12 @@
     methods: {
       dealCard() {
         let value = this.$refs.account.value.trim().replace(/\s/g,"");
+        if(value[0] == 0) {
+          value = '';
+          this.$refs.account.value = '';
+          this.info.number = '';
+          return;
+        }
         if(!(/(^[0-9]\d*$)/.test(value))){
           value = value.replace(/[^0-9]/g,"");
         };
@@ -164,7 +170,7 @@
       right 10px
       cursor pointer
     input
-      padding-right 10px
+      padding-right 20px
     .close-btn
       position absolute
       right 10.4px

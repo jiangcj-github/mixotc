@@ -1,27 +1,27 @@
 <template>
 <div>
-  <div class="kong" v-if="authState === ''"></div>
   <div class="underway" v-if="authState === 1">
     <p>认证中…</p>
   </div>
   <div class="pass" v-if="authState === 2">
     <p>已通过认证</p>
   </div>
-  <div class="fail" v-if="authState === 3">
+  <div class="fail" v-if="authState === 3 || authState === 4 && isPass">
     <dl>
       <dt>认证失败</dt>
-      <dd>{{faileReason}}</dd>
+      <dd v-if="authState === 3">{{faileReason}}</dd>
+      <dd v-if="authState === 4">恶意上传实名认证信息 {{faileReason}}</dd>
     </dl>
   </div>
-  <div class="close-three" v-if="authState === 4">
-    <p>认证失败</p>
+  <div class="close-three" v-if="authState === 4 && !isPass">
+    <p>认证失败 {{faileReason}}</p>
     <p class="hint">恶意上传实名认证信息，关闭实名认证功能3天</p>
   </div>
   <div class="close-forever" v-if="authState === 5">
-    <p>认证失败</p>
+    <p>认证失败 {{faileReason}}</p>
     <p class="hint">恶意上传实名认证信息3次，本账号永久关闭实名认证功能</p>
   </div>
-  <div class="auth" v-if="authState === 3 || authState === 0">
+  <div class="auth" v-if="authState === 3 || authState === 0 || authState === 4 && isPass">
     <div class="name clearfix">
       <div class="title">
         实名认证
@@ -30,26 +30,15 @@
         <p class="tip">实名信息必须真实可靠，并与银行登记信息保持一致。实名信息一旦确认，不可修改</p>
         <ul class="clearfix">
           <li class="input">
-            <p>姓氏</p>
-            <input type="text" placeholder="输入姓氏" v-model="data.surname" maxlength="20" ref="surname">
-            <i 
-              v-if="data.surname"
-              @click="()=>{data.surname = ''; $refs.surname.focus()}"
-            >
-              <img src="/static/images/cancel_icon.png" alt="">
-            </i>
-            <b class="hint" v-if="surnameTip">姓氏不能为空</b>
-          </li>
-          <li class="input">
-            <p>名字</p>
-            <input type="text" placeholder="输入名字" v-model="data.name" maxlength="20" ref='name'>
+            <p>姓名</p>
+            <input type="text" placeholder="输入姓名" v-model="data.name" maxlength="20" ref='name'>
             <i 
               v-if="data.name"
               @click="()=>{data.name = ''; $refs.name.focus()}"
             >
               <img src="/static/images/cancel_icon.png" alt="">
             </i>
-            <b class="hint" v-if="nameTip">名字不能为空</b>
+            <b class="hint" v-if="nameTip">姓名不能为空</b>
           </li>
         </ul>
       </div>
@@ -101,7 +90,7 @@
             <img :src="`${HostUrl.http}image/${data.iconArr[item - 1]}`" alt="" class="up-img" v-if="data.iconArr[item - 1]">
             <p>{{copy[data.type][item - 1]}}</p>
           </li>
-          <li class="hint" v-if="photoTip || sizeTip">{{`${photoTip ? '照片信息缺失' : ''} ${sizeTip ? '图片大小需小于10M' : ''}`}}</li>
+          <li class="hint" v-if="photoTip || sizeTip">{{`${photoTip ? '证件照片信息缺失' : ''} ${sizeTip ? '图片大小需小于10M' : ''}`}}</li>
         </ul>
         <p class="guarantee">
           <img src="/static/images/rules_checked.png" alt="" v-if="guarantee" @click="guarantee=false">
@@ -136,14 +125,14 @@ import { mapState } from 'vuex';
   export default {
     data() {
       return {
-        authState:'',
+        authState:this.$store.state.userInfo.verify,
         curPhoto:0,
-        surnameTip: false,
         nameTip: false,
         numberTip: false,
         photoTip: false,
         sizeTip: false,
         faileReason: '证件照片不符',
+        faileTime: 0,
         defaultIdentity:['identity_0.png','identity_1.png','identity_2.png'],
         defaultPassport:['passport_0.png','passport_1.png','passport_2.png'],
         copy:[
@@ -152,7 +141,6 @@ import { mapState } from 'vuex';
         ],
         guarantee: true,
         data: {
-          surname: '',
           name: '',
           type: 1,
           number: '',
@@ -163,16 +151,23 @@ import { mapState } from 'vuex';
     computed: {
       ...mapState([
         'userInfo'
-      ])
+      ]),
+      isPass(){
+        return (new Date()- 0) - this.faileTime*1000 > 622080000
+      }
     },
     async created() {
       await this.$store.dispatch({ type: 'updateUserInfo', ws: this.WsProxy});
-      if(this.userInfo.verify === 3) {
-        this.failReason = await this.WsProxy.send("control", "get_identity", {
+      if([3, 4, 5].includes(this.userInfo.verify)) {
+        await this.WsProxy.send("control", "get_identity", {
           type: 1
-        }).then(data=> {
-          this.faileReason = data.info
-          console.log(data)
+        }).then(({info, name, type , number, image1, image2, image3, update})=> {
+          this.faileReason = info;
+          this.faileTime = update;
+          this.data.name = name;
+          this.data.type = type;
+          this.data.number = number;
+          this.data.iconArr = [image1, image2, image3]
         }).catch(error=>{
           console.log(error)
         })
@@ -182,6 +177,10 @@ import { mapState } from 'vuex';
     methods: {
       dealCertificate() {
         this.data.number = this.data.number.trim().replace(/\s/g,"");
+        if(this.data.number[0] == 0) {
+          this.data.number = '';
+          return;
+        }
         if(!(/^[0-9a-zA-Z]+$/.test(this.data.number))){
           this.data.number = this.data.number.replace(/[^a-zA-Z0-9]/g,"");
         };
@@ -213,10 +212,9 @@ import { mapState } from 'vuex';
         })
       },
       verify(){
-        let { number, name, surname, type} = this.data;
+        let { number, name, type} = this.data;
         name.trim() === '' ?  this.nameTip = true : this.nameTip = false; 
         number.trim().replace(/\s/g,"") === '' ?  this.numberTip = true : this.numberTip = false;
-        surname.trim() === '' ?  this.surnameTip = true :  this.surnameTip = false;
         if(type === 1) {
           // 身份证正则
           /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/.test(number.trim().replace(/\s/g,"")) ? this.numberTip = false : this.numberTip = true;
@@ -226,20 +224,21 @@ import { mapState } from 'vuex';
         }
         this.data.iconArr.filter(item=>{return item === ''}).length === 0 ? this.photoTip = false :  this.photoTip = true;
         if(this.photoTip) this.sizeTip = false;
-        return !(this.nameTip || this.surnameTip || this.numberTip || this.photoTip)
+        return !(this.nameTip || this.numberTip || this.photoTip)
       },
       submit(){
         if(!this.verify()) return;
-        let { number, name, surname, iconArr} = this.data;
+        let { number, name, iconArr} = this.data;
         this.WsProxy.send('control', 'user_identity', {
           type: 1,
-          name: surname.trim() + name.trim(),
+          name: name.trim(),
           number: number.trim().replace(/\s/g,""),
           Image1: iconArr[0],
           Image2: iconArr[1],
           Image3: iconArr[2]
         }).then(data=>{
           this.authState = 1;
+          this.$store.dispatch({ type: 'updateUserInfo', ws: this.WsProxy})
         }).catch(error=>{
           console.log(error)
         })
@@ -250,9 +249,6 @@ import { mapState } from 'vuex';
 
 <style scoped lang="stylus">
 @import "../../../../stylus/base";
-.kong
-  width 1000px
-  height 577px
 .underway, .pass, .close-three, .close-forever
   width 1000px
   height 307px
