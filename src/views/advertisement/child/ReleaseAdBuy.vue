@@ -54,9 +54,9 @@
           <em v-show="!switchValue">当前市场最低价：</em>
           <b v-show="!switchValue">{{priceNow}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
         </p>
-        <input type="text" v-model="adBuyObj.price"/>
+        <input type="text" v-model="adBuyObj.price" @focus="clearPrice=true" @blur="clearPrice=false"/>
         <span>CNY</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.price" @click="adBuyObj.price=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="clearPrice" @mousedown="adBuyObj.price=''">
       </li>
       <li class="input-li">
         <p class="num-p clearfix">
@@ -156,7 +156,8 @@
         adErrLayer: false,
         errText: '',
         isDisabled: false,
-        //aaa: 0
+
+        clearPrice: false
       }
     },
     components: {
@@ -186,7 +187,6 @@
         this.adBuyObj = this.$route.params.buyCon;
         return;
       }
-      //this.aaa= this.adBuyObj.payment
       this.Bus.$emit('buyInfo', this.adBuyObj)
     },
     mounted() {

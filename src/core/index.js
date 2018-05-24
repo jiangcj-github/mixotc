@@ -154,7 +154,7 @@ const RUN_APP = (App, config, plugin) => {
       toPath = to.path;
       next();
       return;
-    } 
+    }
     if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(to.path)) {
       next();
       return;
@@ -174,7 +174,7 @@ const RUN_APP = (App, config, plugin) => {
     store,
     data() {
       return {
-        isReload: false 
+        isReload: false
       };
     },
     methods: {

@@ -63,7 +63,7 @@
               <span>{{item.type}}</span>
             </li>
           </ul>
-          <img src="/static/images/cancel_icon.png" alt="" v-if="paymentScore !== 0" @click.stop="clearPayment">
+          <img src="/static/images/cancel_icon.png" alt="" v-if="paymentScore !== 0 && showPayment" @click.stop="clearPayment">
         </div>
         <div class="price">
           <b v-if="tip" class="err-tip"><img src="/static/images/hint.png">最大限额不能低于最小限额，且最小限额为200</b>
@@ -520,9 +520,9 @@
       .select
         box-sizing()
         position absolute
-        left 560px
+        left 540px
         top 20px
-        width 170px
+        width 190px
         height 30px
         background #FFF
         border 1px solid $col1E1
@@ -530,7 +530,7 @@
         img
           position absolute
           top 9px
-          right 23px
+          right 30px
         i
           position absolute
           top 0px
