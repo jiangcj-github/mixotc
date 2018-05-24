@@ -8,15 +8,15 @@
     <section class="down" :style="{borderRight: 0}">
       <div class="wrapper">
         <ul class="down-tag">
-          <li><img class="top-logo" src="/static/images/toplogo.png" alt="MIXOTC官网"></li>
+          <li><img class="top-logo logoImg" src="/static/images/toplogo2.png" alt="MIXOTC官网"></li>
           <router-link to="/transaction" tag="li" class="tag transaction" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
           <li class="tag ad"
               @mouseenter="adChild = true"
               @mouseleave="adChild = false"
-              @click="!$store.state.isLogin && changeLoginForm(true) || $store.state.isLogin && !$store.state.userInfo.verif && (realLayer = true)"
+              @click="!$store.state.isLogin && changeLoginForm(true) || $store.state.isLogin && $store.state.userInfo.verify !== 2 && (realLayer = true)"
               :class="{active: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
             <span>广告</span>
-            <ol v-show="$store.state.isLogin && $store.state.userInfo.verify && adChild">
+            <ol v-show="$store.state.isLogin && $store.state.userInfo.verify == 2 && adChild">
               <li @click="releaseAd()"><router-link to="/advertisement/release" tag="li">发广告</router-link></li>
               <li @click="adChild = false"><router-link to="/advertisement" tag="li">我的广告</router-link></li>
             </ol>
@@ -144,6 +144,9 @@
          handler(curVal, oldValue) {
           curVal === '/order' && (this.newOrder = 0);
           curVal === '/personal/account/auth' && (this.realLayer = false)
+          // curVal === '/advertisement/release/buy' && (this.realLayer = false)
+          // curVal === '/advertisement/release/sale' && (this.realLayer = false)
+          // curVal === '/advertisement' && (this.realLayer = false)
           // if (["/verify", "/verify/identifyAuth", "/verify/largeTransaction", "/verify/arbitrationRecord", "/verify/service"].includes(this.$route.path) && this.$store.state.userInfo && !this.$store.state.userInfo.is_admin) {
           //   console.log(9999)
           //   this.$router.push('/transaction');
@@ -175,6 +178,10 @@
 
   .top-logo
     margin-top 22px
+
+  .logoImg
+    width 120px
+    height 26.9px
 
   .header
     height 100px

@@ -5,7 +5,7 @@
       <div class="header">
         <!--<h2>{{filte.currency && "购买"+filte.currency.toUpperCase() || "购买BTC"}}</h2>-->
         <h2 class="clearfix">
-          <img :src="filte.coinImg && `${HostUrl.http}image/${filte.coinImg}` || `${HostUrl.http}image/B012F109359B4872`" alt="">
+          <img :src="filte.coinImg || `/static/images/btc_icon.png`" alt="">
           <p>
             <span>{{filte.currency && filte.currency.toUpperCase() || 'BTC'}}</span>
             <b>{{filte.cName && filte.cName || 'Bitcoin'}}</b>
@@ -17,14 +17,14 @@
             <ul v-show="srchUlShow">
               <li v-for="(e,i) in srchUls" @click="srchUlSel=i">{{e.title}}</li>
             </ul>
-            <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput">
-            <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
+            <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput" @focus="srchTipShow=true">
+            <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchTipShow && srchText.length>0">
             <a href="javascript:void(0)" @click="searchStr"></a>
             <!--币种模糊搜索结果-->
             <ul v-show="srchTipShow" v-if="this.srchType===0">
               <li v-for="e in coinTips" @click="search(e)">
                 <div @mousedown="srchText=e.name">
-                  <img class="coin" :src="`${HostUrl.http}image/${e.icon}`"/><span>{{e.name}}</span><span class="gray">{{e.cname}}</span>
+                  <img class="coin" :src="e.icon"/><span>{{e.name}}</span><span class="gray">{{e.cname}}</span>
                 </div>
               </li>
               <li class="notip" v-show="coinTips.length<=0">暂无该币种信息</li>
@@ -43,10 +43,10 @@
           <li v-for="(item, index) in hotCoinList" @click="hotCoinSelect(item, index)" :class="{'top-active': index == hotNum}">
             <img src="/static/images/hot_coin.png" alt="">
             <p>
-              <img :src="`${HostUrl.http}image/${item.imgUrl}`" alt="">
-              <b>{{item.name}}</b>
+              <img :src="`${HostUrl.http}image/${item.icon}`" alt="">
+              <b>{{item.currency && item.currency.toUpperCase()}}</b>
             </p>
-            <span>{{item.cName}}</span>
+            <span>{{item.name}}</span>
           </li>
         </ul>
       </div>
@@ -177,12 +177,6 @@
         coinTips: [],
         userTips: [],
 
-        hotCoinList: [
-          {name: 'BTC', secName: 'btc', cName: 'Bitcoin', imgUrl: 'B012F109359B4872'},
-          {name: 'ETH', secName: 'eth', cName: 'Ethereum', imgUrl: '7F3F87A10AB4DA1F'},
-          {name: 'DASH', secName: 'dash', cName: 'Dash', imgUrl: 'C4E2A2F3837B7067'},
-          {name: 'LSK', secName: 'lsk', cName: 'Lisk', imgUrl: '5518F8A720045CA3'},
-        ],
         hotNum: 0, // 热门币种选择
         transTypeList: ['购买', '出售'],
         typeNum: 0, // 购买出售选择
@@ -246,8 +240,8 @@
         if (this.srchType === 0) {
           this.filte.user = "";
           this.filte.currency = this.srchText || "btc";
-          this.filte.cName = e.cname;
-          this.filte.coinImg = e.icon;
+          this.filte.cName = this.filte.currency == "btc" && "Bitcoin" || !this.srchTipShow && this.filte.cName || e.cname;
+          this.filte.coinImg = this.filte.currency == "btc" && "/static/images/btc_icon.png" || !this.srchTipShow && this.filte.coinImg || e.icon;
         } else {
           this.filte.user = this.srchText;
         }
@@ -274,7 +268,7 @@
               this.coinTips.push({
                 name: v.currency || "-",
                 cname: v.cname || "-",
-                icon: v.icon,
+                icon: `${this.HostUrl.http}image/${v.icon}`,
                 type: 0
               });
             });
@@ -409,9 +403,9 @@
         },3000);
       },
       hotCoinSelect(item, index) { // 热门选择
-        this.filte.currency = item.secName
-        this.filte.cName = item.cName
-        this.filte.coinImg = item.imgUrl
+        this.filte.currency = item.currency
+        this.filte.cName = item.name
+        this.filte.coinImg = `${this.HostUrl.http}image/${item.icon}`,
         this.hotNum = index
       },
       selectType(item, index) { // 出售购买tab切换选择
@@ -452,6 +446,9 @@
       },
       trustArray() {
         return this.$store.state.trustList;
+      },
+      hotCoinList() { // 热门币种数据
+        return this.$store.state.coinLoopData
       }
     },
     watch: {

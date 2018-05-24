@@ -21,6 +21,7 @@ export default {
   strangerInfo: {},
   editContent: {},
   editFlag: 0,
+  coinLoopData: [], //顶部轮询数据
   /**
    * 审核申述客服部分
    */

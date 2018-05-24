@@ -37,7 +37,7 @@ const evaluateOrder = "evaluateOrder"; // 订单评论结果
 const editBuyCon = "editBuyCon"; // 广告编辑购买内容
 const editSaleCon = "editSaleCon"; // 广告编辑出售内容
 const releaseAd = 'releaseAd'; // 点击发广告
-
+const coinLoop = 'coinLoop'; // 顶部数据轮询
 
 const updateUserInfo = "updateUserInfo";//更新个人信息
 
@@ -94,6 +94,7 @@ export {
   editBuyCon,
   editSaleCon,
   releaseAd,
+  coinLoop,
 
 
   /**

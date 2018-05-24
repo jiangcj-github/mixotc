@@ -19,9 +19,9 @@ let beforeOrder=async function(vue,param) {
   let fundPass = vue.$store.state.userInfo.is_new
 
   //是否实名认证
-  // if(!isVerify){
-  //   return Promise.reject("未实名认证");
-  // }
+  if(isVerify !== 2){
+    return Promise.reject("未实名认证");
+  }
 
   // 是否设置资金密码
   // if (opt.type == 2 && fundPass === 1) { // 提醒设置支付密码

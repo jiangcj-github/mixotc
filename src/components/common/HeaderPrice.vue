@@ -2,16 +2,16 @@
   <div class="mid-container">
     <div :style="{ 'position':'absolute',top:`${midItemAllTop}px` }">
       <div class="mid-item" :style="{ 'position':'absolute',top:`${midItemTop}px`,'left':0 }">
-            <span v-for="(items, index) in exchange" class="double" :key="index">
-              <i>{{items.name}}</i> :
-              <em :class="(items.changePercent*100).toFixed(2)>=0?'is-green':'is-red'">{{items.price.cny.format('cny')}}&nbsp;{{items.changePercent >= 0 ? '↑' :' ↓'}}</em>
-            </span>
+        <span v-for="(items, index) in exchange" class="double" :key="index">
+          <i>{{items.name}}</i> :
+          <em :class="(items.new_price - items.old_price) >=0 ? 'is-green' : 'is-red'">{{items.new_price ? items.new_price.format('cny') : items.new_price}}&nbsp;{{(items.new_price - items.old_price) >= 0 ? '↑' :' ↓'}}</em>
+        </span>
       </div>
       <div class="mid-item" :style="{ 'position':'absolute',top:`${midItemCopyTop}px`,'left':0 }">
-            <span v-for="(items, index) in exchangeCopy" class="double" :key="index">
-              <i>{{items.name}}</i> :
-              <em :class="(items.changePercent*100).toFixed(2)>=0?'is-green':'is-red'">{{items.price.cny.format('cny')}}&nbsp;{{items.changePercent >= 0 ? '↑' :' ↓'}}</em>
-            </span>
+        <span v-for="(items, index) in exchangeCopy" class="double" :key="index">
+          <i>{{items.name}}</i> :
+          <em :class="(items.new_price - items.old_price) >= 0 ? 'is-green' : 'is-red'">{{items.new_price ? items.new_price.format('cny') : items.new_price}}&nbsp;{{(items.new_price - items.old_price) >= 0 ? '↑' :' ↓'}}</em>
+        </span>
       </div>
     </div>
     <ul class="upper-right">
@@ -41,7 +41,7 @@
 
     },
     mounted() {
-      // this._initGetdata()
+      this._initGetdata()
     },
     computed: {
       isAdmin(){
@@ -54,19 +54,24 @@
     },
     methods: {
       async _initGetdata() {
-        let res =await fetch('http://47.74.244.196/v1/home/topCurrency').then(data => data.json())
-
-        this.exchange = res.data
-        // // this.exchange = [{"id":"5acf80024aef0e2828293cb2","name":"BTC","changePercent":0.90,"price":{"cny":5590.129083652126,"usd":698.2312039247622,"btc":0.09471957971460038,"eth":1.5738048012975354}},{"id":"5acf7dc64aef0e28282939a3","name":"ETC","changePercent":-0.85,"price":{"cny":23370.82907642308,"usd":456.593021713392,"btc":0.06185059878756389,"eth":1.0291733227415678}},{"id":"5acf805c4aef0e2828293d1d","name":"ADA","changePercent":0,"price":{"cny":47957.79091382944,"usd":7627.480096047534,"btc":1.031551994874608,"eth":17.152018009082067}}]
+        await this.Proxy.coinLoop({count: 4}).then(res => {
+          console.log('轮询1', res)
+          this.exchange = res.data.Quotations
+          this.$store.commit({type: 'coinLoop', data: this.exchange})
+        }).catch();
 
         this.Loop.topCurrency.clear()
         this.Loop.topCurrencyRoll.clear()
         this.Loop.topCurrency.setDelayTime(10000)
         this.Loop.topCurrency.set(async () => {
-          let res = await fetch('http://47.74.244.196/v1/home/topCurrency').then(data => data.json())
-          this.exchangeCopy = this.flag && res.data || this.exchangeCopy
-          this.exchange = !this.flag && res.data || this.exchange
-          // console.log(this.exchange)
+          // let res = await fetch('http://47.74.244.196/v1/home/topCurrency').then(data => data.json())
+          await await this.Proxy.coinLoop({count: 4}).then(res => {
+            console.log('轮询2', res)
+            this.exchangeCopy = this.flag && res.data.Quotations || this.exchangeCopy
+            this.exchange = !this.flag && res.data.Quotations || this.exchange
+            this.$store.commit({type: 'coinLoop', data: this.exchange})
+          }).catch();
+
           this.Loop.topCurrencyRoll.start()
         }, 10000)
         this.Loop.topCurrencyRoll.set(async () => {

@@ -106,10 +106,10 @@
     },
     methods: {
       saleAd() {
-        if (this.$store.state.userInfo.is_new === 1) { // 提醒设置支付密码
-          this.adRemindLayer = true
-          return
-        }
+        // if (this.$store.state.userInfo.is_new === 1) { // 提醒设置支付密码
+        //   this.adRemindLayer = true
+        //   return
+        // }
         this.$router.push({name:'releaseSale', params: {'saleCon': this.saleObj}})
       },
       buyAd() {

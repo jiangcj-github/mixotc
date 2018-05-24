@@ -8,7 +8,10 @@
       <img src="/static/images/close_btn.png" alt="" @click="closePopup">
       <div class="buy-layer-content">
         <h1>请输入支付密码</h1>
-        <input type="password" v-model="PaymentValue" class="passInput"/>
+        <p class="err-wrap">
+          <input type="text" v-model.trim="PaymentValue" class="passInput" @input="errText = ''"/>
+          <b class="errortext" v-if="errorShow">{{errText}}</b>
+        </p>
         <div>
           <em @click="closePopup">取消</em>
           <i @click="buyNext">下一步</i>
@@ -25,7 +28,7 @@
       <div class="buy-layer-content">
         <h1>请输入短信验证码</h1>
         <p class="err-wrap">
-          <input type="text" v-model="messageVerify" @input="onInput"/><span @click="sendVerify" :class="{offBg: showOffBg}">{{verifyCode}}</span>
+          <input type="text" v-model.trim="messageVerify" @input="errText = ''"/><span @click="sendVerify" :class="{offBg: showOffBg}">{{verifyCode}}</span>
           <b class="errortext" v-if="errorShow">{{errText}}</b>
         </p>
         <div>
@@ -99,6 +102,7 @@
         if (state === true) {
           this.buyLayer = true
           this.PaymentValue = ''
+          this.errText = ''
         } else {
           this.buyLayer = false
         }
@@ -108,6 +112,7 @@
         // if (newValue[newValue.length - 1].length) {
         //   this.inputContent =  newValue.length + 1
         // }
+        this.errText = '';
         this.messageVerify = this.inputGroup.join('')
       }
     },
@@ -117,28 +122,34 @@
       },
       buyNext() { // 点击下一步
         if (this.PaymentValue === '') return
-        this.$emit('offRelease', 'false');
         this.errText = '';
         this.messageVerify = '';
         this.inputGroup = [];
-        this.verifyLayer = true;
-        this.PaymentValue = this.getSafePass(this.PaymentValue)
-        console.log('this.PaymentValue', this.PaymentValue)
-        if (this.$store.state.userInfo.email) {
-          this.WsProxy.send('control','send_code',{ // 获取验证码
-            type: 2, // 0 登录; 1 修改密码; 2 支付
-            uid: this.$store.state.transformInfo === 1 ? this.$store.state.userInfo.uid : this.id,
-          }).then((data)=>{
-            console.log('获取验证码', data)
-          }).catch((msg)=>{
-            switch (msg.ret) {
-              case 3:
-                this.errText = '刚发过确认码，还未超时'
-                break;
-            }
-            console.log('获取验证码错误', msg);
-          });
-        }
+        this.WsProxy.send('control', 'verify_paypass', { // 获取验证码
+          pass: this.getSafePass(this.PaymentValue), // 0 登录; 1 修改密码; 2 支付
+        }).then((data)=>{
+          this.$emit('offRelease', 'false');
+          this.verifyLayer = true;
+          if (this.$store.state.userInfo.email) { // 邮箱获取验证码
+            this.WsProxy.send('control','send_code',{
+              type: 2, // 0 登录; 1 修改密码; 2 支付
+              uid: this.$store.state.transformInfo === 1 ? this.$store.state.userInfo.uid : this.id,
+            }).then((data)=>{
+              console.log('获取验证码', data)
+            }).catch((msg)=>{
+              switch (msg.ret) {
+                case 3:
+                  this.errText = '刚发过确认码，还未超时'
+                  break;
+              }
+              console.log('获取验证码错误', msg);
+            });
+          }
+        }).catch((msg)=>{
+          msg.ret !== 0 && (this.errorShow = true)
+          this.errText = '密码错误'
+          console.log('错误', msg)
+        });
       },
       offVerify() {
         this.verifyLayer = false;
@@ -176,9 +187,6 @@
           });
         }
       },
-      onInput() { // 聚焦输入框
-        this.errText = ''
-      },
       getNum(index) {
         let oEvent = window.event;
         if (oEvent.keyCode === 8) return;
@@ -198,8 +206,7 @@
           id: this.$store.state.transformInfo === 1 ? 0 : this.id,
           currency:  this.$store.state.transformInfo === 1 ? this.currency.toLowerCase() : '',
           amount: this.$store.state.transformInfo === 1 ? this.amount * 1 : '',
-          //pass: "yEQQka401NQ2LjlRM60VEBHSmgkl/YzVlspqBwGnics=",
-          pass: this.PaymentValue,
+          pass: this.getSafePass(this.PaymentValue),
           code: this.messageVerify
         }).then((data) => {
           console.log('确定', data)
@@ -210,9 +217,6 @@
           switch (msg.ret) {
             case 6:
               this.errText = '谷歌验证失败'
-              break;
-            case 7:
-              this.errText = '密码错误'
               break;
             case 8:
               this.errText = '验证码错误'
