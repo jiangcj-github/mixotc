@@ -39,6 +39,8 @@ Vue.prototype.Sleep = Sleep
 import Logger from './libs/Logger' //自定义logger
 Vue.prototype.Logger = Logger
 
+import VueClipboard from "vue-clipboard2";
+Vue.use(VueClipboard);
 
 Vue.prototype.Bus = new Vue();
 
@@ -134,8 +136,6 @@ const RUN_APP = (App, config, plugin) => {
   // 引用vuex
   Vue.use(Vuex)
   let store = Store.install(Vue.prototype, config.StoreConfig);
-
-
 
   store.state.isLogin = false
 

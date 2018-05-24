@@ -189,7 +189,7 @@
         sort: 0,  // 0-时间升序,1-时间降序,2-数量升序,3-数量降序
         days: 0,  // 【提交时间】筛选快捷键【1-一天,7-七天,30-三十天】
 
-        bills: [1,2,3,4,5,6,7,8,9,10],
+        bills: [],
         curPage: 1,
         pageSize: 20,
         total: 0,
@@ -355,12 +355,12 @@
           count: this.pageSize,
           sort: this.paramSort,
         }).then((data)=>{
-          if(!data||!data.bill||data.bill.length<=0){
+          if(!data||!data.bills||data.bills.length<=0){
             this.err=1; //无数据
           }else{
             this.err=0;
             this.total=data.count;
-            this.parseBills(data.bill);
+            this.parseBills(data.bills);
           }
         }).catch((msg)=>{
           if(!msg){
@@ -385,9 +385,9 @@
             num: e.amount,
             fee: e.fee,
             state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
-            orderId: e.relation_id,
+            orderId: e.type_id,
             isIn: [1,3,5,7,9,11].indexOf(e.type)>=0, // 进出账：true-进账,false-出账
-            billType: Math.ceil(e.type/2),  // 账单类型：0-充提,1-交易,2-担保,3-红包,4-转账,5-资金互转
+            billType: Math.ceil(e.type/2)-1,  // 账单类型：0-充提,1-交易,2-担保,3-红包,4-转账,5-资金互转
           };
           if(item.isIn){
             item.addr=e.from && e.from.formatAddr();
@@ -406,7 +406,7 @@
         jsonField["序号"]="index";
         jsonField["时间"]="time";
         jsonField[this.ul1Text]="type";
-        jsonField["币种("+this.ul2[this.ul2Sel]+")"]="coin";
+        jsonField["币种("+this.ul2[this.ul2Sel].text+")"]="coin";
         jsonField["交易对方"]="user";
         jsonField["发送地址名称"]="sendAddrName";
         jsonField["发送地址"]="sendAddr";
@@ -428,7 +428,7 @@
           end: this.paramEnd,
           count: 0,
         }).then((data)=> {
-          data && data.forEach((e,i) => {
+          data && data.bills && data.bills.forEach((e,i) => {
             let item={
               index: i+1,
               time: new Date(e.date*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
@@ -443,7 +443,7 @@
               num: e.amount,
               fee: e.fee,
               state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
-              orderId: e.relation_id,
+              orderId: e.type_id,
               isIn: [1,3,5,7,9,11].indexOf(e.type)>=0, // 进出账：true-进账,false-出账
 
             };
