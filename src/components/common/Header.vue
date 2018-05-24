@@ -1,5 +1,5 @@
 <template>
-  <article class="header" :style="{position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 999}">
+  <article class="header" :style="{position: 'fixed', top: 0, left: 0, width: '100%', zIndex: 2000}">
     <section class="upper">
       <div class="wrapper">
         <HeaderPrice class="upper-left"></HeaderPrice>

@@ -122,7 +122,7 @@
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
   import AdNothing from '@/views/advertisement/child/AdNothing' // 引入无广告页面
   import Pagination from "@/views/verify/component/Pagination" // 引入分页
-  import UndercarriageLayer from "@/views/advertisement/child/UndercarriageLayer" // 引入分页
+  import UndercarriageLayer from "@/views/advertisement/child/UndercarriageLayer" // 引入下架弹窗
 
   export default {
     name: "myAd",

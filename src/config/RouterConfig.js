@@ -72,10 +72,16 @@ const ROUTES = [
   {
     path: "/personal",
     name: "personal",
-    redirect: "/personal/account",
+    redirect: "/personal/evaluate",
     component: resolve =>
       require(["@/views/personalCenter/personalCenter"], resolve), // 个人中心
     children: [
+      //我的评价
+      {
+        path: "evaluate",
+        name: "personal-evaluate",
+        component: resolve => require(["@/views/personalCenter/children/evaluate/Evaluate"], resolve)
+      },
       //账户设置
       {
         path: "account",

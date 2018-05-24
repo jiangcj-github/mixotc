@@ -55,7 +55,7 @@
     methods: {
       async _initGetdata() {
         await this.Proxy.coinLoop({count: 4}).then(res => {
-          console.log('轮询1', res)
+          // console.log('轮询1', res)
           this.exchange = res.data.Quotations
           this.$store.commit({type: 'coinLoop', data: this.exchange})
         }).catch();
@@ -66,7 +66,7 @@
         this.Loop.topCurrency.set(async () => {
           // let res = await fetch('http://47.74.244.196/v1/home/topCurrency').then(data => data.json())
           await await this.Proxy.coinLoop({count: 4}).then(res => {
-            console.log('轮询2', res)
+            // console.log('轮询2', res)
             this.exchangeCopy = this.flag && res.data.Quotations || this.exchangeCopy
             this.exchange = !this.flag && res.data.Quotations || this.exchange
             this.$store.commit({type: 'coinLoop', data: this.exchange})

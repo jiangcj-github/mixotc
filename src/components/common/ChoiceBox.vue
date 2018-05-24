@@ -152,7 +152,26 @@
         content ''
         triangle_down(#FFB422)
 
-    ul
+    .evaluateB
+      box-sizing()
+      position relative
+      color #999
+      height 30px
+      line-height 30px
+      padding-left 10px
+      background #FFF
+      border 1px solid #E1E1E1
+      border-radius 2px
+      &:after
+        position absolute
+        top 13px
+        right 10px
+        content ''
+        triangle_down(#FFB422)
+
+
+
+  ul
       position absolute
       background #FFF
       border 1px solid #E1E1E1

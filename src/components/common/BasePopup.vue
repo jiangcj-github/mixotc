@@ -44,7 +44,7 @@
   .wrap
     position fixed
     background rgba(0, 0, 0, 0.4)
-    z-index 1000
+    z-index 3000
     .content
       position absolute
       left 50%
