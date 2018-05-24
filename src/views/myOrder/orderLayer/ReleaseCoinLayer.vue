@@ -9,7 +9,7 @@
       <div class="buy-layer-content">
         <h1>请输入支付密码</h1>
         <p class="err-wrap">
-          <input type="text" v-model.trim="PaymentValue" class="passInput" @input="errText = ''"/>
+          <input type="password" v-model.trim="PaymentValue" class="passInput" @input="errText = ''"/>
           <b class="errortext" v-if="errorShow">{{errText}}</b>
         </p>
         <div>
