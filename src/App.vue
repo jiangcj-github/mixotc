@@ -140,6 +140,7 @@
           //登录时设置定时器，绑定事件监听用户操作(任意一个选项卡有点击即重新计时)
             window.onmousedown = (event) => {
               //用户操作时重新计时
+              console.log('click', new Date())
               this.Storage.loginTime.set(new Date() - 0);
             }
             this.Loop.isOverTime.clear();
