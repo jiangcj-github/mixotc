@@ -3,9 +3,9 @@
     <h3>mixsOTC-个人中心</h3>
     <div class="nav">
       <ul>
-        <!-- <li class="evaluate">我的评价</li>
-        <li class="trust">信任</li>
-        <li class="address">通讯录</li> -->
+        <router-link to="/personal/evaluate" tag="li" active-class="selected" class="evaluate">我的评价</router-link>
+        <!--<li class="trust">信任</li>-->
+        <!--<li class="address">通讯录</li>-->
         <router-link to="/personal/account" tag="li" active-class="selected" class="account">账户设置</router-link>
         <router-link to="/personal/safe" tag="li" active-class="selected" class="safe">安全设置</router-link>
       </ul>

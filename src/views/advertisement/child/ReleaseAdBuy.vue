@@ -54,30 +54,30 @@
           <em v-show="!switchValue">当前市场最低价：</em>
           <b v-show="!switchValue">{{priceNow}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
         </p>
-        <input type="text" v-model="adBuyObj.price"/>
+        <input type="text" v-model="adBuyObj.price" @focus="clearPrice=true" @blur="clearPrice=false"/>
         <span>CNY</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.price" @click="adBuyObj.price=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.price && clearPrice" @mousedown="adBuyObj.price=''">
       </li>
       <li class="input-li">
         <p class="num-p clearfix">
           <i>购买数量</i>
           <strong :class="{selected: adBuyObj.vary == 2}" @click="showVary">不限量</strong>
         </p>
-        <input type="text" :disabled="adBuyObj.vary == 2" :class="{disabledInput: adBuyObj.vary == 2}" v-model="adBuyObj.tradeable"/>
+        <input type="text" :disabled="adBuyObj.vary == 2" :class="{disabledInput: adBuyObj.vary == 2}" v-model="adBuyObj.tradeable" @focus="clearTradeable=true" @blur="clearTradeable=false"/>
         <span>BTC</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.tradeable" @click="adBuyObj.tradeable=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.tradeable && clearTradeable" @mousedown="adBuyObj.tradeable=''">
       </li>
       <li class="input-li">
         <p>最小订单额<b class="limit">最小200</b></p>
-        <input type="text" v-model="adBuyObj.min"/>
+        <input type="text" v-model="adBuyObj.min" @focus="clearMin=true" @blur="clearMin=false"/>
         <span>CNY</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.min" @click="adBuyObj.min=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.min && clearMin" @mousedown="adBuyObj.min=''">
       </li>
       <li class="input-li">
         <p>最大订单额<b class="limit">最大{{maxLimit}}</b></p>
-        <input type="text" v-model="adBuyObj.max"/>
+        <input type="text" v-model="adBuyObj.max" @focus="clearMax=true" @blur="clearMax=false"/>
         <span>CNY</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.max" @click="adBuyObj.max=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.max && clearMax" @mousedown="adBuyObj.max=''">
       </li>
       <li>付款期限</li>
       <li>
@@ -156,7 +156,11 @@
         adErrLayer: false,
         errText: '',
         isDisabled: false,
-        //aaa: 0
+
+        clearPrice: false,
+        clearTradeable: false,
+        clearMin: false,
+        clearMax: false
       }
     },
     components: {
@@ -186,7 +190,6 @@
         this.adBuyObj = this.$route.params.buyCon;
         return;
       }
-      //this.aaa= this.adBuyObj.payment
       this.Bus.$emit('buyInfo', this.adBuyObj)
     },
     mounted() {

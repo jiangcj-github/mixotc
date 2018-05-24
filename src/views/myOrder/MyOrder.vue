@@ -419,13 +419,13 @@
       showOverTimer() {
         let timer
         this.contentList && this.contentList.forEach((v, i) => {
-          if (v.state == 1 && v.overtime >= 0) {
+          if (this.JsonBig.stringify(v.buyer) == this.userId && v.state == 1 && v.overtime >= 0) {
             v.overtime--
             timer = setTimeout(() => {
               this.showOverTimer()
             },1000);
           }
-          if (v.state == 1 && v.overtime < 0) {
+          if (this.JsonBig.stringify(v.buyer) == this.userId && v.state == 1 && v.overtime < 0) {
             // console.log(222, this.contentList.length)
             this.contentList = this.contentList.filter(item => item.state !== 1)
             this.conductNum = this.contentList.length
@@ -685,23 +685,28 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl"
   .my-order-wrap
-    margin-top 40px
+    margin-top 11px
     margin-bottom 40px
     h1
-      font-size $fz20
-      font-weight bold
-      color $col333
-      margin-bottom 30px
-      &:before
-        display inline-block
-        width 3px
-        height 20px
-        position relative
-        top 2px
-        left 0
-        content ''
-        margin-right 9px
-        background-color $col422
+      font-size 12px
+      color #333
+      letter-spacing 0.25px
+      margin-bottom 20px
+
+    /*font-size $fz20
+    font-weight bold
+    color $col333
+    margin-bottom 30px
+    &:before
+      display inline-block
+      width 3px
+      height 20px
+      position relative
+      top 2px
+      left 0
+      content ''
+      margin-right 9px
+      background-color $col422*/
 
     .order-item
       height 60px

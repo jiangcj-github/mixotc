@@ -24,18 +24,22 @@ export default {
     state.transformInfo = data;
   },
   [types.editBuyCon](state, { data }) {
-    // 编辑模块
+    // 广告编辑模块
     state.editContent = data.content;
     state.editFlag = data.flag
   },
 [types.editSaleCon](state, { data }) {
-  // 编辑模块
+  // 广告编辑模块
   state.editContent = data.content;
   state.editFlag = data.flag
 },
   [types.releaseAd](state, { data }) {
-    // 编辑模块
+    // 广告编辑模块
     state.editFlag = data.flag
+  },
+  [types.coinLoop](state, { data }) {
+    // 顶部数据轮询
+    state.coinLoopData = data
   },
   // 消息部分
   [types.changeChatBox](state, { data }) {

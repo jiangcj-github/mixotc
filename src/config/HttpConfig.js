@@ -27,6 +27,7 @@ export default {
     { name: "userSearch", data: { url: "/otc/search/user/", method: "get" } }, // 获取交易中心用户模糊筛选下拉框
     { name: "coinSearch", data: { url: "/otc/search/coin/", method: "get" } }, // 获取交易中心币种模糊筛选下拉框
     { name: "getCoinData", data: {url: "/otc/coins/", method: "get"}},  // 获取币种资料
+    { name: "coinLoop", data: {url: "/otc/quotation/", method: "get"}},  // 获取顶部最新市场行情接口
     // {
     //   name: "upLoad",
     //   data: {

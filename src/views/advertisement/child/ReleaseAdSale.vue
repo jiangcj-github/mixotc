@@ -55,9 +55,9 @@
           <em v-show="!switchValue">当前市场最低价：</em>
           <b v-show="!switchValue">{{priceNow}} CNY/{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
         </p>
-        <input type="text" v-model="adSaleObj.price"/>
+        <input type="text" v-model="adSaleObj.price" @focus="clearPrice = true" @blur="clearPrice = false"/>
         <span>CNY</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adSaleObj.price" @click="adSaleObj.price=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adSaleObj.price && clearPrice" @mousedown="adSaleObj.price=''">
       </li>
       <li class="input-li">
         <p class="num-p clearfix sale-num-p">
@@ -67,9 +67,6 @@
           <router-link to="/wallet/charge" tag="button" class="sale-btn">去充币</router-link>
           <strong :class="{selected: adSaleObj.vary == 2}" @click="showVary()">随可用余额变动</strong>
         </p>
-        <!--<input type="text" :disabled="selectNum" v-model="numValue"/>-->
-        <!--<span>BTC</span>-->
-        <!--<img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="numValue" @click="numValue=''">-->
         <SliderBar
           :min="0"
           :max="adSaleObj.length"
@@ -84,15 +81,15 @@
       </li>
       <li class="input-li">
         <p>最小订单额<b class="limit">最小200</b></p>
-        <input type="text" v-model="adSaleObj.min"/>
+        <input type="text" v-model="adSaleObj.min" @focus="clearMin = true" @blur="clearMin = false"/>
         <span>CNY</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adSaleObj.min" @click="adSaleObj.min=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adSaleObj.min && clearMin" @mousedown="adSaleObj.min=''">
       </li>
       <li class="input-li">
         <p>最大订单额<b class="limit">最大{{maxLimit}}</b></p>
-        <input type="text" v-model="adSaleObj.max"/>
+        <input type="text" v-model="adSaleObj.max" @focus="clearMax = true" @blur="clearMax = false"/>
         <span>CNY</span>
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adSaleObj.max" @click="adSaleObj.max=''">
+        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adSaleObj.max && clearMax" @mousedown="adSaleObj.max=''">
       </li>
       <li>付款期限</li>
       <li>
@@ -181,7 +178,11 @@
         adSuccLayer: false,
         succNum: 4,
         adErrLayer: false,
-        errText: ''
+        errText: '',
+
+        clearPrice: false,
+        clearMin: false,
+        clearMax: false
       }
     },
     components: {

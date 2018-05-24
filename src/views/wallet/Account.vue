@@ -8,28 +8,33 @@
         <!--右边内容-->
         <div class="right">
           <div class="asset">
+            <p class="l0">法币账户总资产：</p>
             <p class="l1">
-              <span class="big">总资产约：</span>
               <span class="big bright">{{balance.numBtc}}</span>
-              <span class="small">BTC</span>
+              <span class="small"> BTC</span>
               <span class="big">/</span>
               <span class="big bright">{{balance.numCny}}</span>
-              <span class="small">CNY</span>
+              <span class="small"> CNY</span>
             </p>
-            <p class="l2">
-              <span class="quota">24h提币额度：{{balance.quota}} BTC</span>
-              <span class="used">已用：{{balance.usedQuota}} BTC</span>
+          </div>
+          <div class="asset as2">
+            <p class="l0">币币账户总资产：</p>
+            <p class="l1">
+              <span class="big bright">{{balance2.numBtc}}</span>
+              <span class="small"> BTC</span>
+              <span class="big">/</span>
+              <span class="big bright">{{balance2.numCny}}</span>
+              <span class="small"> CNY</span>
             </p>
           </div>
           <div class="filter">
             <div class="f1">
               <input type="text" placeholder="搜索币种" v-model="srchText">
               <img src="/static/images/cancel_icon.png" v-show="srchText.length>0" @click="srchText=''">
-              <button @click=""></button>
+              <button @click="onSearch"></button>
             </div>
             <div class="f2">
-              <span class="radio r1" :class="{check:isPZ===0}" @click="isPZ=0">隐藏小额资产</span>
-              <span class="radio r2" :class="{check:isPZ===1}" @click="isPZ=1">隐藏0余额币种</span>
+              <span class="checkbox r2" :class="{check:isZero}" @click="isZero=!isZero">隐藏0余额币种</span>
               <span class="checkbox r3" :class="{check:isNoWa}" @click="isNoWa=!isNoWa">隐藏非钱包币种</span>
             </div>
           </div>
@@ -44,20 +49,14 @@
           <div class="fb" v-show="tab===0">
             <!--表头-->
             <div class="thead">
-              <p class="th coin sortable" @click="fbSort=++fbSort%2+10">币种
-                <i :class="{up:fbSort===10,down:fbSort===11}"></i></p>
-              <p class="th name sortable" @click="fbSort=++fbSort%2+12">全称
-                <i :class="{up:fbSort===12,down:fbSort===13}"></i></p>
+              <p class="th coin">币种</p>
+              <p class="th name">全称</p>
               <p class="th avail sortable" @click="fbSort=++fbSort%2">可用余额
                 <i :class="{up:fbSort===0,down:fbSort===1}"></i></p>
               <p class="th frozen sortable" @click="fbSort=++fbSort%2+2">冻结中余额
                 <i :class="{up:fbSort===2,down:fbSort===3}"></i></p>
-              <p class="th confirm sortable" @click="fbSort=++fbSort%2+4">确认中余额
+              <p class="th assess sortable" @click="fbSort=++fbSort%2+4">估值
                 <i :class="{up:fbSort===4,down:fbSort===5}"></i></p>
-              <p class="th total sortable" @click="fbSort=++fbSort%2+6">总额
-                <i :class="{up:fbSort===6,down:fbSort===7}"></i></p>
-              <p class="th assess sortable" @click="fbSort=++fbSort%2+8">估值
-                <i :class="{up:fbSort===8,down:fbSort===9}"></i></p>
               <p class="th opera">操作</p>
             </div>
             <!--fb返回结果-->
@@ -68,8 +67,6 @@
                   <p class="name">{{e.name}}</p>
                   <p class="avail">{{e.avail}}</p>
                   <p class="frozen">{{e.frozen}}</p>
-                  <p class="confirm">{{e.confirm}}</p>
-                  <p class="total">{{e.total}}</p>
                   <p class="assess">{{e.assess}}</p>
                   <p class="opera op1">
                     <a class="btn white" href="/#/wallet/withdraw">充币</a>
@@ -82,8 +79,6 @@
                   <p class="name">{{e.name}}</p>
                   <p class="avail">{{e.avail}}</p>
                   <p class="frozen">{{e.frozen}}</p>
-                  <p class="confirm">{{e.confirm}}</p>
-                  <p class="total">{{e.total}}</p>
                   <p class="assess">{{e.assess}}</p>
                   <p class="opera op2">
                     <button class="btn green" @click="createWallet(i)">加入钱包</button>
@@ -121,10 +116,6 @@
                 <i :class="{up:bbSort===0,down:bbSort===1}"></i></p>
               <p class="th frozen sortable" @click="bbSort=++bbSort%2+2">冻结中余额
                 <i :class="{up:bbSort===2,down:bbSort===3}"></i></p>
-              <p class="th confirm sortable" @click="bbSort=++bbSort%2+4">确认中余额
-                <i class="{up:bbSort===4,down:bbSort===5}"></i></p>
-              <p class="th total sortable" @click="bbSort=++bbSort%2+6">总额
-                <i :class="{up:bbSort===6,down:bbSort===7}"></i></p>
               <p class="th assess sortable" @click="bbSort=++bbSort%2+8">估值
                 <i :class="{up:bbSort===8,down:bbSort===9}"></i></p>
               <p class="th opera">操作</p>
@@ -136,8 +127,6 @@
                 <p class="name">{{e.name}}</p>
                 <p class="avail">{{e.avail}}</p>
                 <p class="frozen">{{e.frozen}}</p>
-                <p class="confirm">{{e.confirm}}</p>
-                <p class="total">{{e.total}}</p>
                 <p class="assess">{{e.assess}}</p>
                 <p class="opera op3"><button class="btn white">资产转出</button></p>
               </div>
@@ -185,30 +174,99 @@
       return {
         tab: 0,  //0-法币账户,1-币币账户
         srchText: "",
-        isPZ: -1,
+        isZero: false,
         isNoWa: true,
 
-        balance:{},
+        prices:{},
+        balance:{
+          numBtc: 0,
+          numCny: 0,
+        },
+        balance2:{
+          numBtc: 0,
+          numCny: 0,
+        },
 
-        fbSort: -1, //
+        fbSort: 0, //
         fb: [],
         fbCurPage: 1,
         fbPageSize: 20,
         fbTotal: 0,
-        fbErr: 0,
+        fbErr: -1,
 
-        bbSort: -1, //...
+        bbSort: 0, //...
         bb: [],
         bbCurPage: 1,
         bbPageSize: 20,
         bbTotal: 0,
-        bbErr: 0,
+        bbErr: -1,
 
-        alert:"222",
+        alert:"",
         isShowAlert:false,
       }
     },
+    computed:{
+      paramFbSort:function(){
+        let sort=this.fbSort;
+        switch(sort){
+          case 0:sort=2;break;
+          case 1:sort=1;break;
+          case 2:sort=4;break;
+          case 3:sort=3;break;
+          case 4:sort=6;break;
+          case 5:sort=5;break;
+          default:sort=5;break;
+        }
+        return sort;
+      }
+    },
+    watch:{
+      isZero:function(){
+        if(this.tab===0){
+          this.loadFb();
+        }else{
+          this.loadBb();
+        }
+      },
+      isNoWa:function(){
+        if(this.tab===0){
+          this.loadFb();
+        }else{
+          this.loadBb();
+        }
+      },
+      fbSort:function(){
+        this.loadFb();
+      },
+      bbSort:function() {
+        this.loadBb();
+      }
+    },
     methods:{
+      onSearch(){
+        if(this.srchText.length<=0) return;
+        if(this.tab===0){
+          this.loadFb();
+        }else{
+          this.loadBb();
+        }
+      },
+      async init(){
+        // 查询价格
+        let data=await this.Proxy.getPrice().catch((msg)=>{
+          console.log(msg);
+        });
+        if(data && data.data && data.data.prices){
+          let prices=data.data.prices;
+          prices.forEach((e)=>{
+            this.prices[e.currency.toLowerCase()]=e.cny;
+          })
+        }
+        //加载账户信息
+        this.loadFbBalance();
+        this.loadFb();
+        this.loadBb();
+      },
       showAlert(txt){
         this.alert=txt;
         this.isShowAlert = true;
@@ -224,42 +282,61 @@
           this.showAlert("创建钱包失败");
         });
       },
-      loadBalance(){
-        this.parseBalance();
-      },
-      parseBalance(data){
-        this.balance={
-          numBtc: 1,
-          numCny: 66666,
-          quota: 20,
-          usedQuota: 0,
-        }
+      loadFbBalance(){
+        this.WsProxy.send("wallet","total_assets", {}).then((data)=>{
+          let numBtc=data.total_assets || 0;
+          let btcPrice=this.prices["btc"] || 0;
+          this.balance.numBtc=numBtc.toFixed(6);
+          this.balance.numCny=(numBtc * btcPrice).toFixed(2);
+        }).catch((msg)=>{
+          console.log(msg);
+        });
       },
       loadFb(){
-        this.fbErr=0;
-        this.fbTotal=60;
-        this.parseFb([1,2,3,4,5]);
+        this.WsProxy.send("wallet","bills_v2",{
+          currency: this.srchText,
+          hide_zero: this.isZero,
+          hide_no_wallet: this.isNoWa,
+          sort: this.paramFbSort,
+          page: this.fbCurPage-1,
+          count: this.fbPageSize,
+        }).then((data)=>{
+          if(!data||!data.wallets||data.wallets.length<=0){
+            this.fbErr=1; //无数据
+          }else{
+            this.fbErr=0;
+            this.fbTotal=data.count;
+            this.parseFb(data.wallets);
+          }
+        }).catch((msg)=>{
+          if(!msg){
+            this.fbErr=2; //网络异常
+          }else if(msg.ret!==0){
+            this.fbErr=3; //加载异常
+          }
+        });
       },
       parseFb(data){
         this.fb=[];
         data.forEach((e)=>{
           this.fb.push({
-            icon: "http://192.168.113.26//image/B012F109359B4872",
-            abbr: "BTC",
-            name: "Bitcoin",
-            avail: 0.0001,
-            frozen: 0.0001,
-            confirm: 0.0001,
-            total: 0.0003,
-            assess: 12000+" CNY",
-            hasWallet: Math.random()>0.5,
+            icon: this.HostUrl.http + "/image/"+e.icon,
+            abbr: e.currency,
+            name: e.name,
+            avail: e.balance || "-",
+            frozen: e.locked || "-",
+            assess: (e.assessment||0) * (this.prices["btc"]||0)+" CNY",
+            hasWallet: e.address!=null,
           });
         });
       },
+      loadBbBalance(){
+
+      },
       loadBb(){
-        this.bbErr=0;
-        this.bbTotal=60;
-        this.parseBb([1,2,3,4,5]);
+        this.bbErr=1;
+        this.bbTotal=0;
+        this.parseBb([]);
       },
       parseBb(data){
         this.bb=[];
@@ -279,9 +356,7 @@
       },
     },
     mounted(){
-      this.loadBalance();
-      this.loadFb();
-      this.loadBb();
+      this.init();
       this.Bus.$on("onFbPageChange",(p)=>{
         this.fbCurPage=p;
         this.loadFb();

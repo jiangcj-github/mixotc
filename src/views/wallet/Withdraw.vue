@@ -11,8 +11,9 @@
           <div class="form">
             <div class="p1">
               <label>币种：</label>
-              <div class="select" tabindex="0">
-                <p @click="isShowCoinUl=!isShowCoinUl" v-clickoutside="()=>isShowCoinUl=false">{{coins[coinSel]}}</p>
+              <div class="input-group">
+                <p class="input" @click="isShowCoinUl=!isShowCoinUl" v-clickoutside="()=>isShowCoinUl=false">{{coins[coinSel]}}</p>
+                <i class="drop-trangle"></i>
                 <ul class="drop" v-show="isShowCoinUl">
                   <li v-for="(e,i) in coins" @click="coinSel=i">{{e}}</li>
                 </ul>
@@ -21,7 +22,7 @@
             <div class="p2">
               <span>总额：0.67899765 BTC</span>
               <span>可用余额：0.67899765 BTC</span>
-              <span>认中：0.67899765 BTC</span>
+              <span>冻结中：0.67899765 BTC</span>
             </div>
             <div class="card">
               <div class="warn">
@@ -56,87 +57,45 @@
           <!--充值动态-->
           <div class="list">
             <div class="title">
-              <h3>提币动态</h3>
-              <a href="#" class="btn white a1">去交易</a>
-              <a href="#" class="a2">查看全部</a>
+              <h3>提币记录</h3>
+              <a href="/#/transaction" class="btn white a1">去交易</a>
+              <a href="/#/wallet/history?type=2&coin=btc" class="a2">查看全部</a>
             </div>
             <div class="thead">
-              <p class="time">提币时间</p>
-              <p class="coin">币种</p>
-              <p class="num">提币数量</p>
-              <p class="actual">实际到账</p>
-              <p class="addrName">地址名称</p>
-              <p class="addr">提币地址</p>
+              <p class="th time">提币时间</p>
+              <p class="th coin">币种</p>
+              <p class="th num">提币数量</p>
+              <p class="th actual">实际到账</p>
+              <p class="th addrName">地址名称</p>
+              <p class="th addr">提币地址</p>
             </div>
-            <div class="li">
-              <div class="time">
-                <p>2016/03/09</p>
-                <p>13:43</p>
+            <div v-if="err===0">
+              <div class="li" v-for="(e,i) in lists">
+                <div class="time">
+                  <p>{{e.time1}}</p>
+                  <p>{{e.time2}}</p>
+                </div>
+                <div class="coin">{{e.coin}}</div>
+                <div class="num">- {{e.num}}</div>
+                <div class="actual">{{e.actual}}</div>
+                <div class="addrName">{{e.addrName}}</div>
+                <div class="addr">{{e.addr}}</div>
               </div>
-              <div class="coin">
-                <p>BTC</p>
-                <p>Bitcoin</p>
-              </div>
-              <div class="num">- 13.0949</div>
-              <div class="actual">0.00200</div>
-              <div class="addrName ecli">13693691162987654356</div>
-              <div class="addr ecli">morXXEXFS3ZjP6qk8VD3bnJJm2go4HsFvS</div>
             </div>
-            <div class="li">
-              <div class="time">
-                <p>2016/03/09</p>
-                <p>13:43</p>
-              </div>
-              <div class="coin">
-                <p>BTC</p>
-                <p>Bitcoin</p>
-              </div>
-              <div class="num">- 13.0949</div>
-              <div class="actual">0.00200</div>
-              <div class="addrName ecli">13693691162987654356</div>
-              <div class="addr ecli">morXXEXFS3ZjP6qk8VD3bnJJm2go4HsFvS</div>
+            <div v-else-if="err===1">
+              <div class="err no-result">无充值记录</div>
             </div>
-            <div class="li">
-              <div class="time">
-                <p>2016/03/09</p>
-                <p>13:43</p>
-              </div>
-              <div class="coin">
-                <p>BTC</p>
-                <p>Bitcoin</p>
-              </div>
-              <div class="num">- 13.0949</div>
-              <div class="actual">0.00200</div>
-              <div class="addrName ecli">13693691162987654356</div>
-              <div class="addr ecli">morXXEXFS3ZjP6qk8VD3bnJJm2go4HsFvS</div>
+            <div v-else-if="err===2">
+              <div class="err load-failed">网络异常</div>
             </div>
-            <div class="li">
-              <div class="time">
-                <p>2016/03/09</p>
-                <p>13:43</p>
-              </div>
-              <div class="coin">
-                <p>BTC</p>
-                <p>Bitcoin</p>
-              </div>
-              <div class="num">- 13.0949</div>
-              <div class="actual">0.00200</div>
-              <div class="addrName ecli">13693691162987654356</div>
-              <div class="addr ecli">morXXEXFS3ZjP6qk8VD3bnJJm2go4HsFvS</div>
+            <div v-else-if="err===3">
+              <div class="err net-error">加载失败</div>
             </div>
-            <div class="li">
-              <div class="time">
-                <p>2016/03/09</p>
-                <p>13:43</p>
-              </div>
-              <div class="coin">
-                <p>BTC</p>
-                <p>Bitcoin</p>
-              </div>
-              <div class="num">- 13.0949</div>
-              <div class="actual">0.00200</div>
-              <div class="addrName ecli">13693691162987654356</div>
-              <div class="addr ecli">morXXEXFS3ZjP6qk8VD3bnJJm2go4HsFvS</div>
+            <div v-else-if="err===4">
+              <div class="err loading">加载中...</div>
+            </div>
+            <div v-else>
+              <div class="err empty">无数据</div>
             </div>
           </div>
         </div>
@@ -162,21 +121,52 @@
         coinSel: 0,
         isShowCoinUl: false,
 
-        isShowQrCode: false,
+        lists: [],
+        err: -1,
       }
     },
     methods:{
-      loadFb(){
-
+      async init(){
+        //加载账单
+        this.loadLists();
       },
-      parseFb(){
-
+      loadLists(){
+        let coin=this.coins[this.coinSel];
+        this.WsProxy.send("wallet","bills_v2",{
+          currency: coin,
+          type: 1,
+          state: "0,1,2,3,4,5,6",
+          page: 0,
+          count: 10,
+          sort: 0,
+        }).then((data)=>{
+          if(!data||!data.bills||data.bills.length<=0){
+            this.err=1; //无数据
+          }else{
+            this.err=0;
+            this.parseLists(data.bills);
+          }
+        }).catch((msg)=>{
+          if(!msg){
+            this.err=2; //网络异常
+          }else if(msg.ret!==0){
+            this.err=3; //加载异常
+          }
+        });
       },
-      loadBb(){
-
-      },
-      parseBb(){
-
+      parseLists(data){
+        this.lists=[];
+        data.forEach((e)=>{
+          this.bills.push({
+            time1: new Date(e.date*1000).dateHandle("yyyy/MM/dd"),
+            time2: new Date(e.date*1000).dateHandle("HH:mm:ss"),
+            coin: e.currency && e.currency.toUpperCase(),
+            num: e.amount,
+            actual: e.amount-e.fee,
+            addr: e.to && e.to.formatAddr(),
+            addrName: e.to_name || "-",
+          });
+        });
       },
     },
     mounted(){

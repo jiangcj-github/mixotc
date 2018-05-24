@@ -39,6 +39,8 @@ Vue.prototype.Sleep = Sleep
 import Logger from './libs/Logger' //自定义logger
 Vue.prototype.Logger = Logger
 
+import VueClipboard from "vue-clipboard2";
+Vue.use(VueClipboard);
 
 Vue.prototype.Bus = new Vue();
 
@@ -135,8 +137,6 @@ const RUN_APP = (App, config, plugin) => {
   Vue.use(Vuex)
   let store = Store.install(Vue.prototype, config.StoreConfig);
 
-
-
   store.state.isLogin = false
 
   Vue.prototype.$store = store;
@@ -154,7 +154,7 @@ const RUN_APP = (App, config, plugin) => {
       toPath = to.path;
       next();
       return;
-    } 
+    }
     if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(to.path)) {
       next();
       return;
@@ -174,7 +174,7 @@ const RUN_APP = (App, config, plugin) => {
     store,
     data() {
       return {
-        isReload: false 
+        isReload: false
       };
     },
     methods: {
