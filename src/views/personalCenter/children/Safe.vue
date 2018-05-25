@@ -10,8 +10,16 @@
           <span>为资金加一道锁，更安全</span>
         </div>
         <div class="set">
-          <button v-if="seted">设置</button>
-          <span v-else>修改或找回</span>
+          <button 
+            v-if="$store.state.userInfo.is_new"
+            @click="()=>{
+              type && (showPass = true)
+              !type && $store.state.userInfo.auth === 1 && (showGoogle = true)
+            }"
+          >
+          设置
+          </button>
+          <span v-else @click="showPass = true">修改或找回</span>
         </div>
       </div>
     </div>
@@ -25,11 +33,11 @@
         </div>
         <div class="type clearfix">
           <p class="google">
-            <img src="/static/images/selected.png" alt="" v-if="!type">
-            <img src="/static/images/unselect.png" alt="" v-else><span>谷歌验证</span>
+            <img src="/static/images/selected.png" alt="" v-if="!type && !$store.state.userInfo.is_new">
+            <img src="/static/images/unselect.png" alt="" v-else><span @click="$store.state.userInfo.auth === 1 && (showGoogle = true)">谷歌验证</span>
           </p>
           <p class="message">
-            <img src="/static/images/selected.png" alt="" v-if="type">
+            <img src="/static/images/selected.png" alt="" v-if="type && !$store.state.userInfo.is_new">
             <img src="/static/images/unselect.png" alt="" v-else><span>短信验证</span>
           </p>
         </div>
@@ -109,7 +117,7 @@
          <Pagination class="pageBar" :total="total" :pageSize="pageSize" :curPage="curPage" :onPageChange="emitValue1"></Pagination>
       </div>
     </div>
-    <PayPassword :type="type" v-if="showPass" :emitValue="emitValue2"></PayPassword>
+    <PayPassword :type="type" v-if="showPass" :emitValue="emitValue2" :isnew="$store.state.userInfo.is_new"></PayPassword>
     <GoogleVerify v-if="showGoogle" :emitValue="emitValue3"></GoogleVerify>
   </div>
 </template>
@@ -121,7 +129,7 @@ import GoogleVerify from '../components/safe/GoogleVerify'
   export default {
     data() {
       return {
-        seted: false,
+        seted: !this.$store.state.userInfo.is_new,
         total: 100,
         pageSize: 20,
         curPage: 1,
@@ -129,7 +137,7 @@ import GoogleVerify from '../components/safe/GoogleVerify'
         emitValue2: 'hidePass',
         emitValue3: 'hideGoogle',
         showPass: false,
-        showGoogle: true,
+        showGoogle: false,
         type: this.$store.state.userInfo.phone ? 1 : 0
       }
     },
@@ -140,10 +148,14 @@ import GoogleVerify from '../components/safe/GoogleVerify'
       this.Bus.$on(this.emitValue2, ()=>{
         this.showPass = false;
       })
+      this.Bus.$on(this.emitValue3, ()=>{
+       this. showGoogle = false;
+      })
     },
     destroyed(){
       this.Bus.$off(this.emitValue1)
       this.Bus.$off(this.emitValue2)
+      this.Bus.$off(this.emitValue3)
     },
     components: {
       Pagination,

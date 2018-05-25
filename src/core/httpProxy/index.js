@@ -7,7 +7,7 @@
 
 import Fetch from "../libs/Fetch"; //引入Fetch
 
-let host, port;
+let host, port, type;
 
 const formatParams = req => {
   if (req.url.path.indexOf(":") > 0) {
@@ -18,7 +18,7 @@ const formatParams = req => {
     delete req.data.params[replaceKey];
   }
   // console.log(req)
-  req.url.path && (req.url = `http://${req.url.host}:${req.url.port}${req.url.path}`);
+  req.url.path && (req.url = `${req.url.type ? 'https://' : 'http://'}${req.url.host}:${req.url.port}${req.url.path}`);
   if (req.data && req.data.method === "post")
     req.data.params && Object.keys(req.data.params).length > 0 && (req.data.body = JSON.stringify(req.data.params));
   if (req.data && req.data.method === "get")
@@ -35,11 +35,12 @@ const HTTP_PROXY = {
   install(app, ServerConfig, httpList, httpPreHandler, httpAfterHandler) {
     host = ServerConfig.host;
     port = ServerConfig.port;
+    type = ServerConfig.type;
     httpList.forEach(v => {
       HTTP_PROXY[v.name] = async params => {
         let req = {},
           res = {};
-        req.url = {host, port}
+        req.url = {host, port, type}
         req.url.path = v.data.url
         let data = JSON.parse(JSON.stringify(v.data));
         delete data.url

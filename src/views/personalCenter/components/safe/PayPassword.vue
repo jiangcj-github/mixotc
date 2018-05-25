@@ -1,41 +1,50 @@
 <template>
   <div>
-    <BasePopup :show="true" :top="52" :width="470" :height="470">
+    <BasePopup :show="true" :top="52" :width="470" :height="isnew ? 400 : 470">
       <slot>
         <div class="main">
           <img class="close-btn" src="/static/images/close_btn_tr2.png" alt="" @click="Bus.$emit(emitValue)">
           <h4>支付密码</h4>
           <p class="tip">*出于安全方面的考虑，修改密码后，你的账户将在 24 小时内无法提现。</p>
           <div class="password1">
-            <p>密码<span>密码为8--12位字符，且同时包含字符和数字</span></p>
-            <input type="password" v-model="password1" maxlength="12">
-            <i class="hint">密码格式错误</i>
+            <p>密码<span>密码为8--12位字符，且同时包含字母和数字</span></p>
+            <input type="password" v-model="password1" maxlength="12" @blur="verifyPassword1">
+            <i class="hint" v-if="tip1">{{copy1}}</i>
           </div>
           <div class="password2">
             <p>再输一遍</p>
-            <input type="password" v-model="password2" maxlength="12">
-            <i class="hint">两次输入密码不一致</i>
+            <input type="password" v-model="password2" maxlength="12" @blur="verifyPassword2">
+            <i class="hint" v-if="tip2">两次输入密码不一致</i>
           </div>
-          <div class="verify">
-            <!-- <div class="message">
+          <div class="verify" v-if="!isnew">
+            <div class="message" v-if="type">
               <p>手机验证码</p>
-              <input type="text" v-model="messageWord" maxlength="6"><button>获取验证码</button>
-              <i class="hint">请输入正确的验证码</i>
-            </div> -->
-            <div class="google">
+              <input type="text" v-model="messageWord" maxlength="6" @focus="timeout = false" @input="dealCode" @blur="verifyCode"><button @click="getCode" :disabled="!canSend" :class="{disable: !canSend}">{{codeCopy}}</button>
+              <i class="hint" v-if="tip3">请输入正确的验证码</i>
+              <i class="hint" v-if="!tip3 && timeout">验证码超时</i>
+            </div>
+            <div class="google" v-else>
               <p>谷歌验证码</p>
               <div class="input">
-                <input type="text" maxlength="1">
-                <input type="text" maxlength="1">
-                <input type="text" maxlength="1">
-                <input type="text" maxlength="1">
-                <input type="text" maxlength="1">
-                <input type="text" maxlength="1">
+                <input type="text"
+                  v-for="index in 6"
+                  v-focus="index === inputContent"
+                  v-model="inputGroup[index-1]"
+                  maxlength="1"
+                  @input="dealInput(index-1)"
+                  :key="index"
+                  @keydown="delNum(index)"
+                />                    
               </div>
-              <i class="hint">请输入正确的验证码</i>
+              <i class="hint" v-if="tip4">请输入正确的验证码</i>
             </div>
           </div>
-          <button class="submit">确定</button>
+          <button 
+            class="submit"
+            @click="submit"
+          >
+            确定
+          </button>
         </div>
       </slot>
     </BasePopup>
@@ -44,21 +53,182 @@
 
 <script>
  import BasePopup from '@/components/common/BasePopup';
+ import crypto from 'crypto'
   export default {
-    props:['type', 'emitValue'],
+    props:['type', 'emitValue', 'isnew'],
     data(){
       return {
         password1: '',
         password2: '',
         messageWord: '',
-        // googleWord: ''
+        codeCopy:'获取验证码',
+        canSend:true,
+        timer:null,
+        time: 60,
+        timeout: false,
+        copy1:'',
+        tip1:false,
+        tip2:false,
+        tip3:false,
+        tip4:false,
+        inputGroup: [], // 记录输入框内容,
+        inputContent: ''
       }
     },
     components: {
       BasePopup
     },
+    destroyed() {
+      clearInterval(this.timer);
+    },
+    computed:{
+    },
     methods: {
-    
+      verifyPassword1(){
+        if(this.password2 !== '') this.verifyPassword2()
+        if(this.password1.length < 8 || this.password1.length > 12) {
+          this.tip1 = true;
+          this.copy1 = '密码长度为8--12位'
+          return;
+        }
+        if(!/^[0-9a-zA-Z]+$/.test(this.password1) || /^[0-9]+$/.test(this.password1) || /^[a-zA-Z]+$/.test(this.password1)){
+          this.tip1 = true;
+          this.copy1 = '密码应同时包含字母和数字'
+          return;
+        }
+        this.tip1 = false;
+      },
+      verifyPassword2(){
+        if(this.password1 !== this.password2) {
+          this.tip2 = true;
+          return;
+        }
+        this.tip2 = false;
+      },
+      verifyCode(){
+        console.log(this.messageWord.length)
+        if(this.messageWord.length < 6) {
+          this.tip3 = true;
+          return;
+        }
+        this.tip3 = false;
+      },
+      getCode(){
+        this.time = 60;
+        this.canSend = false;
+        clearInterval(this.timer);
+        this.codeCopy = `${this.time}秒后重发`
+        this.timer = setInterval(() => {
+          this.time--
+          this.codeCopy = `${this.time}秒后重发`
+          if(this.time === 0){
+            this.canSend = true;
+            clearInterval(this.timer);
+            this.codeCopy = '获取验证码'
+          }
+        }, 1000);
+        this.WsProxy.send('control', 'send_code', {type:1}).then(data=>{
+        })
+      },
+      dealCode(){
+        if(!(/(^[0-9]\d*$)/.test(this.messageWord))){
+          this.messageWord = this.messageWord.replace(/[^0-9]/g,"");
+        };
+      },
+      dealInput(num){
+        if(!/^[0-9]\d*$/.test(this.inputGroup[num])) {
+          this.inputGroup[num] = '';
+          return;
+        };
+        if(this.inputGroup[num] === '') {
+          this.inputContent = num + 1;
+          return
+        }
+        if(this.inputGroup[num] !== '') this.inputContent = num + 2;
+      },
+      delNum(index) {
+        let oEvent = window.event;
+        if (this.inputGroup[index - 1] === '' && oEvent.keyCode === 8) {
+          this.inputContent = index - 1;
+          this.inputGroup[index - 2] = '';
+        }
+      },
+      stringToBytes ( str ) {
+        var ch, st, re = [];
+        for (var i = 0; i < str.length; i++ ) {
+          ch = str.charCodeAt(i);  // get char
+          st = [];                 // set up "stack"
+          do {
+            st.push( ch & 0xFF );  // push byte to stack
+            ch = ch >> 8;          // shift value down by 1 byte
+          }
+          while (ch);
+          // add stack contents to result
+          // done because chars have "wrong" endianness
+          re = re.concat( st.reverse() );
+        }
+        // return an array of bytes
+        return re;
+      },
+      getSafePass(plainPass) {
+        // '197102307060486144'
+        let uid = this.JsonBig.stringify(this.$store.state.userInfo.uid), // 用户id
+            uidArr = [], // id数组
+            sum = 0, // id 求和
+            halfPass = "", // 转换密码
+            sha1 = crypto.createHash('sha1'), // 创建并返回一个Hash可用于使用给定生成哈希摘要的对象algorithm
+            endData = "";
+        for (let j = 0; j < uid.length; j++) { // 字符串变数组
+          uidArr.push(uid[j] * 1)
+        }
+        // console.log('getSafePass 0', uidArr)
+        uidArr.forEach(v => { // 数组求和
+          sum = sum + v;
+          return sum
+        });
+        // console.log('getSafePass 1', uidArr, sum, sum%3, plainPass)
+        for (let i = 0; i < plainPass.length; i ++) { // 生成新密码
+          if (i % 3 !== sum % 3) {
+            //console.log('getSafePass 2',halfPass)
+            halfPass += plainPass.substring(i, i + 1);
+          }
+        }
+        halfPass += uid;
+        // console.log('getSafePass 3', sha1, halfPass, typeof halfPass, stringToBytes(halfPass))
+        sha1.update(this.stringToBytes(halfPass)); // 更新散列内容
+        endData = sha1.digest(); //计算传递给散列的所有数据的摘要
+        // console.log('getSafePass 4','plainPass',plainPass, sha1, halfPass, 'salt',endData,plainPass.split('').map(v=>v.charCodeAt()))
+        let salt = endData,
+            iter = 1005,
+            encryptResult = crypto.pbkdf2Sync(plainPass.split('').map(v => v.charCodeAt()), salt, iter, 32, 'sha1');//bit bytes
+        // console.log('getSafePass 5',encryptResult,encryptResult.slice(0, 32).toString('base64'), encryptResult.toString('base64'))
+        return encryptResult.toString('base64');  // Base64加密再 encode;
+      },
+      submit(){
+        this.verifyPassword1();
+        !this.tip2 && this.verifyPassword2();
+        !this.isnew && this.type && this.verifyCode();
+        if(this.tip1 || this.tip2 || this.tip3 || this.tip4) return;
+        this.WsProxy.send('control', this.isnew ? 'user_update' : 'reset_pass', 
+          this.isnew ? {
+            newpass: this.getSafePass(this.password1)
+            } : {
+              code: this.messageWord,
+              pass: this.getSafePass(this.password1)
+            }
+          ).then(data=>{
+            this.Bus.$emit(this.emitValue)
+          this.isnew && this.$store.commit({type:'updateUserInfo', data:{is_new: 0}})
+        }).catch(error=>{
+          if(error.ret === 8){
+            this.type && (this.tip3 = true);
+            !this.type && (this.tip4 = true);
+          }
+          if(error.ret === 4){
+            this.timeout = true;
+          }
+        })
+      }
     }
   }
 </script>
@@ -70,6 +240,10 @@
   width 100%
   height 100%
   padding 24px 0 0 60px
+  button
+    &:hover
+      background-color $col350
+      cursor pointer
   input
     box-sizing()
     padding-left 10px
@@ -146,12 +320,16 @@
         color #FFF
         background $col422
         border-radius 0 2px 2px 0
+        &:hover
+         background-color $col350
+        &.disable
+          background-color #CCC
     .google
       position relative
       .hint
         position absolute
         bottom -20px
-        right 52px
+        left 28px
         fz11()
         color $col94C
       p
@@ -177,4 +355,5 @@
     letter-spacing 0.35px
     background $col422
     border-radius 2px
+
 </style>

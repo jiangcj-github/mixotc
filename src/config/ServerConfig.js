@@ -11,5 +11,6 @@ export default {
 
   // 正式服
   // host: "mixotc.com", //http主机地址
-  // port: 80 //主机端口
+  // type: 1,//1表示https 0或缺省表示http
+  // port: 443 //主机端口
 };
