@@ -84,14 +84,6 @@ Vue.directive('focus', {
   }
 });
 
-//鼠标提示
- Vue.directive('tip', {
-   bind: function (el) {
-     el.className+="tip01-wrap";
-     el.innerHTML+="<i class='tip01'>"+el.innerText+"</i>";
-   },
- });
-
 let _beforeUnloadTime = 0,
   _gapTime = 0,
   tabIndex = Number(localStorage["tabIndex"]) ? Number(localStorage["tabIndex"]) : 0,
