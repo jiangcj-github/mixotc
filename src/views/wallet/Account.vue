@@ -33,7 +33,7 @@
               <img src="/static/images/cancel_icon.png" v-show="srchText.length>0" @click="srchText=''">
               <button @click="onSearch"></button>
             </div>
-            <div class="f2">
+            <div class="f2" v-show="tab===0">
               <span class="checkbox r2" :class="{check:isZero}" @click="isZero=!isZero">隐藏0余额币种</span>
               <span class="checkbox r3" :class="{check:isNoWa}" @click="isNoWa=!isNoWa">隐藏非钱包币种</span>
             </div>
@@ -65,12 +65,12 @@
                 <div class="li" v-if="e.hasWallet">
                   <p class="coin"><img :src="e.icon">{{e.abbr}}</p>
                   <p class="name">{{e.name}}</p>
-                  <p class="avail">{{e.avail}}</p>
-                  <p class="frozen">{{e.frozen}}</p>
-                  <p class="assess">{{e.assess}}</p>
+                  <p class="avail"><span>{{e.avail}}</span></p>
+                  <p class="frozen"><span>{{e.frozen}}</span></p>
+                  <p class="assess"><span>{{e.assess}}</span></p>
                   <p class="opera op1">
-                    <a class="btn white" href="/#/wallet/withdraw">充币</a>
-                    <a class="btn white" href="/#/wallet/charge">提币</a>
+                    <a class="btn white" href="/#/wallet/charge">充币</a>
+                    <a class="btn white" href="/#/wallet/withdraw">提币</a>
                     <a class="btn white" href="/#/">交易</a>
                   </p>
                 </div>
@@ -95,7 +95,7 @@
               <div class="err load-failed">网络异常</div>
             </div>
             <div v-else-if="fbErr===3">
-              <div class="err net-error">加载失败</div>
+              <div class="err net-error">服务器错误</div>
             </div>
             <div v-else-if="fbErr===4">
               <div class="err net-error">数据加载中...</div>
@@ -108,29 +108,26 @@
           <div class="bb" v-show="tab===1">
             <!--表头-->
             <div class="thead">
-              <p class="th coin sortable" @click="bbSort=++bbSort%2+10">币种
-                <i :class="{up:bbSort===10,down:bbSort===11}"></i></p>
-              <p class="th name sortable" @click="bbSort=++bbSort%2+12">全称
-                <i :class="{up:bbSort===12,down:bbSort===13}"></i></p>
-              <p class="th avail sortable" @click="bbSort=++bbSort%2">可用余额
-                <i :class="{up:bbSort===0,down:bbSort===1}"></i></p>
-              <p class="th frozen sortable" @click="bbSort=++bbSort%2+2">冻结中余额
-                <i :class="{up:bbSort===2,down:bbSort===3}"></i></p>
-              <p class="th assess sortable" @click="bbSort=++bbSort%2+8">估值
-                <i :class="{up:bbSort===8,down:bbSort===9}"></i></p>
+              <p class="th coin">币种</p>
+              <p class="th name">全称</p>
+              <p class="th avail">可用余额</p>
+              <p class="th frozen">冻结中余额</p>
+              <p class="th assess">估值</p>
               <p class="th opera">操作</p>
             </div>
             <!--bb返回结果-->
             <div v-if="bbErr===0">
               <div class="li" v-for="(e,i) in bb">
-                <p class="coin"><img :src="e.icon">{{e.abbr}}</p>
+                <p class="coin">{{e.abbr}}</p>
                 <p class="name">{{e.name}}</p>
                 <p class="avail">{{e.avail}}</p>
                 <p class="frozen">{{e.frozen}}</p>
                 <p class="assess">{{e.assess}}</p>
                 <p class="opera op3"><button class="btn white">资产转出</button></p>
               </div>
+              <!--
               <Pagination :total="bbTotal" :pageSize="bbPageSize" :curPage="bbCurPage" onPageChange="onBbPageChange"></Pagination>
+              -->
             </div>
             <div v-else-if="bbErr===1">
               <div class="err no-result">无相应的数据</div>
@@ -139,7 +136,7 @@
               <div class="err load-failed">网络异常</div>
             </div>
             <div v-else-if="bbErr===3">
-              <div class="err net-error">加载失败</div>
+              <div class="err net-error">服务器错误</div>
             </div>
             <div v-else-if="bbErr===4">
               <div class="err net-error">数据加载中...</div>
@@ -150,8 +147,8 @@
           </div>
         </div>
         <!--提示框-->
-        <BasePopup :show="isShowAlert" :width="290" :height="90" v-on:click.native="isShowAlert=false">
-          <div class="alert">{{this.alert}}</div>
+        <BasePopup :show="isShowAlert" :width="0" :height="0" v-on:click.native="isShowAlert=false">
+          <div class="pop-alert">{{this.alert}}</div>
         </BasePopup>
       </div>
     </div>
@@ -187,7 +184,7 @@
           numCny: 0,
         },
 
-        fbSort: 0, //
+        fbSort: 1, //
         fb: [],
         fbCurPage: 1,
         fbPageSize: 20,
@@ -264,6 +261,7 @@
         }
         //加载账户信息
         this.loadFbBalance();
+        this.loadBbBalance();
         this.loadFb();
         this.loadBb();
       },
@@ -275,7 +273,7 @@
         },3000);
       },
       createWallet(i){
-        let curr=this.bb[i].abbr;
+        let curr=this.fb[i].abbr;
         this.WsProxy.send("wallet", "new_wallet",{currency:curr}).then((data)=> {
           this.$set(this.fb[i],"hasWallet",true);
         }).catch(()=>{
@@ -293,7 +291,7 @@
         });
       },
       loadFb(){
-        this.WsProxy.send("wallet","bills_v2",{
+        this.WsProxy.send("wallet","wallets_v2",{
           currency: this.srchText,
           hide_zero: this.isZero,
           hide_no_wallet: this.isNoWa,
@@ -319,38 +317,63 @@
       parseFb(data){
         this.fb=[];
         data.forEach((e)=>{
-          this.fb.push({
-            icon: this.HostUrl.http + "/image/"+e.icon,
-            abbr: e.currency,
-            name: e.name,
-            avail: e.balance || "-",
-            frozen: e.locked || "-",
-            assess: (e.assessment||0) * (this.prices["btc"]||0)+" CNY",
-            hasWallet: e.address!=null,
-          });
+          let item={};
+          item.hasWallet=(e.address!=null);
+          item.icon=this.HostUrl.http + "/image/"+e.icon;
+          item.abbr=e.currency;
+          item.name=e.name;
+          item.avail=item.hasWallet?"0":"-";
+          if(e.balance!=null) {
+            item.avail = (e.balance + "").formatFixed(6);
+          }
+          item.frozen=item.hasWallet?"0":"-";
+          if(e.locked!=null) {
+            item.frozen = (e.locked + "").formatFixed(6);
+          }
+          item.assess=item.hasWallet?"0":"-";
+          if(e.assessment!=null && this.prices["btc"]!=null) {
+            item.assess = (e.assessment * this.prices["btc"] + "").formatFixed(2);
+          }
+          this.fb.push(item);
         });
       },
       loadBbBalance(){
 
       },
       loadBb(){
-        this.bbErr=1;
-        this.bbTotal=0;
-        this.parseBb([]);
+        let uid=this.$store.state.userInfo.uid;
+        this.Proxy.fetch({
+          url: {
+            host: '192.168.113.241',
+            port: '5555',
+            path: '/api/v3/wallet/account/'
+          },
+          data: {
+            method: 'get',
+            params:{uid:uid},
+          },
+        }).then((data)=> {
+          if(!data||!data.objects||data.objects.length<=0){
+            this.bbErr=1; //无数据
+          }else{
+            this.bbErr=0;
+            this.bbTotal=data.count;
+            this.parseBb(data.objects);
+          }
+        }).catch(msg => {
+          this.bbErr=3;
+        });
       },
       parseBb(data){
         this.bb=[];
         data.forEach((e)=>{
           this.bb.push({
-            icon: "http://192.168.113.26//image/B012F109359B4872",
-            abbr: "BTC",
-            name: "Bitcoin",
-            avail: 0.0001,
-            frozen: 0.0001,
-            confirm: 0.0001,
-            total: 0.0003,
-            assess: 1+" BTC",
-            hasWallet: Math.random()>0.5,
+            icon: "",
+            abbr: e.cat,
+            name: e.catalog_name || "-",
+            avail: (e.avail+"").formatFixed(2),
+            frozen: (e.lock+"").formatFixed(2),
+            assess: (e.value+"").formatFixed(2),
           });
         });
       },

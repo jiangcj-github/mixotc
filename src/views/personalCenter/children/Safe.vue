@@ -311,7 +311,7 @@ import GoogleVerify from '../components/safe/GoogleVerify'
           color $col350
           border 1px solid $col350
     .content
-      padding 20px 0 20px 62px 
+      padding 20px 0 20px 62px
   .log
     h4
       height 74px

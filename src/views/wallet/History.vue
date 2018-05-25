@@ -84,9 +84,9 @@
                 <div class="coin"><p><img :src="e.coinIcon">{{e.coin}}</p></div>
                 <div class="addr">
                   <p v-if="e.billType===0">{{e.addr}}</p>
-                  <p v-if="e.billType===1">{{e.nickname}}</p>
+                  <p v-if="e.billType===1"> <a :href="'/#/homepage?uid='+e.uid" target="_blank">{{e.nickname}}</a></p>
                   <p v-if="e.billType===1">
-                    <a :href="'/#/homepage?id='+e.uid" target="_blank"><img src="/static/images/talk.png">联系他</a>
+                    <a href="javascript:void(0);" @click="Bus.$emit('contactSomeone',{id:e.uidStr})"><img src="/static/images/talk.png">联系他</a>
                   </p>
                   <p v-if="e.billType===2">{{e.nickname}}</p>
                   <p v-if="e.billType===3">{{e.nickname}}</p>
@@ -96,7 +96,7 @@
                 <div class="state">
                   <p>{{e.state}}</p>
                 </div>
-                <div class="op"><p v-if="e.billType===1"><a href="#">查看</a></p></div>
+                <div class="op"><p v-if="e.billType===1"><a href="/#/order">查看</a></p></div>
               </div>
               <div class="bottom" v-if="e.billType===1">
                 <span class="orderId">订单号：{{e.orderId}}</span>
@@ -332,7 +332,7 @@
         this.tips=[];
         data && data.forEach((e)=>{
           this.tips.push({
-            orderId: e.bill_id || "-",
+            orderId: e.bill_id.toString() || "-",
             nickname: e.name || "-",
             account: e.phone || e.email || "-",
             addr: e.from || e.to || "-",
@@ -382,6 +382,7 @@
             coinIcon: "http://192.168.113.26//image/B012F109359B4872",
             nickname: e.trader_name || "-",
             uid: e.trader_id,
+            uidStr: this.JsonBig.stringify(e.trader_id),
             num: e.amount,
             fee: e.fee,
             state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],

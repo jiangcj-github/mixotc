@@ -67,7 +67,8 @@
     },
     methods: {
       changeInput(data) {
-        this.sliderValue = this.step === 1 && (! /^d+$/.test(data) ? Math.floor(data) : data) || (data)
+        this.sliderValue = this.step === 1 && (!/^d+$/.test(data) ? Math.round(data) : data) || ((data.toString().replace(/^(\d+)\.(\d{0,6})\d*$/g, "$1" + '.' + '$2'))*1)
+        //console.log('data3473744702345', data, this.sliderValue)
         this.Bus.$emit(this.selectSliderValue, this.sliderValue);
       }
     }

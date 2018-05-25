@@ -15,9 +15,9 @@ const ROUTES = [
     component: resolve => require(["@/views/transaction/Order"], resolve) // 交易中心购买BTC
   },
   {
-    path: "/transaction/tradeRules",
-    name: "tradeRules",
-    component: resolve => require(["@/views/transaction/tradeRules"], resolve) // 交易中心帮助中心
+    path: "/helpcenter",
+    name: "helpCenter",
+    component: resolve => require(["@/views/transaction/HelpCenter"], resolve) // 帮助中心
   },
   {
     path: "/coinData",
