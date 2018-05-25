@@ -4,9 +4,9 @@
       <div class="inner clearfix">
         <h2>常见问题</h2>
         <ul>
-          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 2}}">如何购买数字币</router-link></li>
-          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 3}}">如何出售数字币</router-link></li>
-          <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 1}}">费率说明</router-link></li>
+          <li><router-link :to="{path: '/helpcenter', query: {source: 2}}">如何购买数字币</router-link></li>
+          <li><router-link :to="{path: '/helpcenter', query: {source: 3}}">如何出售数字币</router-link></li>
+          <li><router-link :to="{path: '/helpcenter', query: {source: 1}}">费率说明</router-link></li>
         </ul>
         <img src="/static/images/question.png" alt="">
       </div>
@@ -19,8 +19,8 @@
         <section class="foot-mid">
           <ul class="mid-up">
             <!--<li>关于我们</li>-->
-            <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 4}}">用户协议</router-link></li>
-            <li><router-link :to="{path: '/transaction/tradeRules', query: {source: 5}}">隐私政策</router-link></li>
+            <li><router-link :to="{path: '/helpcenter', query: {source: 4}}">用户协议</router-link></li>
+            <li><router-link :to="{path: '/helpcenter', query: {source: 5}}">隐私政策</router-link></li>
             <li><router-link :to="{path: '/coinData'}">币种资料</router-link></li>
           </ul>
           <ul class="mid-down">

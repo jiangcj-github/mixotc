@@ -92,7 +92,7 @@
     },
     methods: {
       authority(path){
-        return ["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(path);
+        return ["/transaction", "/", "/homepage", "/helpcenter", "/coinData"].includes(path);
       },
       //退出登录逻辑
       logout() {

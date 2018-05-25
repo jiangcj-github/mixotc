@@ -78,7 +78,7 @@
         <div class="rules" @click="agree = !agree">
           <img src="/static/images/rules_checked.png" alt="" v-if="agree">
           <img src="/static/images/rules_unchecked.png" alt="" v-else>
-          <span>我已阅读</span><a href="#/transaction/tradeRules" @click.stop="" target="_blank">{{`《OTC${titleType[type-1]}流程规则》`}}</a>
+          <span>我已阅读</span><a href="#/helpcenter" @click.stop="" target="_blank">{{`《OTC${titleType[type-1]}流程规则》`}}</a>
         </div>
       </div>
       <button class="able" @click="openOrderLayer()" v-if="canSubmit">{{titleType[type-1]}}</button>
@@ -247,7 +247,6 @@
         this.amount = (this.money / (this.rate)).toFixed(6);
         this.money === '' && (this.amount = '');
         this.processNum = 0.002 * (this.amount * 1)
-        console.log('222', this.amount, this.processNum)
       },
       checkMoney(value) {
         this.moneyValue = value

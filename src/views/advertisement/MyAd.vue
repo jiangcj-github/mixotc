@@ -300,6 +300,10 @@
         }).then((data)=>{
           console.log('广告列表', data)
           this.saleList = data.sales ? data.sales : []
+          this.saleList.forEach(v => {
+            v.tradeable = typeof v.tradeable === 'number' ? v.tradeable : this.JsonBig.stringify(v.tradeable).formatFixed(6)
+            v.volume = typeof v.volume === 'number' ? v.volume : this.JsonBig.stringify(v.volume).formatFixed(6)
+          })
           this.pageTotal = data.amount
         }).catch((msg)=>{
           console.log(msg);
@@ -385,11 +389,11 @@
       toSort(title, index) { // 排序操作
         this.clickUp = index;
         this.sortActive = this.sortFlag === index ? !this.sortActive : true;
-        this.dateSort = title.flag === 0 ? (this.sortActive ?  2 : 1) : 0;
-        this.limitSort = title.flag === 7 ? (this.sortActive ? 2 : 1) : 0;
-        this.tradeableSort = title.flag === 8 ? (this.sortActive ? 2 : 1) : 0;
-        this.volumeSort = title.flag === 9 ? (this.sortActive ? 2 : 1) : 0;
-        this.avgSort = title.flag === 10 ? (this.sortActive ? 2 : 1) : 0;
+        this.dateSort = title.flag === 0 ? (this.sortActive ?  1 : 2) : 0;
+        this.limitSort = title.flag === 7 ? (this.sortActive ? 1 : 2) : 0;
+        this.tradeableSort = title.flag === 8 ? (this.sortActive ? 1 : 2) : 0;
+        this.volumeSort = title.flag === 9 ? (this.sortActive ? 1 : 2) : 0;
+        this.avgSort = title.flag === 10 ? (this.sortActive ? 1 : 2) : 0;
         this.sortFlag = title.flag;
         this.initData()
       },

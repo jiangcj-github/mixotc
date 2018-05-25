@@ -1,9 +1,11 @@
 <template>
   <div class="release-ad-wrap">
-    <p class="title">
-      <span>mixOTC</span>-<span>发广告</span>
-      <b>提示：离线或退出时，在订单盘的排序会靠后，订单延时，可能会有投诉，影响订单，建议下载APP，保持随时在线</b>
-    </p>
+    <div class="title">
+      <p class="inner">
+        <router-link to="/transaction">mixOTC</router-link>-<router-link to="/advertisement/release/buy">发广告</router-link>
+        <b>提示：离线或退出时，在订单盘的排序会靠后，订单延时，可能会有投诉，影响订单，建议下载APP，保持随时在线</b>
+      </p>
+    </div>
     <div class="inner release-ad-box clearfix">
       <ul>
         <li class="buy-ad" :class="{active: $route.path=='/advertisement/release/buy', 'is-disabled': !buyCanClick}" @click="buyCanClick && buyAd()">购买广告</li>
@@ -106,10 +108,10 @@
     },
     methods: {
       saleAd() {
-        if (this.$store.state.userInfo.is_new === 1) { // 提醒设置支付密码
-          this.adRemindLayer = true
-          return
-        }
+        // if (this.$store.state.userInfo.is_new === 1) { // 提醒设置支付密码
+        //   this.adRemindLayer = true
+        //   return
+        // }
         this.$router.push({name:'releaseSale', params: {'saleCon': this.saleObj}})
       },
       buyAd() {

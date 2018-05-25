@@ -54,30 +54,52 @@
           <em v-show="!switchValue">当前市场最低价：</em>
           <b v-show="!switchValue">{{priceNow}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
         </p>
-        <input type="text" v-model="adBuyObj.price" @focus="clearPrice=true" @blur="clearPrice=false"/>
+        <input type="text"
+               v-model="adBuyObj.price"
+               @focus="clearPrice=true && (errPrice=true)"
+               @blur="clearPrice=false"
+               @input="priceInput"/>
         <span>CNY</span>
         <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.price && clearPrice" @mousedown="adBuyObj.price=''">
+        <span class="text-err" v-show="errPrice && adBuyObj.price">{{errPriceText}}</span>
       </li>
       <li class="input-li">
         <p class="num-p clearfix">
           <i>购买数量</i>
           <strong :class="{selected: adBuyObj.vary == 2}" @click="showVary">不限量</strong>
         </p>
-        <input type="text" :disabled="adBuyObj.vary == 2" :class="{disabledInput: adBuyObj.vary == 2}" v-model="adBuyObj.tradeable" @focus="clearTradeable=true" @blur="clearTradeable=false"/>
+        <input type="text"
+               :disabled="adBuyObj.vary == 2"
+               :class="{disabledInput: adBuyObj.vary == 2}"
+               v-model="adBuyObj.tradeable"
+               @focus="clearTradeable=true && (errTradeable=true)"
+               @blur="clearTradeable=false"
+               @input="tradeableInput"/>
         <span>BTC</span>
         <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.tradeable && clearTradeable" @mousedown="adBuyObj.tradeable=''">
+        <span class="text-err" v-show="errTradeable && adBuyObj.tradeable">{{errTradeableText}}</span>
       </li>
       <li class="input-li">
         <p>最小订单额<b class="limit">最小200</b></p>
-        <input type="text" v-model="adBuyObj.min" @focus="clearMin=true" @blur="clearMin=false"/>
+        <input type="text"
+               v-model="adBuyObj.min"
+               @focus="clearMin=true && (errMin=true)"
+               @blur="clearMin=false"
+               @input="minInput"/>
         <span>CNY</span>
         <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.min && clearMin" @mousedown="adBuyObj.min=''">
+        <span class="text-err" v-show="errMin && adBuyObj.min">{{errMinText}}</span>
       </li>
       <li class="input-li">
         <p>最大订单额<b class="limit">最大{{maxLimit}}</b></p>
-        <input type="text" v-model="adBuyObj.max" @focus="clearMax=true" @blur="clearMax=false"/>
+        <input type="text"
+               v-model="adBuyObj.max"
+               @focus="clearMax = true && (errMax=true)"
+               @blur="clearMax=false"
+               @input="maxInput"/>
         <span>CNY</span>
         <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.max && clearMax" @mousedown="adBuyObj.max=''">
+        <span class="text-err" v-show="errMax && adBuyObj.max">{{errMaxText}}</span>
       </li>
       <li>付款期限</li>
       <li>
@@ -96,7 +118,7 @@
         <button class="release-btn" :class="{'release-active': canSubmit}" @click="canSubmit && toRelease()">发布购买广告</button>
         <span class="reset-info" @click="reset()">重置信息</span>
       </li>
-      <li class="hint-li">广告成交后，手续费为成交量的0.05%</li>
+      <li class="hint-li">广告成交后，手续费为成交量的0.5%</li>
     </ol>
     <BasePopup :show="adSuccLayer"
                class="ad-succ-layer">
@@ -148,6 +170,7 @@
           "vary": 1, // 余额随动标志 1 不随动 2 随动
           "tradeable": ''// 可交易量
         },
+        maxNum: 0, // 最大订单额度
         selectPrice: [], // 根据币种选择返回情况
         priceNow: '',
         maxLimit: '',
@@ -160,7 +183,18 @@
         clearPrice: false,
         clearTradeable: false,
         clearMin: false,
-        clearMax: false
+        clearMax: false,
+
+        errPrice: false,
+        errTradeable: false,
+        errMin: false,
+        errMax: false,
+
+        errPriceText: '',
+        errTradeableText: '',
+        errMinText: '',
+        errMaxText: '',
+
       }
     },
     components: {
@@ -172,7 +206,7 @@
     },
     computed: {
       canSubmit() {
-        if(this.adBuyObj.payment == 0 || !this.adBuyObj.price || (!this.adBuyObj.tradeable && this.adBuyObj.vary == 1)) {
+        if(this.adBuyObj.payment == 0 || !this.adBuyObj.price || (!this.adBuyObj.tradeable && this.adBuyObj.vary == 1) || this.errPriceText !== '' || this.errTradeableText !== '' || this.errMinText !== '' || this.errMaxText !== '') {
           return false;
         }
         return true;
@@ -248,8 +282,9 @@
         this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
       },
       initData() { // 数据初始化
+        this.maxNum = this.$store.state.userInfo.btverify !== 2 ? 100000 : 10000000
         this.maxLimit = this.$store.state.userInfo.btverify !== 2 ? '100,000' : '10,000,000'
-        this.adBuyObj.max = this.$store.state.userInfo.btverify !== 2 ? '100000' : '10000000'
+        this.adBuyObj.max = this.maxNum
       },
       showVary() {
         this.selectNum = !this.selectNum
@@ -306,6 +341,46 @@
       },
       closeLayer() {
         this.adErrLayer = false
+      },
+      priceInput() { // 表格验证
+        if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adBuyObj.price)) {
+          this.errPriceText = '请输入正确的数字格式'
+          return
+        }
+        this.adBuyObj.price = this.adBuyObj.price.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.errPriceText = ''
+      },
+      tradeableInput() {
+        if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adBuyObj.tradeable)) {
+          this.errTradeableText = '请输入正确的数字格式'
+          return
+        }
+        this.adBuyObj.tradeable = this.adBuyObj.tradeable.replace(/^(\d+)\.(\d{0,6})\d*$/g, "$1" + '.' + '$2');
+        this.errTradeableText = ''
+      },
+      minInput() {
+        if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adBuyObj.min)) {
+          this.errMinText = '请输入正确的数字格式'
+          return
+        }
+        if (this.adBuyObj.min < 200) {
+          this.errMinText = '不能低于最小额度'
+          return
+        }
+        this.adBuyObj.min = this.adBuyObj.min.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.errMinText = ''
+      },
+      maxInput() {
+        if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adBuyObj.max)) {
+          this.errMaxText = '请输入正确的数字格式'
+          return
+        }
+        if (this.adBuyObj.max > this.maxNum) {
+          this.errMaxText = '不能超过最大额度'
+          return
+        }
+        this.adBuyObj.max = this.adBuyObj.max.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.errMaxText = ''
       }
     }
   }

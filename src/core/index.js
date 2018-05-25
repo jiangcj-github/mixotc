@@ -163,7 +163,7 @@ const RUN_APP = (App, config, plugin) => {
       next();
       return;
     }
-    if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(to.path)) {
+    if (["/transaction", "/", "/homepage", "/helpcenter", "/coinData"].includes(to.path)) {
       next();
       return;
     }
@@ -192,7 +192,7 @@ const RUN_APP = (App, config, plugin) => {
         this.$nextTick(() => {
           this.isReload = false;
           console.log(this.$route.path)
-          if (["/transaction", "/", "/homepage", "/transaction/tradeRules", "/coinData"].includes(toPath)) {
+          if (["/transaction", "/", "/homepage", "/helpcenter", "/coinData"].includes(toPath)) {
             return;
           }
           !this.$store.state.token &&

@@ -55,9 +55,14 @@
           <em v-show="!switchValue">当前市场最低价：</em>
           <b v-show="!switchValue">{{priceNow}} CNY/{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
         </p>
-        <input type="text" v-model="adSaleObj.price" @focus="clearPrice = true" @blur="clearPrice = false"/>
+        <input type="text"
+               v-model="adSaleObj.price"
+               @focus="clearPrice=true && (errPrice=true)"
+               @blur="clearPrice = false"
+               @input="priceInput"/>
         <span>CNY</span>
         <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adSaleObj.price && clearPrice" @mousedown="adSaleObj.price=''">
+        <span class="text-err" v-show="errPrice && adSaleObj.price">{{errPriceText}}</span>
       </li>
       <li class="input-li">
         <p class="num-p clearfix sale-num-p">
@@ -81,15 +86,25 @@
       </li>
       <li class="input-li">
         <p>最小订单额<b class="limit">最小200</b></p>
-        <input type="text" v-model="adSaleObj.min" @focus="clearMin = true" @blur="clearMin = false"/>
+        <input type="text"
+               v-model="adSaleObj.min"
+               @focus="clearMin=true && (errMin=true)"
+               @blur="clearMin = false"
+               @input="minInput"/>
         <span>CNY</span>
         <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adSaleObj.min && clearMin" @mousedown="adSaleObj.min=''">
+        <span class="text-err" v-show="errMin && adSaleObj.min">{{errMinText}}</span>
       </li>
       <li class="input-li">
         <p>最大订单额<b class="limit">最大{{maxLimit}}</b></p>
-        <input type="text" v-model="adSaleObj.max" @focus="clearMax = true" @blur="clearMax = false"/>
+        <input type="text"
+               v-model="adSaleObj.max"
+               @focus="clearMax = true && (errMax=true)"
+               @blur="clearMax = false"
+               @input="maxInput"/>
         <span>CNY</span>
         <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adSaleObj.max && clearMax" @mousedown="adSaleObj.max=''">
+        <span class="text-err" v-show="errMax && adSaleObj.max">{{errMaxText}}</span>
       </li>
       <li>付款期限</li>
       <li>
@@ -108,7 +123,7 @@
         <button class="release-btn" :class="{'release-active': canSubmit}" @click="canSubmit && toRelease()">发布购买广告</button>
         <span class="reset-info" @click="reset()">重置信息</span>
       </li>
-      <li class="hint-li">广告成交后，手续费为成交量的0.05%</li>
+      <li class="hint-li">广告成交后，手续费为成交量的0.5%</li>
     </ol>
     <BasePopup :show="adSuccLayer"
                class="ad-succ-layer">
@@ -182,7 +197,15 @@
 
         clearPrice: false,
         clearMin: false,
-        clearMax: false
+        clearMax: false,
+
+        errPrice: false,
+        errMin: false,
+        errMax: false,
+
+        errPriceText: '',
+        errMinText: '',
+        errMaxText: '',
       }
     },
     components: {
@@ -194,7 +217,7 @@
     },
     computed: {
       canSubmit() {
-        if(this.adSaleObj.payment == 0 || !this.adSaleObj.price) {
+        if(this.adSaleObj.payment == 0 || !this.adSaleObj.price|| this.errPriceText !== '' || this.errMinText !== '' || this.errMaxText !== '') {
           return false;
         }
         return true;
@@ -344,6 +367,38 @@
       },
       closeLayer() {
         this.adErrLayer = false
+      },
+      priceInput() { // 表格验证
+        if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adSaleObj.price)) {
+          this.errPriceText = '请输入正确的数字格式'
+          return
+        }
+        this.adSaleObj.price = this.adSaleObj.price.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.errPriceText = ''
+      },
+      minInput() {
+        if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adSaleObj.min)) {
+          this.errMinText = '请输入正确的数字格式'
+          return
+        }
+        if (this.adSaleObj.min < 200) {
+          this.errMinText = '不能低于最小额度'
+          return
+        }
+        this.adSaleObj.min = this.adSaleObj.min.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.errMinText = ''
+      },
+      maxInput() {
+        if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adSaleObj.max)) {
+          this.errMaxText = '请输入正确的数字格式'
+          return
+        }
+        if (this.adSaleObj.max > this.maxNum) {
+          this.errMaxText = '不能超过最大额度'
+          return
+        }
+        this.adSaleObj.max = this.adSaleObj.max.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.errMaxText = ''
       }
     }
   }

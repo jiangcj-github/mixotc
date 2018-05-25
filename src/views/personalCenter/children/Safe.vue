@@ -117,8 +117,13 @@
          <Pagination class="pageBar" :total="total" :pageSize="pageSize" :curPage="curPage" :onPageChange="emitValue1"></Pagination>
       </div>
     </div>
+<<<<<<< HEAD
     <PayPassword :type="type" v-if="showPass" :emitValue="emitValue2" :isnew="$store.state.userInfo.is_new"></PayPassword>
     <GoogleVerify v-if="showGoogle" :emitValue="emitValue3"></GoogleVerify>
+=======
+    <PayPassword :type="type" v-if="showPass" :emitValue="emitValue2"></PayPassword>
+    <!--<GoogleVerify v-if="showGoogle" :emitValue="emitValue3"></GoogleVerify>-->
+>>>>>>> 广告表单校验
   </div>
 </template>
 
@@ -310,7 +315,7 @@ import GoogleVerify from '../components/safe/GoogleVerify'
           color $col350
           border 1px solid $col350
     .content
-      padding 20px 0 20px 62px 
+      padding 20px 0 20px 62px
   .log
     h4
       height 74px

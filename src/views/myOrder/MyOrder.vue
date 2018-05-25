@@ -251,7 +251,7 @@
         startValueDate: null,
         endValueDate: null,
 
-        timeList: ['今天', '三天', '七天'], // 时间Tab切换title
+        timeList: ['今天','三天', '七天'], // 时间Tab切换title
 
         orderType: ['全部类型', '购买', '出售'], // 类型下拉显示
         orderTypeValue: 'orderTypeValue', // 传递给子组件
