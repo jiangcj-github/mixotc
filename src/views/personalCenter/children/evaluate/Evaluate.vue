@@ -7,7 +7,7 @@
       <ol>
         <li v-for="(content, index) in rateList">
           <p class="clearfix" :style="{width: `calc(100 * ${content}px`}">
-            <img src="/static/images/personal/evaluate_white.png" alt="" v-for="index in content">
+            <img src="/static/images/personal/evaluate_white.png" alt="" v-for="index in Math.floor(content)">
             <span>{{content <= 2 ? '差评：' : (content >= 4 ? '好评：' : '中评：')}}{{content}}分</span>
           </p>
         </li>
@@ -98,7 +98,7 @@
     data() {
       return {
         rateOriginList: ['来自交易对方的评价', '给交易对方的评价', '来自担保对方的评价', '给担保对方的评价'],
-        rateList: [2, 1, 3, 4],
+        rateList: [2.5, 1, 3, 4],
         inputValue: '',
         evaluateType: ['全部评价', '好评(3分以上)', '中评(3分)', '差评(1以上，3分以下)'],
         evaluateB: 'evaluateB', // 选择子组件合适样式
