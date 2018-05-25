@@ -34,7 +34,7 @@
                 <span>{{coins[coinSel].addr}}</span>
               </p>
               <p class="link">
-                <a href="javascript:void(0);" @click="onShowQrcode">展示二维码</a>
+                <a href="javascript:void(0);" @click="isShowQrCode=true">展示二维码</a>
                 <a href="javascript:void(0);" v-clipboard:copy="coins[coinSel].addr"
                    v-clipboard:success="onClipSuccess" v-clipboard:error="onClipError">复制到剪贴板</a>
               </p>
@@ -97,7 +97,7 @@
           <div class="qr-pop">
             <div class="close"><i @click="isShowQrCode=false">&times;</i></div>
             <h3>充值地址</h3>
-            <div id="qrcode" ref="dddd"></div>
+            <qrcode-vue :value="coins[coinSel].addr" :size="200" class="qrcode"></qrcode-vue>
             <p>{{coins[coinSel].addr}}</p>
           </div>
         </BasePopup>
@@ -110,7 +110,7 @@
   import LeftBar from "./layout/LeftBar";
   import Pagination from "../verify/component/Pagination";
   import BasePopup from "../../components/common/BasePopup";
-  import QRCode from 'qrcodejs2';
+  import QrcodeVue from "qrcode.vue";
 
   export default {
     components: {
@@ -118,10 +118,11 @@
       Pagination,
       Notify,
       LeftBar,
+      QrcodeVue
     },
     data() {
       return {
-        coins:[{coin:"btc"}],
+        coins:[{coin:"BTC",avail:0,total:0,addr:"-",confirm:0,checkNum:0}],
         coinSel: 0,
         isShowCoinUl: false,
 
@@ -146,28 +147,40 @@
               coin: e.currency.toUpperCase(),
               avail: (e.balance+"").formatFixed(6),
               total: (e.balance+e.locked+"").formatFixed(6),
-              confirm: 0,
               addr: e.address || "-",
+              confirm: 0,
+              checkNum: 0,
             });
           });
-        }
-        //获取币种资料
-        let data2=await this.Proxy.coinSearch().catch((msg)=>{
-          console.log(msg);
-        });
-        if(data2 && data2.data && data2.data.coins){
-          let coins=data2.data.coins;
-          coins.forEach((e)=>{
-            this.coins.forEach((item)=>{
-              if(e.currency.toUpperCase()===item.coin){
-                item.checkNum=e.check_num || "0";
-              }
-            });
-          })
         }
         //排序
         this.coins.sort(function(a,b){
           return a.coin<b.coin?-1:1;
+        });
+        //获取币种资料
+        this.Proxy.coinSearch().then((data)=>{
+          if(data && data.data && data.data.coins) {
+            let coins = data.data.coins;
+            coins.forEach((e) => {
+              this.coins.forEach((item) => {
+                if (e.currency.toUpperCase() === item.coin) {
+                  item.checkNum = e.check_num || "0";
+                }
+              });
+            })
+          }
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+        //获取确认中金额
+        this.coins.forEach((e)=>{
+          this.WsProxy.send("wallet","get_checking_amount",{currency:e.coin}).then((data)=>{
+            if(data && data.data) {
+              e.confirm = data.data.amount || 0;
+            }
+          }).catch((msg)=>{
+            console.log(msg);
+          });
         });
         //加载账单
         this.loadLists();
@@ -175,7 +188,7 @@
       loadLists(){
         let coin=this.coins[this.coinSel];
         this.WsProxy.send("wallet","bills_v2",{
-          type: 1,
+          type: "1",
           state: "0,1,2,3,4,5,6",
           page: 0,
           count: 10,
@@ -210,15 +223,6 @@
             addr2Name: e.to_name || "-",
           });
         });
-      },
-      onShowQrcode(){
-        console.log(this.$refs.pop);
-        new QRCode(this.$refs.pop.$refs.qrcode, {
-          width: 100,
-          height: 100,
-          text:this.coins[this.coinSel].addr,
-        });
-        isShowQrCode=true;
       },
       onClipSuccess(){
         window.alert("复制成功");
