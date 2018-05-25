@@ -65,8 +65,8 @@
                 <div class="li" v-if="e.hasWallet">
                   <p class="coin"><img :src="e.icon">{{e.abbr}}</p>
                   <p class="name">{{e.name}}</p>
-                  <p class="avail"><span v-tip>{{e.avail}}</span></p>
-                  <p class="frozen"><span v-tip>{{e.frozen}}</span></p>
+                  <p class="avail"><span>{{e.avail}}</span></p>
+                  <p class="frozen"><span>{{e.frozen}}</span></p>
                   <p class="assess"><span>{{e.assess}}</span></p>
                   <p class="opera op1">
                     <a class="btn white" href="/#/wallet/charge">充币</a>
