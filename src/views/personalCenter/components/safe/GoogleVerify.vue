@@ -24,10 +24,10 @@
             <li class="second">
               <img src="/static/images/personal/google_2.png" alt="" width="32px" height="32px">
               <p class="tip">在“Google Authenticator(身份验证器)”应用程序中,点击“添加账户”扫描下方二维码</p>
-              <div class="qrcode"></div>
+              <QrcodeVue class="qrcode" :value="secretKey" :size="90"></QrcodeVue>
               <p class="key">
                 如果您无法扫描成功上图的条形码，您可以手动添加账户，输入如下密钥：
-                <span>5VV7J2GDQU3HVHLQ</span>
+                <span>{{secretKey}}</span>
               </p>
             </li>
             <li class="third">
@@ -36,7 +36,7 @@
                 <p class="title">警告：</p>
                 <p class="remember">
                   请您务必将密钥记录下来:
-                  <span>5VV7J2GDQU3HVHLQ</span>
+                  <span>{{secretKey}}</span>
                 </p>
                 <p class="mistake">如果误删或是更换手机，手动输入密钥是您唯一恢复的方式。</p>
               </div>
@@ -66,17 +66,25 @@
 
 <script>
 import BasePopup from '@/components/common/BasePopup';
+import QrcodeVue from 'qrcode.vue';
   export default {
     props:['emitValue'],
     data(){
       return {
         showTip:false,
         inputGroup: [], // 记录输入框内容,
-        inputContent: ''
+        inputContent: '',
+        secretKey:''
       }
     },
     components: {
-      BasePopup
+      BasePopup,
+      QrcodeVue
+    },
+    created(){
+      this.WsProxy.send('control', 'get_secret').then(({secret}) => {
+        this.secretKey = secret
+      })
     },
     methods: {
       dealInput(num){
@@ -98,8 +106,18 @@ import BasePopup from '@/components/common/BasePopup';
         }
       },
       submit(){
-        this.WsProxy.send('',{
-          
+        if(this.inputGroup.join('').length < 6){
+          this.showTip = true;
+          return;
+        }
+        this.showTip = false;
+        this.WsProxy.send('control', 'verify_secret', {
+          code: Number(this.inputGroup.join(''))
+        }).then(data=>{
+          this.Bus.$emit(this.emitValue, true)
+          this.$store.commit({type:'updateUserInfo', data:{auth: 2}})
+        }).catch(error=>{
+          this.showTip = true;
         })
       }
     }
@@ -177,10 +195,11 @@ import BasePopup from '@/components/common/BasePopup';
             span
               color $col94C
           .qrcode
-            width 100px
-            height 100px
+            width 90px
+            height 90px
+            padding 5px
             margin-bottom 10px
-            background yellowgreen
+            border 1px solid $colA8A
         &.third
           font-size $fz13
           button

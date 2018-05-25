@@ -13,8 +13,8 @@
           <button 
             v-if="$store.state.userInfo.is_new"
             @click="()=>{
-              type && (showPass = true)
-              !type && $store.state.userInfo.auth === 1 && (showGoogle = true)
+              (type || !type && $store.state.userInfo.auth !== 1 ) && (showPass = true);
+              !type && $store.state.userInfo.auth === 1 && (showGoogle = true);
             }"
           >
           设置
@@ -46,7 +46,7 @@
     <div class="device">
       <div class="title clearfix">
         <h4>当前已登录你账户的浏览器或设备</h4>
-        <button>一键登出所有设备</button>
+        <button @click="kickOff">一键登出所有设备</button>
       </div>
       <div class="content">
         <table>
@@ -72,49 +72,19 @@
       <div class="content">
         <table>
           <tr>
-            <th style="width: 400px">登录设备</th>
-            <th style="width: 130px">IP</th>
+            <th style="width: 350px">登录设备</th>
+            <th style="width: 180px">IP</th>
             <th style="width: 170px">地点</th>
             <th>时间</th>
           </tr>
-          <tr>
-            <td>联想ThinkPad/Windows 10/Chrome55.0.2883</td>
-            <td>106.38.92.46</td>
-            <td>China Beijing</td>
-            <td>2016年1月18日  10:51</td>
-          </tr>
-          <tr>
-            <td>联想ThinkPad/Windows 10/Chrome55.0.2883</td>
-            <td>106.38.92.46</td>
-            <td>China Beijing</td>
-            <td>2016年1月18日  10:51</td>
-          </tr>
-          <tr>
-            <td>联想ThinkPad/Windows 10/Chrome55.0.2883</td>
-            <td>106.38.92.46</td>
-            <td>China Beijing</td>
-            <td>2016年1月18日  10:51</td>
-          </tr>
-          <tr>
-            <td>联想ThinkPad/Windows 10/Chrome55.0.2883</td>
-            <td>106.38.92.46</td>
-            <td>China Beijing</td>
-            <td>2016年1月18日  10:51</td>
-          </tr>
-          <tr>
-            <td>联想ThinkPad/Windows 10/Chrome55.0.2883</td>
-            <td>106.38.92.46</td>
-            <td>China Beijing</td>
-            <td>2016年1月18日  10:51</td>
-          </tr>
-          <tr>
-            <td>联想ThinkPad/Windows 10/Chrome55.0.2883</td>
-            <td>106.38.92.46</td>
-            <td>China Beijing</td>
-            <td>2016年1月18日  10:51</td>
+          <tr v-for="(item, index) of loginRecord" :key="index">
+            <td>{{item.device}}</td>
+            <td>{{item.ip}}</td>
+            <td>{{item.location}}</td>
+            <td>{{item.create.toDate2()}}</td>
           </tr>
         </table>
-         <Pagination class="pageBar" :total="total" :pageSize="pageSize" :curPage="curPage" :onPageChange="emitValue1"></Pagination>
+         <Pagination class="pageBar" :total="total" :pageSize="20" :curPage="curPage" :onPageChange="emitValue1"></Pagination>
       </div>
     </div>
     <PayPassword :type="type" v-if="showPass" :emitValue="emitValue2" :isnew="$store.state.userInfo.is_new"></PayPassword>
@@ -133,6 +103,9 @@ import GoogleVerify from '../components/safe/GoogleVerify'
         total: 100,
         pageSize: 20,
         curPage: 1,
+        deviceList:[],
+        total:0,
+        loginRecord:[],
         emitValue1: 'changePage',
         emitValue2: 'hidePass',
         emitValue3: 'hideGoogle',
@@ -141,15 +114,29 @@ import GoogleVerify from '../components/safe/GoogleVerify'
         type: this.$store.state.userInfo.phone ? 1 : 0
       }
     },
+    components: {
+      Pagination,
+      PayPassword,
+      GoogleVerify
+    },
+    created() {
+      this.WsProxy.send('control', 'get_online_clients').then(data=>{
+        console.log(data)
+      })
+      this.fetchRecords(0);
+    },
     mounted() {
       this.Bus.$on(this.emitValue1, (num)=>{
-        this.curPage = num;
+        this.fetchRecords(num - 1)
       })
       this.Bus.$on(this.emitValue2, ()=>{
         this.showPass = false;
       })
-      this.Bus.$on(this.emitValue3, ()=>{
-       this. showGoogle = false;
+      this.Bus.$on(this.emitValue3, (data)=>{
+       this.showGoogle = false;
+       if(data) {
+        this.showPass = true;
+       }
       })
     },
     destroyed(){
@@ -157,10 +144,24 @@ import GoogleVerify from '../components/safe/GoogleVerify'
       this.Bus.$off(this.emitValue2)
       this.Bus.$off(this.emitValue3)
     },
-    components: {
-      Pagination,
-      PayPassword,
-      GoogleVerify
+    methods: {
+      kickOff(){
+        this.WsProxy.send('control', 'kick_off_client', {
+          imei: this.$store.state.token
+        }).then(data=>{
+          console.log(data)
+        })
+      },
+      fetchRecords(page){
+        this.WsProxy.send('control', 'get_login_record',{
+          page: page,
+          count: 20
+        }).then(data=>{
+          this.total = data.count;
+          this.loginRecord = data.records;
+          this.curPage = page + 1;
+        })
+      }
     }
   }
 </script>

@@ -163,6 +163,20 @@ Number.prototype.toDate = function (fmt) {
   let date = new Date(this * 1000);
   return date.dateHandle(fmt)
 };
+// 时间格式化2016年1月18日 10:51
+Number.prototype.toDate2 = function() {
+   let _time=new Date(this*1000);
+    let   year=_time.getFullYear();//2017
+    let   month=_time.getMonth()+1;//7
+    let   date=_time.getDate();//10
+    let   hour=_time.getHours();//10
+    hour < 10 && (hour = '0'+ hour)
+    let   minute=_time.getMinutes();//56
+    minute < 10 && (minute = "0" + minute);
+    let   second=_time.getSeconds();//15
+    second < 10 && (second = "0" + second);
+    return  year+"年"+month+"月"+date+"日  "+hour+":"+minute//这里自己按自己需要的格式拼接
+};
 // 时间戳转化为min:second，早于今天转化为xx月xx日min:second
 Number.prototype.formatTime = function() {
   let time = new Date(this);

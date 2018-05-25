@@ -106,12 +106,16 @@
         this.tip2 = false;
       },
       verifyCode(){
-        console.log(this.messageWord.length)
-        if(this.messageWord.length < 6) {
+        if(this.type && this.messageWord.length < 6) {
           this.tip3 = true;
           return;
         }
-        this.tip3 = false;
+        if(!this.type && this.inputGroup.join('').length < 6){
+          this.tip4 = true;
+          return;
+        }
+        this.type && (this.tip3 = false);
+        !this.type && (this.tip4 = false);
       },
       getCode(){
         this.time = 60;
@@ -207,20 +211,20 @@
       submit(){
         this.verifyPassword1();
         !this.tip2 && this.verifyPassword2();
-        !this.isnew && this.type && this.verifyCode();
+        !this.isnew && this.verifyCode();
         if(this.tip1 || this.tip2 || this.tip3 || this.tip4) return;
         this.WsProxy.send('control', this.isnew ? 'user_update' : 'reset_pass', 
           this.isnew ? {
             newpass: this.getSafePass(this.password1)
             } : {
-              code: this.messageWord,
+              code: this.type ? this.messageWord : this.inputGroup.join(''),
               pass: this.getSafePass(this.password1)
             }
-          ).then(data=>{
-            this.Bus.$emit(this.emitValue)
+        ).then(data=>{
+          this.Bus.$emit(this.emitValue)
           this.isnew && this.$store.commit({type:'updateUserInfo', data:{is_new: 0}})
         }).catch(error=>{
-          if(error.ret === 8){
+          if(error.ret === 8 || error.ret === 6){
             this.type && (this.tip3 = true);
             !this.type && (this.tip4 = true);
           }
