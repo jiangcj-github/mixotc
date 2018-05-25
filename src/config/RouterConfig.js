@@ -72,7 +72,7 @@ const ROUTES = [
   {
     path: "/personal",
     name: "personal",
-    redirect: "/personal/evaluate",
+    redirect: "/personal/account",
     component: resolve =>
       require(["@/views/personalCenter/personalCenter"], resolve), // 个人中心
     children: [

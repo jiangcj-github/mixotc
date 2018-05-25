@@ -18,7 +18,7 @@
     </div>
     <BasePopup :show="adRemindLayer"
                class="ad-remind-layer">
-      <router-link to="/personal/account/baseInfo" v-clickoutside="closeLayer">请先设置支付密码</router-link>
+      <router-link to="/personal/safe" v-clickoutside="closeLayer">请先设置支付密码</router-link>
     </BasePopup>
   </div>
 </template>
