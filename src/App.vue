@@ -4,7 +4,7 @@
     <router-view class="main-container" v-if="showView" :key="JsonBig.stringify($route.query)" />
     <Footer v-if="$route.path !== '/verify/service'"></Footer>
     <News v-if="$store.state.userInfo && !$store.state.userInfo.is_admin"></News>
-    <img src="/static/images/to_top.png" alt="" class="to-top">
+    <img src="/static/images/to_top.png" alt="" class="to-top" :class="{show:showTop}" @click="toTop">
   </div>
 </template>
 
@@ -26,13 +26,13 @@
     data() {
       return {
         timer1: null,
-        timer2: null
+        timer2: null,
+        timer3: null,
+        showTop: false
       }
     },
     created() {
-      window.addEventListener("scroll", function(){
-        // console.log(window);
-      });
+      window.addEventListener('scroll', this.handleScroll);
       this.$store.commit({type: 'changeLoginForm', data: false})
       // this.$store.commit({type: 'changeLogin', data: false});
       // console.log(this.token)
@@ -105,9 +105,32 @@
     },
     destroyed() {
       this.timer2 && (this.timer2 = clearInterval(this.timer2));
-      window.onmousedown = null
+      window.removeEventListener('scroll');
+      window.onmousedown = null;
+
     },
     methods: {
+      toTop(){
+        cancelAnimationFrame(this.timer3);
+        let self = this;
+        this.timer3 = requestAnimationFrame(function fn(){
+          let oTop = document.body.scrollTop || document.documentElement.scrollTop;
+          if(oTop > 0){
+          scrollTo(0, oTop - 80);
+          self.timer3 = requestAnimationFrame(fn);
+          }else{
+            cancelAnimationFrame(self.timer3);
+          } 
+        });
+      },
+      handleScroll () {
+        let scrollTop = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
+        if(scrollTop > 1200) {
+          !this.showTop && (this.showTop = true);
+          return;
+        }
+        this.showTop && (this.showTop = false);
+      },
       authority(path){
         return ["/transaction", "/", "/homepage", "/helpcenter", "/coinData"].includes(path);
       },
@@ -213,11 +236,17 @@
       position relative
       flex-grow 1
     .to-top
+      display none
+      position fixed
+      right 8px
+      bottom 73px
       width 30px
       height 30px
-      position fixed;
-      right 8px;
-      bottom 73px;
       cursor pointer
-  
+      transition all 1s
+      -moz-transition all 1s /* Firefox 4 */
+      -webkit-transition all 1s /* Safari 和 Chrome */
+      -o-transition all 1s /* Opera */
+      &.show
+        display block
 </style>
