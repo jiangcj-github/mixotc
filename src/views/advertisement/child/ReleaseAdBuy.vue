@@ -305,12 +305,12 @@
         this.adBuyObj.min = this.adBuyObj.min * 1
         this.adBuyObj.price = this.adBuyObj.price * 1
         this.adBuyObj.tradeable = this.adBuyObj.tradeable * 1
-        // let editeErrNum = 200 + (this.adBuyObj.tradeable * 0.005)
-        // if (this.$store.state.editFlag == 2 && this.adBuyObj.tradeable < editeErrNum) {
-        //   this.adErrLayer = true
-        //   this.errText = '可交易量低于最小交易额度+手续费<br/>无法上架'
-        //   return
-        // }
+        let editeErrNum = 200 * 1.005
+        if (this.$store.state.editFlag == 2 && (this.adBuyObj.tradeable * this.priceNow) < editeErrNum) {
+          this.adErrLayer = true
+          this.errText = '可交易量低于最小交易额度+手续费<br/>无法上架'
+          return
+        }
         this.WsProxy.send('otc', this.$store.state.editFlag == 2 ? 'update_sale' : 'new_sale', this.adBuyObj).then((data)=>{
           if (this.$store.state.editFlag == 2) {
             this.adErrLayer = true
@@ -371,7 +371,7 @@
           this.errPriceText = '请输入正确的数字格式'
           return
         }
-        this.adBuyObj.price = this.adBuyObj.price.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.adBuyObj.price = this.adBuyObj.price.replace(/^(\d+)\.(\d{0,2})\d*$/g, '$1' + '.' + '$2');
         this.errPriceText = ''
       },
       tradeableInput() {
@@ -379,7 +379,7 @@
           this.errTradeableText = '请输入正确的数字格式'
           return
         }
-        this.adBuyObj.tradeable = this.adBuyObj.tradeable.replace(/^(\d+)\.(\d{0,6})\d*$/g, "$1" + '.' + '$2');
+        this.adBuyObj.tradeable = this.adBuyObj.tradeable.replace(/^(\d+)\.(\d{0,6})\d*$/g, '$1' + '.' + '$2');
         this.errTradeableText = ''
       },
       minInput() {
@@ -395,7 +395,7 @@
           this.errMinText = '不能超过最大额度'
           return
         }
-        this.adBuyObj.min = this.adBuyObj.min.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.adBuyObj.min = this.adBuyObj.min.replace(/^(\d+)\.(\d{0,2})\d*$/g, '$1' + '.' + '$2');
         this.errMinText = ''
       },
       maxInput() {
@@ -411,7 +411,7 @@
           this.errMaxText = '不能超过最大额度'
           return
         }
-        this.adBuyObj.max = this.adBuyObj.max.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.adBuyObj.max = this.adBuyObj.max.replace(/^(\d+)\.(\d{0,2})\d*$/g, '$1' + '.' + '$2');
         this.errMaxText = ''
       }
     }

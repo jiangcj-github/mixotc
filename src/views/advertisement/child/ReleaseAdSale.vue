@@ -334,12 +334,12 @@
         this.adSaleObj.max = this.adSaleObj.max * 1
         this.adSaleObj.min = this.adSaleObj.min * 1
         this.adSaleObj.price = this.adSaleObj.price * 1
-        //let editeErrNum = 200 + (this.adSaleObj.tradeable * 0.005)
-        // if (this.$store.state.editFlag == 1 && this.adSaleObj.tradeable < editeErrNum) {
-        //   this.adErrLayer = true
-        //   this.errText = '可交易量低于最小交易额度+手续费<br/>无法上架'
-        //   return
-        // }
+        let editeErrNum = 200 * 1.005
+        if (this.$store.state.editFlag == 1 && (this.adSaleObj.tradeable * this.priceNow) < editeErrNum) {
+          this.adErrLayer = true
+          this.errText = '可交易量低于最小交易额度+手续费<br/>无法上架'
+          return
+        }
         this.WsProxy.send('otc', this.$store.state.editFlag == 1 ? 'update_sale' : 'new_sale', this.adSaleObj).then((data)=>{
           if (this.$store.state.editFlag == 1) {
             this.adErrLayer = true
@@ -400,7 +400,7 @@
           this.errPriceText = '请输入正确的数字格式'
           return
         }
-        this.adSaleObj.price = this.adSaleObj.price.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.adSaleObj.price = this.adSaleObj.price.replace(/^(\d+)\.(\d{0,2})\d*$/g, '$1' + '.' + '$2');
         this.errPriceText = ''
       },
       minInput() {
@@ -412,7 +412,7 @@
           this.errMinText = '不能低于最小额度'
           return
         }
-        this.adSaleObj.min = this.adSaleObj.min.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.adSaleObj.min = this.adSaleObj.min.replace(/^(\d+)\.(\d{0,2})\d*$/g, '$1' + '.' + '$2');
         this.errMinText = ''
       },
       maxInput() {
@@ -424,7 +424,7 @@
           this.errMaxText = '不能超过最大额度'
           return
         }
-        this.adSaleObj.max = this.adSaleObj.max.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
+        this.adSaleObj.max = this.adSaleObj.max.replace(/^(\d+)\.(\d{0,2})\d*$/g, '$1' + '.' + '$2');
         this.errMaxText = ''
       }
     }
