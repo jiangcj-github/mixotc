@@ -57,12 +57,12 @@
             <th style="width: 180px">地点</th>
             <th>是否当前</th>
           </tr>
-          <tr>
-            <td>2016年1月18日  10:51</td>
-            <td>Windows 10/Chrome55.0.2883</td>
-            <td>106.38.92.46</td>
-            <td>China Beijing</td>
-            <td>是</td>
+          <tr v-for="(item, index) of deviceList" :key="index">
+            <td>{{item.create.toDate2()}}</td>
+            <td>{{item.device}}</td>
+            <td>{{item.ip}}</td>
+            <td>{{item.location}}</td>
+            <td>{{item.is_self ? '是' : '否'}}</td>
           </tr>
         </table>
       </div>
@@ -152,11 +152,18 @@ import GoogleVerify from '../components/safe/GoogleVerify'
           console.log(data)
         })
       },
+      getOnlineClients() {
+        this.WsProxy.send('control', 'get_online_clients').then(data=>{
+          if(!data) return;
+          this.deviceList = data.clients;
+        })
+      },
       fetchRecords(page){
         this.WsProxy.send('control', 'get_login_record',{
           page: page,
           count: 20
-        }).then(data=>{
+        }).then(data => {
+          if(!data) return;
           this.total = data.count;
           this.loginRecord = data.records;
           this.curPage = page + 1;
