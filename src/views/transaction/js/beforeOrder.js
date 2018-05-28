@@ -20,13 +20,13 @@ let beforeOrder=async function(vue,param) {
 
   //是否实名认证
   if(isVerify !== 2){
-    return Promise.reject("未实名认证");
+    return Promise.reject("请先进行实名认证");
   }
 
   // 是否设置资金密码
-  // if (opt.type == 2 && fundPass === 1) { // 提醒设置支付密码
-  //   return Promise.reject("请设置资金密码");
-  // }
+  if (opt.type == 2 && fundPass === 1) { // 提醒设置支付密码
+    return Promise.reject("请设置资金密码");
+  }
 
   //是否自己的广告
   if(JsonBig.stringify(opt.sid)===JsonBig.stringify(loginUid)){

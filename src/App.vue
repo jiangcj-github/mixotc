@@ -4,6 +4,7 @@
     <router-view class="main-container" v-if="showView" :key="JsonBig.stringify($route.query)" />
     <Footer v-if="$route.path !== '/verify/service'"></Footer>
     <News v-if="$store.state.userInfo && !$store.state.userInfo.is_admin"></News>
+    <img src="/static/images/to_top.png" alt="" class="to-top">
   </div>
 </template>
 
@@ -29,7 +30,9 @@
       }
     },
     created() {
-      console.log(this.$route)
+      window.addEventListener("scroll", function(){
+        // console.log(window);
+      });
       this.$store.commit({type: 'changeLoginForm', data: false})
       // this.$store.commit({type: 'changeLogin', data: false});
       // console.log(this.token)
@@ -198,18 +201,23 @@
 
 <style lang="stylus">
   @import "stylus/base.styl";
-  #app {
-    height: 100%;
+  #app 
+    height 100%
     box-sizing()
-    display: flex;
-    flex-direction: column;
-    padding-top: 100px;
-    font-family: 'Avenir', Helvetica, Arial, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-  .main-container{
-    position relative
-    flex-grow: 1;
-  }
+    display flex
+    flex-direction column
+    padding-top 100px
+    -webkit-font-smoothing antialiased
+    -moz-osx-font-smoothing grayscale
+    .main-container
+      position relative
+      flex-grow 1
+    .to-top
+      width 30px
+      height 30px
+      position fixed;
+      right 8px;
+      bottom 73px;
+      cursor pointer
+  
 </style>

@@ -109,6 +109,7 @@
                 placeholder="请输入银行卡号" 
                 ref="number"
                 maxlength="23"
+                @blur="verifyCard"
               >
               <b class="hint" v-if="numberTip">请输入正确的银行卡号</b>
               <i 
@@ -122,7 +123,14 @@
             </li>
             <li class="input">
               <p>开户行</p>
-              <input type="text" placeholder="请输入开户行" maxlength="20" ref="bank" v-model="data.bank">
+              <input 
+                type="text" 
+                placeholder="请输入开户行" 
+                maxlength="20" 
+                ref="bank" 
+                v-model="data.bank"
+                @blur="data.bank.trim() === '' ? bankTip = true : bankTip = false"
+                >
               <i 
                 class="cancel" 
                 v-if="data.bank"
@@ -221,7 +229,6 @@ import BasePopup from '@/components/common/BasePopup';
         }).then(data=> {
           this.authData.name = data.name;
           this.authData.number = data.number;
-          console.log(data)
         }).catch(error=>{
           console.log(error)
         })
@@ -245,7 +252,7 @@ import BasePopup from '@/components/common/BasePopup';
         'userInfo'
       ]),
       isPass(){
-        return (new Date()- 0) - this.failTime*1000 > 622080000
+        return (new Date()- 0) - this.failTime*1000 > 259200000
       },
       isShowForm() {
         if(this.authState === 0) return false;
@@ -265,6 +272,9 @@ import BasePopup from '@/components/common/BasePopup';
         this.data.bank = card.bank;
         this.showCardPoup = false;
       },
+      verifyCard(){
+        !(/(^([1-9]{1})(\d{15}|\d{18})$)/.test(this.data.number.trim().replace(/\s/g,""))) ? this.numberTip = true : this.numberTip = false;
+      },
       verify() {
         let { number, bank, iconArr} = this.data;
         bank.trim() === '' ?  this.bankTip = true : this.bankTip = false;
@@ -275,7 +285,6 @@ import BasePopup from '@/components/common/BasePopup';
       },
       submit() {
         if(!this.verify()) return;
-        console.log(99)
         let { number, bank, iconArr} = this.data;
         this.WsProxy.send('control', 'user_identity', {
           type: 2,

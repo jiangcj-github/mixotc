@@ -14,6 +14,7 @@
                 v-model="info.name"
                 maxlength="20"
                 ref="infoname"
+                @blur="info.name.trim() === '' ? nameTip = true : nameTip = false; "
                 >
               <i class="cancel" v-if="info.name" @click="()=>{info.name = ''; $refs.infoname.focus()}">
                 <img src="/static/images/cancel_icon.png" alt="">
@@ -29,6 +30,7 @@
                 :value="info.number.formatCard()"
                 ref="account"
                 @input="dealCard"
+                @blur="!(/(^([1-9]{1})(\d{15}|\d{18})$)/.test(info.number)) ? accountTip = true : accountTip = false;"
               >
                <input 
                 v-else
@@ -37,6 +39,7 @@
                 v-model="info.number"
                 ref="account"
                 maxlength="20"
+                @blur="info.number.trim() === '' ? accountTip = true : accountTip = false;"
                 >
               <i v-if="info.type === 4 && info.number.length > 0" class="cancel" @click="()=>{info.number = ''; $refs.account.vaule = '', $refs.account.focus()}">
                 <img src="/static/images/cancel_icon.png" alt="">
@@ -56,6 +59,7 @@
               maxlength="20" 
               v-model="info.bank"
               ref="bank"
+              @blur="info.bank.trim() === '' ?  bankTip = true : bankTip = false;"
             >
             <i v-if="info.bank" class="cancel" @click="()=>{info.bank = ''; $refs.bank.focus()}">
               <img src="/static/images/cancel_icon.png" alt="">
@@ -73,6 +77,11 @@
         </div>
       </slot>
     </BasePopup>
+    <BasePopup :show="samePopup" :top="42" @click.native="()=>{samePopup = false}">
+      <slot>
+        <p class="sameTip">与原信息相同</p>
+      </slot>
+    </BasePopup>
   </div>
 </template>
 
@@ -85,6 +94,8 @@
         nameTip: false,
         accountTip: false,
         bankTip: false,
+        samePopup: false,
+        timer: null,
         info:{
           ...this.accountInfo,
         }
@@ -102,6 +113,17 @@
       }
     },
     methods: {
+      isSame(){
+        let flag = true;
+        for (const key in this.accountInfo) {
+          if(key === 'id') continue;
+          if(this.accountInfo[key] !== this.info[key]){
+            flag = false;
+            break;
+          }
+        }
+        return flag;
+      },
       dealCard() {
         let value = this.$refs.account.value.trim().replace(/\s/g,"");
         if(value[0] == 0) {
@@ -122,21 +144,30 @@
       verify() {
         let { number, name, bank, type} = this.info;
         name.trim() === '' ?  this.nameTip = true : this.nameTip = false; 
-        !(/(^([1-9]{1})(\d{15}|\d{18})$)/.test(number)) && type === 4 ? this.accountTip = true : this.accountTip = false;
-        bank.trim() === '' && type === 4 ?  this.bankTip = true :  this.bankTip = false;
+        if(type === 4) {
+          !(/(^([1-9]{1})(\d{15}|\d{18})$)/.test(number)) ? this.accountTip = true : this.accountTip = false;
+          bank.trim() === '' && type === 4 ?  this.bankTip = true :  this.bankTip = false;
+        }
+        if(type !== 4) {
+          number.trim() === '' ? this.accountTip = true : this.accountTip = false;
+        }
         return !(this.nameTip || this.accountTip || this.bankTip)
       },
       confirm() {
         if(!this.verify()) return;
+        if(this.isSame()) {
+          this.samePopup = true;
+          return;
+        }
         let {id, number, name, bank, remark, type} = this.info;
         this.WsProxy.send('wallet', this.isNew ? 'new_account' : 'update_account', {
           uid: this.$store.state.userInfo.uid,
           name: name.trim(),
           remark: remark.trim(),
           bank: bank.trim(),
+          number: number.trim(),
           id,
           type,
-          number,
         }).then(data => {
           this.$store.dispatch({ type: 'moneyAddress', ws: this.WsProxy})
         }).catch(error => {
@@ -150,6 +181,10 @@
 
 <style scoped lang="stylus">
   @import "../../../../stylus/base";
+  .sameTip
+    text-align center
+    height 94px
+    line-height 94px
   .main
     position relative
     box-sizing()

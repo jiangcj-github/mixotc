@@ -31,7 +31,14 @@
         <ul class="clearfix">
           <li class="input">
             <p>姓名</p>
-            <input type="text" placeholder="输入姓名" v-model="data.name" maxlength="20" ref='name'>
+            <input 
+              type="text" 
+              placeholder="输入姓名" 
+              v-model="data.name" 
+              maxlength="20" 
+              ref='name'
+              @blur="data.name.trim() === '' ? nameTip = true : nameTip = false;"
+              >
             <i 
               v-if="data.name"
               @click="()=>{data.name = ''; $refs.name.focus()}"
@@ -67,6 +74,7 @@
             @input="dealCertificate"
             style="ime-mode:disabled"
             maxlength="25"
+            @blur="verifyNumber"
             >
             <i 
               v-if="data.number"
@@ -153,7 +161,6 @@ import { mapState } from 'vuex';
         'userInfo'
       ]),
       isPass(){
-        console.log(this.faileTime)
         return (new Date()- 0) - this.faileTime*1000 > 259200000
       }
     },
@@ -212,9 +219,8 @@ import { mapState } from 'vuex';
           console.log(error)
         })
       },
-      verify(){
-        let { number, name, type} = this.data;
-        name.trim() === '' ?  this.nameTip = true : this.nameTip = false; 
+      verifyNumber(){
+        let { number, type} = this.data;
         number.trim().replace(/\s/g,"") === '' ?  this.numberTip = true : this.numberTip = false;
         if(type === 1) {
           // 身份证正则
@@ -223,6 +229,11 @@ import { mapState } from 'vuex';
           // 护照正则
           /^[a-zA-Z0-9]{3,21}$/.test(number.trim().replace(/\s/g,"")) ? this.numberTip = false : this.numberTip = true;
         }
+      },
+      verify(){
+        let { number, name, type} = this.data;
+        name.trim() === '' ?  this.nameTip = true : this.nameTip = false; 
+        this.verifyNumber()
         this.data.iconArr.filter(item=>{return item === ''}).length === 0 ? this.photoTip = false :  this.photoTip = true;
         if(this.photoTip) this.sizeTip = false;
         return !(this.nameTip || this.numberTip || this.photoTip)

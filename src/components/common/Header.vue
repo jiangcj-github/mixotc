@@ -42,7 +42,7 @@
             <ul v-if="showMenu" v-clickoutside="hideShowMenu">
               <router-link to="/personal" tag="li" active-class="selected" class="center">个人中心</router-link>
               <router-link :to="{name:'safe'}" tag="li" active-class="selected" class="safe">安全设置</router-link>
-              <router-link :to="{name:'personal-auth'}" tag="li" active-class="selected" class="auth">身份认证</router-link>
+              <router-link :to="{name:'personal-auth'}" tag="li" active-class="selected" class="auth">实名认证</router-link>
               <li class="logout" @click="logout">退出</li>
             </ul>
           </div>
@@ -53,7 +53,7 @@
     <BasePopup :show="realLayer"
                class="real-layer">
       <span v-clickoutside="closeLayer">
-        <router-link to="/personal/account/auth">请先进行实名认证</router-link>
+        请先进行<router-link to="/personal/account/auth" class="auth">实名认证</router-link>
       </span>
     </BasePopup>
   </article>
@@ -357,5 +357,8 @@
   .real-layer
     text-align center
     line-height 94px
+    .auth
+      color $col422
+      text-decoration underline 
 
 </style>

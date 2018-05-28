@@ -120,9 +120,7 @@ import GoogleVerify from '../components/safe/GoogleVerify'
       GoogleVerify
     },
     created() {
-      this.WsProxy.send('control', 'get_online_clients').then(data=>{
-        console.log(data)
-      })
+      this.getOnlineClients()
       this.fetchRecords(0);
     },
     mounted() {
@@ -149,12 +147,12 @@ import GoogleVerify from '../components/safe/GoogleVerify'
         this.WsProxy.send('control', 'kick_off_client', {
           imei: this.$store.state.token
         }).then(data=>{
-          console.log(data)
+          this.getOnlineClients()
         })
       },
       getOnlineClients() {
         this.WsProxy.send('control', 'get_online_clients').then(data=>{
-          if(!data) return;
+          if(!data.clients) return;
           this.deviceList = data.clients;
         })
       },

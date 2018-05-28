@@ -10,10 +10,6 @@
         </div>
         <div class="info">
           <p>
-            <span>用户ID</span>
-            <i>{{JsonBig.stringify(userInfo.uid).showOther()}}</i>
-          </p>
-          <p>
             <span>昵称</span>
             <i v-if="!isSetting">{{userInfo.name}}</i>
             <i class="set" v-if="!isSetting" @click="()=>{name=userInfo.name;isSetting=true}">设置</i>

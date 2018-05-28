@@ -144,7 +144,7 @@
     </div>
     <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="showPopup=false">
       <slot>
-        <p class="popErr"><img src="/static/images/hint.png"><span>{{popupTip}}</span></p>
+        <p class="popErr"><span>{{popupTip}}</span></p>
       </slot>
     </BasePopup>
   </div>
