@@ -153,7 +153,8 @@ import { mapState } from 'vuex';
         'userInfo'
       ]),
       isPass(){
-        return (new Date()- 0) - this.faileTime*1000 > 622080000
+        console.log(this.faileTime)
+        return (new Date()- 0) - this.faileTime*1000 > 259200000
       }
     },
     async created() {

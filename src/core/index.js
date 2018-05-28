@@ -149,6 +149,7 @@ const RUN_APP = (App, config, plugin) => {
 
   console.log(isNewTab, tabIndex)
   router.beforeEach((to, from, next) => {
+    window.scrollTo(0, 0);
     Vue.prototype.toPath = to.path;
     if ((isNewTab && tabIndex)) {
       toPath = to.path;

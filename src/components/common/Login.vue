@@ -196,6 +196,7 @@
             if(data.body && this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
               this.$store.commit({ type: 'initState'})
             }
+            data.body.code = this.code;
             this.$store.commit({
               type: 'getUserInfo',
               data: data.body

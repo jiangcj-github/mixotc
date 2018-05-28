@@ -12,6 +12,8 @@
   import Footer from '@/components/common/Footer'
   import News from '@/views/news/News'
   import sendConfig from '@/api/SendConfig.js'
+  import getExplorerInfo from '@/js/Browser.js'
+  import detectOS from '@/js/Os.js'
 
   export default {
     name: 'App',
@@ -47,6 +49,7 @@
             return;
           }
           ws.reConnectFlag = true;
+          data.body.code = this.$store.state.userInfo.code;
           this.$store.commit({
             type: 'getUserInfo',
             data: data.body
@@ -70,7 +73,18 @@
         }
         ws.send(sendConfig('login', {
           seq: ws.seq,
-          body: this.token
+          body: {
+              action: 'login',
+              phone: this.$store.state.userInfo.phone,
+              email: this.$store.state.userInfo.email,
+              code: this.$store.state.userInfo.code,
+              country: 'CN',
+              version: 1,
+              mode: 1,
+              device: `${detectOS()}/${getExplorerInfo()}`,
+              os: 3,
+              token: this.token
+            }
         }))
       }
       if (!this.token) return;
