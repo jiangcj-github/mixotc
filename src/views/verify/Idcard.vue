@@ -36,18 +36,6 @@
     mounted(){
       this.loadUncheckTotal();
       this.loadCheckTotal();
-      this.Bus.$on("onUpdateCheck",(info)=>{
-        this.loadUncheckTotal();
-        this.loadCheckTotal();
-      });
-      this.Bus.$on("onUpdateUncheck",(info)=>{
-        this.loadUncheckTotal();
-        this.loadCheckTotal();
-      });
-    },
-    destroyed(){
-      this.Bus.$off("onUpdateCheck");
-      this.Bus.$off("onUpdateUncheck");
     },
     methods:{
       loadUncheckTotal(){

@@ -14,7 +14,6 @@
                   v-model.trim="inputValue"
                   @input="selectData"
                   @click="showResult = true"><button @click="getCoinsData"></button>
-          <!--@click="getCoinsData"-->
         </p>
         <ul class="search-result" v-if="showResult && inputValue">
           <li v-if="!result.length">暂无搜索结果</li>
@@ -63,7 +62,7 @@
     data() {
       return {
         coinDataObj: {}, // 获取币种资料数据
-        coinDataList: [], // 筛选所结有果数据
+        coinDataList: [], // 筛选所结有数据
         selectCoinList: [], // 匹配结果数据
         inputValue: '', // input值
         selectValue: 'btc',
@@ -93,7 +92,6 @@
             params: {word: this.selectValue, app: 0}
           },
         }).then(res => {
-          console.log('搜索结果', res)
           this.id = res.data.currency[0].id;
           console.log('搜索this.selectValue', this.selectValue)
           this.coinDataList = res.data.currency

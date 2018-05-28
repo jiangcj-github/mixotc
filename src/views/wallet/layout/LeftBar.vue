@@ -6,16 +6,16 @@
     <li :class="{active:leftBar===2}">
       <a href="/#/wallet/charge"><i>充币</i><img src="/static/images/wallet/charge.png"></a>
     </li>
-    <li :class="{active:leftBar===3}">
+    <li :class="{active:leftBar===3}" v-show="0">
       <a href="/#/wallet/withdraw"><i>提币</i><img src="/static/images/wallet/widhdraw.png"></a>
     </li>
-    <li :class="{active:leftBar===4}">
+    <li :class="{active:leftBar===4}" v-show="0">
       <a href="/#/wallet/conversion"><i>资产互转</i><img src="/static/images/wallet/conversion.png"></a>
     </li>
     <li :class="{active:leftBar===5}">
       <a href="/#/wallet/history"><i>账单</i><img src="/static/images/wallet/bid.png"></a>
     </li>
-    <li :class="{active:leftBar===6}">
+    <li :class="{active:leftBar===6}" v-show="0">
       <a href="/#/wallet/address"><i>地址管理</i><img src="/static/images/wallet/address.png"></a>
     </li>
   </ul>

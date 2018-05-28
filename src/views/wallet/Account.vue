@@ -34,7 +34,8 @@
               <button @click="onSearch"></button>
             </div>
             <div class="f2" v-show="tab===0">
-              <span class="checkbox r2" :class="{check:isZero}" @click="isZero=!isZero">隐藏0余额币种</span>
+              <span class="radio r2" :class="{check:isZero}" @click="isZero=!isZero,isPetty=false">隐藏0余额币种</span>
+              <span class="radio r2" :class="{check:isPetty}" @click="isPetty=!isPetty,isZero=false">隐藏小额币种</span>
               <span class="checkbox r3" :class="{check:isNoWa}" @click="isNoWa=!isNoWa">隐藏非钱包币种</span>
             </div>
           </div>
@@ -43,7 +44,10 @@
               <li :class="{active:tab===0}" @click="tab=0">法币账户</li>
               <li :class="{active:tab===1}" @click="tab=1">币币账户</li>
             </ul>
-            <button class="btn green" v-show="tab===1">币币交易</button>
+            <p class="tb-tab-r" v-show="tab===1">
+              <i>币币交易需要资产互转</i>
+              <button class="btn green">币币交易</button>
+            </p>
           </div>
           <!--法币账户-->
           <div class="fb" v-show="tab===0">
@@ -65,9 +69,9 @@
                 <div class="li" v-if="e.hasWallet">
                   <p class="coin"><img :src="e.icon">{{e.abbr}}</p>
                   <p class="name">{{e.name}}</p>
-                  <p class="avail"><span>{{e.avail}}</span></p>
-                  <p class="frozen"><span>{{e.frozen}}</span></p>
-                  <p class="assess"><span>{{e.assess}}</span></p>
+                  <p class="avail"><span>{{e.avail}} {{e.abbr}}</span></p>
+                  <p class="frozen"><span>{{e.frozen}} {{e.abbr}}</span></p>
+                  <p class="assess"><span>{{e.assess}} CNY</span></p>
                   <p class="opera op1">
                     <a class="btn white" href="/#/wallet/charge">充币</a>
                     <a class="btn white" href="/#/wallet/withdraw">提币</a>
@@ -172,6 +176,7 @@
         tab: 0,  //0-法币账户,1-币币账户
         srchText: "",
         isZero: false,
+        isPetty: false,
         isNoWa: true,
 
         prices:{},
@@ -294,6 +299,7 @@
         this.WsProxy.send("wallet","wallets_v2",{
           currency: this.srchText,
           hide_zero: this.isZero,
+          hide_low_price: this.isPetty,
           hide_no_wallet: this.isNoWa,
           sort: this.paramFbSort,
           page: this.fbCurPage-1,
@@ -320,19 +326,19 @@
           let item={};
           item.hasWallet=(e.address!=null);
           item.icon=this.HostUrl.http + "/image/"+e.icon;
-          item.abbr=e.currency;
+          item.abbr=e.currency.toUpperCase();
           item.name=e.name;
           item.avail=item.hasWallet?"0":"-";
           if(e.balance!=null) {
-            item.avail = (e.balance + "").formatFixed(6);
+            item.avail = e.balance.toFixed(6);
           }
           item.frozen=item.hasWallet?"0":"-";
           if(e.locked!=null) {
-            item.frozen = (e.locked + "").formatFixed(6);
+            item.frozen = e.locked.toFixed(6);
           }
           item.assess=item.hasWallet?"0":"-";
           if(e.assessment!=null && this.prices["btc"]!=null) {
-            item.assess = (e.assessment * this.prices["btc"] + "").formatFixed(2);
+            item.assess = (e.assessment * this.prices["btc"]).toFixed(2);
           }
           this.fb.push(item);
         });
@@ -396,7 +402,7 @@
   }
 </script>
 <style scoped lang="stylus">
-  @import "../../stylus/base";
+  @import "../../stylus/base"
   @import "./stylus/common"
   @import "./stylus/account"
 </style>

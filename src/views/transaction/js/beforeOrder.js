@@ -20,12 +20,12 @@ let beforeOrder=async function(vue,param) {
 
   //是否实名认证
   if(isVerify !== 2){
-    return Promise.reject("请先进行实名认证");
+    return Promise.reject('请先进行<a href="#/personal/account/auth" style="text-decoration: underline; color: #FFB422">实名认证</a>');
   }
 
   // 是否设置资金密码
   if (opt.type == 2 && fundPass === 1) { // 提醒设置支付密码
-    return Promise.reject("请设置资金密码");
+    return Promise.reject('请先设置<a href="#/personal/safe" style="text-decoration: underline; color: #FFB422">支付密码</a>');
   }
 
   //是否自己的广告

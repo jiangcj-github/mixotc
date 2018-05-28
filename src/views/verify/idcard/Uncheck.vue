@@ -58,8 +58,6 @@
       //
       loadUncheckList(p=0){
         let srchKey=this.srchText;
-        //更新未审核数量
-        this.Bus.$emit("onUpdateUncheck");
         //
         this.WsProxy.send("control","a_get_waiting_identity_user_list",{
           type:1,
@@ -141,13 +139,9 @@
         this.curPage=p;
         this.loadUncheckList(p-1);
       });
-      this.Bus.$on("onSubmit",(info)=>{
-        this.loadUncheckList();
-      });
     },
     destroyed(){
       this.Bus.$off("onPageChange");
-      this.Bus.$off("onSubmit");
     }
   }
 </script>

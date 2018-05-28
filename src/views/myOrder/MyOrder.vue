@@ -15,7 +15,6 @@
                    :emitValue1="searchValue"
                    :emitValue3="searchResult"
                    :result="result"
-                   color="#E1E1E1"
                    class="order-choice-search">
       </SearchInput>
       <div class="order-choice-time clearfix" v-if="contentTabIndex === 2">

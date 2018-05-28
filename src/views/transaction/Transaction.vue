@@ -20,6 +20,7 @@
             <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput" @focus="srchTipShow=true">
             <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchTipShow && srchText.length>0">
             <a href="javascript:void(0)" @click="searchStr"></a>
+            <b v-if="searchTip"><img src="/static/images/hint.png">您还未输入币种</b>
             <!--币种模糊搜索结果-->
             <ul v-show="srchTipShow" v-if="this.srchType===0">
               <li v-for="e in coinTips" @click="search(e)">
@@ -67,8 +68,10 @@
         </div>
         <div class="price">
           <b v-if="tip" class="err-tip"><img src="/static/images/hint.png">最大限额不能低于最小限额，且最小限额为200</b>
-          <input type="number" class="min" @input="inputDealMin()" ref='min' v-model="filte.min" placeholder="最低限额" step="1" min="200">
-          <input type="number" class="max" @input="inputDealMax()" ref='max' v-model="filte.max" placeholder="最高限额" step="1">
+          <input type="text" class="min" @input="inputDealMin()" ref='min' v-model="filte.min" placeholder="最低限额" step="1" min="200" @focus="minCancel = true" @blur="minCancel = false">
+          <img src="/static/images/cancel_icon.png" class="min-cancel" v-show="minCancel && filte.min" @mousedown="filte.min = ''">
+          <input type="text" class="max" @input="inputDealMax()" ref='max' v-model="filte.max" placeholder="最高限额" step="1" @focus="maxCancel = true" @blur="maxCancel = false">
+          <img src="/static/images/cancel_icon.png" class="max-cancel" v-show="maxCancel && filte.max" @mousedown="filte.max = ''">
         </div>
         <div class="wholesale">
           <label @click="changeIsWhole">
@@ -142,9 +145,10 @@
         </div>
       </div>
     </div>
+    <!--<img src="/static/images/hint.png"> v-clickoutside="closeLayer"-->
     <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="showPopup=false">
       <slot>
-        <p class="popErr"><span>{{popupTip}}</span></p>
+        <p class="popErr"><span v-html="popupTip"></span></p>
       </slot>
     </BasePopup>
   </div>
@@ -181,6 +185,7 @@
         transTypeList: ['购买', '出售'],
         typeNum: 0, // 购买出售选择
         tip: false,//限额错误文案提示
+        searchTip: false, // 搜索错误提示
         showPayment: false,
         payment:[{type: '支付宝', score: 1, state: true}, {type: '微信', score: 2, state: true}, {type: '银行卡', score:4, state: true}],
         filte:{
@@ -209,6 +214,9 @@
         curPage: 1,
         pageSize: 20,
         err: 1, //数据加载结果：0-正常，1-无数据，2-网络异常，3-加载失败，4-加载中
+
+        minCancel: false, // 最低限额错误显示
+        maxCancel: false // 最高限额错误显示
       }
     },
     mounted() {
@@ -228,6 +236,7 @@
     },
     methods: {
       fuzzyInput() { // 搜索框数据
+        this.searchTip = false
         if (this.srchType === 0) { // 不能输入汉字
           this.srchText = this.srchText.replace(/[\u4E00-\u9FA5]/g, '');
         }
@@ -251,6 +260,10 @@
       },
       //按钮搜索，不存在的币种，默认给模糊搜索结果第一条
       searchStr() {
+        if (this.srchText == ''){
+          this.searchTip = true
+          return
+        }
         if (this.srchType === 0 && this.srchText.length > 0) {
           let exist = 0;
           this.coinTips.forEach(e => {
@@ -351,24 +364,19 @@
       },
       //最小限额输入处理
       inputDealMin() {
-        let min=this.filte.min;
-        // let max=this.filte.max;
-        // if (!/^[0-9]+$/.test(min) || (max && min > max) || min < 1) {
-        //   this.filte.min = min.substring(0, min.length - 1);
-        //   this.$refs.min.value = min.substring(0, min.length - 1);
-        // }
-        this.filte.min = min && min.replace(!/^[0-9]+$/, '')
-        this.largeTran = 0;
+        let min = this.filte.min;
+        if (!(/^[0-9]+$/.test(min))) {
+          this.filte.min =  min && min.replace(/[^0-9]/g, "");
+        };
+        this.largeTran = 0
       },
       //最大限额输入处理
       inputDealMax() {
-        let max=this.filte.max;
-        // if (!/^[0-9]+$/.test(max) || max < 1) {
-        //   this.filte.max = max.substring(0, max.length - 1);
-        //   this.$refs.max.value = max.substring(0, max.length - 1);
-        // }
-        this.filte.max = max && max.replace(!/^[0-9]+$/, '')
-        this.largeTran = 0;
+        let max = this.filte.max;
+        if (!(/^[0-9]+$/.test(max))) {
+          this.filte.max =  max && max.replace(/[^0-9]/g, "");
+        };
+        this.largeTran = 0
       },
       changeIsWhole() {
         this.largeTran = (this.largeTran + 1) % 2;
@@ -595,6 +603,14 @@
         top 20px
         width 260px
         height 50px
+        .min-cancel, .max-cancel
+          position absolute
+          top 9px
+          cursor pointer
+        .min-cancel
+          left 83px
+        .max-cancel
+          right 50px
         b
           position absolute
           left 0
