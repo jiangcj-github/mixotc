@@ -332,12 +332,12 @@
         this.tips=[];
         data && data.forEach((e)=>{
           this.tips.push({
-            orderId: e.bill_id.toString() || "-",
+            orderId: e.bill_id && e.bill_id.toString() || "-",
             nickname: e.name || "-",
             account: e.phone || e.email || "-",
-            addr: e.from || e.to || "-",
+            addr: e.address || "-",
             type: this.ul0[this.ul0Sel].value,      // 0-订单号,1-对方/地址
-            isUser: (e.phone||e.email||e.name)?1:0,     // 0-地址,1-人
+            isUser: e.address?0:1,     // 0-地址,1-人
           });
         });
         this.isShowTip=true;

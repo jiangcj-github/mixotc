@@ -107,7 +107,7 @@
         this.WsProxy.send("control","a_identify",{
           id:id,uid:uid,type:type,result:result,spite:spite,info:info
         }).then((data)=>{
-          this.Bus.$emit("onSubmit",this.infos);
+          location.reload();
         }).catch((msg)=>{
           alert(JSON.stringify(msg));
         });

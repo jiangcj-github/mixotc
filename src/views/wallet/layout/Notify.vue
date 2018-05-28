@@ -1,22 +1,21 @@
 <template>
   <div class="head" v-if="lists.length<=0">
-    <h3>mixOTC-钱包</h3>
+    <h3><a href="/#/">mixOTC</a>-<a href="/#/wallet">钱包</a></h3>
   </div>
   <div class="notify" v-else="">
     <div class="wrap">
-      <h3>mixOTC-钱包</h3>
-      <transition>
-        <p v-for="(e,i) in lists" v-show="i===showIndex" :key="i">
+      <h3><a href="/#/">mixOTC</a>-<a href="/#/wallet">钱包</a></h3>
+      <transition-group name="slide" tag="div" class="msg">
+        <p v-for="(e,i) in lists" v-show="i===showIndex" :key="i" class="msg-li">
           <span class="p1"><img src="/static/images/wallet/notify.png">消息：充币 {{e.time}}</span>
           <span class="p2 hl">{{e.coin}}：{{e.num}}个</span>
           <span class="p3">当前状态：确认中(<i class="hl">{{e.checked}}</i>/{{e.checkNum}})</span>
         </p>
-      </transition>
+      </transition-group>
     </div>
   </div>
 </template>
 <script>
-  import timeout from "@/js/Timeout.js";
   export default {
     data() {
       return {
@@ -26,6 +25,7 @@
     },
     mounted(){
       this.tick();
+      this.slide();
     },
     methods: {
       //获取充值确认中列表
@@ -70,10 +70,24 @@
       },
       tick(){
         this.loadChargeList();
-        timeout(()=>{
+        /*
+        setTimeout(()=>{
           this.tick();
         },5000);
-      }
+        */
+      },
+      slide(){
+        if(this.lists.length>1){
+          if(this.showIndex<this.lists.length-1){
+            this.showIndex++;
+          }else{
+            this.showIndex=0;
+          }
+        }
+        setTimeout(()=>{
+          this.slide();
+        },3000);
+      },
     }
   }
 </script>
@@ -83,6 +97,8 @@
 
   .head{width:1200px;margin:0 auto;height:40px;line-height:40px;margin-bottom:20px;}
   .head>h3{font-size:12px;margin-left:15px;}
+  .head>h3>a{}
+  .head>h3>a:hover{color:#fea350;}
 
   .notify{background:#FFE4D3;margin-bottom:20px;}
   .notify .wrap{width:1200px;margin:0 auto;text-align:center;height:40px;line-height:40px;position:relative;}
@@ -93,5 +109,14 @@
   .notify .wrap .p2{margin:0 30px;}
   .notify .wrap .p3{}
   .notify .wrap .hl{color:#ff794c;}
+  .notify .wrap .msg{height:40px;overflow:hidden;position:relative;}
+  .notify .wrap .msg .msg-li{position:absolute;left:0;top:0;right:0;bottom:0;}
 
+  /*列表过渡*/
+  .slide-enter-active,
+  .slide-leave-active{
+    transition: all 1s;
+  }
+  .slide-enter{transform: translateY(40px);}
+  .slide-leave-to{transform: translateY(-40px);}
 </style>

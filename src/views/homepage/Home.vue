@@ -11,13 +11,23 @@
           <span class="nickname">{{info.nickname}}</span>
           <span class="tran_num" v-if="isLogin && !isSelf">和他交易过{{info.tradeWidthNum}}次</span>
         </div>
-        <div v-if="isLogin && !isSelf">
-          <div class="trust clearfix">
+        <div v-if="!isSelf">
+          <div v-if="isLogin">
+            <div class="trust clearfix">
             <span class="contact isTrust" @click="Bus.$emit('contactSomeone',{id:info.id_str})">
               <img src="/static/images/talk.png" alt=""><i>联系TA</i>
             </span>
-            <span class="join-trust isTrust" @click="cancelTrust" v-if="info.isTrust"><i>取消信任</i></span>
-            <span class="join-trust" @click="joinTrust" v-else><i>加入信任</i></span>
+              <span class="join-trust isTrust" @click="cancelTrust" v-if="info.isTrust"><i>取消信任</i></span>
+              <span class="join-trust" @click="joinTrust" v-else><i>加入信任</i></span>
+            </div>
+          </div>
+          <div v-else="">
+            <div class="trust clearfix">
+              <span class="contact isTrust" @click="$store.commit({type:'changeLoginForm', data:true})">
+                <img src="/static/images/talk.png" alt=""><i>联系TA</i>
+              </span>
+              <span class="join-trust" @click="$store.commit({type:'changeLoginForm', data:true})"><i>加入信任</i></span>
+            </div>
           </div>
         </div>
       </div>
@@ -29,22 +39,18 @@
         <div class="unit"><label>{{info.trustNum}}</label><span>信任</span></div>
         <div class="unit"><label>{{info.securedNum}}</label><span>担保</span></div>
       </div>
-
     </div>
-    <!--发布和评价-->
-    <div v-if="isLogin" @click="isShowPop=false">
-      <!--Tab项-->
-      <ul class="menu-tab">
-        <li :class="{active:tab===0}" @click="tab=0">他的发布({{saleNum}})</li>
-        <li :class="{active:tab===1}" @click="tab=1">收到的评价({{rateNum}})</li>
-      </ul>
-      <!--发布列表-->
-      <Sales :uid="uid" v-show="tab===0"></Sales>
-      <!--评价列表-->
-      <Rates :uid="uid" v-show="tab===1"></Rates>
-    </div>
+    <!--Tab项-->
+    <ul class="menu-tab">
+      <li :class="{active:tab===0}" @click="tab=0">他的发布({{saleNum}})</li>
+      <li :class="{active:tab===1}" @click="tab=1">收到的评价({{rateNum}})</li>
+    </ul>
+    <!--发布列表-->
+    <Sales :uid="uid" v-show="tab===0"></Sales>
+    <!--评价列表-->
+    <Rates :uid="uid" v-show="tab===1"></Rates>
     <!--提示弹框-->
-    <BasePopup :show="isShowPop">
+    <BasePopup :show="isShowPop" v-on:click.native="isShowPop=false">
       <div class="popContent">{{["取消信任成功","加入信任成功"][info.isTrust]}}</div>
     </BasePopup>
   </div>
