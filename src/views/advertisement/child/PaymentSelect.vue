@@ -16,6 +16,7 @@
     data() {
       return {
         soreItem: 0,
+        aaa: 0,
         showPayment: false,
         payment:[
           {type: '支付宝', url: '/static/images/OTC_zhifubao.png', score: 1, state: false},
@@ -42,7 +43,7 @@
           score += item.score;
         });
         return score;
-      }
+      },
     },
     watch: {
 
@@ -50,8 +51,9 @@
     created() {
 
     },
-    mounted() { // 第一次加载接收值
-      this.Bus.$on('paymentNum', data => {
+    mounted() {
+      this.Bus.$on('paymentNum', data => { // 支付情况初始值
+        console.log('孙子接收', data)
         this.soreItem = data
         this.paymentItem(this.soreItem)
       })
@@ -65,39 +67,12 @@
       choicePayment() {
         this.Bus.$emit('choicePayment', this.paymentScore);
       },
-      paymentItem(data) {
-        switch (data) {
-          case 1:
-            this.payment[0].state = true
-            break;
-          case 2:
-            this.payment[1].state = true
-            break;
-          case 3:
-            this.payment[0].state = true
-            this.payment[1].state = true
-            break;
-          case 4:
-            this.payment[2].state = true
-            break;
-          case 5:
-            this.payment[0].state = true
-            this.payment[2].state = true
-            break;
-          case 6:
-            this.payment[1].state = true
-            this.payment[2].state = true
-            break;
-          case 7:
-            this.payment[0].state = true
-            this.payment[1].state = true
-            this.payment[2].state = true
-            break;
-          default:
-            this.payment[0].state = false
-            this.payment[1].state = false
-            this.payment[2].state = false
-        }
+      paymentItem(data) { // 根据数值进行显示
+        const arr = [4, 2, 1]
+        let stateArr = []
+        arr.reduce((a, b, index) => a && (a - b < 0 && a || stateArr.push(3 - index) && a - b), data)
+        this.payment.forEach(v => v.state = false)
+        stateArr.forEach(v => this.payment[v - 1].state = true)
       }
     }
   }

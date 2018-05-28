@@ -15,7 +15,7 @@
               @mouseleave="adChild = false"
               @click="!$store.state.isLogin && changeLoginForm(true) || $store.state.isLogin && $store.state.userInfo.verify !== 2 && (realLayer = true)"
               :class="{active: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
-            <span>广告</span>
+            <span>发广告</span>
             <ol v-show="$store.state.isLogin && $store.state.userInfo.verify == 2 && adChild">
               <li @click="releaseAd()"><router-link to="/advertisement/release" tag="li">发广告</router-link></li>
               <li @click="adChild = false"><router-link to="/advertisement" tag="li">我的广告</router-link></li>

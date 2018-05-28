@@ -37,6 +37,10 @@ export default {
     // 广告编辑模块
     state.editFlag = data.flag
   },
+  [types.initPaymentSore](state, { data }) {
+    // 广告支付
+    state.PaymentSoreData = data
+  },
   [types.coinLoop](state, { data }) {
     // 顶部数据轮询
     state.coinLoopData = data

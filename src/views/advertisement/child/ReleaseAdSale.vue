@@ -120,7 +120,7 @@
         <span>{{adSaleObj.info.length}}/50</span>
       </li>
       <li>
-        <button class="release-btn" :class="{'release-active': canSubmit}" @click="canSubmit && toRelease()">发布购买广告</button>
+        <button class="release-btn" :class="{'release-active': canSubmit}" @click="canSubmit ? toRelease() : forbidRelease()">发布购买广告</button>
         <span class="reset-info" @click="reset()">重置信息</span>
       </li>
       <li class="hint-li">广告成交后，手续费为成交量的0.5%</li>
@@ -131,7 +131,11 @@
     </BasePopup>
     <BasePopup :show="adErrLayer"
                class="ad-err-layer">
-      <span v-clickoutside="closeLayer">{{errText}}</span>
+      <div v-clickoutside="closeLayer" class="ad-err-laye-container">
+        <p>
+          <span v-html="errText"></span>
+        </p>
+      </div>
     </BasePopup>
   </div>
 </template>
@@ -165,7 +169,7 @@
 
         selectNum: false, // 是否限量
         adSaleObj: {
-          "id": '', // 广告id
+          "id": 0, // 广告id
           "uid": '', // 用户id
           "currency": 'btc', // 电子货币
           "money": 'cny', // 法币
@@ -224,9 +228,11 @@
       }
     },
     created() {
+
       if (this.$store.state.editFlag == 1) {
         this.isDisabled = true
         this.adSaleObj = this.$store.state.editContent
+        console.log('赋值完毕',this.adSaleObj.length)
       }
       if(this.$route.params.saleCon){
         this.adSaleObj = this.$route.params.saleCon;
@@ -239,8 +245,11 @@
       this.selectUserCoin()
       this.getPrice()
       this.initData()
+
+      console.log('我要看看这是啥',this.$store.state.editContent.tradeable)
       this.Bus.$on(this.selectCoin, data => { // 币种筛选
         this.adSaleObj.currency = data
+        this.adSaleObj.tradeable = 0
         this.getPrice()
         this.selectUserCoin()
       }),
@@ -306,7 +315,7 @@
         this.maxLimit = this.$store.state.userInfo.btverify !== 2 ? '100,000' : '10,000,000'
         this.adSaleObj.max = this.$store.state.userInfo.btverify !== 2 ? '100000' : '10000000'
       },
-      showVary() {
+      showVary() { // 是否溢价
         this.selectNum = !this.selectNum
         if (this.selectNum == true) {
           this.adSaleObj.vary = 2
@@ -317,11 +326,30 @@
           this.disabledSlide = false
         }
       },
+      forbidRelease() { // 信息不完整
+        this.errText = '信息未填写完整'
+        this.adErrLayer = true
+      },
       toRelease() { // 发布广告
         this.adSaleObj.max = this.adSaleObj.max * 1
         this.adSaleObj.min = this.adSaleObj.min * 1
         this.adSaleObj.price = this.adSaleObj.price * 1
+        //let editeErrNum = 200 + (this.adSaleObj.tradeable * 0.005)
+        // if (this.$store.state.editFlag == 1 && this.adSaleObj.tradeable < editeErrNum) {
+        //   this.adErrLayer = true
+        //   this.errText = '可交易量低于最小交易额度+手续费<br/>无法上架'
+        //   return
+        // }
         this.WsProxy.send('otc', this.$store.state.editFlag == 1 ? 'update_sale' : 'new_sale', this.adSaleObj).then((data)=>{
+          if (this.$store.state.editFlag == 1) {
+            this.adErrLayer = true
+            this.errText = '已上架'
+            setTimeout(() => {
+              this.adErrLayer = false
+              window.location.hash = '/advertisement'
+            }, 3000)
+            return
+          }
           console.log('发布广告', data)
           this.adSuccLayer = true
           let _this = this
@@ -336,6 +364,7 @@
           let timer = setInterval(timerFn, 1000)
         }).catch((msg)=>{
           console.log('发布广告失败', msg)
+          msg.ret !== 1 && (this.adErrLayer = true)
           switch (msg.ret) {
             case 22:
               this.errText = '一个币种同时只能上架一条广告'
@@ -346,10 +375,7 @@
             case 82:
               this.errText = '创建钱包失败'
               break;
-            default:
-              this.errText = '请核实'
           }
-          this.adErrLayer = true
         });
       },
       reset() {
@@ -359,11 +385,12 @@
         this.adSaleObj.price = ''
         this.adSaleObj.min = '200'
         this.adSaleObj.max = this.$store.state.userInfo.btverify !== 2 ? '100000' : '10000000'
-        this.adSaleObj.payment = 0
+        this.adSaleObj.payment = this.$store.state.PaymentSoreData
         this.adSaleObj.limit = 10
         this.adSaleObj.info = ''
         this.adSaleObj.vary = 1
         this.adSaleObj.tradeable = this.userBalance * 1
+        this.Bus.$emit('paymentNum', this.$store.state.PaymentSoreData)
       },
       closeLayer() {
         this.adErrLayer = false
