@@ -5,11 +5,13 @@
   <div class="notify" v-else="">
     <div class="wrap">
       <h3>mixOTC-钱包</h3>
-      <p v-for="(e,i) in lists">
-        <span class="p1"><img src="/static/images/wallet/notify.png">消息：充币 {{e.time}}</span>
-        <span class="p2 hl">{{e.coin}}：{{e.num}}个</span>
-        <span class="p3">当前状态：确认中(<i class="hl">1</i>/5)</span>
-      </p>
+      <transition>
+        <p v-for="(e,i) in lists" v-show="i===showIndex" :key="i">
+          <span class="p1"><img src="/static/images/wallet/notify.png">消息：充币 {{e.time}}</span>
+          <span class="p2 hl">{{e.coin}}：{{e.num}}个</span>
+          <span class="p3">当前状态：确认中(<i class="hl">{{e.checked}}</i>/{{e.checkNum}})</span>
+        </p>
+      </transition>
     </div>
   </div>
 </template>
@@ -19,6 +21,7 @@
     data() {
       return {
         lists: [],
+        showIndex:0,
       }
     },
     mounted(){
@@ -44,8 +47,7 @@
                 typeId: e.type_id,
                 checked: 0,
                 checkNum: 0,
-              })
-
+              });
             });
             this.loadConfirm();
           }
@@ -55,11 +57,11 @@
       },
       //获取列表中的确认进度
       loadConfirm() {
-        this.lists.forEach((e)=>{
+        this.lists.forEach((e,i)=>{
           this.WsProxy.send("wallet", "get_recharge_checknum", {id: e.typeId}).then((data)=>{
-            if (data && data.data) {
-              e.checked = data.data.check_num;
-              e.checkNum = data.data.should_num;
+            if (data) {
+              e.checked = data.check_num;
+              e.checkNum = data.should_num;
             }
           }).catch((msg) => {
             console.log(msg);
@@ -70,7 +72,7 @@
         this.loadChargeList();
         timeout(()=>{
           this.tick();
-        },3000);
+        },5000);
       }
     }
   }

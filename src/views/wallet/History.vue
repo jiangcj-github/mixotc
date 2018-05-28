@@ -92,7 +92,7 @@
                   <p v-if="e.billType===3">{{e.nickname}}</p>
                   <p v-if="e.billType===4">{{e.addr}}</p>
                 </div>
-                <div class="num"><p :class="{in:!e.inOrOut,out:e.inOrOut}">{{e.num}}</p><p>{{e.fee}}</p></div>
+                <div class="num"><p :class="{in:!e.inOrOut,out:e.inOrOut}">{{e.num}} {{e.coin}}</p><p>{{e.fee}} {{e.coin}}</p></div>
                 <div class="state">
                   <p>{{e.state}}</p>
                 </div>
@@ -383,8 +383,8 @@
             nickname: e.trader_name || "-",
             uid: e.trader_id,
             uidStr: this.JsonBig.stringify(e.trader_id),
-            num: e.amount,
-            fee: e.fee,
+            num: e.amount.toFixed(6),
+            fee: e.fee.toFixed(6),
             state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
             orderId: e.type_id,
             isIn: [1,3,5,7,9,11].indexOf(e.type)>=0, // 进出账：true-进账,false-出账

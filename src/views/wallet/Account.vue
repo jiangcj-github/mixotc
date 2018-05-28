@@ -65,9 +65,9 @@
                 <div class="li" v-if="e.hasWallet">
                   <p class="coin"><img :src="e.icon">{{e.abbr}}</p>
                   <p class="name">{{e.name}}</p>
-                  <p class="avail"><span>{{e.avail}}</span></p>
-                  <p class="frozen"><span>{{e.frozen}}</span></p>
-                  <p class="assess"><span>{{e.assess}}</span></p>
+                  <p class="avail"><span>{{e.avail}} {{e.abbr}}</span></p>
+                  <p class="frozen"><span>{{e.frozen}} {{e.abbr}}</span></p>
+                  <p class="assess"><span>{{e.assess}} CNY</span></p>
                   <p class="opera op1">
                     <a class="btn white" href="/#/wallet/charge">充币</a>
                     <a class="btn white" href="/#/wallet/withdraw">提币</a>
@@ -320,19 +320,19 @@
           let item={};
           item.hasWallet=(e.address!=null);
           item.icon=this.HostUrl.http + "/image/"+e.icon;
-          item.abbr=e.currency;
+          item.abbr=e.currency.toUpperCase();
           item.name=e.name;
           item.avail=item.hasWallet?"0":"-";
           if(e.balance!=null) {
-            item.avail = (e.balance + "").formatFixed(6);
+            item.avail = e.balance.toFixed(6);
           }
           item.frozen=item.hasWallet?"0":"-";
           if(e.locked!=null) {
-            item.frozen = (e.locked + "").formatFixed(6);
+            item.frozen = e.locked.toFixed(6);
           }
           item.assess=item.hasWallet?"0":"-";
           if(e.assessment!=null && this.prices["btc"]!=null) {
-            item.assess = (e.assessment * this.prices["btc"] + "").formatFixed(2);
+            item.assess = (e.assessment * this.prices["btc"]).toFixed(2);
           }
           this.fb.push(item);
         });
