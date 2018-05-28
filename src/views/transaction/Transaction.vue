@@ -228,6 +228,9 @@
     },
     methods: {
       fuzzyInput() { // 搜索框数据
+        if (this.srchType === 0) { // 不能输入汉字
+          this.srchText = this.srchText.replace(/[\u4E00-\u9FA5]/g, '');
+        }
         if (this.srchText.length <= 0) {
           this.srchTipShow = false;
         } else {
@@ -349,20 +352,22 @@
       //最小限额输入处理
       inputDealMin() {
         let min=this.filte.min;
-        let max=this.filte.max;
-        if (!/^[0-9]+$/.test(min) || (max && min > max) || min < 1) {
-          this.filte.min = min.substring(0, min.length - 1);
-          this.$refs.min.value = min.substring(0, min.length - 1);
-        }
+        // let max=this.filte.max;
+        // if (!/^[0-9]+$/.test(min) || (max && min > max) || min < 1) {
+        //   this.filte.min = min.substring(0, min.length - 1);
+        //   this.$refs.min.value = min.substring(0, min.length - 1);
+        // }
+        this.filte.min = min && min.replace(!/^[0-9]+$/, '')
         this.largeTran = 0;
       },
       //最大限额输入处理
       inputDealMax() {
         let max=this.filte.max;
-        if (!/^[0-9]+$/.test(max) || max < 1) {
-          this.filte.max = max.substring(0, max.length - 1);
-          this.$refs.max.value = max.substring(0, max.length - 1);
-        }
+        // if (!/^[0-9]+$/.test(max) || max < 1) {
+        //   this.filte.max = max.substring(0, max.length - 1);
+        //   this.$refs.max.value = max.substring(0, max.length - 1);
+        // }
+        this.filte.max = max && max.replace(!/^[0-9]+$/, '')
         this.largeTran = 0;
       },
       changeIsWhole() {

@@ -3,7 +3,7 @@
     <div>
       <img src="/static/images/no_order.png">
     </div>
-    <p>您暂时没有进行中的广告，<router-link to="/advertisement/release">去发布</router-link></p>
+    <p>您暂时没有广告，<router-link to="/advertisement/release">去发布</router-link></p>
   </div>
 </template>
 
