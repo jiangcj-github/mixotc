@@ -10,15 +10,18 @@
         <ul class="down-tag">
           <li><img class="top-logo logoImg" src="/static/images/toplogo2.png" alt="MIXOTC官网"></li>
           <router-link to="/transaction" tag="li" class="tag transaction" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
+          <!--|| $store.state.isLogin && $store.state.userInfo.verify !== 2 && (realLayer = true)-->
           <li class="tag ad"
               @mouseenter="adChild = true"
               @mouseleave="adChild = false"
-              @click="!$store.state.isLogin && changeLoginForm(true) || $store.state.isLogin && $store.state.userInfo.verify !== 2 && (realLayer = true)"
+              @click="!$store.state.isLogin && changeLoginForm(true)"
               :class="{active: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
-            <span>发广告</span>
-            <ol v-show="$store.state.isLogin && $store.state.userInfo.verify == 2 && adChild">
-              <li @click="releaseAd()"><router-link to="/advertisement/release" tag="li">发广告</router-link></li>
-              <li @click="adChild = false"><router-link to="/advertisement" tag="li">我的广告</router-link></li>
+            <span v-if="$route.path=='/advertisement'">我的广告</span>
+            <span v-else>发广告</span>
+            <!--$store.state.userInfo.verify == 2 && -->
+            <ol v-show="$store.state.isLogin && adChild">
+              <li @click="releaseAd()">发广告</li>
+              <li @click="goMyAd()">我的广告</li>
             </ol>
           </li>
           <router-link to="/order" tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">订单<span v-if="newOrder"><i>{{newOrder}}</i></span></router-link>
@@ -53,7 +56,7 @@
     <BasePopup :show="realLayer"
                class="real-layer">
       <span v-clickoutside="closeLayer">
-        请先进行<router-link to="/personal/account/auth" class="auth">实名认证</router-link>
+        请先进行<router-link to="/personal/account/auth">实名认证</router-link>
       </span>
     </BasePopup>
   </article>
@@ -114,12 +117,31 @@
         if (!this.showMenu) return;
         this.showMenu = false
       },
-      releaseAd() {
+      releaseAd() { // 发广告操作
+        if (this.$store.state.userInfo.verify !== 2) {
+          this.realLayer = true
+          setTimeout(() => {
+            this.realLayer = false
+          }, 3000)
+          return
+        }
         this.adChild = false
+        this.$router.push({path:'/advertisement/release'})
         if (this.$store.state.editFlag == 2 || this.$store.state.editFlag == 1) {
           window.location.reload()
         }
         this.$store.commit({type: 'releaseAd', data:{flag: 0}})
+      },
+      goMyAd() { // 我的广告操作
+        if (this.$store.state.userInfo.verify !== 2) {
+          this.realLayer = true
+          setTimeout(() => {
+            this.realLayer = false
+          }, 3000)
+          return
+        }
+        this.adChild = false
+        this.$router.push({path:'/advertisement'})
       },
       closeLayer() {
         this.realLayer = false
@@ -357,8 +379,9 @@
   .real-layer
     text-align center
     line-height 94px
-    .auth
-      color $col422
-      text-decoration underline 
+    span
+      a
+        text-decoration underline
+        color #FFB422
 
 </style>

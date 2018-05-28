@@ -20,7 +20,8 @@
     </div>
     <BasePopup :show="adRemindLayer"
                class="ad-remind-layer">
-      <router-link to="/personal/safe" v-clickoutside="closeLayer">请先设置支付密码</router-link>
+      <span v-clickoutside="closeLayer">请先设置<router-link to="/personal/safe">支付密码</router-link></span>
+      <!--<router-link to="/personal/safe" v-clickoutside="closeLayer">请先设置支付密码</router-link>-->
     </BasePopup>
   </div>
 </template>
@@ -90,7 +91,6 @@
         console.log('saleSlideLength', data)
         this.saleObj.length = data * 1
         this.saleObj.tradeable = this.saleObj.tradeable ? this.saleObj.tradeable : data * 1
-        // this.saleObj.tradeable = data * 1
       }),
       this.Bus.$on('buyInfo', data => {
         this.buyObj = data
@@ -110,10 +110,13 @@
     },
     methods: {
       saleAd() {
-        // if (this.$store.state.userInfo.is_new === 1) { // 提醒设置支付密码
-        //   this.adRemindLayer = true
-        //   return
-        // }
+        if (this.$store.state.userInfo.is_new === 1) { // 提醒设置支付密码
+          this.adRemindLayer = true
+          setTimeout(() => {
+            this.adRemindLayer = false
+          }, 3000)
+          return
+        }
         this.$router.push({name:'releaseSale', params: {'saleCon': this.saleObj}})
       },
       buyAd() {
@@ -142,10 +145,8 @@
           });
           this.buyObj.payment = sum
           this.saleObj.payment = sum
-          console.log('请求回来的数据', sum)
           this.$store.commit({type: 'initPaymentSore', data: sum})
           this.Bus.$emit('paymentNum', sum)
-          console.log('我的支付', paymentList, filterList, sum, this.buyObj.payment)
         }).catch((msg)=>{
           console.log(msg)
         });
@@ -160,4 +161,8 @@
   .ad-remind-layer
     text-align center
     line-height 94px
+    span
+      a
+        text-decoration underline
+        color #FFB422
 </style>

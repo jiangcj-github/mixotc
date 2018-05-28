@@ -29,13 +29,13 @@
         <i>是否溢价</i>
         <em class="sel-premium"><b>*</b>根据市场价的溢价比例</em>
         <em v-show="switchValue">当前市场最低价：</em>
-        <b v-show="switchValue">{{priceNow}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
+        <b v-show="switchValue">{{lowerPrice}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
         <SwitchBlock class="switch-block" :showSwitch="switchValue = adBuyObj.mode == 1 ? false : true"></SwitchBlock>
       </li>
       <li v-show="switchValue">
         <i>溢价</i>
         <em>参考价：</em>
-        <b>{{priceNow}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
+        <b>{{priceNow && priceNow.toString().formatFixed(2)}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
       </li>
       <li v-show="switchValue">
         <SliderBar
@@ -52,7 +52,7 @@
         <p>
           <i>{{switchValue == true ? '最高单价' : '固定单价'}}</i>
           <em v-show="!switchValue">当前市场最低价：</em>
-          <b v-show="!switchValue">{{priceNow}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
+          <b v-show="!switchValue">{{lowerPrice}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
         </p>
         <input type="text"
                v-model="adBuyObj.price"
@@ -176,7 +176,8 @@
         },
         maxNum: 0, // 最大订单额度
         selectPrice: [], // 根据币种选择返回情况
-        priceNow: '',
+        priceNow: '', // 参考价
+        lowerPrice: '', // 最低价
         maxLimit: '',
         adSuccLayer: false,
         succNum: 4,
@@ -236,10 +237,12 @@
       this.adBuyObj.uid = this.$store.state.userInfo.uid
       this.selectUserCoin()
       this.getPrice()
+      this.getLowerPrice()
       this.initData()
       this.Bus.$on(this.selectCoin, data => { // 币种筛选
         this.adBuyObj.currency = data
         this.getPrice()
+        this.getLowerPrice()
       }),
       this.Bus.$on('switchValueType', data => { // 是否溢价
         this.switchValue = data
@@ -247,7 +250,7 @@
       });
       this.Bus.$on(this.premiumValue, data => { // 溢价滑动价格
         this.adBuyObj.premium = data
-
+        this.priceNow = this.priceNow * (1 + (data/100))
       });
       this.Bus.$on(this.limitValue, data => { // 期限滑动价格
         this.adBuyObj.limit = data
@@ -285,6 +288,30 @@
         });
         console.log('this.selectPrice', this.selectPrice)
         this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
+      },
+      async getLowerPrice() { // 最低价格获取
+        this.Proxy.sales({
+          type: 2, // 购买
+          payment: 0,
+          currency: this.adBuyObj.currency,
+          money: 'CNY',
+          min: 0,
+          max: 9007199254740992,
+          count: 1,
+          user: '',
+          price: 2, // 价格升序排列，第一项为最低价
+          date: 0,
+          order: 0,
+          volume: 0,
+          rate: 0,
+          tradeable: 0,
+          page: 0,
+        }).then(res => {
+          console.log('最低价格', res.data.sales[0].price)
+          this.lowerPrice = res.data.sales[0].price
+        }).catch((msg) => {
+          console.log(msg)
+        });
       },
       initData() { // 数据初始化
         this.maxNum = this.$store.state.userInfo.btverify !== 2 ? 100000 : 10000000

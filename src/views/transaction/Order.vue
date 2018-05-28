@@ -7,7 +7,7 @@
           <img :src="coinIcon && `${HostUrl.http}image/${coinIcon}`" alt="">
           <span>{{titleType[type-1]}}{{contentData.currency && contentData.currency.toUpperCase()}}</span>
         </div>
-        <div class="info">
+        <div class="info" @click="$router.push({path:'/homepage', query:{uid: contentData.sid}})">
           <div class="avatar">
             <img :src="contentData.icon ? `${HostUrl.http}image/${contentData.icon}` : `/static/images/default_avator.png`" alt="">
           </div>
@@ -63,13 +63,13 @@
         <span class="error-text" :class="{'sale-err': contentData.type == 2}">{{errorText[errorFlag]}}</span>
         <div class="input">
           <div>
-            <input type="number" :placeholder="`输入${titleType[type-1]}金额`" v-model="money"
+            <input type="text" :placeholder="`输入${titleType[type-1]}金额`" v-model="money"
                    @input="changeMoney" @keydown="checkMoney(money)" autofocus="autofocus" @wheel.prevent="">
             <b>CNY</b>
           </div>
           <img src="/static/images/huansuan.png" alt="">
           <div>
-            <input type="number" :placeholder="`输入${titleType[type-1]}数量`" v-model="amount"
+            <input type="text" :placeholder="`输入${titleType[type-1]}数量`" v-model="amount"
                    @input="changeAmount" @keydown="checkAmount(amount)" @wheel.prevent="">
             <b>{{contentData.currency && contentData.currency.toUpperCase()}}</b>
           </div>
@@ -156,6 +156,9 @@
       OrderLayer,
       BasePopup
     },
+    creatd() {
+
+    },
     mounted() {
       this.Bus.$on("offOrderLayer",()=>{
         this.showOrderLayer=false;
@@ -167,12 +170,12 @@
         this.contentData = data;
         this.type = data.type;
         this.tradeable = this.contentData.tradeable && (this.contentData.tradeable * 1 + "").formatFixed(6) || 0
+        this.getPrice();
+        this.getCoinIcon();
+        this.getBalance();
       }).catch((msg)=>{
         alert(JSON.stringify(msg));
       });
-      this.getPrice();
-      this.getCoinIcon();
-      this.getBalance();
     },
     destroyed(){
       this.Bus.$off("offOrderLayer");
@@ -335,6 +338,7 @@
         .info
           margin-right 50px
           text-align center
+          cursor pointer
           .avatar
             display inline-block
             width 45px

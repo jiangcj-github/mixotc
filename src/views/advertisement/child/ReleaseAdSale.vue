@@ -29,14 +29,14 @@
       <li class="switch-li clearfix">
         <i>是否溢价</i>
         <em class="sel-premium"><b>*</b>根据市场价的溢价比例</em>
-        <em v-show="switchValue">当前市场最低价：</em>
-        <b v-show="switchValue">{{priceNow}} CNY/{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
+        <em v-show="switchValue">当前市场最高价：</em>
+        <b v-show="switchValue">{{higherPrice}} CNY/{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
         <SwitchBlock class="switch-block" :showSwitch="switchValue = adSaleObj.mode == 1 ? false : true"></SwitchBlock>
       </li>
       <li v-show="switchValue">
         <i>溢价</i>
         <em>参考价：</em>
-        <b>{{priceNow}} CNY/{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
+        <b>{{priceNow && priceNow.toString().formatFixed(2)}} CNY/{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
       </li>
       <li v-show="switchValue">
         <SliderBar
@@ -52,8 +52,8 @@
       <li class="input-li">
         <p>
           <i>{{switchValue == true ? '最低单价' : '固定单价'}}</i>
-          <em v-show="!switchValue">当前市场最低价：</em>
-          <b v-show="!switchValue">{{priceNow}} CNY/{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
+          <em v-show="!switchValue">当前市场最高价：</em>
+          <b v-show="!switchValue">{{higherPrice}} CNY/{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
         </p>
         <input type="text"
                v-model="adSaleObj.price"
@@ -189,6 +189,7 @@
 
         selectPrice: [], // 根据币种选择返回情况
         priceNow: '',
+        higherPrice: '', // 最高价格
         maxLimit: '',
 
         balanceList: [],
@@ -245,20 +246,21 @@
       this.selectUserCoin()
       this.getPrice()
       this.initData()
-
-      console.log('我要看看这是啥',this.$store.state.editContent.tradeable)
+      this.getHigherPrice()
       this.Bus.$on(this.selectCoin, data => { // 币种筛选
         this.adSaleObj.currency = data
         this.adSaleObj.tradeable = 0
         this.getPrice()
         this.selectUserCoin()
-      }),
+        this.getHigherPrice()
+      });
       this.Bus.$on('switchValueType', data => { // 是否溢价
         this.switchValue = data
         this.adSaleObj.mode = this.switchValue ? 2 : 1
       });
       this.Bus.$on(this.premiumValue, data => { // 溢价滑动价格
         this.adSaleObj.premium = data
+        this.priceNow = this.priceNow * (1 + (data/100))
       });
       this.Bus.$on(this.limitValue, data => { // 期限滑动价格
         this.adSaleObj.limit = data
@@ -310,6 +312,30 @@
           alert(JSON.stringify(msg));
         });
         this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
+      },
+      async getHigherPrice() { // 最高价格获取
+        this.Proxy.sales({
+          type: 1, // 出售
+          payment: 0,
+          currency: this.adSaleObj.currency,
+          money: 'CNY',
+          min: 0,
+          max: 9007199254740992,
+          count: 1,
+          user: '',
+          price: 1, // 价格降序排列，第一项为最高价
+          date: 0,
+          order: 0,
+          volume: 0,
+          rate: 0,
+          tradeable: 0,
+          page: 0,
+        }).then(res => {
+          console.log('最高价格', res.data.sales[0].price)
+          this.higherPrice = res.data.sales[0].price
+        }).catch((msg) => {
+          console.log(msg)
+        });
       },
       initData() { // 数据初始化
         this.maxLimit = this.$store.state.userInfo.btverify !== 2 ? '100,000' : '10,000,000'

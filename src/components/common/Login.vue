@@ -8,7 +8,7 @@
 
       <div class="account">
         手机号/邮箱
-        <input type="text" value="" v-model="account" @focus="accountCancel = true"  v-clickoutside="accountBlur">
+        <input type="text" value="" v-model.trim="account" @focus="accountCancel = true"  v-clickoutside="accountBlur">
         <img src="/static/images/cancel_icon.png" alt="" v-if="accountCancel" @click="account = ''">
         <ul class="account-history" v-if="accountCancel && accountSearch.length">
           <li v-for="(item, index) of accountSearch" :key="index" @click="changeAccount(item)">{{item}}</li>
@@ -21,7 +21,7 @@
 
       <div class="yzm">
         <span v-if="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先拖拽滑块</b></span>
-        <input type="text" @focus="codeCancel = true" @blur="codeCancel = false" placeholder="验证码" value="" v-model="code" :disabled="!moveTrue || !checkAccount(account)">
+        <input type="text" @focus="codeCancel = true" @blur="codeCancel = false" placeholder="验证码" value="" v-model.trim="code" :disabled="!moveTrue || !checkAccount(account)">
         <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-if="codeCancel" @click="code = ''">
         <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend, disable: !moveTrue || !checkAccount(account)}" @click="sendCode">{{isSend ? time + '秒后重发': sendCodeText}}</button>
       </div>
