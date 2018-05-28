@@ -53,10 +53,14 @@
         default: 0
       }
     },
+    created(){
+      console.log('created', this.max, this.choiceValue)
+    },
     mounted() {
     },
     watch: {
       choiceValue(data) {
+        console.log('choiceValue watch', data)
         this.sliderValue = data
       }
     },

@@ -115,7 +115,7 @@
         <span>{{adBuyObj.info.length}}/50</span>
       </li>
       <li>
-        <button class="release-btn" :class="{'release-active': canSubmit}" @click="canSubmit && toRelease()">发布购买广告</button>
+        <button class="release-btn" :class="{'release-active': canSubmit}" @click="canSubmit ? toRelease() : forbidRelease()">发布购买广告</button>
         <span class="reset-info" @click="reset()">重置信息</span>
       </li>
       <li class="hint-li">广告成交后，手续费为成交量的0.5%</li>
@@ -126,7 +126,11 @@
     </BasePopup>
     <BasePopup :show="adErrLayer"
                class="ad-err-layer">
-      <span v-clickoutside="closeLayer">{{errText}}</span>
+      <div v-clickoutside="closeLayer" class="ad-err-laye-container">
+        <p>
+          <span v-html="errText"></span>
+        </p>
+      </div>
     </BasePopup>
   </div>
 </template>
@@ -154,7 +158,7 @@
         limitValue: 'limitValue',
         selectNum: false, // 是否限量
         adBuyObj: {
-          "id": '', // 广告id
+          "id": 0,
           "uid": '', // 用户id
           "currency": 'btc', // 电子货币
           "money": 'cny', // 法币
@@ -195,6 +199,8 @@
         errMinText: '',
         errMaxText: '',
 
+        soreNum: 0
+
       }
     },
     components: {
@@ -231,7 +237,6 @@
       this.selectUserCoin()
       this.getPrice()
       this.initData()
-
       this.Bus.$on(this.selectCoin, data => { // 币种筛选
         this.adBuyObj.currency = data
         this.getPrice()
@@ -286,16 +291,36 @@
         this.maxLimit = this.$store.state.userInfo.btverify !== 2 ? '100,000' : '10,000,000'
         this.adBuyObj.max = this.maxNum
       },
-      showVary() {
+      showVary() { // 是否溢价
         this.selectNum = !this.selectNum
         this.adBuyObj.vary = this.selectNum == true ? 2 : 1
       },
+      forbidRelease() { // 信息不完整
+        this.errText = '信息未填写完整'
+        this.adErrLayer = true
+      },
       toRelease() { // 发布广告
+        //提示：可交易量低于最小交易额度+手续费，无法上架
         this.adBuyObj.max = this.adBuyObj.max * 1
         this.adBuyObj.min = this.adBuyObj.min * 1
         this.adBuyObj.price = this.adBuyObj.price * 1
         this.adBuyObj.tradeable = this.adBuyObj.tradeable * 1
+        // let editeErrNum = 200 + (this.adBuyObj.tradeable * 0.005)
+        // if (this.$store.state.editFlag == 2 && this.adBuyObj.tradeable < editeErrNum) {
+        //   this.adErrLayer = true
+        //   this.errText = '可交易量低于最小交易额度+手续费<br/>无法上架'
+        //   return
+        // }
         this.WsProxy.send('otc', this.$store.state.editFlag == 2 ? 'update_sale' : 'new_sale', this.adBuyObj).then((data)=>{
+          if (this.$store.state.editFlag == 2) {
+            this.adErrLayer = true
+            this.errText = '已上架'
+            setTimeout(() => {
+              this.adErrLayer = false
+              window.location.hash = '/advertisement'
+            }, 3000)
+            return
+          }
           console.log('发布广告', data)
           this.adSuccLayer = true
           let _this = this
@@ -310,6 +335,7 @@
           let timer = setInterval(timerFn, 1000)
         }).catch((msg)=>{
           console.log('发布广告失败', msg)
+          msg.ret !== 1 && (this.adErrLayer = true)
           switch (msg.ret) {
             case 22:
               this.errText = '一个币种同时只能上架一条广告'
@@ -320,10 +346,7 @@
             case 82:
               this.errText = '创建钱包失败'
               break;
-            default:
-              this.errText = '请核实'
           }
-          this.adErrLayer = true
         });
       },
       reset() {
@@ -333,11 +356,12 @@
         this.adBuyObj.price = ''
         this.adBuyObj.min = '200'
         this.adBuyObj.max = this.$store.state.userInfo.btverify !== 2 ? '100000' : '10000000'
-        this.adBuyObj.payment = 0
+        this.adBuyObj.payment = this.$store.state.PaymentSoreData
         this.adBuyObj.limit = 10
         this.adBuyObj.info = ''
         this.adBuyObj.vary = 1
         this.adBuyObj.tradeable = ''
+        this.Bus.$emit('paymentNum', this.$store.state.PaymentSoreData)
       },
       closeLayer() {
         this.adErrLayer = false
@@ -367,12 +391,20 @@
           this.errMinText = '不能低于最小额度'
           return
         }
+        if (this.adBuyObj.min > this.maxNum) {
+          this.errMinText = '不能超过最大额度'
+          return
+        }
         this.adBuyObj.min = this.adBuyObj.min.replace(/^(\d+)\.(\d{0,2})\d*$/g, "$1" + '.' + '$2');
         this.errMinText = ''
       },
       maxInput() {
         if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adBuyObj.max)) {
           this.errMaxText = '请输入正确的数字格式'
+          return
+        }
+        if (this.adBuyObj.max < 200) {
+          this.errMaxText = '不能低于最小额度'
           return
         }
         if (this.adBuyObj.max > this.maxNum) {

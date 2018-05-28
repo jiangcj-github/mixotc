@@ -22,6 +22,7 @@ export default {
   editContent: {},
   editFlag: 0,
   coinLoopData: [], //顶部轮询数据
+  PaymentSoreData: 0, // 用户初始支付方式
   /**
    * 审核申述客服部分
    */

@@ -87,8 +87,10 @@
     },
     created() {
       this.Bus.$on('saleSlideLength', data => {
+        console.log('saleSlideLength', data)
         this.saleObj.length = data * 1
         this.saleObj.tradeable = this.saleObj.tradeable ? this.saleObj.tradeable : data * 1
+        // this.saleObj.tradeable = data * 1
       }),
       this.Bus.$on('buyInfo', data => {
         this.buyObj = data
@@ -96,7 +98,7 @@
       this.Bus.$on('saleInfo', data => {
         this.saleObj = data
       })
-      this.initPayment()
+      this.$store.state.editFlag !== 2 && this.$store.state.editFlag !== 1 && this.initPayment()
     },
     mounted() {
 
@@ -120,7 +122,7 @@
       closeLayer() {
         this.adRemindLayer = false
       },
-      async initPayment() {
+      async initPayment() { // 获取用户钱包支付方式
         await this.WsProxy.send('wallet', 'my_accounts', {
           uid: this.$store.state.userInfo.uid,
           origin: 0
@@ -135,11 +137,13 @@
             }
           })
           filterList.forEach(v => { // 数组求和
-            sum = sum + v;
+            sum = sum + v;``
             return sum
           });
           this.buyObj.payment = sum
           this.saleObj.payment = sum
+          console.log('请求回来的数据', sum)
+          this.$store.commit({type: 'initPaymentSore', data: sum})
           this.Bus.$emit('paymentNum', sum)
           console.log('我的支付', paymentList, filterList, sum, this.buyObj.payment)
         }).catch((msg)=>{

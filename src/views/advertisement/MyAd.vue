@@ -84,7 +84,7 @@
               <img src="/static/images/OTC_Bankcard.png" alt="" v-if="[4, 5, 6, 7].includes(content.payments)">
             </td>
             <td>{{content.limit}}</td>
-            <td>{{content.tradeable}}</td>
+            <td class="tradeable-td">{{content.tradeable}}</td>
             <td>{{content.volume}}</td>
             <td>{{content.price_avg}}</td>
             <td class="operation-td">
@@ -360,7 +360,20 @@
           this.$refs.di.date1 = new Date(date2.getTime() - (24 * 60 * 60 * 7 * 1000))
         }
       },
-      edit(content) { // 编辑
+      async edit(content) { // 编辑
+        console.log('ddfasfas', content.payments)
+        let lengthList, length
+        await this.WsProxy.send('wallet', 'wallets', {
+          id: this.$store.state.userInfo.uid, // 用户id
+        }).then((data)=>{
+          lengthList = data.wallets.filter(item => {
+            return item.currency === content.currency
+          })
+          console.log('lengthList', lengthList)
+        }).catch((msg)=>{
+          // console.log('出售币种错误', msg);
+        });
+        length = lengthList[0] && (this.JsonBig.stringify(lengthList[0].balance)).formatFixed(6) || 0
         this.myObj= {
           "uid": '', // 用户id
           "currency": content.currency, // 电子货币
@@ -375,8 +388,9 @@
           "limit": content.limit, // 付款期限, 分钟
           "info": content.info, // 描述信息
           "vary": content.vary, // 余额随动标志 1 不随动 2 随动
-          "tradeable": content.tradeable,// 可交易量
-          "id": content.id
+          "tradeable": content.tradeable * 1,// 可交易量
+          "id": content.id,
+          "length": length ? length * 1 : 0,
         }
         if (content.type === 1) {
           this.$router.push({name:'releaseSale'})
@@ -389,11 +403,11 @@
       toSort(title, index) { // 排序操作
         this.clickUp = index;
         this.sortActive = this.sortFlag === index ? !this.sortActive : true;
-        this.dateSort = title.flag === 0 ? (this.sortActive ?  1 : 2) : 0;
-        this.limitSort = title.flag === 7 ? (this.sortActive ? 1 : 2) : 0;
-        this.tradeableSort = title.flag === 8 ? (this.sortActive ? 1 : 2) : 0;
-        this.volumeSort = title.flag === 9 ? (this.sortActive ? 1 : 2) : 0;
-        this.avgSort = title.flag === 10 ? (this.sortActive ? 1 : 2) : 0;
+        this.dateSort = title.flag === 0 ? (this.sortActive ?  2 : 1) : 0;
+        this.limitSort = title.flag === 7 ? (this.sortActive ? 2 : 1) : 0;
+        this.tradeableSort = title.flag === 8 ? (this.sortActive ? 2 : 1) : 0;
+        this.volumeSort = title.flag === 9 ? (this.sortActive ? 2 : 1) : 0;
+        this.avgSort = title.flag === 10 ? (this.sortActive ? 2 : 1) : 0;
         this.sortFlag = title.flag;
         this.initData()
       },
@@ -534,6 +548,15 @@
 
             p:last-child
               cursor pointer
+
+          /*.tradeable-td*/
+            /*max-width 100px*/
+            /*overflow hidden*/
+            /*white-space nowrap*/
+            /*text-overflow ellipsis*/
+
+
+
 
   .ad-remind-layer
     text-align center

@@ -38,6 +38,7 @@ const editBuyCon = "editBuyCon"; // 广告编辑购买内容
 const editSaleCon = "editSaleCon"; // 广告编辑出售内容
 const releaseAd = 'releaseAd'; // 点击发广告
 const coinLoop = 'coinLoop'; // 顶部数据轮询
+const initPaymentSore = 'initPaymentSore'; // 用户初始支付方式
 
 const updateUserInfo = "updateUserInfo";//更新个人信息
 
@@ -95,6 +96,7 @@ export {
   editSaleCon,
   releaseAd,
   coinLoop,
+  initPaymentSore,
 
 
   /**
