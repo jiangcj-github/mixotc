@@ -83,6 +83,7 @@
         <p>最小订单额<b class="limit">最小200</b></p>
         <input type="text"
                v-model="adBuyObj.min"
+               maxlength="8"
                @focus="clearMin=true && (errMin=true)"
                @blur="clearMin=false"
                @input="minInput"/>
@@ -94,6 +95,7 @@
         <p>最大订单额<b class="limit">最大{{maxLimit}}</b></p>
         <input type="text"
                v-model="adBuyObj.max"
+               maxlength="8"
                @focus="clearMax = true && (errMax=true)"
                @blur="clearMax=false"
                @input="maxInput"/>
@@ -325,6 +327,9 @@
       forbidRelease() { // 信息不完整
         this.errText = '信息未填写完整'
         this.adErrLayer = true
+        setTimeout(() => {
+          this.adErrLayer = false
+        }, 3000)
       },
       toRelease() { // 发布广告
         //提示：可交易量低于最小交易额度+手续费，无法上架
@@ -336,6 +341,9 @@
         if (this.$store.state.editFlag == 2 && (this.adBuyObj.tradeable * this.priceNow) < editeErrNum) {
           this.adErrLayer = true
           this.errText = '可交易量低于最小交易额度+手续费<br/>无法上架'
+          setTimeout(() => {
+            this.adErrLayer = false
+          }, 3000)
           return
         }
         this.WsProxy.send('otc', this.$store.state.editFlag == 2 ? 'update_sale' : 'new_sale', this.adBuyObj).then((data)=>{
@@ -374,6 +382,9 @@
               this.errText = '创建钱包失败'
               break;
           }
+          setTimeout(() => {
+            this.adErrLayer = false
+          }, 3000)
         });
       },
       reset() {

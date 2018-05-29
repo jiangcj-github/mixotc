@@ -1,5 +1,5 @@
 <template>
-  <div class="choice-box" v-clickoutside="closeSelect">
+  <div class="choice-box" v-clickoutside="closeSelect" :class="{'is-disabled': canShow}">
     <span @click="showChoice()"><b>{{items}}</b><i></i></span>
     <ul v-show="contentShow"  :style="{width: `${width}px`}">
       <li @click="allCheck" :class="{selected: checkAll}" v-show="isAll">{{allName}}</li>
@@ -17,7 +17,11 @@
       isAll: {
         type: Boolean,
         default: true
-      }, // 是否替换全选
+      }, // 是否替换全选]
+      canShow: {
+        type: Boolean,
+        default: false
+      },
       emitValue: String, // emit返回标识
       allName: String
     },
@@ -143,6 +147,12 @@
       li:hover
         background #FFF3EB
 
+  .is-disabled
+    span
+      b
+        cursor not-allowed
+    ul
+      display none
 
 
 

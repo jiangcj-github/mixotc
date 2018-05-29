@@ -14,7 +14,8 @@
     <div class="footer">
       <article class="footer-wrapper">
         <section class="foot-left">
-          <img src="/static/images/footlogo.png" alt="">
+          <img src="/static/images/footlogo2.png" alt="">
+          <span>support@mixotc.com</span>
         </section>
         <section class="foot-mid">
           <ul class="mid-up">
@@ -142,8 +143,20 @@
       font-size 13px
 
       .foot-left
-        margin-right 250px
+        margin-right 210px
         float left
+        img
+          width 160px
+          height 35px
+        span
+          position relative
+          top -5px
+          display inline-block
+          margin-top -3px
+          padding-left 40px
+          font-size 12px
+          letter-spacing 0.23px
+          color #FFF
 
       .foot-mid
         flex 1
