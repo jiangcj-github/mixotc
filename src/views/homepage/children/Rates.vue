@@ -56,6 +56,7 @@
     methods: {
       loadRates(){
         //获取列表
+        /*
         this.WsProxy.send('otc','rates',{
           id:this.uid,
           origin: this.curPage-1,
@@ -67,6 +68,26 @@
             this.total=data.amount;
             this.Bus.$emit("onRateTotalUpdate",this.total);
             this.parseRates(data.rates);
+          }
+        }).catch((msg)=>{
+          if(!msg){
+            this.err=2; //网络异常
+          }else if(msg.ret!==0){
+            this.err=3; //加载异常
+          }
+        });
+        */
+        this.Proxy.hp_rates({
+          id:this.uid,
+          origin: this.curPage-1,
+        }).then((data)=>{
+          if(!data.data||!data.data.rates||data.data.rates.length<=0){
+            this.err=1;
+          }else{
+            this.err=0;
+            this.total=data.data.amount;
+            this.Bus.$emit("onRateTotalUpdate",this.total);
+            this.parseRates(data.data.rates);
           }
         }).catch((msg)=>{
           if(!msg){

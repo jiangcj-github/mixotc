@@ -188,7 +188,9 @@
 
   .is-disabled
     .adB
-      background #999
+      background #F4F6FA
+      cursor not-allowed
+    b
       cursor not-allowed
     ul
       display none

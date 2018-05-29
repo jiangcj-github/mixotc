@@ -148,7 +148,7 @@
           });
         }
       },
-      parseInfo(data){console.log(data);
+      parseInfo(data){
         this.info= {
           id: data.id,
           id_str: this.JsonBig.stringify(data.id),

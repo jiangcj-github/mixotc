@@ -9,7 +9,7 @@
       <div class="wrapper">
         <ul class="down-tag">
           <li><img class="top-logo logoImg" src="/static/images/toplogo2.png" alt="MIXOTC官网"></li>
-          <router-link to="/transaction" tag="li" class="tag transaction" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
+          <router-link to="/transaction" tag="li" class="tag transaction tag-hover" active-class="selected" :class="{selected: path === '/'}">交易中心</router-link>
           <!--|| $store.state.isLogin && $store.state.userInfo.verify !== 2 && (realLayer = true)-->
           <li class="tag ad"
               @mouseenter="adChild = true"
@@ -24,8 +24,8 @@
               <li @click="goMyAd()">我的广告</li>
             </ol>
           </li>
-          <router-link to="/order" tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">订单<span v-if="newOrder"><i>{{newOrder}}</i></span></router-link>
-          <router-link to="/wallet" tag="li" class="tag order" v-if="this.$store.state.isLogin" active-class="selected">钱包</router-link>
+          <router-link to="/order" tag="li" class="tag order tag-hover" v-if="this.$store.state.isLogin" active-class="selected">订单<span v-if="newOrder"><i>{{newOrder}}</i></span></router-link>
+          <router-link to="/wallet" tag="li" class="tag order tag-hover" v-if="this.$store.state.isLogin" active-class="selected">钱包</router-link>
           <li class="itag" @mouseenter="showQr" @mouseleave="hideQr">
             <img class="top-logo" src="/static/images/phoneicon.png" alt="">
             <div class="show-qr" v-show="isHover">
@@ -272,10 +272,8 @@
                 &:hover
                   background: #FFF3EB
           &.selected
-            background #FFF3EB
             border-bottom 2px solid $col422
           &.active
-            background #FFF3EB
             border-bottom 2px solid $col422
         .itag
           line-height 60px
@@ -303,6 +301,9 @@
               height 12px
               line-height 12px
               fz11()
+        .tag-hover
+          &:hover
+            background #FFF3EB
       .log
         font-size 14px
         color $col422

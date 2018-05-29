@@ -20,7 +20,7 @@
             <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput" @focus="srchTipShow=true">
             <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchTipShow && srchText.length>0">
             <a href="javascript:void(0)" @click="searchStr"></a>
-            <b v-if="searchTip"><img src="/static/images/hint.png">您还未输入币种</b>
+            <b v-if="searchTip">您还未输入币种</b>
             <!--币种模糊搜索结果-->
             <ul v-show="srchTipShow" v-if="this.srchType===0">
               <li v-for="e in coinTips" @click="search(e)">
@@ -67,7 +67,8 @@
           <img src="/static/images/cancel_icon.png" alt="" v-if="paymentScore !== 0 && showPayment" @click.stop="clearPayment">
         </div>
         <div class="price">
-          <b v-if="tip" class="err-tip"><img src="/static/images/hint.png">最大限额不能低于最小限额，且最小限额为200</b>
+          <!--<img src="/static/images/hint.png">-->
+          <b v-if="tip" class="err-tip">最大限额不能低于最小限额，且最小限额为200</b>
           <input type="text" class="min" @input="inputDealMin()" ref='min' v-model="filte.min" placeholder="最低限额" step="1" min="200" @focus="minCancel = true" @blur="minCancel = false">
           <img src="/static/images/cancel_icon.png" class="min-cancel" v-show="minCancel && filte.min" @mousedown="filte.min = ''">
           <input type="text" class="max" @input="inputDealMax()" ref='max' v-model="filte.max" placeholder="最高限额" step="1" @focus="maxCancel = true" @blur="maxCancel = false">
@@ -474,6 +475,11 @@
           } else {
             this.tip = false;
           }
+          if (min >= 100000) {
+            this.largeTran = 1
+          } else {
+            this.largeTran = 0
+          }
           this.fetchData();
         },
         deep: true
@@ -615,7 +621,7 @@
           position absolute
           left 0
           top 32px
-          color $col422
+          color #FF794C
           fz11()
         input
           position relative
@@ -659,19 +665,19 @@
           cursor pointer
         span
           position absolute
-          left 67px
+          left 55px
           top 27px
           font-size $fz13
           color $col333
           letter-spacing 0.15px
-          &::before
+          /*&::before
             position absolute
             top 5px
             left -12px
             width 11px
             height 9px
             content ''
-            background url('/static/images/whole_icon2.png')
+            background url('/static/images/whole_icon2.png')*/
 
     .result-list
       margin-bottom 20px

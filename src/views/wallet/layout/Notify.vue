@@ -93,7 +93,7 @@
   @import "../../../stylus/base";
   *{box-sizing:border-box;}
 
-  .head{width:1200px;margin:0 auto;height:40px;line-height:40px;margin-bottom:20px;}
+  .head{width:1200px;margin:10px auto 20px auto;height:20px;line-height:20px;}
   .head>h3{font-size:12px;margin-left:15px;}
   .head>h3>a{}
   .head>h3>a:hover{color:#fea350;}
