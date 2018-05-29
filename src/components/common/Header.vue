@@ -30,7 +30,7 @@
             <img class="top-logo" src="/static/images/phoneicon.png" alt="">
             <div class="show-qr" v-show="isHover">
               <img src="/static/images/down_load.png" alt="">
-              <span>APP安卓端下载</span>
+              <span>扫码下载APP</span>
             </div>
           </li>
 
@@ -285,8 +285,8 @@
             border-bottom 2px solid $col422
           .show-qr
             position absolute
-            left 1px
-            top 75px
+            left 0
+            top 72px
             width 100px
             height 100px
             background-color #FFF

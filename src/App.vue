@@ -186,7 +186,7 @@
             this.Loop.isOverTime.clear();
             this.Loop.isOverTime.set(() => {
               // 10分钟无操作则自动退出
-              let flag = new Date() - 0 - this.Storage.loginTime.get() > 600000;
+              let flag = new Date() - 0 - this.Storage.loginTime.get() > 3600000;
               if(flag) {
                 console.log('十分钟无操作， 退出', new Date(), new Date(this.Storage.loginTime.get()))
                 this.logout()
@@ -209,15 +209,7 @@
           this.$store.commit({type: 'changeTrustList', data: []});
         },
         immediate: true
-      },
-      // path:{
-      //   handler: function(curVal, oldVal) {
-      //     if (this.authority(curVal)) return;
-      //     !this.$store.state.token && this.$router.push({
-      //         name: "transaction"
-      //       });
-      //   }
-      // }
+      }
     }
   }
 </script>

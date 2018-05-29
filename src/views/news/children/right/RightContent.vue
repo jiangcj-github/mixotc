@@ -19,7 +19,6 @@
             <div class="messages clearfix" v-for="(item, idx) of value" :key="item.id ? item.id : item.time">
               <p class="time-info" v-if="idx > 0 && dealTime(value[idx - 1].time, item.time)">{{dealTime(value[idx-1].time, item.time)}}</p>
               <div :class="{'left-people': item.from !== JsonBig.stringify($store.state.userInfo.uid), 'right-people': item.from === JsonBig.stringify($store.state.userInfo.uid)}">
-                
                 <img 
                   class="avator" 
                   :src="chat[index].service ? '/static/images/service_icon.png' : infoDiction[item.from] && infoDiction[item.from].icon"
@@ -61,9 +60,10 @@
             </ul>
             <button 
               @click="addFriend(item.id, item.info ? item.info : `我是${infoDiction[item.id] && infoDiction[item.id].name},申请添加你为好友`)"
+              :class="{disable:item.isDeal}"
               :disabled="item.isDeal"
             >
-              {{item.isDeal ? '已处理' : '同意'}}
+              {{item.isDeal ? '已添加' : '添加'}}
             </button>
           </div>
         </div>
@@ -530,6 +530,10 @@
           border-radius 2px
           color #FFF
           cursor pointer
+          &.disable
+            cursor auto
+            color $col999
+            background #FFF
         ul
           width 380px
           height 60px

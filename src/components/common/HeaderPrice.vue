@@ -120,7 +120,7 @@
         em
           margin-left 5px
         .is-green
-          color $col100
+          color $colE23
           position relative
           &:after
             display: block;
@@ -132,7 +132,7 @@
             top 2px
             right -13px
         .is-red
-          color red
+          color $col94C
           position relative
           &:after
             display: block;
