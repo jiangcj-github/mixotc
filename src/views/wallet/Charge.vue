@@ -182,6 +182,13 @@
             console.log(msg);
           });
         });
+        //获取路由参数
+        let coin=this.$route.query.coin || "btc";
+        this.coins.forEach((e,i)=>{
+          if(e.coin===coin.toUpperCase()){
+            this.coinSel=i;
+          }
+        });
         //加载账单
         this.loadLists();
       },

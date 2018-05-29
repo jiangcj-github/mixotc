@@ -46,9 +46,9 @@
             <div class="th time sortable" @click="sort=++sort%2">创建时间
               <i :class="{up:sort===0,down:sort===1}"></i></div>
             <div class="th type select multi" v-clickoutside="()=>isShowUl1=false">
-              <p @click="isShowUl1=!isShowUl1">{{ul1Text}}</p>
+              <p @click="isShowUl1=!isShowUl1"><i>{{ul1Text}}</i></p>
               <ul class="drop" v-show="isShowUl1">
-                <li v-for="(e,i) in ul1" @click="e.check=!e.check">
+                <li v-for="(e,i) in ul1" @click="onClickMultiUl(ul1,e)">
                   {{e.text}}
                   <img src="/static/images/selected.png" v-show="e.check">
                   <img src="/static/images/unselect.png" v-show="!e.check">
@@ -65,9 +65,9 @@
             <div class="th num sortable" @click="sort=++sort%2+2">数量/手续费
               <i :class="{up:sort===2,down:sort===3}"></i></div>
             <div class="th state select multi"  v-clickoutside="()=>isShowUl3=false">
-              <p @click="isShowUl3=!isShowUl3">{{ul3Text}}</p>
+              <p @click="isShowUl3=!isShowUl3"><i>{{ul3Text}}</i></p>
               <ul class="drop" v-show="isShowUl3">
-                <li v-for="(e,i) in ul3" @click="e.check=!e.check">
+                <li v-for="(e,i) in ul3" @click="onClickMultiUl(ul3,e)">
                   {{e.text}}
                   <img src="/static/images/selected.png" v-show="e.check">
                   <img src="/static/images/unselect.png" v-show="!e.check">
@@ -96,7 +96,7 @@
                 <div class="state">
                   <p>{{e.state}}</p>
                 </div>
-                <div class="op"><p v-if="e.billType===1"><a href="/#/order">查看</a></p></div>
+                <div class="op"><p v-if="e.billType===1"><a :href="'/#/order?oid='+e.orderId+'&classify='+e.orderType">查看</a></p></div>
               </div>
               <div class="bottom" v-if="e.billType===1">
                 <span class="orderId">订单号：{{e.orderId}}</span>
@@ -155,6 +155,7 @@
 
         isShowUl1: false,
         ul1: [
+          {text:"全部类型",value:-1,check:1},
           {text:"充币",value:1,check:1},
           {text:"提币",value:2,check:1},
           {text:"购买",value:3,check:1},
@@ -177,6 +178,7 @@
 
         isShowUl3: false,
         ul3: [
+          {text:"全部状态",check:1,value:-1},
           {text:"已完成",check:1,value:0},
           {text:"进行中",check:1,value:1},
           {text:"取消",check:1,value:2},
@@ -198,18 +200,26 @@
     },
     computed:{
       ul1Text(){
-        let i=0;
-        this.ul1.forEach((e)=>{
-          if(e.check) i++;
-        });
-        return i>=this.ul1.length?"类型(全部)":"类型(筛选"+i+"项)";
+        if(this.ul1[0].check) return this.ul1[0].text;
+        let str="";
+        for(let i=1;i<this.ul1.length;i++){
+          let e=this.ul1[i];
+          if(e.check){
+            str+=","+e.text;
+          }
+        }
+        return str.substr(1) || "未选择类型";
       },
       ul3Text(){
-        let i=0;
-        this.ul3.forEach((e)=>{
-          if(e.check) i++;
-        });
-        return i>=this.ul3.length?"状态(全部)":"状态(筛选"+i+"项)";
+        if(this.ul3[0].check) return this.ul3[0].text;
+        let str="";
+        for(let i=1;i<this.ul3.length;i++){
+          let e=this.ul3[i];
+          if(e.check){
+            str+=","+e.text;
+          }
+        }
+        return str.substr(1) || "未选择状态";
       },
       paramSort(){
         let sort=this.sort;
@@ -230,19 +240,23 @@
       },
       paramType(){
         let type="";
-        this.ul1.forEach((e)=>{
-          if(e.check) type+=","+e.value;
-        });
-        type=type.substr(1);
-        return type;
+        for(i=1;i<this.ul1.length;i++){
+          let e=this.ul1[i];
+          if(e.check){
+            type+=","+e.value;
+          }
+        }
+        return type.substr(1);
       },
       paramState(){
         let state="";
-        this.ul3.forEach((e)=>{
-          if(e.check) state+=","+e.value;
-        });
-        state=state.substr(1);
-        return state;
+        for(i=1;i<this.ul3.length;i++){
+          let e=this.ul3[i];
+          if(e.check){
+            state+=","+e.value;
+          }
+        }
+        return state.substr(1);
       },
       paramStart(){
         let start= this.$refs.di.date1;
@@ -272,7 +286,8 @@
       },
       ul3Text:function(){
         this.loadBills();
-      }
+      },
+
     },
     methods: {
       async init(){
@@ -307,6 +322,21 @@
         }
         //加载账单
         this.loadBills();
+      },
+      onClickMultiUl(ul,e){
+        e.check=!e.check;
+        //多选下拉框，状态联动
+        if(e.value===-1){
+          for(let i=1;i<ul.length;i++){
+            ul[i].check=e.check;
+          }
+        }else{
+          let c=0;
+          for(let i=1;i<ul.length;i++){
+            c+=ul[i].check;
+          }
+          ul[0].check= (c>=ul.length-1);
+        }
       },
       onFuzzyInput(){
         if(this.srchText.length<=0){
@@ -385,7 +415,8 @@
             uidStr: this.JsonBig.stringify(e.trader_id),
             num: e.amount.formatFixed(6),
             fee: e.fee.formatFixed(6),
-            state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
+            stateStr: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
+            state: e.state,
             orderId: e.type_id,
             isIn: [1,3,5,7,9,11].indexOf(e.type)>=0, // 进出账：true-进账,false-出账
             billType: Math.ceil(e.type/2)-1,  // 账单类型：0-充提,1-交易,2-担保,3-红包,4-转账,5-资金互转
@@ -398,6 +429,12 @@
             item.addr=e.to && e.to.formatAddr();
             item.addrName=e.to_name || "-";
             item.amount="-"+item.amount+" "+item.coin;
+          }
+          //订单类型：0-进行中，1-已完成
+          if(item.state===0){
+            item.orderType=1;
+          }else if(item.state===1){
+            item.orderType=0;
           }
           this.bills.push(item);
         });

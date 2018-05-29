@@ -73,8 +73,8 @@
                   <p class="frozen"><span>{{e.frozen}} {{e.abbr}}</span></p>
                   <p class="assess"><span>{{e.assess}} CNY</span></p>
                   <p class="opera op1">
-                    <a class="btn white" href="/#/wallet/charge">充币</a>
-                    <a class="btn white" href="/#/wallet/withdraw">提币</a>
+                    <a class="btn white" :href="'/#/wallet/charge?coin='+e.abbr">充币</a>
+                    <a class="btn white" :href="'/#/wallet/withdraw'+e.abbr">提币</a>
                     <a class="btn white" href="/#/">交易</a>
                   </p>
                 </div>

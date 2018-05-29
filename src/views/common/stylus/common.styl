@@ -42,11 +42,13 @@ ul.drop>li.empty{color:#999;}
 .thead .th{display:inline-block;vertical-align:top;line-height:50px;color:#999;position:relative;}
 
 .thead .select{cursor:pointer;}
-.thead .select>p{color:#999;}
+.thead .select>p{color:#999;ecli();}
 .thead .select:hover>p{color:#fea350;}
 .thead .select>p:after{content:"";display:inline-block;border:5px solid transparent;border-top-color:#999;
   vertical-align:-3px;margin-left:7px;}
 .thead .select>ul{position:absolute;top:40px;left:-10px;right:0;}
+.thead .select.multi>p{padding-right:10px;}
+.thead .select.multi>p>i{color:inherit;}
 .thead .select.multi>ul img{float:right;margin-top:7px;}
 
 .thead .sortable{cursor:pointer;}
