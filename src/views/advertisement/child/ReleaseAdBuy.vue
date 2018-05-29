@@ -365,7 +365,7 @@
           msg.ret !== 1 && (this.adErrLayer = true)
           switch (msg.ret) {
             case 22:
-              this.errText = '一个币种同时只能上架一条广告'
+              this.errText = '一个币种同时只能上架一条购买广告'
               break;
             case 21:
               this.errText = '最多可同时发布3条广告'

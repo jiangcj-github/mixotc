@@ -12,17 +12,17 @@
         </span>
       </p>
     </div>
-    <div class="title deal-volume">{{data.dealVolume}}</div>
-    <div class="title order-volume">{{data.orderVolume}}</div>
+    <div class="title deal-volume" :title="data.dealVolume">{{data.dealVolume}}</div>
+    <div class="title order-volume" :title="data.orderVolume">{{data.orderVolume}}</div>
     <div class="title good-reputation">{{data.rate}}</div>
-    <div class="title limit-price">{{data.priceMin}}-{{data.priceMax}}</div>
+    <div class="title limit-price" :title="`${data.priceMin}-${data.priceMax}`">{{data.priceMin}}-{{data.priceMax}}</div>
     <div class="title payment">
       <img src="/static/images/OTC_zhifubao.png" alt="" v-if="data.pay_zfb">
       <img src="/static/images/OTC_wechat.png" alt="" v-if="data.pay_wx">
       <img src="/static/images/OTC_Bankcard.png" alt="" v-if="data.pay_yhk">
     </div>
-    <div class="title amount">{{data.amount}}</div>
-    <div class="title price">{{data.price}}</div>
+    <div class="title amount" :title="data.amount">{{data.amount}}</div>
+    <div class="title price" :title="data.price">{{data.price}}</div>
     <div class="title button">
       <button @click.stop="_toOrder(data)">{{data.type == 1 ? '购买' : '出售'}}{{data.currency && data.currency.toUpperCase()}}</button>
     </div>
