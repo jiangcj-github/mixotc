@@ -101,6 +101,8 @@
             <p>{{coins[coinSel].addr}}</p>
           </div>
         </BasePopup>
+        <!--提示框-->
+        <Alert ref="alert"></Alert>
       </div>
     </div>
   </div>
@@ -111,6 +113,7 @@
   import Pagination from "../verify/component/Pagination";
   import BasePopup from "../../components/common/BasePopup";
   import QrcodeVue from "qrcode.vue";
+  import Alert from "../common/widget/Alert";
 
   export default {
     components: {
@@ -118,7 +121,8 @@
       Pagination,
       Notify,
       LeftBar,
-      QrcodeVue
+      QrcodeVue,
+      Alert
     },
     data() {
       return {
@@ -232,10 +236,10 @@
         });
       },
       onClipSuccess(){
-        window.alert("复制成功");
+        this.$refs.alert.showAlert({content:"复制成功"});
       },
       onClipError(){
-        window.alert("复制失败");
+        this.$refs.alert.showAlert({content:"复制失败"});
       },
     },
     mounted(){

@@ -56,11 +56,17 @@
     <div class="err net-error" v-else-if="err===3">加载失败</div>
     <div class="err loading" v-else-if="err===4">数据加载中...</div>
     <div class="err empty" v-else>没有评价数据</div>
+    <!--提醒框-->
+    <Alert ref="alert"></Alert>
   </div>
 </template>
 <script>
   import beforeOrder from "@/views/transaction/js/beforeOrder.js";
+  import Alert from "../../common/widget/Alert";
   export default {
+    components: {
+      Alert,
+    },
     data() {
       return {
         uid: 0,           // 用户ID
@@ -69,7 +75,7 @@
         err: -1,          // 广告列表请求状态
 
         fltTypes:[                          // 广告类型过滤下拉列表
-          {text:"全部广告",value:null},
+          {text:"全部广告",value:''},
           {text:"购买",value:2},
           {text:"出售",value:1},
         ],
@@ -77,7 +83,7 @@
         fltTypeShow: false,               // 是否显示广告类型下拉列表
 
         fltCoins:[                          // 币种过滤下拉列表
-          {text:"全部币种",value:null},
+          {text:"全部币种",value:''},
           {text:"BTC",value:"btc"},
           {text:"ETH",value:"eth"},
           {text:"LTC",value:"ltc"},
@@ -135,7 +141,7 @@
             this.err=1;
           }else{
             this.err=0;
-            this.Bus.$emit("onSaleTotalUpdate",data.sales.length);
+            this.Bus.$emit("onSaleTotalUpdate",data.data.sales.length);
             this.parseSales(data.data.sales);
           }
         }).catch((msg)=>{
@@ -171,7 +177,7 @@
         }).then(()=>{
           this.$router.push({ name: 'order', query: { id:e.id}})
         }).catch((res)=>{
-          alert(res);
+          this.$refs.alert.showAlert({content:res});
         });
       },
     }

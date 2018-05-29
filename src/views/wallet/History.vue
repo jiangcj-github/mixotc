@@ -80,7 +80,7 @@
             <div class="li" v-for="(e,i) in bills">
               <div class="booth">
                 <div class="time"><p>{{e.time1}}</p><p>{{e.time2}}</p></div>
-                <div class="type"><p :class="{in:!e.inOrOut,out:e.inOrOut}">{{e.type}}</p></div>
+                <div class="type"><p :class="{in:!e.isIn,out:e.isIn}">{{e.type}}</p></div>
                 <div class="coin"><p><img :src="e.coinIcon">{{e.coin}}</p></div>
                 <div class="addr">
                   <p v-if="e.billType===0">{{e.addr}}</p>
@@ -91,8 +91,9 @@
                   <p v-if="e.billType===2">{{e.nickname}}</p>
                   <p v-if="e.billType===3">{{e.nickname}}</p>
                   <p v-if="e.billType===4">{{e.addr}}</p>
+                  <p v-if="e.billType===5">{{e.isIn?"法币账户":"币币账户"}}</p>
                 </div>
-                <div class="num"><p :class="{in:!e.inOrOut,out:e.inOrOut}">{{e.num}} {{e.coin}}</p><p>{{e.fee}} {{e.coin}}</p></div>
+                <div class="num"><p :class="{in:!e.isIn,out:e.isIn}">{{e.num}}</p><p>{{e.fee}} {{e.coin}}</p></div>
                 <div class="state">
                   <p>{{e.state}}</p>
                 </div>
@@ -240,7 +241,7 @@
       },
       paramType(){
         let type="";
-        for(i=1;i<this.ul1.length;i++){
+        for(let i=1;i<this.ul1.length;i++){
           let e=this.ul1[i];
           if(e.check){
             type+=","+e.value;
@@ -250,7 +251,7 @@
       },
       paramState(){
         let state="";
-        for(i=1;i<this.ul3.length;i++){
+        for(let i=1;i<this.ul3.length;i++){
           let e=this.ul3[i];
           if(e.check){
             state+=","+e.value;
@@ -407,7 +408,7 @@
             time1: new Date(e.date*1000).dateHandle("yyyy/MM/dd"),
             time2: new Date(e.date*1000).dateHandle("HH:mm:ss"),
             type: ["充币","提币","购买","出售","转账-入账","转账-出账","担保-入账","担保-出账",
-              "红包-入账","红包-出账","资金互转-转入","资金互转-转出"][e.type-1],
+              "红包-入账","红包-出账","资产划出","资产划入"][e.type-1],
             coin: e.currency && e.currency.toUpperCase(),
             coinIcon: "http://192.168.113.26//image/B012F109359B4872",
             nickname: e.trader_name || "-",
@@ -424,11 +425,11 @@
           if(item.isIn){
             item.addr=e.from && e.from.formatAddr();
             item.addrName=e.from_name || "-";
-            item.amount="+"+item.amount+" "+item.coin;
+            item.num="+"+item.num+" "+item.coin;
           }else{
             item.addr=e.to && e.to.formatAddr();
             item.addrName=e.to_name || "-";
-            item.amount="-"+item.amount+" "+item.coin;
+            item.num="-"+item.num+" "+item.coin;
           }
           //订单类型：0-进行中，1-已完成
           if(item.state===0){
@@ -471,7 +472,7 @@
               index: i+1,
               time: new Date(e.date*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
               type: ["充币","提币","购买","出售","转账-入账","转账-出账","担保-入账","担保-出账",
-                "红包-入账","红包-出账","资金互转-转入","资金互转-转出"][e.type-1],
+                "红包-入账","红包-出账","资产划出","资产划入"][e.type-1],
               coin: e.currency && e.currency.toUpperCase(),
               user: e.trader_name,
               sendAddrName: e.from_name,
@@ -481,16 +482,20 @@
               num: e.amount,
               fee: e.fee,
               state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
-              orderId: e.type_id,
+              orderId: e.type_id.toString(),
               isIn: [1,3,5,7,9,11].indexOf(e.type)>=0, // 进出账：true-进账,false-出账
-
+              billType: Math.ceil(e.type/2)-1,  // 账单类型：0-充提,1-交易,2-担保,3-红包,4-转账,5-资金互转
             };
             if(item.isIn){
-              item.amount="+"+item.amount+" "+item.coin;
+              item.num="+"+item.num+" "+item.coin;
             }else{
-              item.amount="-"+item.amount+" "+item.coin;
+              item.num="-"+item.num+" "+item.coin;
             }
             item.fee=item.fee+item.coin;
+            //资金划转
+            if(item.billType===5){
+              item.user=item.isIn?"法币账户":"币币账户";
+            }
             jsonData.push(item);
           });
           JsonExcel.data=jsonData;

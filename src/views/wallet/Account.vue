@@ -74,7 +74,7 @@
                   <p class="assess"><span>{{e.assess}} CNY</span></p>
                   <p class="opera op1">
                     <a class="btn white" :href="'/#/wallet/charge?coin='+e.abbr">充币</a>
-                    <a class="btn white" :href="'/#/wallet/withdraw'+e.abbr">提币</a>
+                    <!--<a class="btn white" :href="'/#/wallet/withdraw'+e.abbr">提币</a>-->
                     <a class="btn white" href="/#/">交易</a>
                   </p>
                 </div>
@@ -151,9 +151,7 @@
           </div>
         </div>
         <!--提示框-->
-        <BasePopup :show="isShowAlert" :width="0" :height="0" v-on:click.native="isShowAlert=false">
-          <div class="pop-alert">{{this.alert}}</div>
-        </BasePopup>
+        <Alert ref="alert"></Alert>
       </div>
     </div>
   </div>
@@ -162,11 +160,10 @@
   import Notify from "./layout/Notify";
   import LeftBar from "./layout/LeftBar";
   import Pagination from "../verify/component/Pagination";
-  import BasePopup from "@/components/common/BasePopup";
-  import timeout from "@/js/Timeout.js";
+  import Alert from "../common/widget/Alert";
   export default {
     components: {
-      BasePopup,
+      Alert,
       Pagination,
       Notify,
       LeftBar,
@@ -202,9 +199,6 @@
         bbPageSize: 20,
         bbTotal: 0,
         bbErr: -1,
-
-        alert:"",
-        isShowAlert:false,
       }
     },
     computed:{
@@ -270,19 +264,12 @@
         this.loadFb();
         this.loadBb();
       },
-      showAlert(txt){
-        this.alert=txt;
-        this.isShowAlert = true;
-        timeout(()=>{
-          this.isShowAlert=false;
-        },3000);
-      },
       createWallet(i){
         let curr=this.fb[i].abbr;
         this.WsProxy.send("wallet", "new_wallet",{currency:curr}).then((data)=> {
           this.$set(this.fb[i],"hasWallet",true);
         }).catch(()=>{
-          this.showAlert("创建钱包失败");
+          this.$refs.alert.showAlert({content:"创建钱包失败"});
         });
       },
       loadFbBalance(){
