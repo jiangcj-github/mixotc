@@ -289,8 +289,8 @@
         this.WsProxy.send("wallet","total_assets", {}).then((data)=>{
           let numBtc=data.total_assets || 0;
           let btcPrice=this.prices["btc"] || 0;
-          this.balance.numBtc=numBtc.toFixed(6);
-          this.balance.numCny=(numBtc * btcPrice).toFixed(2);
+          this.balance.numBtc=numBtc.formatFixed(6);
+          this.balance.numCny=(numBtc * btcPrice).formatFixed(2);
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -330,15 +330,15 @@
           item.name=e.name;
           item.avail=item.hasWallet?"0":"-";
           if(e.balance!=null) {
-            item.avail = e.balance.toFixed(6);
+            item.avail = e.balance.formatFixed(6);
           }
           item.frozen=item.hasWallet?"0":"-";
           if(e.locked!=null) {
-            item.frozen = e.locked.toFixed(6);
+            item.frozen = e.locked.formatFixed(6);
           }
           item.assess=item.hasWallet?"0":"-";
           if(e.assessment!=null && this.prices["btc"]!=null) {
-            item.assess = (e.assessment * this.prices["btc"]).toFixed(2);
+            item.assess = (e.assessment * this.prices["btc"]).formatFixed(2);
           }
           this.fb.push(item);
         });
@@ -403,6 +403,7 @@
 </script>
 <style scoped lang="stylus">
   @import "../../stylus/base"
+  @import "../common/stylus/common"
   @import "./stylus/common"
   @import "./stylus/account"
 </style>

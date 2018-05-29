@@ -185,6 +185,7 @@
 </script>
 <style scoped lang="stylus">
   @import "../../stylus/base";
+  @import "../common/stylus/common"
   @import "./stylus/common"
   @import "./stylus/withdraw"
 </style>

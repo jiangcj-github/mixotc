@@ -50,21 +50,18 @@
     <!--评价列表-->
     <Rates :uid="uid" v-show="tab===1"></Rates>
     <!--提示弹框-->
-    <BasePopup :show="isShowPop" v-on:click.native="isShowPop=false">
-      <div class="popContent">{{["取消信任成功","加入信任成功"][info.isTrust]}}</div>
-    </BasePopup>
+    <Alert ref="alert"></Alert>
   </div>
 </template>
 <script>
   import Sales from './children/Sales';
   import Rates from './children/Rates';
-  import BasePopup from '@/components/common/BasePopup';
-  import timeout from "@/js/Timeout.js";
+  import Alert from "../common/widget/Alert";
   export default {
     components: {
       Sales,
       Rates,
-      BasePopup
+      Alert,
     },
     data() {
       return {
@@ -75,7 +72,6 @@
         tab:0,                 // tab项【0-他的发布，1-他的评价】
         rateNum:0,            // 评价数量
         saleNum:0,            // 广告数量
-        isShowPop:false,    // 是否显示弹框
       }
     },
     computed:{
@@ -117,7 +113,7 @@
         let uid= this.JsonBig.parse(this.$route.query.uid) || "";
         let loginUid=this.$store.state.userInfo.uid;
         this.WsProxy.send('otc','new_trust',{uid:loginUid, id:uid, trust:1}).then((data)=>{
-          this.showPop();
+          this.$refs.alert.showAlert({content:"加入信任成功"});
           this.info.isTrust=1;
           this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(uid)});
         }).catch((msg)=>{
@@ -128,7 +124,7 @@
         let uid= this.JsonBig.parse(this.$route.query.uid) || "";
         let loginUid=this.$store.state.userInfo.uid;
         this.WsProxy.send('otc','new_trust',{uid:loginUid, id:uid, trust:0}).then((data)=>{
-          this.showPop();
+          this.$refs.alert.showAlert({content:"取消信任成功"});
           this.info.isTrust=0;
           this.$store.commit({type:"delTrust",data:this.JsonBig.stringify(uid)});
         }).catch((msg)=>{
@@ -152,7 +148,7 @@
           });
         }
       },
-      parseInfo(data){
+      parseInfo(data){console.log(data);
         this.info= {
           id: data.id,
           id_str: this.JsonBig.stringify(data.id),
@@ -160,17 +156,13 @@
           headimg: (data.icon && this.HostUrl.http+"image/"+data.icon) || "/static/images/default_avator.png",
           tradeWidthNum: data.mytrade || 0,
           orderNum: data.order || 0,
-          volumn: data.volumes && (data.volumes+"").formatFixed(6)+"+BTC",
+          volumn: data.volumes && data.volumes.toString().formatFixed(6)+"+BTC",
           praiseRate: data.rate && data.rate+"%" || "0%",
           trustedNum: data.trusted || 0,
           trustNum: data.trust || 0,
           securedNum: data.secured || 0,
           isTrust: data.is_trust || 0,
         }
-      },
-      showPop(){
-        this.isShowPop=true;
-        timeout(()=>{this.isShowPop=false;},3000);
       },
     },
   }
