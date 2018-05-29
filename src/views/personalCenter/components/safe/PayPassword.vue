@@ -5,7 +5,7 @@
         <div class="main">
           <img class="close-btn" src="/static/images/close_btn_tr2.png" alt="" @click="Bus.$emit(emitValue)">
           <h4>支付密码</h4>
-          <p class="tip">*出于安全方面的考虑，修改密码后，你的账户将在 24 小时内无法提现。</p>
+          <p class="tip">*出于安全方面的考虑，修改密码后，你的账户将在24小时内无法提现。</p>
           <div class="password1">
             <p>密码<span>密码为8--12位字符，且同时包含字母和数字</span></p>
             <input type="password" v-model="password1" maxlength="12" @blur="verifyPassword1">
@@ -48,6 +48,11 @@
         </div>
       </slot>
     </BasePopup>
+    <BasePopup :show="showSame" :top="46" @click.native="hidePopup" class="show-same">
+      <slot>
+        <p>{{popupCopy}}</p>
+      </slot>
+    </BasePopup>
   </div>
 </template>
 
@@ -61,9 +66,12 @@
         password1: '',
         password2: '',
         messageWord: '',
+        showSame: false,
+        popupCopy:'',
         codeCopy:'获取验证码',
         canSend:true,
         timer:null,
+        timer2:null,
         time: 60,
         timeout: false,
         copy1:'',
@@ -71,7 +79,7 @@
         tip2:false,
         tip3:false,
         tip4:false,
-        inputGroup: [], // 记录输入框内容,
+        inputGroup: ['','','','','',''], // 记录输入框内容,
         inputContent: ''
       }
     },
@@ -80,10 +88,23 @@
     },
     destroyed() {
       clearInterval(this.timer);
+      clearTimeout(this.timer2);
     },
     computed:{
     },
     methods: {
+      hidePopup(){
+        this.showSame = false;
+        clearTimeout(this.timer2);
+      },
+      showPopup(){
+        this.showSame = true;
+        clearTimeout(this.timer2);
+        this.timer2 = setTimeout(() => {
+          this.showSame = false;
+          clearTimeout(this.timer2)
+        }, 3000);
+      },
       verifyPassword1(){
         if(this.password2 !== '') this.verifyPassword2()
         if(this.password1.length < 8 || this.password1.length > 12) {
@@ -221,8 +242,8 @@
               pass: this.getSafePass(this.password1)
             }
         ).then(data=>{
-          this.Bus.$emit(this.emitValue)
           this.isnew && this.$store.commit({type:'updateUserInfo', data:{is_new: 0}})
+          this.Bus.$emit(this.emitValue, true)
         }).catch(error=>{
           if(error.ret === 8 || error.ret === 6){
             this.type && (this.tip3 = true);
@@ -230,6 +251,10 @@
           }
           if(error.ret === 4){
             this.timeout = true;
+          }
+          if(error.ret === 91){
+            this.popupCopy = '新密码不能与原密码相同';
+            this.showPopup()
           }
         })
       }
@@ -239,6 +264,11 @@
 
 <style scoped lang="stylus">
 @import "../../../../stylus/base";
+.show-same
+  p
+    height 94px
+    line-height 94px
+    text-align center
 .main
   box-sizing()
   width 100%
@@ -276,6 +306,7 @@
       height 20px
       background $col422
   .tip
+    width 430px
     height 71px
     line-height 71px
     fz11()
@@ -284,6 +315,7 @@
   .password1,.password2
     position relative
     margin-bottom 20px
+    background-color #FFF
     .hint
       position absolute
       bottom -18px

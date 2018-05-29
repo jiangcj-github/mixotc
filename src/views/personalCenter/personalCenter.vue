@@ -1,6 +1,6 @@
 <template>
   <div class="personal inner">
-    <h3>mixsOTC-个人中心</h3>
+    <h3>mixOTC-个人中心</h3>
     <div class="nav">
       <ul>
         <!--<router-link to="/personal/evaluate" tag="li" active-class="selected" class="evaluate">我的评价</router-link>-->

@@ -11,10 +11,10 @@
               <input 
                 type="text" 
                 :placeholder="info.type === 4 ? '例：李某' : '名称'" 
-                v-model="info.name"
+                v-model.trim.trim="info.name"
                 maxlength="20"
                 ref="infoname"
-                @blur="info.name.trim() === '' ? nameTip = true : nameTip = false; "
+                @blur="info.name === '' ? nameTip = true : nameTip = false; "
                 >
               <i class="cancel" v-if="info.name" @click="()=>{info.name = ''; $refs.infoname.focus()}">
                 <img src="/static/images/cancel_icon.png" alt="">
@@ -36,10 +36,10 @@
                 v-else
                 type="text"
                 placeholder='名称'
-                v-model="info.number"
+                v-model.trim="info.number"
                 ref="account"
                 maxlength="20"
-                @blur="info.number.trim() === '' ? accountTip = true : accountTip = false;"
+                @blur="info.number === '' ? accountTip = true : accountTip = false;"
                 >
               <i v-if="info.type === 4 && info.number.length > 0" class="cancel" @click="()=>{info.number = ''; $refs.account.vaule = '', $refs.account.focus()}">
                 <img src="/static/images/cancel_icon.png" alt="">
@@ -57,9 +57,9 @@
               type="text" 
               placeholder='例：北京银行中关村支行'
               maxlength="20" 
-              v-model="info.bank"
+              v-model.trim="info.bank"
               ref="bank"
-              @blur="info.bank.trim() === '' ?  bankTip = true : bankTip = false;"
+              @blur="info.bank === '' ?  bankTip = true : bankTip = false;"
             >
             <i v-if="info.bank" class="cancel" @click="()=>{info.bank = ''; $refs.bank.focus()}">
               <img src="/static/images/cancel_icon.png" alt="">
@@ -67,7 +67,7 @@
             <b class="hint" v-if="bankTip">开户行不能为空</b>
           </div>
           <div class="remark">
-            <textarea maxlength="40" placeholder="请填写备注信息" v-model="info.remark">
+            <textarea maxlength="40" placeholder="请填写备注信息" v-model.trim="info.remark">
             </textarea>
             <b>{{info.remark.length}}/40</b>
           </div>
@@ -77,7 +77,7 @@
         </div>
       </slot>
     </BasePopup>
-    <BasePopup :show="samePopup" :top="42" @click.native="()=>{samePopup = false}">
+    <BasePopup :show="samePopup" :top="42" @click.native="()=>{samePopup = false;clearTimeout(timer)}">
       <slot>
         <p class="sameTip">与原信息相同</p>
       </slot>
@@ -112,6 +112,9 @@
         return obj;
       }
     },
+    destroyed(){
+      clearTimeout(this.timer);
+    },
     methods: {
       isSame(){
         let flag = true;
@@ -125,7 +128,7 @@
         return flag;
       },
       dealCard() {
-        let value = this.$refs.account.value.trim().replace(/\s/g,"");
+        let value = this.$refs.account.value.replace(/\s/g,"");
         if(value[0] == 0) {
           value = '';
           this.$refs.account.value = '';
@@ -143,13 +146,13 @@
       },
       verify() {
         let { number, name, bank, type} = this.info;
-        name.trim() === '' ?  this.nameTip = true : this.nameTip = false; 
+        name === '' ?  this.nameTip = true : this.nameTip = false; 
         if(type === 4) {
           !(/(^([1-9]{1})(\d{15}|\d{18})$)/.test(number)) ? this.accountTip = true : this.accountTip = false;
-          bank.trim() === '' && type === 4 ?  this.bankTip = true :  this.bankTip = false;
+          bank === '' && type === 4 ?  this.bankTip = true :  this.bankTip = false;
         }
         if(type !== 4) {
-          number.trim() === '' ? this.accountTip = true : this.accountTip = false;
+          number === '' ? this.accountTip = true : this.accountTip = false;
         }
         return !(this.nameTip || this.accountTip || this.bankTip)
       },
@@ -162,10 +165,10 @@
         let {id, number, name, bank, remark, type} = this.info;
         this.WsProxy.send('wallet', this.isNew ? 'new_account' : 'update_account', {
           uid: this.$store.state.userInfo.uid,
-          name: name.trim(),
-          remark: remark.trim(),
-          bank: bank.trim(),
-          number: number.trim(),
+          name: name,
+          remark: remark,
+          bank: bank,
+          number: number,
           id,
           type,
         }).then(data => {
@@ -204,8 +207,10 @@
       top 40px
       right 10px
       cursor pointer
-    input
+    input,textarea
+      font-size $fz13
       padding-right 20px
+      placeholder()
     .close-btn
       position absolute
       right 10.4px
@@ -216,7 +221,6 @@
       height 20px
       line-height 20px
       padding-left 12px
-      // margin-top 24px
       font-size $fz20
       color $col333
       font-weight bold
@@ -240,7 +244,6 @@
         margin-bottom 10px
       input
         box-sizing()
-        placeholder()
         width 208px
         height 40px
         padding-left 10px
@@ -265,7 +268,6 @@
         margin-bottom 8px
       input
         box-sizing()
-        placeholder()
         width 100%
         height 40px
         padding-left 10px
@@ -281,13 +283,10 @@
         height 120px
         padding 10px 
         margin-bottom 36px
-        font-size $fz13
-        color $col999
         border 1px solid $col1E1
         border-radius 2px
         resize none
         outline none
-        placeholder()
       b
         position absolute
         bottom 46px

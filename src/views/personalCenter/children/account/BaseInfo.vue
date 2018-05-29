@@ -13,7 +13,7 @@
             <span>昵称</span>
             <i v-if="!isSetting">{{userInfo.name}}</i>
             <i class="set" v-if="!isSetting" @click="()=>{name=userInfo.name;isSetting=true}">设置</i>
-            <input type="text" placeholder="输入昵称" v-if="isSetting" v-model="name" ref="name" maxlength="20" v-clickoutside="()=>{isSetting = false}">
+            <input type="text" placeholder="输入昵称" v-if="isSetting" v-model.trim="name" ref="name" maxlength="20" v-clickoutside="()=>{isSetting = false}">
             <b 
               v-if="name && isSetting"
               @click.stop="()=>{name = ''; $refs.name.focus()}"
@@ -158,7 +158,7 @@ import AddressInfo from "../../components/account/AddressInfo";
         this.$store.dispatch({ type: 'moneyAddress', ws: this.WsProxy})
       },
       updateName() {
-        if(this.name.trim() === '') {
+        if(this.name === '') {
           this.isSetting=false;
           return;
         };

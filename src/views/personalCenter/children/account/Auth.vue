@@ -142,9 +142,9 @@ import { mapState } from 'vuex';
         faileReason: '证件照片不符',
         faileTime: 0,
         defaultIdentity:['identity_0.png','identity_1.png','identity_2.png'],
-        defaultPassport:['passport_0.png','passport_1.png','passport_2.png'],
+        defaultPassport:['passport_0.png','passport_2.png','passport_1.png'],
         copy:[
-          ['护照正面照片', '护照反面照片', '手持护照照片'],
+          ['护照正面照片', '手持护照照片', '住址证明'],
           ['身份证正面照片', '身份证反面照片', '手持身份证照片']
         ],
         guarantee: true,
@@ -174,7 +174,7 @@ import { mapState } from 'vuex';
           this.faileTime = update;
           this.data.name = name;
           this.data.type = type;
-          this.data.number = number;
+          this.data.number = number.formatCertificate();
           this.data.iconArr = [image1, image2, image3]
         }).catch(error=>{
           console.log(error)
@@ -314,8 +314,8 @@ import { mapState } from 'vuex';
   input
     box-sizing()
     placeholder()
-    font-size $fz14
     background $col6FA
+    font-size $fz13
     padding-right 25px
     border 1px solid $col1E1
     border-radius: 2px

@@ -228,7 +228,7 @@ import BasePopup from '@/components/common/BasePopup';
           type: 1
         }).then(data=> {
           this.authData.name = data.name;
-          this.authData.number = data.number;
+          this.authData.number = data.number.formatCard();
         }).catch(error=>{
           console.log(error)
         })
@@ -505,6 +505,7 @@ import BasePopup from '@/components/common/BasePopup';
               width 206px
               height 40px
               padding 0 20px 0 10px
+              font-size $fz13
               background $col6FA
               border 1px solid $col1E1
               border-radius 2px

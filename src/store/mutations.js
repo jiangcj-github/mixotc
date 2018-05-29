@@ -52,8 +52,14 @@ export default {
     state.showChat = data;
   },
   [types.changeToken](state, { data }) {
-    // 控制右下方消息框显示
+
     state.token = data;
+  },
+  [types.changeCode](state, { data }) {
+    state.userInfo = {};
+    state.userInfo['code'] = data.code;
+    state.userInfo["email"] = data.email;
+    state.userInfo["phone"] = data.phone;
   },
   [types.changeTrustList](state, { data }) {
     // 用户信任人员列表

@@ -122,4 +122,12 @@
           letter-spacing 0.15px
       span
         display none
+    .el-input__inner:focus
+      background #FFF
+      border 1px solid #FFB422
+       border-radius 2px
+  .el-date-table td.current:not(.disabled) span
+    background-color #FFB422
+  .el-date-table td.today span
+    color #FFB422
 </style>

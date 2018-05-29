@@ -1,6 +1,6 @@
 <template>
   <div class="wrap">
-    <div class="login" v-if="showForm">
+    <div class="login" v-if="showForm" >
       <img src="/static/images/close_btn.png" alt="" class="close-btn" @click="hideLoginForm">
       <h2 class="title">登录/注册</h2>
 
@@ -8,7 +8,7 @@
 
       <div class="account">
         手机号/邮箱
-        <input type="text" value="" v-model.trim="account" @focus="accountCancel = true"  v-clickoutside="accountBlur">
+        <input type="text" value="" @keyup.enter="login" v-model.trim="account" @focus="accountCancel = true"  v-clickoutside="accountBlur">
         <img src="/static/images/cancel_icon.png" alt="" v-if="accountCancel" @click="account = ''">
         <ul class="account-history" v-if="accountCancel && accountSearch.length">
           <li v-for="(item, index) of accountSearch" :key="index" @click="changeAccount(item)">{{item}}</li>
@@ -21,7 +21,7 @@
 
       <div class="yzm">
         <span v-if="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先拖拽滑块</b></span>
-        <input type="text" @focus="codeCancel = true" @blur="codeCancel = false" placeholder="验证码" value="" v-model.trim="code" :disabled="!moveTrue || !checkAccount(account)">
+        <input type="text" @keyup.enter="login" @focus="codeCancel = true" @blur="codeCancel = false" placeholder="验证码" value="" v-model.trim="code" :disabled="!moveTrue || !checkAccount(account)">
         <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-if="codeCancel" @click="code = ''">
         <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend, disable: !moveTrue || !checkAccount(account)}" @click="sendCode">{{isSend ? time + '秒后重发': sendCodeText}}</button>
       </div>
@@ -196,14 +196,19 @@
             if(data.body && this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
               this.$store.commit({ type: 'initState'})
             }
-            data.body.code = this.code;
+            data.body['code'] = this.code;
             this.$store.commit({
               type: 'getUserInfo',
               data: data.body
             });
             this.saveAccount(this.account)
             data.body.token && this.$store.commit({ type: 'changeToken', data: data.body.token })
-            data.body.token && localStorage.setItem('getToken', data.body.token);
+            data.body.token && localStorage.setItem('getToken', JSON.stringify({
+              phone:data.body.phone,
+              email:data.body.email,
+              token: data.body.token, 
+              code: data.body.code
+            }));
             this.$store.commit({ type: 'changeLogin', data: true });
             this.Storage.loginTime.set(new Date() - 0)
             localStorage.removeItem('getToken')
@@ -423,6 +428,7 @@
       .log
         width 350px
         height 40px
+        font-size $fz14
         margin-left 25px
         background-color: $col999
         text-align center

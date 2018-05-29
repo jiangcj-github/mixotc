@@ -89,6 +89,11 @@
     </div>
     <PayPassword :type="type" v-if="showPass" :emitValue="emitValue2" :isnew="$store.state.userInfo.is_new"></PayPassword>
     <GoogleVerify v-if="showGoogle" :emitValue="emitValue3"></GoogleVerify>
+    <BasePopup :show="showSame" :top="46" @click.native="hidePopup" class="show-same">
+      <slot>
+        <p>{{popupCopy}}</p>
+      </slot>
+    </BasePopup>
   </div>
 </template>
 
@@ -96,6 +101,7 @@
 import Pagination from '@/components/common/Pagination'
 import PayPassword from '../components/safe/PayPassword'
 import GoogleVerify from '../components/safe/GoogleVerify'
+import BasePopup from '@/components/common/BasePopup'
   export default {
     data() {
       return {
@@ -111,13 +117,17 @@ import GoogleVerify from '../components/safe/GoogleVerify'
         emitValue3: 'hideGoogle',
         showPass: false,
         showGoogle: false,
+        showSame: false,
+        timer: null,
+        popupCopy:'',
         type: this.$store.state.userInfo.phone ? 1 : 0
       }
     },
     components: {
       Pagination,
       PayPassword,
-      GoogleVerify
+      GoogleVerify,
+      BasePopup
     },
     created() {
       this.getOnlineClients()
@@ -127,8 +137,12 @@ import GoogleVerify from '../components/safe/GoogleVerify'
       this.Bus.$on(this.emitValue1, (num)=>{
         this.fetchRecords(num - 1)
       })
-      this.Bus.$on(this.emitValue2, ()=>{
+      this.Bus.$on(this.emitValue2, (flag)=>{
         this.showPass = false;
+        if(flag){
+          this.popupCopy = '密码设置成功'
+          this.showPopup();
+        }
       })
       this.Bus.$on(this.emitValue3, (data)=>{
        this.showGoogle = false;
@@ -143,6 +157,18 @@ import GoogleVerify from '../components/safe/GoogleVerify'
       this.Bus.$off(this.emitValue3)
     },
     methods: {
+      hidePopup(){
+        this.showSame = false;
+        clearTimeout(this.timer);
+      },
+      showPopup(){
+        this.showSame = true;
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+          this.showSame = false;
+          clearTimeout(this.timer)
+        }, 3000);
+      },
       kickOff(){
         this.WsProxy.send('control', 'kick_off_client', {
           imei: this.$store.state.token
@@ -173,6 +199,11 @@ import GoogleVerify from '../components/safe/GoogleVerify'
 
 <style scoped lang="stylus">
 @import "../../../stylus/base"
+.show-same
+  p
+    height 94px
+    line-height 94px
+    text-align center
 .safe
   box-sizing()
   width 1000px
@@ -185,6 +216,7 @@ import GoogleVerify from '../components/safe/GoogleVerify'
     th
       height 23px
       line-height 23px
+      text-align left
       color $col999
       font-weight normal
       letter-spacing 0.27px

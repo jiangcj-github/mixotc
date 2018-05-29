@@ -3,6 +3,7 @@ const changeLogin = "changeLogin";
 const getUserInfo = "getUserInfo";
 const changeChatBox = "changeChatBox";
 const changeToken = "changeToken";
+const changeCode = "changeCode";
 const changeTrustList = "changeTrustList";
 const changeUnread = "changeUnread";
 const changeCurChat = "changeCurChat";
@@ -64,6 +65,7 @@ export {
   getUserInfo,
   changeChatBox,
   changeToken,
+  changeCode,
   changeTrustList,
   changeUnread,
   changeCurChat,

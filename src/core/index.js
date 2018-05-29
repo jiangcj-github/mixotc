@@ -255,7 +255,14 @@ const RUN_APP = (App, config, plugin) => {
       // 已存在的标签页会收到这个事件;
       // 一个页面登录，让其他页面获取token
       if (!event.newValue) return;
-      store.commit({ type: "changeToken", data: event.newValue });
+      let params = JSON.parse(event.newValue);
+      console.log(params);
+      store.commit({ type: "changeToken", data: params.token});
+      store.commit({ type: "changeCode", data: {
+        code: params.code,
+        email: params.email,
+        phone: params.phone
+      }});
       location.reload()
     }
   });

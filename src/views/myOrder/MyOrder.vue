@@ -162,7 +162,6 @@
 <script>
   import ChoiceBox from '@/components/common/ChoiceBox' // 引入下拉选择框
   // import Pagination from '@/components/common/Pagination' // 引入分页
-  // import DatePicker from '@/components/common/DatePicker' // 引入日历
   import DateInterval from '@/components/common/DateInterval' // 引入日历
   import SearchInput from '@/components/common/SearchInput' // 引入搜索下拉框
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗

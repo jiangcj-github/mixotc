@@ -95,7 +95,7 @@
 </script>
 
 <style scoped lang="stylus" type="text/stylus">
-
+@import "../../stylus/base.styl";
   .mid-container
     height 100%
     width 1200px
@@ -120,7 +120,7 @@
         em
           margin-left 5px
         .is-green
-          color green
+          color $col100
           position relative
           &:after
             display: block;

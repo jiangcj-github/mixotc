@@ -52,7 +52,7 @@
             return;
           }
           ws.reConnectFlag = true;
-          data.body.code = this.$store.state.userInfo.code;
+          data.body['code'] = this.$store.state.userInfo.code;
           this.$store.commit({
             type: 'getUserInfo',
             data: data.body
@@ -78,9 +78,9 @@
           seq: ws.seq,
           body: {
               action: 'login',
-              phone: this.$store.state.userInfo.phone,
-              email: this.$store.state.userInfo.email,
-              code: this.$store.state.userInfo.code,
+              phone: this.$store.state.userInfo && this.$store.state.userInfo.phone,
+              email: this.$store.state.userInfo && this.$store.state.userInfo.email,
+              code: this.$store.state.userInfo && this.$store.state.userInfo.code,
               country: 'CN',
               version: 1,
               mode: 1,
@@ -105,7 +105,7 @@
     },
     destroyed() {
       this.timer2 && (this.timer2 = clearInterval(this.timer2));
-      window.removeEventListener('scroll');
+      window.removeEventListener('scroll', this.handleScroll);
       window.onmousedown = null;
 
     },
