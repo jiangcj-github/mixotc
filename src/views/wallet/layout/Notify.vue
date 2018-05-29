@@ -43,7 +43,7 @@
               this.lists.push({
                 time: new Date(e.date * 1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
                 coin: e.currency,
-                num: (e.amount + "").formatFixed(6),
+                num: e.amount.formatFixed(6),
                 typeId: e.type_id,
                 checked: 0,
                 checkNum: 0,
@@ -70,11 +70,9 @@
       },
       tick(){
         this.loadChargeList();
-        /*
         setTimeout(()=>{
           this.tick();
         },5000);
-        */
       },
       slide(){
         if(this.lists.length>1){

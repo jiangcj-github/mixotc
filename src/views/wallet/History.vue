@@ -193,7 +193,7 @@
         curPage: 1,
         pageSize: 20,
         total: 0,
-        err: 0,
+        err: -1,
       }
     },
     computed:{
@@ -383,8 +383,8 @@
             nickname: e.trader_name || "-",
             uid: e.trader_id,
             uidStr: this.JsonBig.stringify(e.trader_id),
-            num: e.amount.toFixed(6),
-            fee: e.fee.toFixed(6),
+            num: e.amount.formatFixed(6),
+            fee: e.fee.formatFixed(6),
             state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
             orderId: e.type_id,
             isIn: [1,3,5,7,9,11].indexOf(e.type)>=0, // 进出账：true-进账,false-出账
@@ -483,6 +483,7 @@
 </script>
 <style scoped lang="stylus">
   @import "../../stylus/base";
+  @import "../common/stylus/common"
   @import "./stylus/common"
   @import "./stylus/history"
 </style>

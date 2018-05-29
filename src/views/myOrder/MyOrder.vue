@@ -73,12 +73,17 @@
             <p><router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(content.buyer) == userId ? content.seller : content.buyer}}">{{content.name || content.contact}}</router-link></p>
             <p class="talk" @click="contactSomeone(JsonBig.stringify(content.buyer) == userId ? content.seller : content.buyer)">联系他</p>
           </li>
-          <li>{{content.price}}</li>
+          <!---->
           <li>
-            <p :class="JsonBig.stringify(content.buyer) == userId ? 'text-g' : 'text-r'">{{JsonBig.stringify(content.buyer) == userId ? `+${content.amountc && content.amountc.toFixed(6)}${content.currency.toUpperCase()}` : `-${content.amountc && content.amountc.toFixed(6)}${content.currency.toUpperCase()}`}}</p>
-            <p>{{content.fee === 0 ? '' : content.fee.toFixed(6)}}</p>
+            <em class="hidden-text" :title="content.price">{{content.price}}</em>
           </li>
-          <li>{{content.amountm}}</li>
+          <li>
+            <p :class="JsonBig.stringify(content.buyer) == userId ? 'text-g' : 'text-r'" class="hidden-text" :title="content.amountc">{{JsonBig.stringify(content.buyer) == userId ? `+${content.amountc && content.amountc.toString().formatFixed(6)}` : `-${content.amountc && content.amountc.toString().formatFixed(6)}`}}</p>
+            <p class="hidden-text" :title="content.fee !==0 && content.fee">{{content.fee === 0 ? '' : content.fee.toString().formatFixed(6)}}</p>
+          </li>
+          <li>
+            <em class="hidden-text" :title="content.amountm">{{content.amountm}}</em>
+          </li>
           <li>{{content.trade_code}}</li>
           <!-- 状态显示 -->
           <li class="state-li">
@@ -787,6 +792,12 @@
       li
         width 110px
         font-size $fz13
+        .hidden-text
+          display block
+          width 100px
+          overflow hidden
+          white-space nowrap
+          text-overflow ellipsis
       li:nth-child(1)
         width 130px
       li:nth-child(4)
