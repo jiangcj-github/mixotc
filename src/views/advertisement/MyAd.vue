@@ -231,8 +231,8 @@
 
       // 时间框值
       this.Bus.$on('onDiChange', () => {
-        this.startValueDate = this.$refs.di.date1 ? Math.floor(new Date(this.$refs.di.date1).getTime() / 1000) : null;
-        this.endValueDate = this.$refs.di.date2 ? Math.floor(new Date(this.$refs.di.date2).getTime() / 1000) : null;
+        this.startValueDate = this.$refs.di.paramDate1;
+        this.endValueDate = this.$refs.di.paramDate2;
         if (this.startValueDate && this.endValueDate) {
           this.initData()
         }
@@ -316,6 +316,8 @@
       selectStatus(type) { // Tab切换
         this.contentTabIndex = type;
         this.clickUp = 20;
+        this.startValueDate = null
+        this.endValueDate = null
         this.initData()
         this.getCoin()
       },
@@ -351,17 +353,15 @@
         });
       },
       selectTime(index) { // 时间切换
-        this.num = index;
-        let date2 = new Date(new Date(new Date().toDateString()).getTime() + 24 * 60 * 60 * 1000);
-        this.$refs.di.date2 = date2;
+        //this.num = index;
         if (index === 0) {
-          this.$refs.di.date1 = new Date(date2.getTime() - (24 * 60 * 60 * 1000))
+          this.$refs.di.setDays(1);
         }
         if (index === 1) {
-          this.$refs.di.date1 = new Date(date2.getTime() - (24 * 60 * 60 * 3 * 1000))
+          this.$refs.di.setDays(3);
         }
         if (index === 2) {
-          this.$refs.di.date1 = new Date(date2.getTime() - (24 * 60 * 60 * 7 * 1000))
+          this.$refs.di.setDays(7);
         }
       },
       async edit(content) { // 编辑
@@ -432,6 +432,8 @@
       color #333
       letter-spacing 0.25px
       margin-bottom 20px
+      a:hover
+        color $col422
 
     .ad-item
       height 60px

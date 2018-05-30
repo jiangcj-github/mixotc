@@ -227,7 +227,7 @@
         tradeCode: '',
         trader: '',
         contentTabIndex: 1, // 控制tab切换
-        num: 4, // 控制时间选择Tab active类
+        //num: 4, // 控制时间选择Tab active类
 
         showPayment: false, // 标记已付款弹窗
         showReleaseCoin: false,
@@ -588,6 +588,7 @@
         this.getOrderCoin();
       },
       selectTime(index) { // 时间切换
+        //this.num = index;
         if (index === 0) {
           this.$refs.di.setDays(1);
         }
@@ -707,6 +708,8 @@
       color #333
       letter-spacing 0.25px
       margin-bottom 20px
+      a:hover
+        color $col422
 
     /*font-size $fz20
     font-weight bold

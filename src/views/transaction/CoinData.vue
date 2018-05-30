@@ -4,19 +4,23 @@
       <h1>
         <router-link to="/transaction">mixOTC</router-link>
         -
-        <router-link to="">币种资料</router-link>
+        <router-link to="/coinData">币种资料</router-link>
         -
         <span>{{coinDataObj.name}}</span>
       </h1>
       <div class="search-box">
-        <p><input type="text"
-                  placeholder="搜索币种"
-                  v-model.trim="inputValue"
-                  @input="selectData"
-                  @keyup.enter="getCoinsData"
-                  @click="showResult = true"><button @click="getCoinsData"></button>
+        <p :class="{'active-btn': showActive}">
+          <input type="text"
+                 placeholder="搜索币种"
+                 v-model.trim="inputValue"
+                 @input="selectData"
+                 @keyup.enter="getCoinsData"
+                 @focus="(showActive=true) && (canCancel=true)"
+                 @blur="blurInput"
+                 @click="showResult = true"><button @click="getCoinsData"></button>
+          <img src="/static/images/cancel_icon.png" alt="" v-show="canCancel && inputValue" @mousedown="inputValue=''">
         </p>
-        <ul class="search-result" v-if="showResult && inputValue">
+        <ul class="search-result" v-if="showResult && inputValue"  v-clickoutside="closeSelect">
           <li v-if="!result.length">{{nothingText}}</li>
           <li v-for="(item,index) of result" :key="index" @click="selectResultContent(item)">{{item}}</li>
         </ul>
@@ -71,9 +75,12 @@
         showResult: true, // 控制下拉框显示隐藏
         id: '',
         nothingText: '', // 无搜索结果提示文字
+        showActive: false,
+        canCancel: false
       }
     },
     async created() {
+      this.selectValue = this.$route.query.coin || "btc";
       await this.selectData() // 筛选出btcID 加载数据
       this.getCoinsData();
     },
@@ -119,6 +126,13 @@
         console.log('选择数组', this.selectCoinList)
         this.id = this.selectCoinList[0].id;
         //console.log('赋值', this.selectValue, this.inputValue, item)
+      },
+      blurInput() {
+        this.showActive = false
+        this.canCancel = false
+      },
+      closeSelect() {
+        this.showResult = false
       }
       // goRecharge() {
       //   if (!this.$store.state.isLogin) {
@@ -138,9 +152,16 @@
     background-color #FFF
 
   .coin-data
-    margin-top 40px
+    margin-top 10px
     margin-bottom 40px
     h1
+      font-size 12px
+      color #333
+      letter-spacing 0.25px
+      margin-bottom 20px
+      a:hover
+        color $col422
+    /*h1
       font-size $fz20
       font-weight bold
       color $col333
@@ -154,13 +175,14 @@
         left 0
         content ''
         margin-right 9px
-        background-color $col422
+        background-color $col422*/
     .search-box
       position relative
       width 456px
       height 30px
       margin-left 382px
       p
+        position relative
         input
           width 374px
           height 28px
@@ -172,9 +194,19 @@
         button
           width 70px
           height 30px
-          background url("/static/images/search_icon.png") #FFB422 no-repeat 27px 7px
+          background url("/static/images/search_icon.png") #E1E1E1 no-repeat 27px 7px
           background-size 16px 16px
           border-radius 0 2px 2px 0
+        img
+          position absolute
+          right 80px
+          top 9px
+          cursor pointer
+      .active-btn
+        input
+          border 1px solid $col422
+        button
+          background url("/static/images/search_icon.png") $col422 no-repeat 27px 7px
       /* 币种筛选下拉框 */
       .search-result
         position absolute
