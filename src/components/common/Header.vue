@@ -29,7 +29,7 @@
           <li class="itag" @mouseenter="showQr" @mouseleave="hideQr">
             <img class="top-logo" src="/static/images/phoneicon.png" alt="">
             <div class="show-qr" v-show="isHover">
-              <img src="/static/images/down_load.png" alt="">
+              <QrcodeVue class="qrcode" :value="HostUrl.download" :size="60"></QrcodeVue>
               <span>扫码下载APP</span>
             </div>
           </li>
@@ -66,6 +66,7 @@
   import Login from '@/components/common/Login'
   import HeaderPrice from '@/components/common/HeaderPrice'
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
+  import QrcodeVue from 'qrcode.vue'
 
   export default {
     data() {
@@ -80,7 +81,8 @@
     components: {
       Login,
       HeaderPrice,
-      BasePopup
+      BasePopup,
+      QrcodeVue
     },
     mounted() {
       // console.log('header')
@@ -102,7 +104,6 @@
         this.isHover = false;
       },
       logout() {
-        // sessionStorage.removeItem('otcToken');
         localStorage.setItem("removeSessionStorage", Date.now());
         this.$store.commit({type: 'changeToken', data: ''});
         this.$store.commit({type: 'changeLogin', data: false});
@@ -289,10 +290,8 @@
             height 100px
             background-color #FFF
             z-index 9
-            img
-              width 60px
-              height 60px
-              margin 10px 20px 5px
+            .qrcode
+              margin-top 10px
             span
               position absolute
               left 3px

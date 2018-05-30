@@ -30,7 +30,7 @@
       <div class="img phone-img">
         <img src="/static/images/phoneicon.png">
         <p>
-          <img src="/static/images/down_load.png" alt="">
+          <QrcodeVue class="qrcode" :value="HostUrl.download" :size="70"></QrcodeVue>
           <span><i>下载APP沟通更方便</i></span>
         </p>
       </div>
@@ -43,6 +43,7 @@
 <script>
   import { mapGetters } from 'vuex'
   import { HappyScroll } from 'vue-happy-scroll'
+  import QrcodeVue from 'qrcode.vue'
   export default {
     name: "new-info-left",
     data() {
@@ -74,7 +75,8 @@
       }
     },
     components: {
-      HappyScroll
+      HappyScroll,
+      QrcodeVue
     },
     methods: {
       async fetchGroup() {
@@ -453,11 +455,8 @@
             text-align center
             background #FFF
             box-shadow -2px -2px 8px 0 rgba(51,51,51,0.30)
-            img
-              display block
-              margin 7px auto 1px
-              width 70px
-              height 70px
+            .qrcode
+              margin-top 8px
             span
               float left
               width 100%

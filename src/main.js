@@ -8,6 +8,7 @@ import { DatePicker } from "element-ui"; // 引入日历组件
 import { Slider } from "element-ui"; // 引入滑块
 import { Switch } from "element-ui"; // 引入开关
 import '@/stylus/rest.styl'
+import "@/stylus/base.styl"
 import "vue-happy-scroll/docs/happy-scroll.css";
 
 import BaseFunction from '@/js/BaseFunction'//引入自定义插件

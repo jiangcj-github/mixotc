@@ -84,6 +84,7 @@
         return this.$store.state.isLogin;
       },
       isSelf(){
+        if(!this.isLogin) return false;
         return this.JsonBig.stringify(this.$store.state.userInfo.uid)===this.$route.query.uid;
       },
     },

@@ -5,6 +5,11 @@
     <Footer v-if="$route.path !== '/verify/service'"></Footer>
     <News v-if="$store.state.userInfo && !$store.state.userInfo.is_admin"></News>
     <img src="/static/images/to_top.png" alt="" class="to-top" :class="{show:showTop}" @click="toTop">
+    <BasePopup :show="showTip" class="app-popup" :top="40" @click.native="hidePopup">
+      <slot>
+        <p>您的账号已在其他地方登录，请重新登录</p>
+      </slot>
+    </BasePopup>
   </div>
 </template>
 
@@ -12,6 +17,7 @@
   import Header from '@/components/common/Header'
   import Footer from '@/components/common/Footer'
   import News from '@/views/news/News'
+  import BasePopup from '@/components/common/BasePopup'
   import sendConfig from '@/api/SendConfig.js'
   import getExplorerInfo from '@/js/Browser.js'
   import detectOS from '@/js/Os.js'
@@ -21,14 +27,30 @@
     components: {
       Header,
       Footer,
-      News
+      News,
+      BasePopup
     },
     data() {
       return {
-        timer1: null,
         timer2: null,
         timer3: null,
-        showTop: false
+        timer4: null,
+        showTop: false,
+        showTip: false
+      }
+    },
+    beforeCreate(){
+      let u = navigator.userAgent;
+      let isAndroid = u.indexOf("Android") > -1 || u.indexOf("Adr") > -1; //android终端
+      let isiOS = !!u.match(/\(i[^;]+;( U;)? CPU. + Mac OS X/); //ios终端
+      if (isAndroid) {
+        window.location.href = this.HostUrl.http + "otc/download/app/?pkg=apk";
+        return;
+      }
+      if (isiOS) {
+        window.location.href = this.HostUrl.http + "otc/download/app/?pkg=ipa";
+        // window.location.href = `itms-services://?action=download-manifest&url=${this.HostUrl.http}otc/download/app/ipa.plist`;
+        return;
       }
     },
     created() {
@@ -94,6 +116,7 @@
       ws.start(this.HostUrl.ws);
     },
     mounted() {
+      this.listenOffline();
       //websock发包接口需先判断登录状态
       this.WebSocket.beforeSend = (txt) => {
         let op =  this.JsonBig.parse(txt).op;
@@ -104,12 +127,37 @@
       }
     },
     destroyed() {
-      this.timer2 && (this.timer2 = clearInterval(this.timer2));
+      clearInterval(this.timer2);
+      cancelAnimationFrame(this.timer3);
+      clearTimeout(this.timer4);
       window.removeEventListener('scroll', this.handleScroll);
       window.onmousedown = null;
 
     },
     methods: {
+      hidePopup(){
+        this.showTip = false;
+        clearTimeout(this.timer4);
+      },
+      showPopup(){
+        this.showTip = true;
+        clearTimeout(this.timer4);
+        this.timer4 = setTimeout(() => {
+          this.showTip = false;
+          clearTimeout(this.timer4)
+        }, 3000);
+      },
+      //监听被挤掉的通知
+      listenOffline(){
+        this.WebSocket.onMessage['offline'] = {
+          callback(res){
+            if(res.body && res.body.type === 'offline') {
+              this.showPopup();
+              this.logout();
+            };
+          }
+        }
+      },
       toTop(){
         cancelAnimationFrame(this.timer3);
         let self = this;
@@ -215,7 +263,6 @@
 </script>
 
 <style lang="stylus">
-  @import "stylus/base.styl";
   #app 
     height 100%
     box-sizing()
@@ -227,6 +274,11 @@
     .main-container
       position relative
       flex-grow 1
+    .app-popup
+      p
+        height 94px
+        line-height 94px
+        text-align center
     .to-top
       display none
       position fixed

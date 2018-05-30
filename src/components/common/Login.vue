@@ -21,8 +21,10 @@
 
       <div class="yzm">
         <span v-if="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先拖拽滑块</b></span>
-        <input type="text" @keyup.enter="login" @focus="codeCancel = true" @blur="codeCancel = false" placeholder="验证码" value="" v-model.trim="code" :disabled="!moveTrue || !checkAccount(account)">
-        <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-if="codeCancel" @click="code = ''">
+        <p v-clickoutside="() => { codeCancel = false}">
+          <input type="text" @keyup.enter="login" @focus="codeCancel = true"  placeholder="验证码" value="" v-model.trim="code" :disabled="!moveTrue || !checkAccount(account)">
+          <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-if="codeCancel && code.length" @click="code = ''">
+        </p>
         <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend, disable: !moveTrue || !checkAccount(account)}" @click="sendCode">{{isSend ? time + '秒后重发': sendCodeText}}</button>
       </div>
 
@@ -393,21 +395,22 @@
             color $col94C
             text-align center
             fz11()
-        .cancel
-          position absolute
-          top 15px
-          right 124px
-          cursor pointer
-        input
-          box-sizing()
-          width 210px
-          height 40px
-          float left
-          background-color: $col6FA
-          placeholder()
-          padding-left 10px
-          &:focus
-            border 1px solid $col422
+        p
+          .cancel
+            position absolute
+            top 15px
+            right 124px
+            cursor pointer
+          input
+            box-sizing()
+            width 210px
+            height 40px
+            float left
+            background-color: $col6FA
+            placeholder()
+            padding-left 10px
+            &:focus
+              border 1px solid $col422
         button
           width 100px
           height 40px
