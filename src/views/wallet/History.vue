@@ -426,10 +426,10 @@
             item.num="-"+item.num+" "+item.coin;
           }
           //订单类型：0-进行中，1-已完成
-          if(item.state===0){
-            item.orderType=1;
-          }else if(item.state===1){
+          if(item.state===1||item.state===4){
             item.orderType=0;
+          }else{
+            item.orderType=1;
           }
           this.bills.push(item);
         });

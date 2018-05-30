@@ -20,9 +20,9 @@
               </div>
             </div>
             <div class="p2">
-              <span>总额：{{coins[coinSel].total}} BTC</span>
-              <span>可用余额：{{coins[coinSel].avail}} BTC</span>
-              <span>确认中：{{coins[coinSel].confirm}} BTC</span>
+              <span>总额：{{coins[coinSel].total}} {{coins[coinSel].coin}}</span>
+              <span>可用余额：{{coins[coinSel].avail}} {{coins[coinSel].coin}}</span>
+              <span>确认中：{{coins[coinSel].confirm}} {{coins[coinSel].coin}}</span>
             </div>
             <div class="card">
               <p class="warning">
@@ -58,8 +58,7 @@
               <p class="th time">时间</p>
               <p class="th coin">币种</p>
               <p class="th chargeNum">充值数量</p>
-              <p class="th sendAddr">发送地址</p>
-              <p class="th recvAddr">接收地址</p>
+              <p class="th recvAddr">对方/地址</p>
               <p class="th confirm">状态</p>
             </div>
             <div v-if="err===0">
@@ -70,8 +69,11 @@
                 </div>
                 <div class="coin">{{e.coin}}</div>
                 <div class="chargeNum">+{{e.num}} {{e.coin}}</div>
-                <div class="sendAddr">{{e.addr1}}</div>
-                <div class="recvAddr">{{e.addr2}}</div>
+                <div class="recvAddr" v-show="e.hasUser">
+                  <p> <a :href="'/#/homepage?uid='+e.userId" target="_blank">{{e.user}}</a></p>
+                  <p><a href="javascript:void(0);" @click="Bus.$emit('contactSomeone',{id:e.userIdStr})"><img src="/static/images/talk.png">联系他</a></p>
+                </div>
+                <div class="recvAddr" v-show="!e.hasUser">{{e.addr2}}</div>
                 <div class="confirm">{{e.state}}</div>
               </div>
             </div>
@@ -93,7 +95,7 @@
           </div>
         </div>
         <!--二维码弹框-->
-        <BasePopup :show="isShowQrCode" ref="pop">
+        <BasePopup :show="isShowQrCode" ref="pop" :width="400" :height="400" :top="50">
           <div class="qr-pop">
             <div class="close"><i @click="isShowQrCode=false">&times;</i></div>
             <h3>充值地址</h3>
@@ -228,10 +230,12 @@
             coin: e.currency && e.currency.toUpperCase(),
             num: e.amount.toString().formatFixed(6),
             state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
-            addr1: e.from && e.from.formatAddr(),
-            addr1Name: e.from_name || "-",
             addr2: e.to && e.to.formatAddr(),
             addr2Name: e.to_name || "-",
+            user: e.trader_name,
+            userId: e.trader_id,
+            userIdStr: this.JsonBig.stringify(e.trader_id),
+            hasUser: e.trader_name?1:0,
           });
         });
       },

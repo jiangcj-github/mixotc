@@ -3,7 +3,6 @@
     <div class="transacation inner" @click="showPopup=false">
       <!--头部搜索栏-->
       <div class="header">
-        <!--<h2>{{filte.currency && "购买"+filte.currency.toUpperCase() || "购买BTC"}}</h2>-->
         <h2 class="clearfix">
           <img :src="filte.coinImg || `/static/images/btc_icon.png`" alt="">
           <p>
@@ -13,12 +12,21 @@
         </h2>
         <div class="f1">
           <div class="search">
-            <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">搜索{{srchUls[srchUlSel].title}}</span>
+            <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">
+              搜索{{srchUls[srchUlSel].title}}
+            </span>
             <ul v-show="srchUlShow">
               <li v-for="(e,i) in srchUls" @click="srchUlSel=i">{{e.title}}</li>
             </ul>
-            <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @keyup.enter="()=>{searchStr();srchTipShow=false;}" @input="fuzzyInput" @focus="srchTipShow=true">
-            <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchTipShow && srchText.length>0">
+            <input type="text"
+                   v-model="srchText" title=""
+                   v-clickoutside="()=>{srchTipShow=false}"
+                   @keyup.enter="()=>{searchStr();srchTipShow=false;}"
+                   @input="fuzzyInput"
+                   @focus="srchTipShow=true">
+            <img src="/static/images/cancel_icon.png"
+                 @click="srchText=''"
+                 v-show="srchTipShow && srchText.length>0">
             <a href="javascript:void(0)" @click="searchStr"></a>
             <b v-if="searchTip">您还未输入币种</b>
             <!--币种模糊搜索结果-->

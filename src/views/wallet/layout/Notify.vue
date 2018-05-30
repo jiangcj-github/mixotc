@@ -16,6 +16,7 @@
   </div>
 </template>
 <script>
+  import timeout from "@/js/Timeout.js";
   export default {
     data() {
       return {
@@ -70,9 +71,9 @@
       },
       tick(){
         this.loadChargeList();
-        setTimeout(()=>{
+        timeout(()=>{
           this.tick();
-        },5000);
+        },5000,"timer0");
       },
       slide(){
         if(this.lists.length>1){
@@ -82,9 +83,9 @@
             this.showIndex=0;
           }
         }
-        setTimeout(()=>{
+        timeout(()=>{
           this.slide();
-        },3000);
+        },3000,"timer1");
       },
     }
   }
