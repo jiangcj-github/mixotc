@@ -158,9 +158,7 @@
     },
     watch:{
       days:function(){
-        let date2=new Date(new Date(new Date().toDateString()).getTime()+24*60*60*1000);
-        this.$refs.di.date2=date2;
-        this.$refs.di.date1=new Date(date2.getTime()-24*60*60*1000*this.days);
+        this.$refs.di.setDays(this.days);
       },
       resUlSel:function(){
         this.loadArbiLists();
@@ -206,10 +204,8 @@
           case 4:srchKey5=this.srchText;break;
         }
         let result=this.resUls[this.resUlSel].key;
-        let start= this.$refs.di.date1;
-        let end= this.$refs.di.date2;
-        start=start?Math.floor(new Date(this.$refs.di.date1).getTime()/1000):null;
-        end=end?Math.floor(new Date(this.$refs.di.date2).getTime()/1000):null;
+        let start= this.$refs.di.paramDate1;
+        let end= this.$refs.di.paramDate2;
         let sortByDuration=null;
         let sortByCreate=null;
         switch(this.sort){

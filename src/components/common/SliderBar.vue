@@ -136,6 +136,6 @@
 
       .is-disabled
         .el-input__inner
-          color #333
+          color #999
           background #F4F6FA
 </style>

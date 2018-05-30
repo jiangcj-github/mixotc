@@ -188,8 +188,16 @@
 
   .is-disabled
     .adB
+      position relative
+      color #999
       background #F4F6FA
       cursor not-allowed
+      &:after
+        position absolute
+        top 18px
+        right 10px
+        content ''
+        triangle_down(#999)
     b
       cursor not-allowed
     ul

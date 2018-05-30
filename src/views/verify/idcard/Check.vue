@@ -140,9 +140,7 @@
         this.loadCheckedList();
       },
       days:function(){
-        let date2=new Date(new Date(new Date().toDateString()).getTime()+24*60*60*1000);
-        this.$refs.di.date2=date2;
-        this.$refs.di.date1=new Date(date2.getTime()-24*60*60*1000*this.days);
+        this.$refs.di.setDays(this.days);
       },
     },
     methods: {
@@ -164,10 +162,8 @@
       loadCheckedList(){
         //提交参数
         let srchKey=this.srchText;
-        let start= this.$refs.di.date1;
-        let end= this.$refs.di.date2;
-        start=start?Math.floor(new Date(this.$refs.di.date1).getTime()/1000):null;
-        end=end?Math.floor(new Date(this.$refs.di.date2).getTime()/1000):null;
+        let start= this.$refs.di.paramDate1;
+        let end= this.$refs.di.paramDate2;
         let result=this.status[this.statusDropSel].value;
         let sort=this.sort;
         switch (sort){

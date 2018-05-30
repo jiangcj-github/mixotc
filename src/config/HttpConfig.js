@@ -152,6 +152,10 @@ export default {
 
     { name: "hp_tradeInfo", data: { url: "/otc/traderinfo/", method: "get" } }, // 个人中心-获取个人信息
     { name: "hp_rates", data: { url: "/otc/traderrates/", method: "get" } }, // 获取发布信息
-    { name: "hp_sales", data: { url: "/otc/tradersales/", method: "get" } } // 获取评价
+    { name: "hp_sales", data: { url: "/otc/tradersales/", method: "get" } }, // 获取评价
+
+    { name: "hp_account", data: { url: "/api/v3/wallet/account/", method: "get" } } // 获取币币账户列表
+
+
   ]
 };

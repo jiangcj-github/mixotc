@@ -335,17 +335,7 @@
       },
       loadBb(){
         let uid=this.$store.state.userInfo.uid;
-        this.Proxy.fetch({
-          url: {
-            host: '192.168.113.241',
-            port: '5555',
-            path: '/api/v3/wallet/account/'
-          },
-          data: {
-            method: 'get',
-            params:{uid:uid},
-          },
-        }).then((data)=> {
+        this.Proxy.hp_account({uid:uid}).then((data)=> {
           if(!data||!data.objects||data.objects.length<=0){
             this.bbErr=1; //无数据
           }else{
