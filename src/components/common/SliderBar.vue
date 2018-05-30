@@ -101,6 +101,10 @@
       position absolute
       left 400px
       top 10px
+      width 90px
+      overflow hidden
+      white-space nowrap
+      text-overflow ellipsis
   .el-slider
     display inline-block
     .show-input
@@ -126,7 +130,7 @@
         .el-input__inner
           width 120px
           height 40px
-          padding 0 10px
+          padding 0 35px 0 10px
           color #333
           background #FFF
           border 1px solid #E1E1E1

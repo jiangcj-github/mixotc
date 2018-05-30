@@ -61,6 +61,7 @@
         <input type="text"
                v-model="adSaleObj.price"
                @focus="clearPrice=true && (errPrice=true)"
+               maxlength="9"
                @blur="clearPrice = false"
                @input="priceInput"/>
         <span>CNY</span>
