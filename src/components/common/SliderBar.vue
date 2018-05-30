@@ -127,9 +127,15 @@
           width 120px
           height 40px
           padding 0 10px
+          color #333
           background #FFF
           border 1px solid #E1E1E1
           border-radius 2px
           line-height 40px
           text-align left
+
+      .is-disabled
+        .el-input__inner
+          color #999
+          background #F4F6FA
 </style>

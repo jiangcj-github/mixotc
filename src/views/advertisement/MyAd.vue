@@ -43,6 +43,7 @@
                 v-if="title.currencyShow"
                 :classify="currencyType"
                 title="币种"
+                :showDisabled="isDisabled"
                 :emitValue="currencyValue"
                 :selectValue="currencyValueData">
               </ChoiceBox>
@@ -168,6 +169,7 @@
         currencyType: ['全部币种'],// 币种下拉显示
         currencyValueData: [''],
         saleCoin: '',
+        isDisabled: '', // 是否为禁止状态
 
         statusValue: 'statusValue',
         statusType: ['全部模式', '固定', '溢价'],
@@ -273,10 +275,11 @@
           "state": this.contentTabIndex // 1在架 2下架
         }).then((data)=>{
           console.log('币种', data)
-          data.coins.forEach(v => {
+          data.coins && data.coins.forEach(v => {
             this.currencyType.splice(1, 0, v.currency.toUpperCase()) // 显示币种数据
             this.currencyValueData.splice(1, 0, v.currency) // 传递后台数据
           })
+          this.isDisabled = data.coins == null ? true : false
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -544,10 +547,13 @@
           .operation-td
             p:first-child
               cursor pointer
-              color #FFA21C
-
+              color #FFB422
+              &:hover
+                color #FEA350
             p:last-child
               cursor pointer
+              &:hover
+                color #FFB422
 
           /*.tradeable-td*/
             /*max-width 100px*/

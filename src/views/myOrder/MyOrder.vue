@@ -4,11 +4,7 @@
       <router-link to="/transaction">mixOTC</router-link> -
       <router-link to="/order">我的订单</router-link>
     </h1>
-    <div class="order-item clearfix">
-      <span @click="selectStatus(1)" :class="contentTabIndex === 1 ? 'content-btn-active' : 'content-btn'">进行中({{conductNum}})</span>
-      <span @click="selectStatus(2)" :class="contentTabIndex === 2 ? 'content-btn-active' : 'content-btn'">完成({{completeNum}})</span>
-      <button @click="openTransform()">资金划转</button>
-    </div>
+    <!--表格搜索-->
     <div class="order-select clearfix">
       <SearchInput :content="content"
                    :title="title"
@@ -17,13 +13,20 @@
                    :result="result"
                    class="order-choice-search">
       </SearchInput>
-      <div class="order-choice-time clearfix" v-if="contentTabIndex === 2">
+      <div class="order-choice-time clearfix">
         <DateInterval class="date-group" :max="Date.parse(new Date())" ref="di"></DateInterval>
         <ul class="clearfix">
           <!--:class="{'time-active': index == num}"-->
           <li v-for="(item, index) in timeList" @click="selectTime(index)">{{item}}</li>
         </ul>
       </div>
+    </div>
+
+    <!--tab切换表头-->
+    <div class="order-item clearfix">
+      <span @click="selectStatus(1)" :class="contentTabIndex === 1 ? 'content-btn-active' : 'content-btn'">进行中({{conductNum}})</span>
+      <span @click="selectStatus(2)" :class="contentTabIndex === 2 ? 'content-btn-active' : 'content-btn'">完成({{completeNum}})</span>
+      <button @click="openTransform()">资金划转</button>
     </div>
 
     <div class="order-content">
@@ -48,6 +51,7 @@
             allName="全部币种"
             :checkBoxList="currencyBox"
             :emitValue="currencyValue"
+            :canShow = 'isDisabled'
             :width=105>
           </CheckBox>
           <CheckBox
@@ -73,7 +77,6 @@
             <p><router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(content.buyer) == userId ? content.seller : content.buyer}}">{{content.name || content.contact}}</router-link></p>
             <p class="talk" @click="contactSomeone(JsonBig.stringify(content.buyer) == userId ? content.seller : content.buyer)">联系他</p>
           </li>
-          <!---->
           <li>
             <em class="hidden-text" :title="content.price">{{content.price}}</em>
           </li>
@@ -110,7 +113,7 @@
         <p class="order-content-extre clearfix">
           <span>订单号：{{JsonBig.stringify(content.id)}}</span>
           <span>备注：{{content.info ? content.info : '无'}}</span>
-          <CountDown :endTime="endTime" class="reset-time" v-if="content.state == 1"></CountDown>
+          <CountDown :endTime="endTime" class="reset-time" v-if="JsonBig.stringify(content.buyer) == userId && content.state == 1"></CountDown>
         </p>
       </div>
     </div>
@@ -123,11 +126,6 @@
                 :curPage="curPage">
                 <!--emitValue="changePage"-->
     </Pagination >
-    <!--<div class="page-btn" v-if="contentList">-->
-      <!--<button @click="clickPre" :class="{'unable-btn': page === 0}" :disabled="page === 0">上一页</button>-->
-      <!--<button @click="clickNext" :class="{'unable-btn': contentList && contentList.length < 15}" :disabled="contentList && contentList.length < 15">下一页</button>-->
-    <!--</div>-->
-
 
     <!-- 标记已付款弹窗 -->
     <MarkedPaymentLayer :paymentShow="showPayment"
@@ -263,12 +261,10 @@
         selectCurrency: '', // 币种筛选
         selectState: '', // 订单状态筛选
         comment: 0, // 是否评价
-        currencyBox:[ // 币种下拉显示
-          {type: 'BTC', state: false, code: 'btc'},
-          {type: 'ETH', state: false, code: 'eth'},
-          {type: 'LTC', state: false, code: 'ltc'}
-        ],
+        currencyBox:[],// 币种下拉显示
+        isDisabled: '', // 币种下拉是否显示
         currencyValue: 'currencyValue', // 传递给子组件
+
         allStatusPro: [
           {type: '待付款', state: false, code: '1'},
           {type: '待放币', state: false, code: '2'},
@@ -297,22 +293,22 @@
 
         pageTotal: 0, // 分页总数
         curPage: 1, // 当前页
-        // changePage: 'changePage', // 监听自组件数量
-        // page: 0 // 分页
         flagNow: true // 倒计时标志
-
       }
     },
     created() {
+      // 钱包页面直接查询
+      this.orderId = this.$route.query.oid ? this.$route.query.oid : ''
+      this.$route.query.classify && (this.$route.query.classify == 0 && (this.selectState = "1,2,3") || ((this.contentTabIndex = 2) && (this.selectState = "4,5,6,7,8,9,10,11"))) || (this.selectState = "1,2,3")
       // 获取用户id
       this.userId = typeof this.$store.state.userInfo.uid  === 'string' ? this.$store.state.userInfo.uid : this.JsonBig.stringify(this.$store.state.userInfo.uid);
       console.log( this.JsonBig.stringify(this.$store.state.userInfo.uid))
       //console.log('这是个字符串', this.$store.state.userInfo.uid,  typeof this.$store.state.userInfo.uid)
       //console.log('1111', typeof this.userId, this.userId, typeof this.$store.state.userInfo.uid, this.$store.state.userInfo.uid)
       // 获取进行状态
-      this.selectState = "1,2,3";
       this.initData();
       this.getInitNum();
+      this.getOrderCoin();
       this.getCompleteData(); // 获取完成数据
     },
     mounted() {
@@ -329,7 +325,6 @@
         let a = data.indexOf('6,7'), b = data.indexOf('8,9'), selectStateArr = ['1,2,3', '4,5,6,7,8,9,10,11']
         !((a + 1) && (b + 1)) && ((a + 1) && (this.comment = 1) && data.splice(a, 1) || (b + 1) && (this.comment = 2) && data.splice(b, 1)) || (this.comment = 0)
         this.selectState = data.length && data.join(',') || !this.comment && (this.selectState = selectStateArr[this.contentTabIndex - 1]) || ''
-        // console.log('a', a, 'b', b, !((a + 1) && (b + 1)))
         console.log('selectState', this.selectState, this.comment)
         this.initData()
       });
@@ -340,7 +335,6 @@
       });
       // 监听搜索框值
       this.Bus.$on('changeInputContent', ({type, data}) => {
-        //this.orderId=type == 'order_id'?
         if (type == 'order_id') {
           this.orderId = data
         } else if (type == 'order_tradecode') {
@@ -352,8 +346,12 @@
           this.comment = 0
           this.selectState = this.contentTabIndex === 1 ? '123' : '4,5,6,7,8,9,10,11'
         }
+        this.contentList = this.contentList.filter(v => {
+          return this.JsonBig.stringify(v.id) == data
+        })
+        this.contentList.length == 0 && (this.contentTabIndex === 1 && ((this.selectState = '4,5,6,7,8,9,10,11') && (this.contentTabIndex = 2)) || ((this.selectState = '1,2,3') && (this.contentTabIndex = 1)))
         this.initData()
-        console.log('this.result', data, this.result, this.result.length, this.contentTabIndex)
+        console.log('搜索', this.contentList, this.contentList.length)
       })
       // 模糊搜索
       this.Bus.$on(this.searchResult,({type, data}) => {
@@ -378,15 +376,10 @@
         this.startValueDate = this.$refs.di.paramDate1;
         this.endValueDate = this.$refs.di.paramDate2;
         if (this.startValueDate && this.endValueDate) {
+          this.contentList.length == 0 && (this.contentTabIndex === 1 && ((this.selectState = '4,5,6,7,8,9,10,11') && (this.contentTabIndex = 2)) || ((this.selectState = '1,2,3') && (this.contentTabIndex = 1)))
           this.initData()
         }
       });
-      // 分页
-      // this.Bus.$on(this.changePage, data => {
-      //   console.log('changePage', data)
-      //   this.page = data
-      //   this.initData()
-      // })
       this.Bus.$on('onPageChange', data => {
         this.curPage = data;
         this.initData();
@@ -405,7 +398,7 @@
       contactSomeone(id){
         this.Bus.$emit('contactSomeone', {id: this.JsonBig.stringify(id)})
       },
-      appealTimer(){
+      appealTimer(){ // 申述倒计时
         let s = 0;
         this.contentList && this.contentList.forEach((e,i) => {
           if (e.timeToAppeal > 0) {
@@ -419,7 +412,7 @@
           this.appealTimer();
         },1000);
       },
-      showOverTimer() {
+      showOverTimer() { // 标记已付款倒计时
         let timer
         this.contentList && this.contentList.forEach((v, i) => {
           if (this.JsonBig.stringify(v.buyer) == this.userId && v.state == 1 && v.overtime >= 0) {
@@ -430,7 +423,7 @@
           }
           if (this.JsonBig.stringify(v.buyer) == this.userId && v.state == 1 && v.overtime < 0) {
             // console.log(222, this.contentList.length)
-            this.contentList = this.contentList.filter(item => item.state !== 1)
+            this.contentList = this.contentList.filter(item => {return item.state !== 1})
             this.conductNum = this.contentList.length
             this.completeNum ++;
             this.flagNow = false;
@@ -513,33 +506,29 @@
               "currency": this.selectCurrency,// 币种筛选
               "start": this.startValueDate, // 开始时间
               "end": this.endValueDate,// 结束时间
-              "order_id": this.orderId,
-              "trade_code": this.tradeCode,
-              "trader": this.trader,
+              "order_id": this.orderId, // 订单号
+              "trade_code": this.tradeCode, // 资金码
+              "trader": this.trader, // 账号
               "comment": Number(this.comment), // 1 已 2 未 评价
             }
           }
         }))
       },
-      getCompleteData() {
+      getCompleteData() { // 已完成状态
         let ws = this.WebSocket; // 创建websocket连接
         ws.onMessage['upd_ord'] = { // 完成状态的action
           callback: (res) => {
             if (res.op && res.op === 24) {
-              this.contentList.forEach(v => {
-                if (this.JsonBig.stringify(v.id) == res.body.data.order) {
-                  v.state = 6
-                  this.selectState = "4,5,6,7,8,9,10,11"
-                  this.conductNum--
-                  this.completeNum++
-                }
+              this.contentList = this.contentList.filter(v => {
+                return this.JsonBig.stringify(v.id) !== this.JsonBig.stringify(res.body.data.order)
               })
+              this.conductNum--
+              this.completeNum++
             }
           },
         };
       },
-      getInitNum() {
-        // 获取进行中和已完成数量
+      getInitNum() { // 获取进行中和已完成数量
         this.WsProxy.send('otc','get_orders_num',{
           type: 1 // 1: 进行中, 2: 已完成
         }).then((data)=>{
@@ -553,6 +542,19 @@
         }).then((data)=>{
           console.log('num', data)
           this.completeNum = data.amount ? data.amount : 0
+        }).catch((msg)=>{
+          console.log(msg);
+        });
+      },
+      getOrderCoin() { // 获取订单币种
+        this.WsProxy.send('otc','get_orders_currency',{
+          type: this.contentTabIndex // 1: 进行中, 2: 已完成
+        }).then((data)=>{
+          this.currencyBox = []
+          data.coins && data.coins.forEach(v => {
+            this.currencyBox.push({type: v.currency.toUpperCase(), state: false, code: v.currency})
+          })
+          this.isDisabled = this.currencyBox.length == 0 ? true : false
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -572,6 +574,7 @@
           this.selectState = "4,5,6,7,8,9,10,11"
         }
         this.initData()
+        this.getOrderCoin();
       },
       selectTime(index) { // 时间切换
         if (index === 0) {
@@ -583,6 +586,7 @@
         if (index === 2) {
           this.$refs.di.setDays(7);
         }
+        //this.contentList.length == 0 && (this.contentTabIndex === 1 && ((this.selectState = '4,5,6,7,8,9,10,11') && (this.contentTabIndex = 2)) || ((this.selectState = '1,2,3') && (this.contentTabIndex = 1)))
       },
       showOperation(index) { // 去评价
         if (this.contentList[index].operationList[0].flag == 1) { // 去评价
@@ -744,6 +748,7 @@
     .order-select
       height 50px
       padding 0 30px
+      margin-bottom 1px
       background #FFF
       .order-choice-search
         float left

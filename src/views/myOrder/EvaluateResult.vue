@@ -88,6 +88,7 @@
         button
           width 140px
           height 25px
+          background #FFF
           border 1px solid #FFB422
           border-radius 2px
           color #FFB422

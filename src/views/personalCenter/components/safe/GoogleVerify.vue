@@ -42,7 +42,7 @@
               </div>
               <div class="google">
                 <p>请输入显示的验证码，开启验证功能</p>
-                 <div class="input">
+                <div class="input">
                   <input type="text"
                     v-for="index in 6"
                     v-focus="index === inputContent"
@@ -51,7 +51,7 @@
                     @input="dealInput(index-1)"
                     :key="index"
                     @keydown="delNum(index)"
-                    />                    
+                    />
                 </div>
                 <i class="hint" v-if="showTip">请输入正确的验证码</i>
               </div>
@@ -72,7 +72,7 @@ import QrcodeVue from 'qrcode.vue';
     data(){
       return {
         showTip:false,
-        inputGroup: [], // 记录输入框内容,
+        inputGroup: ['','','','','',''], // 记录输入框内容,
         inputContent: '',
         secretKey:''
       }

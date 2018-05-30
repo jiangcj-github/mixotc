@@ -12,7 +12,7 @@
           <p>
             <span>昵称</span>
             <i v-if="!isSetting">{{userInfo.name}}</i>
-            <i class="set" v-if="!isSetting" @click="()=>{name=userInfo.name;isSetting=true}">设置</i>
+            <i class="set" v-if="!isSetting" @click="()=>{name = userInfo.name;isSetting=true}">设置</i>
             <input type="text" placeholder="输入昵称" v-if="isSetting" v-model.trim="name" ref="name" maxlength="20" v-clickoutside="()=>{isSetting = false}">
             <b 
               v-if="name && isSetting"
@@ -90,6 +90,11 @@
         </div>
       </slot>
     </BasePopup>
+    <BasePopup :show="showTip" :top="40" class="nick-tip" @click.native="hidePopup">
+      <slot>
+        <p>昵称已被占用</p>
+      </slot>
+    </BasePopup>
   </div>
 </template>
 
@@ -107,6 +112,8 @@ import AddressInfo from "../../components/account/AddressInfo";
         isShowInfo: false,
         isShowConfirm: false,
         delId: null,
+        showTip:false,
+        timer: null,
         name: ''
       }
     },
@@ -130,6 +137,7 @@ import AddressInfo from "../../components/account/AddressInfo";
     destroyed() {
       this.Bus.$off("hideAddressPoup");
       this.Bus.$off("avatorUrl");
+      clearTimeout(this.timer)
     },
     computed: {
       ...mapState([
@@ -154,6 +162,18 @@ import AddressInfo from "../../components/account/AddressInfo";
       }
     },
     methods: {
+      hidePopup(){
+        this.showTip = false;
+        clearTimeout(this.timer);
+      },
+      showPopup(){
+        this.showTip = true;
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+          this.showTip = false;
+          clearTimeout(this.timer)
+        }, 3000);
+      },
       fetchAddress() {
         this.$store.dispatch({ type: 'moneyAddress', ws: this.WsProxy})
       },
@@ -164,6 +184,8 @@ import AddressInfo from "../../components/account/AddressInfo";
         };
         this.WsProxy.send('control', 'user_update', { name: this.name }).then(res =>{
           this.$store.commit({type: 'updateUserInfo', data:{name: this.name}})
+        }).catch(error=>{
+          error.ret === 93 && this.showPopup();
         })
         this.isSetting=false;
       },
@@ -202,6 +224,11 @@ import AddressInfo from "../../components/account/AddressInfo";
 
 <style scoped lang="stylus">
   @import "../../../../stylus/base";
+  .nick-tip
+    p
+      height 94px
+      line-height 94px
+      text-align center
   .base
     box-sizing()
     width 1000px

@@ -35,7 +35,7 @@ export default {
         });
     });
     let icon = state.userInfo.icon;
-    let userId = JsonBig.stringify(state.userInfo.id);
+    let userId = JsonBig.stringify(state.userInfo.uid);
     !obj[userId] &&
       (obj[userId] = {
         icon: icon

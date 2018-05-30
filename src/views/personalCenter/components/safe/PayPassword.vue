@@ -6,15 +6,19 @@
           <img class="close-btn" src="/static/images/close_btn_tr2.png" alt="" @click="Bus.$emit(emitValue)">
           <h4>支付密码</h4>
           <p class="tip">*出于安全方面的考虑，修改密码后，你的账户将在24小时内无法提现。</p>
-          <div class="password1">
+          <div class="password1" :class="{show: flag1}">
             <p>密码<span>密码为8--12位字符，且同时包含字母和数字</span></p>
-            <input type="password" v-model="password1" maxlength="12" @blur="verifyPassword1">
+            <input :type="type1" v-model="password1" maxlength="12" @blur="verifyPassword1" >
             <i class="hint" v-if="tip1">{{copy1}}</i>
+            <img src="/static/images/visible.png" alt="" v-if="flag1" @click="()=>{flag1=false; type1='password'}">                    
+            <img src="/static/images/invisible.png" alt="" v-else @click="()=>{flag1=true; type1='text'}">    
           </div>
-          <div class="password2">
+          <div class="password2" :class="{show: flag2}">
             <p>再输一遍</p>
-            <input type="password" v-model="password2" maxlength="12" @blur="verifyPassword2">
+            <input :type="type2" v-model="password2" maxlength="12" @blur="verifyPassword2">
             <i class="hint" v-if="tip2">两次输入密码不一致</i>
+            <img src="/static/images/visible.png" alt="" v-if="flag2" @click="()=>{flag2=false; type2='password'}">                    
+            <img src="/static/images/invisible.png" alt="" v-else @click="()=>{flag2=true; type2='text'}">
           </div>
           <div class="verify" v-if="!isnew">
             <div class="message" v-if="type">
@@ -65,6 +69,10 @@
       return {
         password1: '',
         password2: '',
+        type1:'password',
+        type2: 'password',
+        flag1: false,
+        flag2: false,
         messageWord: '',
         showSame: false,
         popupCopy:'',
@@ -316,6 +324,17 @@
     position relative
     margin-bottom 20px
     background-color #FFF
+    &.show
+      input
+        font-size $fz13
+        letter-spacing 0.23px
+    img
+      position absolute
+      left 315px
+      bottom 10px
+      width 20px
+      height 20px
+      cursor pointer
     .hint
       position absolute
       bottom -18px

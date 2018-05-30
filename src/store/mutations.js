@@ -156,7 +156,8 @@ export default {
       item.id === data.id && (idex = index);
     });
     !state.messages[data.id] && (state.messages[data.id] = []); //对话记录不存在时创建
-    state.messages[data.id].push(data.msg);
+    let last = state.messages[data.id].slice(-1);
+    (!last || last.id !== data.msg.id) && state.messages[data.id].push(data.msg);
     data.id === "system" && state.curChat !== "system" && state.systemMessage++;
     data.id !== "system" &&
       state.curChat !== data.id &&

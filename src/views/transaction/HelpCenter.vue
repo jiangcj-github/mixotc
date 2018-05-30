@@ -271,7 +271,7 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl"
   .rule-wrap
-    margin-top 21px
+    margin-top 10px
     margin-bottom 30px
     h1
       font-size 12px

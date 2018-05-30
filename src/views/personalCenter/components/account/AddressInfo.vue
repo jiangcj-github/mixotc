@@ -77,9 +77,9 @@
         </div>
       </slot>
     </BasePopup>
-    <BasePopup :show="samePopup" :top="42" @click.native="()=>{samePopup = false;clearTimeout(timer)}">
+    <BasePopup :show="samePopup" :top="42" @click.native="hidePopup">
       <slot>
-        <p class="sameTip">与原信息相同</p>
+        <p class="sameTip">{{sameCopy}}</p>
       </slot>
     </BasePopup>
   </div>
@@ -95,6 +95,7 @@
         accountTip: false,
         bankTip: false,
         samePopup: false,
+        sameCopy: '',
         timer: null,
         info:{
           ...this.accountInfo,
@@ -116,6 +117,18 @@
       clearTimeout(this.timer);
     },
     methods: {
+      hidePopup(){
+        this.samePopup = false;
+        clearTimeout(this.timer);
+      },
+      showPopup(){
+        this.samePopup = true;
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+          this.samePopup = false;
+          clearTimeout(this.timer)
+        }, 3000);
+      },
       isSame(){
         let flag = true;
         for (const key in this.accountInfo) {
@@ -125,6 +138,18 @@
             break;
           }
         }
+        return flag;
+      },
+      repetition(){
+        let flag = false;
+        if(this.accountInfo.type !== 4) return flag;
+        let address = this.$store.state.moneyAddress.filter(item => {
+          return this.JsonBig.stringify(this.accountInfo.id) !== this.JsonBig.stringify(item.id) && item.type === 4;
+        })
+        address.forEach(item => {
+          !this.isNew && item.number === this.accountInfo.number && (flag = true);
+          this.isNew && item.number === this.info.number && (flag = true);
+        })
         return flag;
       },
       dealCard() {
@@ -159,7 +184,13 @@
       confirm() {
         if(!this.verify()) return;
         if(this.isSame()) {
-          this.samePopup = true;
+          this.sameCopy = '与原信息相同';
+          this.showPopup()
+          return;
+        }
+        if(this.repetition()) {
+          this.sameCopy = '与其他银行卡卡号重复';
+          this.showPopup()
           return;
         }
         let {id, number, name, bank, remark, type} = this.info;

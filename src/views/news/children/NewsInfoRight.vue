@@ -398,7 +398,7 @@
                       video: `您收到一条视频信息，请在手机端查看`,
                       gift: `您收到一条红包信息，请在手机端查看`
                     };
-                if (_this.userId === _this.JsonBig.stringify(uid)) return;
+                // if (_this.userId === _this.JsonBig.stringify(uid)) return;
                 let group = _this.$store.state.groupList.filter(item => {
                   return _this.JsonBig.stringify(gid) === _this.JsonBig.stringify(item.id)
                 })[0];
@@ -419,7 +419,6 @@
                   isFail: false,
                   time: new Date() - 0
                 }
-                console.log(_this.JsonBig.stringify(gid))
                 await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
                 _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
               })
@@ -701,9 +700,12 @@
               z-index 99
               background #333
               cursor pointer
-              border-radius 2px
             li:hover
               background #474747
+            li:nth-child(1)  
+              border-radius 2px 2px 0 0
+            li:nth-child(3)  
+              border-radius  0 0 2px 2px
             li:nth-child(1):before
               position absolute
               top 6px
