@@ -35,7 +35,7 @@
       return {
         buyObj: {
           "uid": '', // 用户id
-          "currency": 'btc', // 电子货币
+          "currency": '', // 电子货币
           "money": 'cny', // 法币
           "mode": 1, // 出售类型: 1 固定; 2 溢价
           "premium": 0, // 溢价
@@ -51,7 +51,7 @@
         },
         saleObj: {
           "uid": '', // 用户id
-          "currency": 'btc', // 电子货币
+          "currency": '', // 电子货币
           "money": 'cny', // 法币
           "mode": 1, // 出售类型: 1 固定; 2 溢价
           "premium": 0, // 溢价
@@ -92,6 +92,12 @@
         this.saleObj.length = data * 1
         this.saleObj.tradeable = this.saleObj.tradeable ? this.saleObj.tradeable : data * 1
       }),
+      this.Bus.$on('saleCoinData', data => {
+        this.saleObj.currency = this.saleObj.currency ? this.saleObj.currency : data[0]
+      }),
+      this.Bus.$on('buyCoinData', data => {
+        this.buyObj.currency = this.buyObj.currency ? this.buyObj.currency : data[0]
+      }),
       this.Bus.$on('buyInfo', data => {
         this.buyObj = data
       }),
@@ -107,6 +113,8 @@
       this.Bus.$off('buyInfo');
       this.Bus.$off('saleInfo');
       this.Bus.$off('saleSlideLength');
+      this.Bus.$off('saleCoinData');
+      this.Bus.$off('buyCoinData');
     },
     methods: {
       saleAd() {

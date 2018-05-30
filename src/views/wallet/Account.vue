@@ -10,7 +10,7 @@
           <div class="asset">
             <p class="l0">法币账户总资产：</p>
             <p class="l1">
-              <span class="big bright">{{balance.numBtc}}</span>
+              <span class="big bright">约: {{balance.numBtc}}</span>
               <span class="small"> BTC</span>
               <span class="big">/</span>
               <span class="big bright">{{balance.numCny}}</span>
@@ -20,7 +20,7 @@
           <div class="asset as2">
             <p class="l0">币币账户总资产：</p>
             <p class="l1">
-              <span class="big bright">{{balance2.numBtc}}</span>
+              <span class="big bright">约: {{balance2.numBtc}}</span>
               <span class="small"> BTC</span>
               <span class="big">/</span>
               <span class="big bright">{{balance2.numCny}}</span>
@@ -53,8 +53,10 @@
           <div class="fb" v-show="tab===0">
             <!--表头-->
             <div class="thead">
-              <p class="th coin">币种</p>
-              <p class="th name">全称</p>
+              <p class="th coin sortable" @click="fbSubSort=++fbSubSort%2">币种
+                <i :class="{up:fbSubSort===0,down:fbSubSort===1}"></i></p>
+              <p class="th name sortable" @click="fbSubSort=++fbSubSort%2+2">全称
+                <i :class="{up:fbSubSort===2,down:fbSubSort===3}"></i></p>
               <p class="th avail sortable" @click="fbSort=++fbSort%2">可用余额
                 <i :class="{up:fbSort===0,down:fbSort===1}"></i></p>
               <p class="th frozen sortable" @click="fbSort=++fbSort%2+2">冻结中余额
@@ -180,6 +182,7 @@
         },
 
         fbSort: 1, //
+        fbSubSort :1,
         fb: [],
         fbCurPage: 1,
         fbPageSize: 20,
@@ -207,6 +210,17 @@
           default:sort=5;break;
         }
         return sort;
+      },
+      paramFbSubSort:function(){
+        let sort=this.fbSubSort;
+        switch(sort){
+          case 0:sort=2;break;
+          case 1:sort=1;break;
+          case 2:sort=4;break;
+          case 3:sort=3;break;
+          default:sort=2;break;
+        }
+        return sort;
       }
     },
     watch:{
@@ -225,6 +239,9 @@
         }
       },
       fbSort:function(){
+        this.loadFb();
+      },
+      fbSubSort:function(){
         this.loadFb();
       },
       bbSort:function() {
@@ -260,7 +277,7 @@
       createWallet(i){
         let curr=this.fb[i].abbr;
         this.WsProxy.send("wallet", "new_wallet",{currency:curr}).then((data)=> {
-          this.$set(this.fb[i],"hasWallet",true);
+          this.loadFb();
         }).catch(()=>{
           this.$refs.alert.showAlert({content:"创建钱包失败"});
         });
@@ -282,6 +299,7 @@
           hide_low_price: this.isPetty,
           hide_no_wallet: this.isNoWa,
           sort: this.paramFbSort,
+          sub_sort:this.paramFbSubSort,
           page: this.fbCurPage-1,
           count: this.fbPageSize,
         }).then((data)=>{

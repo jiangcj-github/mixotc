@@ -67,7 +67,18 @@
       return {
         uid: "",                // 用户ID
         isOnline: true,       // 是否在线
-        info:{},               // 用户信息
+        info:{                  // 用户信息
+          headimg: "/static/images/default_avator.png",
+          nickname: "unknown",
+          tradeWidthNum: 0,
+          orderNum: 0,
+          volumn: "-",
+          praiseRate: "-",
+          trustedNum: 0,
+          trustNum: 0,
+          securedNum: 0,
+          isTrust: 0,
+        },
 
         tab:0,                 // tab项【0-他的发布，1-他的评价】
         rateNum:0,            // 评价数量

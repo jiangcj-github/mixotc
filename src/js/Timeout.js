@@ -1,10 +1,10 @@
 //定时器函数，自动释放
-let timer=null;
-let timeout=function(callback,delay){
-  if(timer){
-    clearTimeout(timer);
+let timer={};
+let timeout=function(callback,delay,name="timer0"){
+  if(timer[name]){
+    clearTimeout(timer[name]);
   }
-  timer=setTimeout(()=>{
+  timer[name]=setTimeout(()=>{
     callback();
   },delay);
 };
