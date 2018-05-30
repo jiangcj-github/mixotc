@@ -55,15 +55,29 @@
         date2: "",
         opt1: {
           disabledDate: (time) => {
-            return time.getTime() > this.max || time.getTime() < this.min || (this.date2 && time >= this.date2)
+            return time.getTime() > this.max || time.getTime() < this.min || (this.date2 && time > this.date2)
           }
         },
         opt2: {
           disabledDate: (time) => {
-            return time.getTime() > this.max || time.getTime() < this.min || (this.date1 && time <= this.date1);
+            return time.getTime() > this.max || time.getTime() < this.min || (this.date1 && time < this.date1);
           }
         },
       };
+    },
+    computed:{
+      paramDate1:function () {
+        if(this.date1){
+          return Math.floor(new Date(this.date1).getTime()/1000);
+        }
+        return null;
+      },
+      paramDate2:function() {
+        if(this.date2){
+          return Math.floor(new Date(this.date2).getTime()/1000)+24*3600-1;
+        }
+        return null;
+      }
     },
     watch:{
       date1:function(){
@@ -91,7 +105,13 @@
       onBlur2(){
         this.Bus.$emit(this.onDiEndBlur,this.date2);
         this.Bus.$emit(this.onDiBlur,this.date1,this.date2);
-      }
+      },
+      //设置n天前
+      setDays(n){
+        let date2=new Date(new Date().toDateString());
+        this.date2=date2;
+        this.date1=new Date(date2.getTime()-24*60*60*1000*(n-1));
+      },
     }
   };
 </script>

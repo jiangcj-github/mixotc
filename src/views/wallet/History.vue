@@ -260,21 +260,15 @@
         return state.substr(1);
       },
       paramStart(){
-        let start= this.$refs.di.date1;
-        start=start?Math.floor(new Date(this.$refs.di.date1).getTime()/1000):null;
-        return start;
+        return this.$refs.di.paramDate1;
       },
       paramEnd(){
-        let end= this.$refs.di.date2;
-        end=end?Math.floor(new Date(this.$refs.di.date2).getTime()/1000):null;
-        return end;
+        return this.$refs.di.paramDate2;
       }
     },
     watch:{
       days:function(){
-        let date2=new Date(new Date(new Date().toDateString()).getTime()+24*60*60*1000);
-        this.$refs.di.date2=date2;
-        this.$refs.di.date1=new Date(date2.getTime()-24*60*60*1000*this.days);
+        this.$refs.di.setDays(this.days);
       },
       sort:function(){
         this.loadBills();
