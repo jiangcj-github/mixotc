@@ -345,6 +345,27 @@
           })
         }
       },
+      // 监听订单提醒
+      listenOrderR(){
+        let _this = this;
+        this.WebSocket.onMessage['rmd_ord_message'] = {
+            async callback(res) {
+            if(res.body && res.body.type === 'rmd_ord') {
+              let {id, icon, name, order, state } = res.body.data;
+              let isgroup = false,  _id = _this.JsonBig.stringify(id);
+              _this.friendGid[_id] && (isgroup = true)
+              let obj = {
+                id: _this.JsonBig.stringify(res.body.id),
+                cid: isgroup ? _this.friendGid[_id] : _id,
+                order : _this.JsonBig.stringify(order),
+                icon,
+                name,
+                state,
+              }
+            }
+          }
+        }
+      },
       // 监听消息
       listenChat() {
         //聊天信息监听
@@ -456,7 +477,7 @@
           isFail: false,
           time: time
         }
-        this.$store.commit({type: 'addMessages', data:{id: tid, msg: obj }})
+        this.$store.commit({type: 'addMessages', data:{id: this.JsonBig.stringify(tid), msg: obj }})
       },
       // 发送图片
       async uploadImage() {

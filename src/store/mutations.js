@@ -152,12 +152,13 @@ export default {
   [types.addMessages](state, { data }) {
     let idex = false,
       flag = false;
-    state.chat.forEach((item, index) => {
-      item.id === data.id && (idex = index);
-    });
-    !state.messages[data.id] && (state.messages[data.id] = []); //对话记录不存在时创建
-    let last = state.messages[data.id].slice(-1);
-    (!last || last.id !== data.msg.id) && state.messages[data.id].push(data.msg);
+      state.chat.forEach((item, index) => {
+        item.id === data.id && (idex = index);
+      });
+      !state.messages[data.id] && (state.messages[data.id] = []); //对话记录不存在时创建
+      let last = state.messages[data.id].slice(-1);
+    (!last[0] || last[0].id !== data.msg.id) && state.messages[data.id].push(data.msg);
+    // state.messages[data.id].push(data.msg);
     data.id === "system" && state.curChat !== "system" && state.systemMessage++;
     data.id !== "system" &&
       state.curChat !== data.id &&

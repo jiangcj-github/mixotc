@@ -152,7 +152,7 @@
         return this.$store.state.userInfo.icon
       },
       name() {
-        return this.$store.state.userInfo.name
+        return this.$store.state.userInfo.name ? this.$store.state.userInfo.name : (this.$store.state.userInfo.phone ? this.$store.state.userInfo.phone : this.$store.state.userInfo.email)
       },
       path() {
         return this.$route.path

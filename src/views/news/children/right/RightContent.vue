@@ -27,9 +27,7 @@
                 >
                 <p>
                   <i :class="{name: chat[index].group && userId !== item.from}"></i>
-
                   <b v-if="chat[index].group && userId !== item.from">{{infoDiction[item.from] && infoDiction[item.from].name}}</b>
-
                   <span v-if="item.msg.type === 1" class="images">
                     <img
                       :id="'img' + item.time"
