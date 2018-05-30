@@ -16,7 +16,7 @@
                   @click="showResult = true"><button @click="getCoinsData"></button>
         </p>
         <ul class="search-result" v-if="showResult && inputValue">
-          <li v-if="!result.length">暂无搜索结果</li>
+          <li v-if="!result.length">{{nothingText}}</li>
           <li v-for="(item,index) of result" :key="index" @click="selectResultContent(item)">{{item}}</li>
         </ul>
       </div>
@@ -68,7 +68,8 @@
         selectValue: 'btc',
         result: [], // 模糊搜索结果
         showResult: true, // 控制下拉框显示隐藏
-        id: ''
+        id: '',
+        nothingText: '', // 无搜索结果提示文字
       }
     },
     async created() {
@@ -81,6 +82,7 @@
       async selectData() { // 模糊筛选
         this.result = [];
         this.inputValue && (this.selectValue = this.inputValue);
+        this.nothingText = '加载中...'
         await this.Proxy.fetch({
           url: {
             host: '47.74.244.196',
@@ -92,8 +94,12 @@
             params: {word: this.selectValue, app: 0}
           },
         }).then(res => {
+          console.log('搜索this.selectValue', this.selectValue, res)
+          if (res.data.currency.length === 0) {
+            this.nothingText = '暂无数据'
+            return
+          }
           this.id = res.data.currency[0].id;
-          console.log('搜索this.selectValue', this.selectValue)
           this.coinDataList = res.data.currency
           res.data.currency && res.data.currency.forEach(v => {
             this.result.push(v.name)

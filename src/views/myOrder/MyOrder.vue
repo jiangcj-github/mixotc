@@ -77,7 +77,6 @@
             <p><router-link :to="{path:'/homepage', query:{uid: JsonBig.stringify(content.buyer) == userId ? content.seller : content.buyer}}">{{content.name || content.contact}}</router-link></p>
             <p class="talk" @click="contactSomeone(JsonBig.stringify(content.buyer) == userId ? content.seller : content.buyer)">联系他</p>
           </li>
-          <!---->
           <li>
             <em class="hidden-text" :title="content.price">{{content.price}}</em>
           </li>
@@ -347,8 +346,12 @@
           this.comment = 0
           this.selectState = this.contentTabIndex === 1 ? '123' : '4,5,6,7,8,9,10,11'
         }
+        this.contentList = this.contentList.filter(v => {
+          return this.JsonBig.stringify(v.id) == data
+        })
         this.contentList.length == 0 && (this.contentTabIndex === 1 && ((this.selectState = '4,5,6,7,8,9,10,11') && (this.contentTabIndex = 2)) || ((this.selectState = '1,2,3') && (this.contentTabIndex = 1)))
         this.initData()
+        console.log('搜索', this.contentList, this.contentList.length)
       })
       // 模糊搜索
       this.Bus.$on(this.searchResult,({type, data}) => {
@@ -586,7 +589,7 @@
         if (index === 2) {
           this.$refs.di.date1 = new Date(date2.getTime() - (24 * 60 * 60 * 7 * 1000))
         }
-        this.contentList.length == 0 && (this.contentTabIndex === 1 && ((this.selectState = '4,5,6,7,8,9,10,11') && (this.contentTabIndex = 2)) || ((this.selectState = '1,2,3') && (this.contentTabIndex = 1)))
+        //this.contentList.length == 0 && (this.contentTabIndex === 1 && ((this.selectState = '4,5,6,7,8,9,10,11') && (this.contentTabIndex = 2)) || ((this.selectState = '1,2,3') && (this.contentTabIndex = 1)))
       },
       showOperation(index) { // 去评价
         if (this.contentList[index].operationList[0].flag == 1) { // 去评价
