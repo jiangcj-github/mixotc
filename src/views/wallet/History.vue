@@ -80,7 +80,7 @@
             <div class="li" v-for="(e,i) in bills">
               <div class="booth">
                 <div class="time"><p>{{e.time1}}</p><p>{{e.time2}}</p></div>
-                <div class="type"><p :class="{in:!e.isIn,out:e.isIn}">{{e.type}}</p></div>
+                <div class="type"><p :class="{in:e.isIn,out:!e.isIn}">{{e.type}}</p></div>
                 <div class="coin"><p><img :src="e.coinIcon">{{e.coin}}</p></div>
                 <div class="addr">
                   <p v-if="e.billType===0">{{e.addr}}</p>
@@ -93,9 +93,9 @@
                   <p v-if="e.billType===4">{{e.addr}}</p>
                   <p v-if="e.billType===5">{{e.isIn?"法币账户":"币币账户"}}</p>
                 </div>
-                <div class="num"><p :class="{in:!e.isIn,out:e.isIn}">{{e.num}}</p><p>{{e.fee}} {{e.coin}}</p></div>
+                <div class="num"><p :class="{in:e.isIn,out:!e.isIn}">{{e.num}}</p><p>{{e.fee}} {{e.coin}}</p></div>
                 <div class="state">
-                  <p>{{e.state}}</p>
+                  <p>{{e.stateStr}}</p>
                 </div>
                 <div class="op"><p v-if="e.billType===1"><a :href="'/#/order?oid='+e.orderId+'&classify='+e.orderType">查看</a></p></div>
               </div>
@@ -402,7 +402,7 @@
             time1: new Date(e.date*1000).dateHandle("yyyy/MM/dd"),
             time2: new Date(e.date*1000).dateHandle("HH:mm:ss"),
             type: ["充币","提币","购买","出售","转账-入账","转账-出账","担保-入账","担保-出账",
-              "红包-入账","红包-出账","资产划出","资产划入"][e.type-1],
+              "红包-入账","红包-出账","资产划入","资产划出"][e.type-1],
             coin: e.currency && e.currency.toUpperCase(),
             coinIcon: "http://192.168.113.26//image/B012F109359B4872",
             nickname: e.trader_name || "-",
@@ -466,7 +466,7 @@
               index: i+1,
               time: new Date(e.date*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
               type: ["充币","提币","购买","出售","转账-入账","转账-出账","担保-入账","担保-出账",
-                "红包-入账","红包-出账","资产划出","资产划入"][e.type-1],
+                "红包-入账","红包-出账","资产划入","资产划出"][e.type-1],
               coin: e.currency && e.currency.toUpperCase(),
               user: e.trader_name,
               sendAddrName: e.from_name,

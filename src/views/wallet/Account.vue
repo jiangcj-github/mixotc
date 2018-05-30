@@ -59,7 +59,7 @@
                 <i :class="{up:fbSort===0,down:fbSort===1}"></i></p>
               <p class="th frozen sortable" @click="fbSort=++fbSort%2+2">冻结中余额
                 <i :class="{up:fbSort===2,down:fbSort===3}"></i></p>
-              <p class="th assess sortable" @click="fbSort=++fbSort%2+4">估值
+              <p class="th assess sortable" @click="fbSort=++fbSort%2+4">估值(CNY)
                 <i :class="{up:fbSort===4,down:fbSort===5}"></i></p>
               <p class="th opera">操作</p>
             </div>
@@ -310,15 +310,15 @@
           item.name=e.name;
           item.avail=item.hasWallet?"0":"-";
           if(e.balance!=null) {
-            item.avail = e.balance.toString().formatFixed(6)+" "+item.abbr;
+            item.avail = e.balance.toString().formatFixed(6);
           }
           item.frozen=item.hasWallet?"0":"-";
           if(e.locked!=null) {
-            item.frozen = e.locked.toString().formatFixed(6)+" "+item.abbr;
+            item.frozen = e.locked.toString().formatFixed(6);
           }
           item.assess=item.hasWallet?"0":"-";
           if(e.assessment!=null && this.prices["btc"]!=null) {
-            item.assess = (e.assessment * this.prices["btc"]).toString().formatFixed(2)+" "+item.abbr;
+            item.assess = (e.assessment * this.prices["btc"]).toString().formatFixed(2);
           }
           this.fb.push(item);
         });
