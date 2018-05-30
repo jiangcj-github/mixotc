@@ -227,7 +227,7 @@
         tradeCode: '',
         trader: '',
         contentTabIndex: 1, // 控制tab切换
-        num: 4, // 控制时间选择Tab active类
+        //num: 4, // 控制时间选择Tab active类
 
         showPayment: false, // 标记已付款弹窗
         showReleaseCoin: false,
@@ -310,6 +310,7 @@
       this.getInitNum();
       this.getOrderCoin();
       this.getCompleteData(); // 获取完成数据
+      this.getRemindData();
     },
     mounted() {
       // 监听下拉框值，将值传给子组件
@@ -518,12 +519,22 @@
         let ws = this.WebSocket; // 创建websocket连接
         ws.onMessage['upd_ord'] = { // 完成状态的action
           callback: (res) => {
-            if (res.op && res.op === 24) {
+            if (res.op && res.op === 24 && res.body.type === 'upd_ord') {
               this.contentList = this.contentList.filter(v => {
                 return this.JsonBig.stringify(v.id) !== this.JsonBig.stringify(res.body.data.order)
               })
               this.conductNum--
               this.completeNum++
+            }
+          },
+        };
+      },
+      getRemindData() { // 接收到提醒状态
+        let ws = this.WebSocket; // 创建websocket连接
+        ws.onMessage['rmd_ord'] = { // 完成状态的action
+          callback: (res) => {
+            if (res.op && res.op === 24 && res.body.type === 'rmd_ord') {
+              console.log(1111)
             }
           },
         };
@@ -577,6 +588,7 @@
         this.getOrderCoin();
       },
       selectTime(index) { // 时间切换
+        //this.num = index;
         if (index === 0) {
           this.$refs.di.setDays(1);
         }
@@ -696,6 +708,8 @@
       color #333
       letter-spacing 0.25px
       margin-bottom 20px
+      a:hover
+        color $col422
 
     /*font-size $fz20
     font-weight bold
@@ -862,6 +876,8 @@
             p
               color #FFB422
               cursor pointer
+              &:hover
+                color $col350
               >span.disabled
                 color #999
                 pointer-events none
@@ -875,9 +891,13 @@
               background: #FFB422
               border-radius: 2px
               cursor pointer
+              &:hover
+                background $col350
             .text-b
               color #333
               cursor pointer
+              &:hover
+                color $col422
 
 
           li
@@ -899,7 +919,7 @@
                 background url(/static/images/talk.png) no-repeat
                 background-size 18px 18px
               &:hover
-                color #FF794C
+                color $col350
 
           .text-g
             color $col100

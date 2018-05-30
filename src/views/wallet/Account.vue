@@ -59,34 +59,27 @@
                 <i :class="{up:fbSort===0,down:fbSort===1}"></i></p>
               <p class="th frozen sortable" @click="fbSort=++fbSort%2+2">冻结中余额
                 <i :class="{up:fbSort===2,down:fbSort===3}"></i></p>
-              <p class="th assess sortable" @click="fbSort=++fbSort%2+4">估值
+              <p class="th assess sortable" @click="fbSort=++fbSort%2+4">估值(CNY)
                 <i :class="{up:fbSort===4,down:fbSort===5}"></i></p>
               <p class="th opera">操作</p>
             </div>
             <!--fb返回结果-->
             <div v-if="fbErr===0">
               <div v-for="(e,i) in fb">
-                <div class="li" v-if="e.hasWallet">
+                <div class="li">
                   <p class="coin"><img :src="e.icon">{{e.abbr}}</p>
                   <p class="name">{{e.name}}</p>
-                  <p class="avail"><span>{{e.avail}} {{e.abbr}}</span></p>
-                  <p class="frozen"><span>{{e.frozen}} {{e.abbr}}</span></p>
-                  <p class="assess"><span>{{e.assess}} CNY</span></p>
-                  <p class="opera op1">
+                  <p class="avail"><span>{{e.avail}}</span></p>
+                  <p class="frozen"><span>{{e.frozen}}</span></p>
+                  <p class="assess"><span>{{e.assess}}</span></p>
+                  <p class="opera op1" v-if="e.hasWallet">
                     <a class="btn white" :href="'/#/wallet/charge?coin='+e.abbr">充币</a>
                     <!--<a class="btn white" :href="'/#/wallet/withdraw'+e.abbr">提币</a>-->
                     <a class="btn white" href="/#/">交易</a>
                   </p>
-                </div>
-                <div class="li" v-else="">
-                  <p class="coin"><img :src="e.icon">{{e.abbr}}</p>
-                  <p class="name">{{e.name}}</p>
-                  <p class="avail">{{e.avail}}</p>
-                  <p class="frozen">{{e.frozen}}</p>
-                  <p class="assess">{{e.assess}}</p>
-                  <p class="opera op2">
+                  <p class="opera op2" v-else="">
                     <button class="btn green" @click="createWallet(i)">加入钱包</button>
-                    <a href="/#/coinData" target="_blank">查看币种资料</a>
+                    <a :href="'/#/coinData?coin='+e.abbr" target="_blank">查看币种资料</a>
                   </p>
                 </div>
               </div>
@@ -276,8 +269,8 @@
         this.WsProxy.send("wallet","total_assets", {}).then((data)=>{
           let numBtc=data.total_assets || 0;
           let btcPrice=this.prices["btc"] || 0;
-          this.balance.numBtc=numBtc.formatFixed(6);
-          this.balance.numCny=(numBtc * btcPrice).formatFixed(2);
+          this.balance.numBtc=numBtc.toString().formatFixed(6);
+          this.balance.numCny=(numBtc * btcPrice).toString().formatFixed(2);
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -299,7 +292,7 @@
             this.fbTotal=data.count;
             this.parseFb(data.wallets);
           }
-        }).catch((msg)=>{
+        }).catch((msg)=>{console.log(msg);
           if(!msg){
             this.fbErr=2; //网络异常
           }else if(msg.ret!==0){
@@ -317,15 +310,15 @@
           item.name=e.name;
           item.avail=item.hasWallet?"0":"-";
           if(e.balance!=null) {
-            item.avail = e.balance.formatFixed(6);
+            item.avail = e.balance.toString().formatFixed(6);
           }
           item.frozen=item.hasWallet?"0":"-";
           if(e.locked!=null) {
-            item.frozen = e.locked.formatFixed(6);
+            item.frozen = e.locked.toString().formatFixed(6);
           }
           item.assess=item.hasWallet?"0":"-";
           if(e.assessment!=null && this.prices["btc"]!=null) {
-            item.assess = (e.assessment * this.prices["btc"]).formatFixed(2);
+            item.assess = (e.assessment * this.prices["btc"]).toString().formatFixed(2);
           }
           this.fb.push(item);
         });
@@ -354,9 +347,9 @@
             icon: "",
             abbr: e.cat,
             name: e.catalog_name || "-",
-            avail: (e.avail+"").formatFixed(2),
-            frozen: (e.lock+"").formatFixed(2),
-            assess: (e.value+"").formatFixed(2),
+            avail: (e.avail+"").toString().formatFixed(2),
+            frozen: (e.lock+"").toString().formatFixed(2),
+            assess: (e.value+"").toString().formatFixed(2),
           });
         });
       },

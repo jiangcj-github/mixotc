@@ -2,7 +2,10 @@
   <div class="release-ad-info">
     <ol>
       <li>
-        <p>选择币种</p>
+        <p>
+          <span>选择币种</span>
+          <b class="select-remind">一个币种同时只能上架一条购买广告</b>
+        </p>
         <ChoiceBox :choiceClass="adB"
                    :title="adBuyObj.currency && adBuyObj.currency.toUpperCase()"
                    :classify="coinType"
@@ -58,6 +61,7 @@
                v-model="adBuyObj.price"
                @focus="clearPrice=true && (errPrice=true)"
                @blur="clearPrice=false"
+               maxlength="9"
                @input="priceInput"/>
         <span>CNY</span>
         <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.price && clearPrice" @mousedown="adBuyObj.price=''">
@@ -409,6 +413,7 @@
           this.errPriceText = '请输入正确的数字格式'
           return
         }
+
         this.adBuyObj.price = this.adBuyObj.price.replace(/^(\d+)\.(\d{0,2})\d*$/g, '$1' + '.' + '$2');
         this.errPriceText = ''
       },

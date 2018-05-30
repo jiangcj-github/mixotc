@@ -2,7 +2,10 @@
   <div class="release-ad-info">
     <ol>
       <li>
-        <p>选择币种</p>
+        <p>
+          <span>选择币种</span>
+          <b class="select-remind">一个币种同时只能上架一条出售广告</b>
+        </p>
         <ChoiceBox :choiceClass="adB"
                    :title="adSaleObj.currency && adSaleObj.currency.toUpperCase()"
                    :classify="coinType"
@@ -58,6 +61,7 @@
         <input type="text"
                v-model="adSaleObj.price"
                @focus="clearPrice=true && (errPrice=true)"
+               maxlength="9"
                @blur="clearPrice = false"
                @input="priceInput"/>
         <span>CNY</span>

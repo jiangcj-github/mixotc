@@ -475,7 +475,7 @@
           } else {
             this.tip = false;
           }
-          if (min >= 100000) {
+          if (min >= 100000 || max >= 100000) {
             this.largeTran = 1
           } else {
             this.largeTran = 0

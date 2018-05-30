@@ -5,10 +5,10 @@
         <img class="largeTran" v-if="data.isLargeTran" src="/static/images/whole_icon2.png" title="已大额认证">
         <img class="headimg" @click="toHomePage(data.sid)" :src="data.headimg" alt="">
       </p>
-      <p class="userInfo" :class="{'no-trust': trustArray.indexOf(JsonBig.stringify(data.sid))<0}">
-        <span class="nickname" @click="toHomePage(data.sid)">{{data.nickname}}</span>
+      <p class="userInfo">
+        <span class="nickname" :class="{'no-trust':!isTrust}" @click="toHomePage(data.sid)">{{data.nickname}}</span>
         <!-- -->
-        <i class="trust" title="已信任" v-if="trustArray.includes(JsonBig.stringify(data.sid))">信任</i>
+        <i class="trust" title="已信任" v-if="isTrust">信任</i>
       </p>
     </div>
     <div class="title deal-volume" :title="data.dealVolume">{{data.dealVolume}}</div>
@@ -53,6 +53,11 @@ export default {
       });
     },
   },
+  computed:{
+    isTrust:function(){
+      return this.trustArray.indexOf(this.JsonBig.stringify(this.data.sid))>=0;
+    }
+  }
 };
 </script>
 
