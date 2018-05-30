@@ -38,7 +38,7 @@
       <li v-show="switchValue">
         <i>溢价</i>
         <em>参考价：</em>
-        <b>{{priceNow && priceNow.toString().formatFixed(2)}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
+        <b>{{changePrice && changePrice.toString().formatFixed(2)}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
       </li>
       <li v-show="switchValue">
         <SliderBar
@@ -166,7 +166,7 @@
         adBuyObj: {
           "id": 0,
           "uid": '', // 用户id
-          "currency": 'btc', // 电子货币
+          "currency": '', // 电子货币
           "money": 'cny', // 法币
           "mode": 1, // 出售类型: 1 固定; 2 溢价
           "premium": 0, // 溢价
@@ -183,6 +183,7 @@
         maxNum: 0, // 最大订单额度
         selectPrice: [], // 根据币种选择返回情况
         priceNow: '', // 参考价
+        changePrice: '', // 溢价滑动
         lowerPrice: '', // 最低价
         maxLimit: '',
         adSuccLayer: false,
@@ -256,7 +257,8 @@
       });
       this.Bus.$on(this.premiumValue, data => { // 溢价滑动价格
         this.adBuyObj.premium = data
-        this.priceNow = this.priceNow * (1 + (data/100))
+        this.changePrice = this.priceNow * (1 + (data/100))
+        console.log('现在的价格', this.changePrice)
       });
       this.Bus.$on(this.limitValue, data => { // 期限滑动价格
         this.adBuyObj.limit = data
@@ -280,6 +282,7 @@
             this.coinType.push(v.currency.toUpperCase())
             this.coinData.push(v.currency)
           })
+          this.Bus.$emit('buyCoinData', this.coinData)
         }).catch(msg => {
           console.log('购买币种错误', msg)
         });
@@ -290,10 +293,10 @@
             return item.currency === this.adBuyObj.currency;
           })
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          console.log(msg)
         });
         console.log('this.selectPrice', this.selectPrice)
-        this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
+        this.changePrice = this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
       },
       async getLowerPrice() { // 最低价格获取
         this.Proxy.sales({
@@ -409,8 +412,8 @@
         this.adErrLayer = false
       },
       priceInput() { // 表格验证
-        if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adBuyObj.price)) {
-          this.errPriceText = '请输入正确的数字格式'
+        if (!(/^(0|([1-9]{1,6}))(\.\d+)?$/).test(this.adBuyObj.price)) {
+          this.errPriceText = '请输入整数部分不大于6位的2位小数'
           return
         }
 

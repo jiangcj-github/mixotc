@@ -231,7 +231,8 @@
 
         ineffectiveProof: "", // 证明无效
         paymentProofs: "", // 付款证明输入框内容
-        noticeCoin: "" // 通知放币
+        noticeCoin: "", // 通知放币
+
 
       }
     },
@@ -245,6 +246,7 @@
             result = item.user_name
           }
         });
+        this.$refs.textarea && (this.$refs.textarea.innerHTML = '');
         this.startSwiper() // 轮播图切换
         return result
       },
