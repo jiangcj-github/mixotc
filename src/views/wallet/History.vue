@@ -106,7 +106,7 @@
             <Pagination :total="total" :pageSize="pageSize" :curPage="curPage"></Pagination>
           </div>
           <div v-else-if="err===1">
-            <div class="err no-result">无相应的数据，请重新搜索</div>
+            <div class="err no-result">没有符合条件的账单</div>
           </div>
           <div v-else-if="err===2">
             <div class="err load-failed">网络异常，请重新搜索</div>
@@ -146,8 +146,8 @@
         isShowUl0: false,
         ul0Sel: 0,
         ul0: [
-          {text:"对方/地址",value:2},
           {text:"订单号",value:1},
+          {text:"对方/地址",value:2},
         ],
 
         isShowTip: false,
@@ -412,7 +412,7 @@
             fee: e.fee.toString().formatFixed(6),
             stateStr: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
             state: e.state,
-            orderId: e.type_id,
+            orderId: e.type_id.toString(),
             isIn: [1,3,5,7,9,11].indexOf(e.type)>=0, // 进出账：true-进账,false-出账
             billType: Math.ceil(e.type/2)-1,  // 账单类型：0-充提,1-交易,2-担保,3-红包,4-转账,5-资金互转
           };

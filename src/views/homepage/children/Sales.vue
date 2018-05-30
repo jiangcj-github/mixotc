@@ -44,7 +44,7 @@
           <span class="pay-time">{{e.dead}}</span>
           <span class="operation">
           <span class="buy-to" @click="toOrder(e)" v-if="!e.isBuy"><i>向他购买</i></span>
-          <span class="buy-to" :class="{disabled:e.isBuy}"  v-else><i>向他出售</i></span>
+          <span class="buy-to" @click="toOrder(e)"  v-else><i>向他出售</i></span>
         </span>
         </div>
         <div class="division"></div>
