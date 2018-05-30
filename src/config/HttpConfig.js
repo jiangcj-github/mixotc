@@ -35,8 +35,8 @@ export default {
     //     method: "post",
     //   }
     // },
-    // {name: 'searchTips', data: {url: '/v1/home/searchTips', method: 'get'}}, //币种资料模糊搜索
-    // {name: 'getCoinData', data: {url: '/v1/currency/detail', method: 'get'}}, // 获取币种资料
+    {name: 'searchTips', data: {url: '/v1/home/searchTips', method: 'get'}}, //币种资料模糊搜索
+    {name: 'getCoinData', data: {url: '/v1/currency/detail', method: 'get'}}, // 获取币种资料
 
 
 

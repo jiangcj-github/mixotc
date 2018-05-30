@@ -13,6 +13,7 @@
                   placeholder="搜索币种"
                   v-model.trim="inputValue"
                   @input="selectData"
+                  @keyup.enter="getCoinsData"
                   @click="showResult = true"><button @click="getCoinsData"></button>
         </p>
         <ul class="search-result" v-if="showResult && inputValue">
@@ -81,17 +82,7 @@
       async selectData() { // 模糊筛选
         this.result = [];
         this.inputValue && (this.selectValue = this.inputValue);
-        await this.Proxy.fetch({
-          url: {
-            host: '47.74.244.196',
-            port: '80',
-            path: '/v1/home/searchTips'
-          },
-          data: {
-            method: 'get',
-            params: {word: this.selectValue, app: 0}
-          },
-        }).then(res => {
+        await this.Proxy.searchTips({word: this.selectValue, app: 0}).then(res => {
           this.id = res.data.currency[0].id;
           console.log('搜索this.selectValue', this.selectValue)
           this.coinDataList = res.data.currency
@@ -105,18 +96,7 @@
 
       async getCoinsData() { // 获取币种资料数据
         this.inputValue = '';
-        await this.Proxy.fetch(
-          {
-            url: {
-              host: '47.74.244.196',
-              port: '80',
-              path: '/v1/currency/detail'
-            },
-            data: {
-              method: 'get',
-              params: {app: 0, symbolId: this.id, period: '24h'}
-            },
-          }).then(res => {
+        await this.Proxy.getCoinData({app: 0, symbolId: this.id, period: '24h'}).then(res => {
           console.log('资料', res.data, this.JsonBig.stringify(res.data.price.cny), this.JsonBig.stringify(res.data.totalValue.cny))
           this.coinDataObj = res.data
         }).catch(msg => {

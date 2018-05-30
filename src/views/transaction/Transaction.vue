@@ -17,7 +17,7 @@
             <ul v-show="srchUlShow">
               <li v-for="(e,i) in srchUls" @click="srchUlSel=i">{{e.title}}</li>
             </ul>
-            <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @input="fuzzyInput" @focus="srchTipShow=true">
+            <input type="text" v-model="srchText" title="" v-clickoutside="()=>{srchTipShow=false}" @keyup.enter="()=>{searchStr();srchTipShow=false;}" @input="fuzzyInput" @focus="srchTipShow=true">
             <img src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchTipShow && srchText.length>0">
             <a href="javascript:void(0)" @click="searchStr"></a>
             <b v-if="searchTip">您还未输入币种</b>
