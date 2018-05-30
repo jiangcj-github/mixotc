@@ -149,8 +149,8 @@
           wallets.forEach((e)=>{
             this.coins.push({
               coin: e.currency.toUpperCase(),
-              avail: e.balance.formatFixed(6),
-              total: (e.balance+e.locked).formatFixed(6),
+              avail: e.balance.toString().formatFixed(6),
+              total: (e.balance+e.locked).toString().formatFixed(6),
               addr: e.address || "-",
               confirm: 0,
               checkNum: 0,
@@ -180,7 +180,7 @@
         this.coins.forEach((e)=>{
           this.WsProxy.send("wallet","get_checking_amount",{currency:e.coin}).then((data)=>{
             if(data) {
-              e.confirm = data.amount.formatFixed(6);
+              e.confirm = data.amount.toString().formatFixed(6);
             }
           }).catch((msg)=>{
             console.log(msg);
@@ -226,7 +226,7 @@
             time1: new Date(e.date*1000).dateHandle("yyyy/MM/dd"),
             time2: new Date(e.date*1000).dateHandle("HH:mm:ss"),
             coin: e.currency && e.currency.toUpperCase(),
-            num: e.amount.formatFixed(6),
+            num: e.amount.toString().formatFixed(6),
             state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
             addr1: e.from && e.from.formatAddr(),
             addr1Name: e.from_name || "-",

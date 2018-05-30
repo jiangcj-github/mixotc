@@ -153,7 +153,7 @@ String.prototype.formatFixed=function(n){
 };
 
 Number.prototype.formatFixed=function(n){
-  return (this+"").formatFixed(n);
+  return this.toString().formatFixed(n);
 };
 
 //格式化地址，msHdsbs......dxkdkdw
