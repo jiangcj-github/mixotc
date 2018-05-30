@@ -23,19 +23,19 @@
     <!-- 底部 -->
     <ol class="input-text clearfix">
       <li>
-        <input 
-          type="text" 
-          :disabled="isDisable" 
-          :class="{disable: isDisable}" 
-          v-model="sendText" 
-          @keyup.enter="sendMs(sendText)" 
+        <input
+          type="text"
+          :disabled="isDisable"
+          :class="{disable: isDisable}"
+          v-model="sendText"
+          @keyup.enter="sendMs(sendText)"
           maxlength="100"
         >
       </li>
       <li @click="()=>{
           if(isDisable) return;
           this.$refs.up_img.click()
-        }" 
+        }"
         class="send-image">
         <img src="/static/images/picture_icon.png"  title="发送图片">
         <div style='display:none'>
@@ -157,6 +157,7 @@
       this.Bus.$on('contactSomeone',({id, msg})=> {
         this.contactSomeone(id, msg)
       });
+
       this.Bus.$on('addReqInfo',(info)=> {
         this.reqMessage = info;
       });
@@ -282,7 +283,7 @@
       async dealNewChat(id, flag) {
         !flag && !this.chatIds.includes(id) && await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(id)}).then( ({name, phone, email, icon }) => {
           this.$store.commit(
-            {type: 'updateStrangerInfo', 
+            {type: 'updateStrangerInfo',
               data: {
                 id: id,
                 icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
@@ -365,18 +366,18 @@
                   }
                 obj = {
                   id: _this.JsonBig.stringify(id),
-                  from: _this.JsonBig.stringify(uid), 
+                  from: _this.JsonBig.stringify(uid),
                   to: _this.userId,
                   msg:{
                     type: type === 'image' ? 1 : 0,
                     content: messageContent[type]
                   },
-                  isLoding: type === 'image' ? true : false, 
+                  isLoding: type === 'image' ? true : false,
                   isFail: false,
                   time: new Date() - 0
                 }
                 _this.$store.commit({
-                  type: 'updateStrangerInfo', data: 
+                  type: 'updateStrangerInfo', data:
                     {
                       id: _this.JsonBig.stringify(id),
                       icon: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
@@ -408,14 +409,14 @@
                 let {icon, name} = other;
                 obj = {
                   id: _this.JsonBig.stringify(id),
-                  from: _this.JsonBig.stringify(uid), 
+                  from: _this.JsonBig.stringify(uid),
                   to: _this.userId,
                   name: name,
                   msg:{
                     type: type === 'image' ? 1 : 0,
                     content: messageContent[type]
                   },
-                  isLoding: type === 'image' ? true : false, 
+                  isLoding: type === 'image' ? true : false,
                   isFail: false,
                   time: new Date() - 0
                 }
@@ -702,9 +703,9 @@
               cursor pointer
             li:hover
               background #474747
-            li:nth-child(1)  
+            li:nth-child(1)
               border-radius 2px 2px 0 0
-            li:nth-child(3)  
+            li:nth-child(3)
               border-radius  0 0 2px 2px
             li:nth-child(1):before
               position absolute

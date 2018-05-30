@@ -2,7 +2,10 @@
   <div class="release-ad-info">
     <ol>
       <li>
-        <p>选择币种</p>
+        <p>
+          <span>选择币种</span>
+          <b class="select-remind">一个币种同时只能上架一条购买广告</b>
+        </p>
         <ChoiceBox :choiceClass="adB"
                    :title="adBuyObj.currency && adBuyObj.currency.toUpperCase()"
                    :classify="coinType"

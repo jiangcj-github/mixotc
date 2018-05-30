@@ -306,6 +306,7 @@
           this.saleList.forEach(v => {
             v.tradeable = typeof v.tradeable === 'number' ? v.tradeable : this.JsonBig.stringify(v.tradeable).formatFixed(6)
             v.volume = typeof v.volume === 'number' ? v.volume : this.JsonBig.stringify(v.volume).formatFixed(6)
+            v.price_avg = typeof v.price_avg === 'number' ? v.price_avg : this.JsonBig.stringify(v.volume).formatFixed(2)
           })
           this.pageTotal = data.amount
         }).catch((msg)=>{

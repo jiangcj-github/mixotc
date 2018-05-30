@@ -1,6 +1,6 @@
 <template>
   <div class="clearfix">
-    <div class="search" v-clickoutside="hideSelect" @click="$refs.input.focus()">
+    <div class="search" v-clickoutside="hideSelect" @click="$refs.input.focus()" :class="{'search-active': showActive}">
       <input
         type="text"
         :style="{borderColor: color}"
@@ -8,20 +8,21 @@
         v-model="inputContent"
         @keyup.enter="changeInputContent"
         @click="showResult = true"
-        @focus="showCancel = true"
+        @focus="(showCancel = true) && (showActive = true)"
+        @blur="showActive = false"
         @input="input"
       >
       <span ref='title' @click="showTitleItem">{{title}}</span>
-      <ul class="clearfix" v-show="showSelect">
+      <ul class="clearfix search-title" v-show="showSelect">
         <li v-for="(item, index) of content" @click="changeTitle(item)" :key="index" :class="{ active: item.title === title}">{{item.title}}</li>
       </ul>
       <ul class="search-result" v-if="showResult && inputContent">
         <li v-if="!result.length">暂无搜索结果</li>
         <li v-for="(item, index) of result" :key="index" @click="selectInputContent(item)">{{item.name}}<i v-if="item.cname">（{{item.cname}}）</i></li>
       </ul>
-      <img src="/static/images/cancel_icon.png" alt="" v-show="showCancel" @click="inputContent = ''">
+      <img src="/static/images/cancel_icon.png" alt="" v-show="inputContent && showCancel" @click="inputContent = ''">
     </div>
-    <button @click="changeInputContent" :style="{backgroundColor: color}">
+    <button @click="changeInputContent" :style="{backgroundColor: color}" :class="{'btn-active': showActive}">
       <img src="/static/images/search_icon.png" alt="" class="search-icon">
     </button>
   </div>
@@ -68,7 +69,8 @@ export default {
       showSelect: false,
       inputContent: '',
       showResult: false,
-      showCancel: false
+      showCancel: false,
+      showActive: false
     }
   },
   methods: {
@@ -96,6 +98,7 @@ export default {
       this.changeInputContent();
     },
     hideSelect() {
+      this.showResult = false
       this.showCancel = false;
       if(!this.showSelect) return;
       this.showSelect = false;
@@ -125,26 +128,30 @@ export default {
     padding-left 110px
     padding-right 25px
     background $colFFF
-    border 1px solid $col422
+    border 1px solid #E1E1E1
+    /*border 1px solid $col422*/
     border-radius 2px 0 0 0
     &:focus
       outline 0
   span
     position absolute
-    left 10px
     top 0
-    padding-right 16px
-    line-height 30px
+    height 28px
+    padding-left 10px
+    padding-right 25px
+    line-height 28px
     font-size 13px
     color #999
     letter-spacing 0
+    border 1px solid #E1E1E1
+    background #F4F6FA
     cursor pointer
     &::after
       position absolute
       top 13px
-      right 0
+      right 5px
       content ''
-      triangle_down($col422)
+      triangle_down(#999)
   ul
     box-sizing()
     position absolute
@@ -161,12 +168,14 @@ export default {
       float left
       width 100%
       height 30px
-      padding-left 10px
+      padding 0 10px
       line-height 30px
       background-color #FFF
       cursor pointer
       &:hover, &.active
         background-color $col3EB
+  .search-title
+    width 135px
   img
     position absolute
     top 10px
@@ -178,12 +187,12 @@ button
   width 72px
   height 30px
   margin-right 125px
-  background $col422
+  background #E1E1E1
   border-radius 0 2px 2px 0
   border 0
   cursor pointer
   &:hover
-    background $col350
+    background $col422
   .search-icon
     display block
     position absolute
@@ -192,4 +201,18 @@ button
     margin -8px 0 0 -8px
     width 16px
     height 16px
+
+.search-active
+  input
+    box-sizing()
+    border 1px solid $col422
+  span
+    border 1px solid $col422
+
+.btn-active
+  background $col422
+  &:hover
+    background $col350
+
+
 </style>
