@@ -230,6 +230,11 @@
       }
     },
     mounted() {
+      if(this.$route.query.icon) {
+        this.filte.coinImg = `${this.HostUrl.http}image/${this.$route.query.icon}`
+        this.filte.currency =this.$route.query.currency
+        this.filte.cName = this.$route.query.name
+      }
       this.fetchData();
       this.Bus.$on("onOrderFail",(msg) => {
         this.verifyState(msg);

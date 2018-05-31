@@ -14,7 +14,7 @@
                        title="BTC"
                        :classify="coinType"
                        :emitValue="coinTypeValue"
-                       :width=470
+                       :width=455
                        :widthSelect=478
                        :top=40
                        :widthWrap=480>
