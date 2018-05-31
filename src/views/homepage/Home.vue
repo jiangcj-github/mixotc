@@ -17,7 +17,7 @@
           <div v-if="isLogin">
             <div class="trust clearfix">
               <span class="contact isTrust" @click="Bus.$emit('contactSomeone',{id:info.id_str})">
-                <img src="/static/images/talk.png" alt=""><i>联系TA</i>
+                <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
               </span>
               <button class="btn white" v-if="info.isTrust" @click="cancelTrust">取消信任</button>
               <button class="btn green" v-else="" @click="joinTrust">加入信任</button>
@@ -131,7 +131,8 @@
           this.info.isTrust=1;
           this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(uid)});
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          this.$refs.alert.showAlert({content:"加入信任失败"});
+          console.log(msg);
         });
       },
       cancelTrust(){
@@ -142,7 +143,8 @@
           this.info.isTrust=0;
           this.$store.commit({type:"delTrust",data:this.JsonBig.stringify(uid)});
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          this.$refs.alert.showAlert({content:"取消信任失败"});
+          console.log(msg);
         });
       },
       loadTraderInfo(){
@@ -152,13 +154,13 @@
           this.WsProxy.send("otc","trader_info",{id:uid, uid:loginUid}).then((data)=>{
             this.parseInfo(data);
           }).catch((msg)=>{
-            alert(JSON.stringify(msg));
+            console.log(msg);
           });
         }else{
           this.Proxy.hp_tradeInfo({id:uid}).then((data)=>{
             this.parseInfo(data.data);
           }).catch((msg)=>{
-            alert(JSON.stringify(msg));
+            console.log(msg);
           });
         }
       },
@@ -245,11 +247,6 @@
               line-height 20px
               letter-spacing 0.23px
               font-size 12px
-              color inherit
-            &.isTrust
-              color #FFB422
-              &:hover
-                color #fea350
           .btn
             width 90px
             height 25px
@@ -277,26 +274,6 @@
             font-size 14px
             color #333333
             letter-spacing 0.16px
-    .popContent
-      width 100%
-      height 100%
-      display flex
-      justify-content center
-      align-items center
-      font-size: 14px
-      color #333333
-      letter-spacing 0.29px
-      position relative
-      .close
-        position absolute
-        top 0
-        right 0
-        font-size 20px
-        cursor pointer
-        display inline-block
-        line-height 24px
-        width 24px
-        text-align center
     .menu-tab
       margin-top 20px
       height 60px

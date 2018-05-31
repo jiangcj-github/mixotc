@@ -109,7 +109,7 @@
         }).then((data)=>{
           location.reload();
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          console.log(msg);
         });
       }
     },

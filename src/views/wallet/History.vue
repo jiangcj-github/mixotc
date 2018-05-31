@@ -8,7 +8,7 @@
         <!--右边内容-->
         <div class="right">
           <div class="export">
-            <a href="javascript:void(0);" @click="exportCsv"><img src="/static/images/wallet/export.png">导出账单</a>
+            <a href="javascript:void(0);" @click="exportXls"><img src="/static/images/wallet/export.png">导出账单</a>
           </div>
           <div class="filter">
             <div class="input-group">
@@ -93,7 +93,10 @@
                   <p v-if="e.billType===4">{{e.addr}}</p>
                   <p v-if="e.billType===5">{{e.isIn?"法币账户":"币币账户"}}</p>
                 </div>
-                <div class="num"><p :class="{in:e.isIn,out:!e.isIn}">{{e.num}}</p><p>{{e.fee}} {{e.coin}}</p></div>
+                <div class="num">
+                  <p :class="{in:e.isIn,out:!e.isIn}">{{e.num}}</p>
+                  <p v-show="e.fee>0">{{e.fee}} {{e.coin}}</p>
+                </div>
                 <div class="state">
                   <p>{{e.stateStr}}</p>
                 </div>
@@ -434,7 +437,7 @@
           this.bills.push(item);
         });
       },
-      exportCsv(){
+      exportXls(){
         let jsonField={};
         jsonField["序号"]="index";
         jsonField["时间"]="time";
@@ -497,7 +500,7 @@
           JsonExcel.name="MixOTC-账单.xls";
           JsonExcel.generate();
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          console.log(msg);
         });
       },
     },

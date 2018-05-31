@@ -62,7 +62,7 @@
           this.total=data.amount;
           this.parseCands(data.users);
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          console(msg);
         });
       },
       loadUncheckByUid(id){
@@ -126,7 +126,6 @@
         this.infos.his.sort((a,b)=>{
           return a.submitTime<b.submitTime?1:-1;
         });
-        console.log(this.infos);
       },
     },
     mounted(){

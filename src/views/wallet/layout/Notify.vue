@@ -87,6 +87,10 @@
           this.slide();
         },3000,"timer1");
       },
+    },
+    destroyed(){
+      timeout(null,0,"timer0");
+      timeout(null,0,"timer1");
     }
   }
 </script>
