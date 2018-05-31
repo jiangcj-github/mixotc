@@ -55,7 +55,7 @@
       }
     },
     mounted() {
-      // this.WsProxy.send('control', 'del_friend', {gid: this.JsonBig.parse('215993507544829952'), id: this.JsonBig.parse('19855731022917632') }).then(data => {})
+      this.$store.dispatch({ type: 'getService', ws: this.WsProxy});
       this.initData()
       this.reqFriend()//监听好友请求
       this.beKickGroup()//监听被踢出群
@@ -295,6 +295,7 @@
           }
         })
         this.searchRange = result
+        console.log(result);
       },
       delUser(chat) {
         let messages = this.$store.state.messages[chat.id],

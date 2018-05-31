@@ -98,5 +98,10 @@ export default {
         obj[JsonBig.stringify(item.id)] = item.members.length;
       });
     return obj;
+  },
+  serviceIds: state => {
+    return state.serviceList.map(item=>{
+      return JsonBig.stringify(item.id);
+    })
   }
 };

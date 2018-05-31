@@ -173,7 +173,8 @@
         'friendIds',
         'friendGid',
         'infoDiction',
-        'title'
+        'title',
+        'serviceIds'
       ]),
       curChat() {
         return this.$store.state.curChat
@@ -291,7 +292,8 @@
                 name: name
               }
           })
-           this.$store.commit({type: 'newChat', data:{
+          let isService = this.serviceIds.includes(id);
+           !isService && this.$store.commit({type: 'newChat', data:{
               id: id,
               uid: id,
               group: false,
@@ -299,6 +301,17 @@
               phone: phone,
               email: email,
               moreFlag: false,
+              unread: 0
+           }})
+           isService && this.$store.commit({type: 'newChat', data:{
+              id: id,
+              group: false,
+              service: true,
+              icon: "/static/images/service_icon.png",
+              nickName: '客服',
+              phone: false,
+              email: false,
+              moreFlag: true,
               unread: 0
            }})
         })
@@ -416,8 +429,8 @@
             }
             // 群聊（好友单聊实质为群聊）
             if (Array.isArray(res) && res[0].op === 6) {
-              res.forEach(async (ite) => {
-                let {id, uid, gid, data, type } = res[0].body;
+              res.forEach(async (ite, index) => {
+                let {id, uid, gid, data, type } = res[index].body;
                 let obj = {},
                     messageContent = {
                       text: data.msg && data.msg.br(),
@@ -448,6 +461,7 @@
                   time: new Date() - 0
                 }
                 await _this.dealNewChat(_this.JsonBig.stringify(gid), 1)
+                console.log('add................2')
                 _this.$store.commit({type: 'addMessages', data:{id: _this.JsonBig.stringify(gid), msg: obj }})
               })
             }
@@ -519,7 +533,7 @@
               ext: file.type,
             }
           }).then(data => {
-            this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0 }})
+            this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:0, mid: this.JsonBig.stringify(data.data.msg_id)}})
           }).catch(error => {
             this.$store.commit({type: 'changeMessageState', data:{id: tid, time: time, code:1 }})
           })

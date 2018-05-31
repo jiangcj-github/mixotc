@@ -11,7 +11,7 @@
         <div class="info">
           <p>
             <span>昵称</span>
-            <i v-if="!isSetting">{{userInfo.name}}</i>
+            <i v-if="!isSetting">{{name}}</i>
             <i class="set" v-if="!isSetting" @click="()=>{name = userInfo.name;isSetting=true}">设置</i>
             <input type="text" placeholder="输入昵称" v-if="isSetting" v-model.trim="name" ref="name" maxlength="20" v-clickoutside="()=>{isSetting = false}">
             <b 
@@ -114,7 +114,7 @@ import AddressInfo from "../../components/account/AddressInfo";
         delId: null,
         showTip:false,
         timer: null,
-        name: ''
+        name: this.$store.state.userInfo.name
       }
     },
     components: {
@@ -178,7 +178,7 @@ import AddressInfo from "../../components/account/AddressInfo";
         this.$store.dispatch({ type: 'moneyAddress', ws: this.WsProxy})
       },
       updateName() {
-        if(this.name === '') {
+        if(this.name === '' || this.userInfo.name === this.name) {
           this.isSetting=false;
           return;
         };
@@ -291,6 +291,7 @@ import AddressInfo from "../../components/account/AddressInfo";
           margin-right 30px
         .info
           float left
+          width 500px
           margin-top 4px
           font-size $fz14
           color $col333
@@ -303,7 +304,7 @@ import AddressInfo from "../../components/account/AddressInfo";
             letter-spacing 0.29px
             b
               position absolute
-              right 42px
+              right 195px
               bottom -1px
               cursor pointer
             i.set, i.confirm

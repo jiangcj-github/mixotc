@@ -3,6 +3,7 @@ export default {
   isLogin: false,
   userInfo: null,
   showChat: false,
+  serviceList:[],
   evaluateOrderResult: {}, // 订单评论结果
   transformInfo: 0, // 支付标识来源
   newOrder: false,

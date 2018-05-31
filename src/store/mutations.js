@@ -26,24 +26,24 @@ export default {
   [types.editBuyCon](state, { data }) {
     // 广告编辑模块
     state.editContent = data.content;
-    state.editFlag = data.flag
+    state.editFlag = data.flag;
   },
-[types.editSaleCon](state, { data }) {
-  // 广告编辑模块
-  state.editContent = data.content;
-  state.editFlag = data.flag
-},
+  [types.editSaleCon](state, { data }) {
+    // 广告编辑模块
+    state.editContent = data.content;
+    state.editFlag = data.flag;
+  },
   [types.releaseAd](state, { data }) {
     // 广告编辑模块
-    state.editFlag = data.flag
+    state.editFlag = data.flag;
   },
   [types.initPaymentSore](state, { data }) {
     // 广告支付
-    state.PaymentSoreData = data
+    state.PaymentSoreData = data;
   },
   [types.coinLoop](state, { data }) {
     // 顶部数据轮询
-    state.coinLoopData = data
+    state.coinLoopData = data;
   },
   // 消息部分
   [types.changeChatBox](state, { data }) {
@@ -52,12 +52,11 @@ export default {
     state.showChat = data;
   },
   [types.changeToken](state, { data }) {
-
     state.token = data;
   },
   [types.changeCode](state, { data }) {
     state.userInfo = {};
-    state.userInfo['code'] = data.code;
+    state.userInfo["code"] = data.code;
     state.userInfo["email"] = data.email;
     state.userInfo["phone"] = data.phone;
   },
@@ -152,13 +151,16 @@ export default {
   [types.addMessages](state, { data }) {
     let idex = false,
       flag = false;
-      state.chat.forEach((item, index) => {
-        item.id === data.id && (idex = index);
-      });
-      !state.messages[data.id] && (state.messages[data.id] = []); //对话记录不存在时创建
-      let last = state.messages[data.id].slice(-1);
-    (!last[0] || last[0].id !== data.msg.id) && state.messages[data.id].push(data.msg);
-    // state.messages[data.id].push(data.msg);
+    state.chat.forEach((item, index) => {
+      item.id === data.id && (idex = index);
+    });
+    !state.messages[data.id] && (state.messages[data.id] = []); //对话记录不存在时创建
+    let isSame = false;
+    data.msg.id && state.messages[data.id].forEach(item => {
+      if (item.id === data.msg.id) isSame = true;
+    });
+    !isSame && state.messages[data.id].push(data.msg);
+    
     data.id === "system" && state.curChat !== "system" && state.systemMessage++;
     data.id !== "system" &&
       state.curChat !== data.id &&
@@ -327,6 +329,10 @@ export default {
         if (id !== state.curChat) item.unread++;
       }
     });
+  },
+
+  [types.getService](state, { data }) {
+    state.serviceList = data;
   },
   /**************个人中心部分 *********/
   // 更新个人信息

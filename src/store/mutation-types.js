@@ -30,6 +30,7 @@ const initState = "initState"; // 改变登陆用户时初始化必要的state
 const updateStrangerInfo = "updateStrangerInfo"; // 跟新陌生人信息
 const agreeAddFriend = "agreeAddFriend";
 const delFriend = "delFriend";
+const getService = "getService";//获取客服名单
 
 
 const showTransform = "showTransform"; // 支付弹窗来源
@@ -92,6 +93,7 @@ export {
   updateStrangerInfo,
   agreeAddFriend,
   delFriend,
+  getService,
   evaluateOrder,
   showTransform,
   editBuyCon,

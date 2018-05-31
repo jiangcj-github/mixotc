@@ -124,7 +124,7 @@
           position relative
           &:after
             display: block;
-            background url('/static/icon/shuaxin_up@3x.png') no-repeat center center / 12px 13px
+            // background url('/static/icon/shuaxin_up@3x.png') no-repeat center center / 12px 13px
             width: 12px;
             height: 13px;
             content: '';
@@ -136,7 +136,7 @@
           position relative
           &:after
             display: block;
-            background url('/static/icon/shuaxin_down@3x.png') no-repeat center center / 12px 13px
+            // background url('/static/icon/shuaxin_down@3x.png') no-repeat center center / 12px 13px
             width: 12px;
             height: 13px;
             content: '';

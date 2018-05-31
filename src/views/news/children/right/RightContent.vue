@@ -37,8 +37,8 @@
                         :id="'img' + item.time"
                         :src="item.msg.content"
                         alt=""
-                        @load="imgLoad(curChat, item.time, 'img' + item.time)"
-                        @error="imgError(curChat, item.time, item.msg.content)"
+                        @load="imgLoad(key, item.time, 'img' + item.time)"
+                        @error="imgError(key, item.time, item.msg.content)"
                         @click="showBigPicture(!item.isLoding && !item.isFail, item.msg.content, 'img' + item.time)"
                       >
                     </span>

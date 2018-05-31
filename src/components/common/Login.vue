@@ -22,7 +22,7 @@
       <div class="yzm">
         <span v-if="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先拖拽滑块</b></span>
         <p v-clickoutside="() => { codeCancel = false}">
-          <input type="text" @keyup.enter="login" @focus="codeCancel = true"  placeholder="验证码" value="" v-model.trim="code" :disabled="!moveTrue || !checkAccount(account)">
+          <input type="text" @keyup.enter="login" @focus="codeCancel = true"  placeholder="验证码" v-model.trim="code" :disabled="!moveTrue || !checkAccount(account)">
           <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-if="codeCancel && code.length" @click="code = ''">
         </p>
         <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend, disable: !moveTrue || !checkAccount(account)}" @click="sendCode">{{isSend ? time + '秒后重发': sendCodeText}}</button>
@@ -41,6 +41,11 @@
     <BasePopup class="popup" :show="loginSuccess" :top="29.17" v-on:click.native="hideLoginForm">
       <slot>
         <p>登录成功</p>
+      </slot>
+    </BasePopup>
+    <BasePopup class="popup" :show="frequentlyTip" :top="40" @click.native="hideFrequently">
+      <slot>
+        <p>本账号操作频繁，请{{restTime}}分钟后再登录</p>
       </slot>
     </BasePopup>
 
@@ -76,8 +81,10 @@
         time:'',
         interval: null,
         timer: null,
+        timer1: null,
         sendCodeText: '发送验证码',
-        href: ''
+        frequentlyTip: false,
+        restTime: ''
       }
 
     },
@@ -93,6 +100,18 @@
       }
     },
     methods: {
+      hideFrequently(){
+        this.frequentlyTip = false;
+        clearTimeout(this.timer1);
+      },
+      showFrequently(){
+        this.frequentlyTip = true;
+        clearTimeout(this.timer1);
+        this.timer1 = setTimeout(() => {
+          this.frequentlyTip = false;
+          clearTimeout(this.timer1)
+        }, 3000);
+      },
       hidePopup() {
         this.loginSuccess = false
         this.hideLoginForm();
@@ -161,6 +180,15 @@
         let ws = this.WebSocket;
         ws.start(this.HostUrl.ws);
         let seq = ws.seq;
+        ws.onMessage[seq] = {
+          callback: (res)=>{
+            if(res && res.body.ret === 201) {
+              this.restTime = res.body.rest_time/60 + 1;
+              this.showFrequently()
+            }
+          },
+          date:new Date()
+        }
         ws.onOpen[seq]= () =>{
           ws.send(sendConfig('send_code',{
             seq: seq,
@@ -256,6 +284,7 @@
       this.Bus.$off(this.slideStatus);
       clearInterval(this.interval);
       clearTimeout(this.timer);
+      clearTimeout(this.timer1);
     }
   }
 </script>
@@ -402,10 +431,11 @@
             right 124px
             cursor pointer
           input
+            float left
             box-sizing()
             width 210px
             height 40px
-            float left
+            font-size $fz14
             background-color: $col6FA
             placeholder()
             padding-left 10px

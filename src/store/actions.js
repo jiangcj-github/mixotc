@@ -52,7 +52,7 @@ export default {
       .send("control", "user_info", {
         id: state.userInfo.uid
       })
-      .then(({name, phone, email, icon, verify, btverify}) => {
+      .then(({ name, phone, email, icon, verify, btverify }) => {
         commit({
           type: "updateUserInfo",
           data: {
@@ -66,5 +66,12 @@ export default {
         });
       })
       .catch(error => {});
+  },
+  async [types.getService]({ commit, state }, { ws }) {
+    // 收款地址
+    await ws
+      .send('control', 'client_service').then(data => { 
+        commit({ type: "getService", data: data });
+      }).catch(error => {});
   }
 };

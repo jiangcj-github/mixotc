@@ -6,7 +6,7 @@ export default {
 
   // 正式服
   // ws: "wss://mixotc.com/sub",
-  // http: "https://mixotc.com/"
+  // http: "https://mixotc.com/",
 
   // app地址前缀
   download: "http://192.168.113.33/", //测试服

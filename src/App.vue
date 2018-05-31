@@ -10,6 +10,12 @@
         <p>您的账号已在其他地方登录，请重新登录</p>
       </slot>
     </BasePopup>
+    <BasePopup :show="showError" class="app-popup"  :top="40">
+      <slot>
+        <img src="/static/images/close_btn_tr2.png" alt="" @click="showError = false">
+        <p>抱歉，服务器维护中，请耐心等待。</p>
+      </slot>
+    </BasePopup>
   </div>
 </template>
 
@@ -36,7 +42,8 @@
         timer3: null,
         timer4: null,
         showTop: false,
-        showTip: false
+        showTip: false,
+        showError: false
       }
     },
     beforeCreate(){
@@ -54,6 +61,7 @@
       }
     },
     created() {
+      this.listenOffline();
       window.addEventListener('scroll', this.handleScroll);
       this.$store.commit({type: 'changeLoginForm', data: false})
       // this.$store.commit({type: 'changeLogin', data: false});
@@ -116,7 +124,6 @@
       ws.start(this.HostUrl.ws);
     },
     mounted() {
-      this.listenOffline();
       //websock发包接口需先判断登录状态
       this.WebSocket.beforeSend = (txt) => {
         let op =  this.JsonBig.parse(txt).op;
@@ -147,14 +154,22 @@
           clearTimeout(this.timer4)
         }, 3000);
       },
-      //监听被挤掉的通知
+      // 两个全周期存在的监听
       listenOffline(){
         this.WebSocket.onMessage['offline'] = {
-          callback(res){
+          callback: (res) => {
+            //监听被挤掉的通知
             if(res.body && res.body.type === 'offline') {
               this.showPopup();
               this.logout();
+              return;
             };
+            //错误码为250时，提示服务器维护中，做退出操作
+            if(res.body && res.body.ret === 250) {
+              this.showError = true;
+              this.logout();
+              return;
+            }
           }
         }
       },
@@ -279,6 +294,11 @@
         height 94px
         line-height 94px
         text-align center
+      img
+       position absolute
+       top 10px
+       right 10px
+       cursor pointer
     .to-top
       display none
       position fixed

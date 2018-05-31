@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="news-wrap clearfix" @click="openBox">
-      <span v-if="!newMessage && unread" class="tip"><b>{{unread > 10 ? '...' : unread }}</b></span>
+      <span v-if="!newMessage && unread" class="tip" ><b :class="{'move-top': unread > 10 }">{{unread > 10 ? '...' : unread }}</b></span>
       <div class="chat">
         <img src="/static/images/talk_icon.png" alt="">
         <i></i>
@@ -83,8 +83,8 @@
       position absolute
       top -5px
       right -5px
-      width 14px
-      height 14px
+      width 17px
+      height 17px
       border-radius 50%
       background-color $col94C
       z-index 99
@@ -92,10 +92,12 @@
         position absolute
         width 100%
         height 100%
+        font-size $fz13
         text-align center
-        line-height 14px
+        line-height 17px
         color #FFF
-        fz11()
+        &.move-top
+          top -4px
     .chat
       position:relative
       float right
