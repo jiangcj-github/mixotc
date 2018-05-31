@@ -338,18 +338,25 @@
       this.Bus.$on('changeInputContent', ({type, data}) => {
         if (type == 'order_id') {
           this.orderId = data
+          this.contentList = this.contentList.filter(v => {
+            return this.JsonBig.stringify(v.id) == data
+          })
         } else if (type == 'order_tradecode') {
           this.tradeCode = data
+          this.contentList = this.contentList.filter(v => {
+            return v.trade_code == data
+          })
         } else{
           this.trader = data
+          this.contentList = this.contentList.filter(v => {
+            return v.name == data
+          })
         }
-        if (this.result.length === 0) {
+        if (this.result.length === 0) { // 无搜索直接的点击
           this.comment = 0
-          this.selectState = this.contentTabIndex === 1 ? '123' : '4,5,6,7,8,9,10,11'
+          this.selectState = '1,2,3'
+          this.contentTabIndex = 1
         }
-        this.contentList = this.contentList.filter(v => {
-          return this.JsonBig.stringify(v.id) == data
-        })
         this.contentList.length == 0 && (this.contentTabIndex === 1 && ((this.selectState = '4,5,6,7,8,9,10,11') && (this.contentTabIndex = 2)) || ((this.selectState = '1,2,3') && (this.contentTabIndex = 1)))
         this.initData()
         console.log('搜索', this.contentList, this.contentList.length)
@@ -456,6 +463,8 @@
                 this.endTime = (v.limit - (Math.floor(new Date().getTime() / 1000) - v.create * 1) / 60) * 60000
                 this.showOverTimer();
               }
+              // 数据格式化
+              v.price = this.JsonBig.stringify(v.price).formatFixed(2)
               // 状态数组
               let stateListObject = {
                 1: [{name: '待付款', flag: 3}],

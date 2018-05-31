@@ -395,7 +395,7 @@
         });
       },
       reset() {
-        this.adBuyObj.currency = 'btc'
+        this.adBuyObj.currency =  this.coinType[0]
         this.adBuyObj.mode = 1
         this.adBuyObj.premium = 0
         this.adBuyObj.price = ''
