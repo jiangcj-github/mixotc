@@ -25,7 +25,6 @@
       Left,
       Uncheck,
       Check,
-      Alert,
     },
     data() {
       return {
