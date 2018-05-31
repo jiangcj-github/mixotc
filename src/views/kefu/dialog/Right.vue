@@ -208,7 +208,8 @@
         noticeCoin: "", // 通知放币
 
         errText: "", // 错误提示
-        errLayer: false
+        errLayer: false,
+        swiperIndex: 0
       }
     },
     computed: {
@@ -289,14 +290,9 @@
             on: {
               slideChangeTransitionEnd() {
                 _this.$refs.textarea.innerHTML = ''
+                _this.swiperIndex = this.activeIndex
                 _this.isBuyer = _this.otherInfo[this.activeIndex].buyer_id == _this.serviceNow ?  "买家" : "卖家";
                 //_this.recv = _this.otherInfo && _this.otherInfo[this.activeIndex].buyer_id == _this.serviceNow ?  0 : 1; // 是否为买家 0 买 1 卖
-                // 证明无效输入框内容
-                _this.ineffectiveProof = MSGS.get(1, _this.appl, _this.recv) ? MSGS.get(1, _this.appl, _this.recv).replace(/reason/, _this.pop4Text).replace(/trade_code/, `<i style="color:#FF794C">[${_this.otherInfo[this.activeIndex].trade_code}]</i>`) : '';
-                // 上传付款证明
-                _this.paymentProofs = MSGS.get(0, _this.appl, _this.recv) ? MSGS.get(0, _this.appl, _this.recv).replace(/orderId/, `<a href="#/order" style="color:#00A123">(${_this.otherInfo[this.activeIndex].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${_this.otherInfo[this.activeIndex].trade_code}]</i>`) : '';
-                // 通知放币
-                _this.noticeCoin = MSGS.get(3, _this.appl, _this.recv) ? MSGS.get(3, _this.appl, _this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${_this.otherInfo[this.activeIndex].sid})</a>`) : '';
               }
             }
           })
@@ -469,10 +465,8 @@
         return time2.formatTime()
       },
       onClickM0() { // 点击上传付款证明按钮
-        if (this.otherInfo && this.otherInfo.length === 1) {
-          this.paymentProofs = MSGS.get(0, this.appl, this.recv);
-          this.paymentProofs = this.paymentProofs ? this.paymentProofs.replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`) : '';
-        }
+        this.paymentProofs = MSGS.get(0, this.appl, this.recv);
+        this.paymentProofs = this.paymentProofs ? this.paymentProofs.replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.swiperIndex].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[this.swiperIndex].trade_code}]</i>`) : '';
         this.$refs.textarea.innerHTML = this.paymentProofs;
         this.$refs.textarea.focus();
       },
@@ -488,17 +482,14 @@
           return
         }
         this.showPop4 = false
-        if (this.otherInfo && this.otherInfo.length === 1) {
           this.ineffectiveProof = MSGS.get(1, this.appl, this.recv);
-          this.ineffectiveProof = this.ineffectiveProof ? this.ineffectiveProof.replace(/reason/, this.pop4Text).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`) : '';
-        }
+          this.ineffectiveProof = this.ineffectiveProof ? this.ineffectiveProof.replace(/reason/, this.pop4Text).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[this.swiperIndex].trade_code}]</i>`) : '';
+
         this.sendMsg = this.ineffectiveProof;
         this.$refs.textarea.focus();
       },
       onClickM1() { // 点击通知放币按钮
-        if (this.otherInfo && this.otherInfo.length === 1) {
-          this.noticeCoin = MSGS.get(3, this.appl, this.recv) ? MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`) : '';
-        }
+        this.noticeCoin = MSGS.get(3, this.appl, this.recv) ? MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.swiperIndex].sid})</a>`) : '';
         this.$refs.textarea.innerHTML = this.noticeCoin;
         this.$refs.textarea.focus();
       },
