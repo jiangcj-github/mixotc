@@ -1,5 +1,5 @@
 <template>
-  <div class="head" v-if="lists.length<=0">
+  <div class="navigation" v-if="lists.length<=0">
     <h3><a href="/#/">mixOTC</a>-<a href="/#/wallet">钱包</a></h3>
   </div>
   <div class="notify" v-else="">
@@ -92,12 +92,13 @@
 </script>
 <style scoped lang="stylus">
   @import "../../../stylus/base";
+
   *{box-sizing:border-box;}
 
-  .head{width:1200px;margin:10px auto 20px auto;height:20px;line-height:20px;}
-  .head>h3{font-size:12px;margin-left:15px;}
-  .head>h3>a{}
-  .head>h3>a:hover{color:#fea350;}
+  .navigation{width:1200px;margin:10px auto 20px auto;height:20px;line-height:20px;}
+  .navigation h3{font-size:12px;margin-left:10px;}
+  .navigation h3 a{margin:0 5px;font-size:inherit;}
+  .navigation h3 a:hover{color:#ffb422;}
 
   .notify{background:#FFE4D3;margin-bottom:20px;}
   .notify .wrap{width:1200px;margin:0 auto;text-align:center;height:40px;line-height:40px;position:relative;}
