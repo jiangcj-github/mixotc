@@ -76,6 +76,7 @@
         </div>
         <div class="price">
           <!--<img src="/static/images/hint.png">-->
+          <!---->
           <b v-if="tip" class="err-tip">最大限额不能低于最小限额，且最小限额为200</b>
           <input type="text" class="min" @input="inputDealMin()" ref='min' v-model="filte.min" placeholder="最低限额" step="1" min="200" @focus="minCancel = true" @blur="minCancel = false">
           <img src="/static/images/cancel_icon.png" class="min-cancel" v-show="minCancel && filte.min" @mousedown="filte.min = ''">
@@ -635,7 +636,7 @@
           position relative
           float left
           box-sizing()
-          width 100px
+          width 105px
           height 30px
           padding 0 24px
           margin-right 15px
@@ -647,7 +648,7 @@
         &::before
           position absolute
           top 14.5px
-          left 105px
+          left 110px
           width 5px
           height 1px
           content ''

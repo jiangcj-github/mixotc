@@ -175,7 +175,7 @@
       initData() { // 初始化弹窗数据
         let balanceArr = [];
         this.coinType = [];
-        this.WsProxy.send('wallet', 'wallets', {
+        this.WsProxy.send('wallet', 'wallets', { // 法币账户
           id: this.$store.state.userInfo.uid, // 用户id
         }).then((data)=>{
           console.log('钱包', data)
@@ -191,6 +191,20 @@
         }).catch((msg)=>{
           console.log(msg);
         });
+
+        this.Proxy.hp_account({uid:this.$store.state.userInfo.uid}).then((data)=> { // 币币账户
+          console.log('币币账户')
+          // if(!data||!data.objects||data.objects.length<=0){
+          //   this.bbErr=1; //无数据
+          // }else{
+          //   this.bbErr=0;
+          //   this.bbTotal=data.count;
+          //   this.parseBb(data.objects);
+          // }
+        }).catch(msg => {
+          //this.bbErr=3;
+        });
+
       },
       allCheck() { // 数量下的全部按钮
         this.amount = this.fromAmount
@@ -295,6 +309,8 @@
             margin 6px 12px 0
     .amount-input
       position relative
+      input
+        font-size 13px
       span
         position absolute
         top -25px

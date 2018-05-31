@@ -109,7 +109,7 @@
 
       async getCoinsData() { // 获取币种资料数据
         this.inputValue = '';
-        await this.Proxy.getCoinData({app: 0, symbolId: this.id, period: '24h'}).then(res => {
+        await this.Proxy.getCoinDataAll({app: 0, symbolId: this.id, period: '24h'}).then(res => {
           console.log('资料', res.data, this.JsonBig.stringify(res.data.price.cny), this.JsonBig.stringify(res.data.totalValue.cny))
           this.coinDataObj = res.data
         }).catch(msg => {
@@ -265,6 +265,8 @@
               letter-spacing 0.27px
               text-decoration underline
               margin-right 20px
+              &:hover
+                color $col350
       /*a:last-child*/
       /*padding 5px 10px*/
       /*font-size 13px*/
@@ -298,6 +300,8 @@
             background #FFB422
             color #FFF
             border-radius 2px
+            &:hover
+              background $col350
 
 
 </style>

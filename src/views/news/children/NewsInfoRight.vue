@@ -153,6 +153,7 @@
       this.delFriend()//监听被加好友
       this.listenChat()//监听消息
       this.beAddedGroup()//监听被加入群
+      this.listenOrderR()//监听提醒放币提醒付款
       //监听其他页面调用聊天窗口
       this.Bus.$on('contactSomeone',({id, msg})=> {
         this.contactSomeone(id, msg)
@@ -351,18 +352,23 @@
         let _this = this;
         this.WebSocket.onMessage['rmd_ord_message'] = {
             async callback(res) {
-            if(res.body && res.body.type === 'rmd_ord') {
+            if(res.body && res.body.type === 'rmd_ord' && [1, 2, 5].includes(res.body.data.state)) {
               let {id, icon, name, order, state } = res.body.data;
-              let isgroup = false,  _id = _this.JsonBig.stringify(id);
+              let isgroup = false,  _id = _this.JsonBig.stringify(id), _order = _this.JsonBig.stringify(order);
               _this.friendGid[_id] && (isgroup = true)
               let obj = {
                 id: _this.JsonBig.stringify(res.body.id),
                 cid: isgroup ? _this.friendGid[_id] : _id,
-                order : _this.JsonBig.stringify(order),
+                order : _order,
+                time: new Date() - 0,
+                type: 'rmd_ord',
+                msg: state === 2 ? `订单号${_order}已付款，请尽快放币` : `订单号${_order}请及时付款 `,
                 icon,
                 name,
                 state,
               }
+              isgroup ? await _this.dealNewChat(_this.friendGid[_id], 1) : await _this.dealNewChat(_id, 0)
+              _this.$store.commit({type: 'addMessages', data:{id: obj.cid, msg: obj }})
             }
           }
         }

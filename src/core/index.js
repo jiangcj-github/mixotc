@@ -147,8 +147,11 @@ const RUN_APP = (App, config, plugin) => {
   config.LoopTaskConfig && Object.keys(config.LoopTaskConfig).length && Loop.install(Vue.prototype, config.LoopTaskConfig);
   config.PrototypeConfig && Prototype.install(Vue.prototype, config.PrototypeConfig);
 
-  console.log(isNewTab, tabIndex)
+  // console.log(isNewTab, tabIndex)
   router.beforeEach((to, from, next) => {
+    if (to.meta.title) {
+      document.title = to.meta.title;
+    }
     window.scrollTo(0, 0);
     Vue.prototype.toPath = to.path;
     if ((isNewTab && tabIndex)) {
@@ -162,6 +165,7 @@ const RUN_APP = (App, config, plugin) => {
     }
     if (!store.state.token) {
       next({ path: "/transaction" });
+      document.title = '交易中心';
       return;
     }
     next();

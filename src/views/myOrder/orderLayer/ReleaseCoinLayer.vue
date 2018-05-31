@@ -8,8 +8,10 @@
       <img src="/static/images/close_btn.png" alt="" @click="closePopup">
       <div class="buy-layer-content">
         <h1>请输入支付密码</h1>
-        <p class="err-wrap">
-          <input type="password" v-model.trim="PaymentValue" class="passInput" @input="errText = ''"/>
+        <p class="err-wrap fund-pass">
+          <input :type="inputType" v-model.trim="PaymentValue" class="passInput" @input="errText = ''"/>
+          <img src="/static/images/visible.png" alt=""  v-if="typeFlag" @click="()=>{typeFlag=false; inputType='password'}">
+          <img src="/static/images/invisible.png" alt="" v-else @click="()=>{typeFlag=true; inputType='text'}">
           <b class="errortext" v-if="errorShow">{{errText}}</b>
         </p>
         <div>
@@ -92,6 +94,8 @@
         errText: '',
         remindLayer: false,
         remindText: '3456789',
+        typeFlag: false, //支付密码眼睛提示
+        inputType:'password', // 支付密码默认type
       }
     },
     components: {
@@ -297,6 +301,12 @@
       display block
       font-size 12px
       color #ff794c
+    .fund-pass
+      position relative
+      img
+        position absolute
+        top 3px
+        right 75px
 
     h1
       font-size $fz20

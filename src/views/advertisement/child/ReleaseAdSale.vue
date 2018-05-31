@@ -39,7 +39,7 @@
       <li v-show="switchValue">
         <i>溢价</i>
         <em>参考价：</em>
-        <b>{{priceNow && priceNow.toString().formatFixed(2)}} CNY/{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
+        <b>{{changePrice && changePrice.toString().formatFixed(2)}} CNY/{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
       </li>
       <li v-show="switchValue">
         <SliderBar
@@ -73,7 +73,7 @@
           <i>出售数量</i>
           <em>可用余额：</em>
           <b>{{userBalance}}{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
-          <router-link to="/wallet/charge" tag="button" class="sale-btn">去充币</router-link>
+          <router-link :to="{path: '/wallet/charge', query: {coin: adSaleObj.currency}}" tag="button" class="sale-btn">去充币</router-link>
           <strong :class="{selected: adSaleObj.vary == 2}" @click="showVary()">随可用余额变动</strong>
         </p>
         <SliderBar
@@ -177,7 +177,7 @@
         adSaleObj: {
           "id": 0, // 广告id
           "uid": '', // 用户id
-          "currency": 'btc', // 电子货币
+          "currency": '', // 电子货币
           "money": 'cny', // 法币
           "mode": 1, // 出售类型: 1 固定; 2 溢价
           "premium": 0, // 溢价
@@ -195,6 +195,7 @@
 
         selectPrice: [], // 根据币种选择返回情况
         priceNow: '',
+        changePrice: '', // 溢价滑动
         higherPrice: '', // 最高价格
         maxLimit: '',
 
@@ -266,7 +267,7 @@
       });
       this.Bus.$on(this.premiumValue, data => { // 溢价滑动价格
         this.adSaleObj.premium = data
-        this.priceNow = this.priceNow * (1 + (data/100))
+        this.changePrice = this.priceNow * (1 + (data/100))
       });
       this.Bus.$on(this.limitValue, data => { // 期限滑动价格
         this.adSaleObj.limit = data
@@ -307,6 +308,7 @@
         this.coinMinText = `0${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
         this.coinMaxText = `${this.userBalance}${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
         this.Bus.$emit('saleSlideLength', this.userBalance)
+        this.Bus.$emit('saleCoinData', this.coinData)
       },
       async getPrice() { // 当前价格
         await this.Proxy.getPrice().then(res => {
@@ -315,9 +317,9 @@
             return item.currency === this.adSaleObj.currency;
           })
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          console.log(msg)
         });
-        this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
+        this.changePrice = this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
       },
       async getHigherPrice() { // 最高价格获取
         this.Proxy.sales({
@@ -437,8 +439,8 @@
         this.adErrLayer = false
       },
       priceInput() { // 表格验证
-        if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adSaleObj.price)) {
-          this.errPriceText = '请输入正确的数字格式'
+        if (!(/^(0|([1-9]{1,6}))(\.\d+)?$/).test(this.adSaleObj.price)) {
+          this.errPriceText = '请输入整数部分不大于6位的2位小数'
           return
         }
         this.adSaleObj.price = this.adSaleObj.price.replace(/^(\d+)\.(\d{0,2})\d*$/g, '$1' + '.' + '$2');
