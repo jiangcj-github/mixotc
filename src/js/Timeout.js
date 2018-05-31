@@ -5,7 +5,7 @@ let timeout=function(callback,delay,name="timer0"){
     clearTimeout(timer[name]);
   }
   timer[name]=setTimeout(()=>{
-    callback();
+    callback && callback();
   },delay);
 };
 

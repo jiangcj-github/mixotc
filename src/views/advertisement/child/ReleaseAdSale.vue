@@ -305,10 +305,10 @@
           // console.log('出售币种错误', msg);
         });
         this.userBalance = this.balanceList[0] && (this.JsonBig.stringify(this.balanceList[0].balance)).formatFixed(6) || 0
-        this.coinMinText = `0${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
-        this.coinMaxText = `${this.userBalance}${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
         this.Bus.$emit('saleSlideLength', this.userBalance)
         this.Bus.$emit('saleCoinData', this.coinData)
+        this.coinMinText = `0${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
+        this.coinMaxText = `${this.userBalance}${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
       },
       async getPrice() { // 当前价格
         await this.Proxy.getPrice().then(res => {
@@ -422,7 +422,7 @@
         });
       },
       reset() {
-        this.adSaleObj.currency = 'btc'
+        this.adSaleObj.currency =  this.coinType[0]
         this.adSaleObj.mode = 1
         this.adSaleObj.premium = 0
         this.adSaleObj.price = ''

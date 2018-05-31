@@ -105,11 +105,11 @@ export default {
     }
   },
   watch:{
-    title(newValue,oldValue) {
-      setTimeout(()=>{
-        this.$refs.input.style.paddingLeft = this.$refs.title.clientWidth + 26 + 'px';
-      },0)
-    }
+    // title(newValue,oldValue) {
+    //   setTimeout(()=>{
+    //     this.$refs.input.style.paddingLeft = this.$refs.title.clientWidth + 26 + 'px';
+    //   },0)
+    // }
   }
 };
 </script>
@@ -125,7 +125,7 @@ export default {
     position relative
     width 384px
     height 30px
-    padding-left 110px
+    padding-left 150px
     padding-right 25px
     background $colFFF
     border 1px solid #E1E1E1
@@ -136,9 +136,11 @@ export default {
   span
     position absolute
     top 0
+    left 0
+    width 115px
     height 28px
     padding-left 10px
-    padding-right 25px
+    padding-right 15px
     line-height 28px
     font-size 13px
     color #999
@@ -175,7 +177,7 @@ export default {
       &:hover, &.active
         background-color $col3EB
   .search-title
-    width 135px
+    width 142px
   img
     position absolute
     top 10px

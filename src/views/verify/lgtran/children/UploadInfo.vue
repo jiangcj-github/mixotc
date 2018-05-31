@@ -56,7 +56,6 @@
     props: {
       infos:{},
       err:{},
-      onSubmit:{type: String,default:"onSubmit"},
     },
     data(){
       return{
@@ -106,7 +105,7 @@
         }).then((data)=>{
           location.reload();
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          console.log(msg);
         });
       }
     },

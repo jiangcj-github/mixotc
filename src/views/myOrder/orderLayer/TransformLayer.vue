@@ -14,7 +14,7 @@
                        title="BTC"
                        :classify="coinType"
                        :emitValue="coinTypeValue"
-                       :width=470
+                       :width=455
                        :widthSelect=478
                        :top=40
                        :widthWrap=480>
@@ -192,17 +192,12 @@
           console.log(msg);
         });
 
-        this.Proxy.hp_account({uid:this.$store.state.userInfo.uid}).then((data)=> { // 币币账户
-          console.log('币币账户')
-          // if(!data||!data.objects||data.objects.length<=0){
-          //   this.bbErr=1; //无数据
-          // }else{
-          //   this.bbErr=0;
-          //   this.bbTotal=data.count;
-          //   this.parseBb(data.objects);
-          // }
+        this.Proxy.hp_account({ // 币币账户
+          uid:this.$store.state.userInfo.uid
+        }).then(res => {
+          console.log('币币账户', res)
         }).catch(msg => {
-          //this.bbErr=3;
+
         });
 
       },

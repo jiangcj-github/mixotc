@@ -1,6 +1,8 @@
  <template>
   <div class="homepage inner">
-    <h2>mixOTC-{{info.nickname}}的个人主页</h2>
+    <div class="navigation">
+      <h3><a href="/#/">mixOTC</a>-<a :href="'/#/homepage?uid='+uid">{{info.nickname}}的个人主页</a></h3>
+    </div>
     <!-- 个人交易信息 -->
     <div class="info-sec">
       <div class="sec1 clearfix">
@@ -14,11 +16,11 @@
         <div v-if="!isSelf">
           <div v-if="isLogin">
             <div class="trust clearfix">
-            <span class="contact isTrust" @click="Bus.$emit('contactSomeone',{id:info.id_str})">
-              <img src="/static/images/talk.png" alt=""><i>联系TA</i>
-            </span>
-              <span class="join-trust isTrust" @click="cancelTrust" v-if="info.isTrust"><i>取消信任</i></span>
-              <span class="join-trust" @click="joinTrust" v-else><i>加入信任</i></span>
+              <span class="contact isTrust" @click="Bus.$emit('contactSomeone',{id:info.id_str})">
+                <img src="/static/images/conversation_icon.png" alt=""><i>联系TA</i>
+              </span>
+              <button class="btn white" v-if="info.isTrust" @click="cancelTrust">取消信任</button>
+              <button class="btn green" v-else="" @click="joinTrust">加入信任</button>
             </div>
           </div>
           <div v-else="">
@@ -26,7 +28,7 @@
               <span class="contact isTrust" @click="$store.commit({type:'changeLoginForm', data:true})">
                 <img src="/static/images/talk.png" alt=""><i>联系TA</i>
               </span>
-              <span class="join-trust" @click="$store.commit({type:'changeLoginForm', data:true})"><i>加入信任</i></span>
+              <button class="btn green" @click="$store.commit({type:'changeLoginForm', data:true})">加入信任</button>
             </div>
           </div>
         </div>
@@ -129,7 +131,8 @@
           this.info.isTrust=1;
           this.$store.commit({type:"newTrust",data:this.JsonBig.stringify(uid)});
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          this.$refs.alert.showAlert({content:"加入信任失败"});
+          console.log(msg);
         });
       },
       cancelTrust(){
@@ -140,7 +143,8 @@
           this.info.isTrust=0;
           this.$store.commit({type:"delTrust",data:this.JsonBig.stringify(uid)});
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          this.$refs.alert.showAlert({content:"取消信任失败"});
+          console.log(msg);
         });
       },
       loadTraderInfo(){
@@ -150,13 +154,13 @@
           this.WsProxy.send("otc","trader_info",{id:uid, uid:loginUid}).then((data)=>{
             this.parseInfo(data);
           }).catch((msg)=>{
-            alert(JSON.stringify(msg));
+            console.log(msg);
           });
         }else{
           this.Proxy.hp_tradeInfo({id:uid}).then((data)=>{
             this.parseInfo(data.data);
           }).catch((msg)=>{
-            alert(JSON.stringify(msg));
+            console.log(msg);
           });
         }
       },
@@ -181,27 +185,9 @@
 </script>
 <style scoped lang="stylus">
   @import "../../stylus/base.styl";
+  @import "../common/stylus/common";
   .homepage
-    margin-top: 40px;
     margin-bottom: 40px;
-    h2
-      height 30px
-      padding-left 5px
-      line-height 30px
-      font-size $fz20
-      font-weight bold
-      color $col333
-      letter-spacing 0.41px
-      &::before
-        display inline-block
-        position relative
-        top 2px
-        left 0
-        content ''
-        width 3px
-        height 20px
-        margin-right 10px
-        background-color $col422
     .info-sec
       box-sizing()
       margin-top 25px
@@ -261,28 +247,10 @@
               line-height 20px
               letter-spacing 0.23px
               font-size 12px
-            &.isTrust
-              color #FFB422
-              &:hover
-                color #fea350
-          .join-trust
-            background: #FFB422
-            border-radius: 2px
+          .btn
             width 90px
             height 25px
-            line-height 25px
-            text-align center
-            cursor pointer
-            color: #FFFFFF;
-            border 1px solid #FFB422
-            &:hover
-              background #fea350
-            i
-              font-size: 13px;
-              letter-spacing: 0.29px;
-            &.isTrust
-              background #fff
-              color #FFB422
+            line-height 23px
       .sec2
         height 60px
         display flex
@@ -306,26 +274,6 @@
             font-size 14px
             color #333333
             letter-spacing 0.16px
-    .popContent
-      width 100%
-      height 100%
-      display flex
-      justify-content center
-      align-items center
-      font-size: 14px
-      color #333333
-      letter-spacing 0.29px
-      position relative
-      .close
-        position absolute
-        top 0
-        right 0
-        font-size 20px
-        cursor pointer
-        display inline-block
-        line-height 24px
-        width 24px
-        text-align center
     .menu-tab
       margin-top 20px
       height 60px

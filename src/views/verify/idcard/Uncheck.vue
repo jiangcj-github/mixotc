@@ -68,7 +68,7 @@
           this.total=data.amount;
           this.parseCands(data.users);
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          console.log(msg);
         });
       },
       loadUncheckByUid(id){

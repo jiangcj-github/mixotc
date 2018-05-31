@@ -76,12 +76,12 @@
         </div>
         <div class="price">
           <!--<img src="/static/images/hint.png">-->
-          <!--最大限额不能低于最小限额，且-->
-          <b v-if="tip" class="err-tip">最小限额为200</b>
-          <input type="text" class="min" @input="inputDealMin()" ref='min' v-model="filte.min" placeholder="交易金额" step="1" min="200" @focus="minCancel = true" @blur="minCancel = false">
+          <!---->
+          <b v-if="tip" class="err-tip">最大限额不能低于最小限额，且最小限额为200</b>
+          <input type="text" class="min" @input="inputDealMin()" ref='min' v-model="filte.min" placeholder="最低限额" step="1" min="200" @focus="minCancel = true" @blur="minCancel = false">
           <img src="/static/images/cancel_icon.png" class="min-cancel" v-show="minCancel && filte.min" @mousedown="filte.min = ''">
-          <!--<input type="text" class="max" @input="inputDealMax()" ref='max' v-model="filte.max" placeholder="最高限额" step="1" @focus="maxCancel = true" @blur="maxCancel = false">-->
-          <!--<img src="/static/images/cancel_icon.png" class="max-cancel" v-show="maxCancel && filte.max" @mousedown="filte.max = ''">-->
+          <input type="text" class="max" @input="inputDealMax()" ref='max' v-model="filte.max" placeholder="最高限额" step="1" @focus="maxCancel = true" @blur="maxCancel = false">
+          <img src="/static/images/cancel_icon.png" class="max-cancel" v-show="maxCancel && filte.max" @mousedown="filte.max = ''">
         </div>
         <div class="wholesale">
           <label @click="changeIsWhole">
@@ -230,6 +230,11 @@
       }
     },
     mounted() {
+      if(this.$route.query.icon) {
+        this.filte.coinImg = `${this.HostUrl.http}image/${this.$route.query.icon}`
+        this.filte.currency =this.$route.query.currency
+        this.filte.cName = this.$route.query.name
+      }
       this.fetchData();
       this.Bus.$on("onOrderFail",(msg) => {
         this.verifyState(msg);
@@ -623,7 +628,7 @@
           top 9px
           cursor pointer
         .min-cancel
-          left 190px
+          left 83px
         .max-cancel
           right 50px
         b
@@ -636,7 +641,7 @@
           position relative
           float left
           box-sizing()
-          width 215px
+          width 105px
           height 30px
           padding 0 24px
           margin-right 15px
@@ -645,14 +650,14 @@
           border 1px solid $col1E1
           border-radius 2px
           placeholder()
-        /*&::before
+        &::before
           position absolute
           top 14.5px
-          left 105px
+          left 110px
           width 5px
           height 1px
           content ''
-          background $col999*/
+          background $col999
         &::after
           position absolute
           top 7.5px

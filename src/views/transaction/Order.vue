@@ -58,7 +58,7 @@
           <h3>{{titleType[type-1]}}多少？</h3>
           <router-link to="/wallet/charge" tag="span" v-if="contentData.type == 2">去充币</router-link>
         </div>
-        <p class="rate" v-if="contentData.type == 1">{{selectPrice[0] && selectPrice[0].cny}} CNY = {{selectPrice[0] && selectPrice[0].btc}} {{contentData.currency && contentData.currency.toUpperCase()}}</p>
+        <p class="rate" v-if="contentData.type == 1">{{selectPrice[0] && selectPrice[0].cny}} CNY = 1 {{contentData.currency && contentData.currency.toUpperCase()}}</p>
         <p class="balance" v-if="contentData.type == 2"><span>可用余额{{balance}}{{contentData.currency && contentData.currency.toUpperCase()}}</span></p>
         <span class="error-text" :class="{'sale-err': contentData.type == 2}">{{errorText[errorFlag]}}</span>
         <div class="input">
@@ -213,7 +213,8 @@
         }).catch((msg)=>{
           alert(JSON.stringify(msg));
         });
-        this.rate = this.selectPrice[0] && (this.selectPrice[0].cny / this.selectPrice[0].btc);
+        console.log('价格数组', this.selectPrice, this.rate)
+        this.rate = this.selectPrice[0] && this.selectPrice[0].cny
       },
       // 获取币种图标
       async getCoinIcon() {
@@ -247,7 +248,7 @@
       },
       changeMoney() {
         this.money = /^\d+\.?\d{0,2}$/.test(this.money) || this.money === '' ? this.money : this.moneyValue;
-        this.amount = (this.money / (this.rate)).toFixed(6);
+        this.amount = (this.money / (this.rate)).formatFixed(6);
         this.money === '' && (this.amount = '');
         this.processNum = 0.002 * (this.amount * 1)
       },
@@ -256,7 +257,7 @@
       },
       changeAmount() {
         this.amount = /^\d+\.?\d{0,6}$/.test(this.amount) || this.amount === '' ? this.amount : this.amountValue;
-        this.money = (this.amount * this.rate).toFixed(2);
+        this.money = (this.amount * this.rate).formatFixed(2);
         this.amount === '' && (this.money = '');
         this.processNum = 0.002 * (this.amount * 1)
       },

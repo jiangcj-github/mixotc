@@ -8,7 +8,7 @@
         <!--右边内容-->
         <div class="right">
           <div class="export">
-            <a href="javascript:void(0);" @click="exportCsv"><img src="/static/images/wallet/export.png">导出账单</a>
+            <a href="javascript:void(0);" @click="exportXls"><img src="/static/images/wallet/export.png">导出账单</a>
           </div>
           <div class="filter">
             <div class="input-group">
@@ -93,7 +93,10 @@
                   <p v-if="e.billType===4">{{e.addr}}</p>
                   <p v-if="e.billType===5">{{e.isIn?"法币账户":"币币账户"}}</p>
                 </div>
-                <div class="num"><p :class="{in:e.isIn,out:!e.isIn}">{{e.num}}</p><p>{{e.fee}} {{e.coin}}</p></div>
+                <div class="num">
+                  <p :class="{in:e.isIn,out:!e.isIn}">{{e.num}}</p>
+                  <p v-show="e.fee>0">{{e.fee}} {{e.coin}}</p>
+                </div>
                 <div class="state">
                   <p>{{e.stateStr}}</p>
                 </div>
@@ -189,7 +192,7 @@
           {text:"终止交易",check:1,value:6},
         ],
 
-        sort: 0,  // 0-时间升序,1-时间降序,2-数量升序,3-数量降序
+        sort: 1,  // 0-时间升序,1-时间降序,2-数量升序,3-数量降序
         days: 0,  // 【提交时间】筛选快捷键【1-一天,7-七天,30-三十天】
 
         bills: [],
@@ -434,7 +437,7 @@
           this.bills.push(item);
         });
       },
-      exportCsv(){
+      exportXls(){
         let jsonField={};
         jsonField["序号"]="index";
         jsonField["时间"]="time";
@@ -485,7 +488,7 @@
             }else{
               item.num="-"+item.num+" "+item.coin;
             }
-            item.fee=item.fee+item.coin;
+            item.fee=item.fee+" "+item.coin;
             //资金划转
             if(item.billType===5){
               item.user=item.isIn?"法币账户":"币币账户";
@@ -497,7 +500,7 @@
           JsonExcel.name="MixOTC-账单.xls";
           JsonExcel.generate();
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          console.log(msg);
         });
       },
     },

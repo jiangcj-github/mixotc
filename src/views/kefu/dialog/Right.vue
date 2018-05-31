@@ -50,6 +50,7 @@
         </div>
       </happy-scroll>
     </div>
+
     <!-- 下方发送消息 -->
     <div class="sendBox">
       <div class="menu">
@@ -80,7 +81,7 @@
         <h2>责任人</h2>
         <div class="head"><img :src="forceIconNameIcon"><span>{{forceIconName}}</span></div>
         <div class="textarea">
-          <textarea placeholder="填写强制放币的理由" ref="pop1Text" v-model="pop1Text" @input="onPop1Input"></textarea>
+          <textarea placeholder="填写强制放币的理由" ref="pop1Text" v-model.trim="pop1Text" maxlength="50"></textarea>
           <p>{{pop1Text.length}}/50</p >
         </div>
         <div class="btns">
@@ -93,7 +94,7 @@
     <BasePopup :width="470" :height="280" :top="50" :show="showPop2">
       <div class="pop">
         <div class="textarea">
-          <textarea placeholder="填写驳回申诉的理由" ref="pop2Text" v-model="pop2Text" @input="onPop2Input"></textarea>
+          <textarea placeholder="填写驳回申诉的理由" ref="pop2Text" v-model.trim="pop2Text" maxlength="50"></textarea>
           <p>{{pop2Text.length}}/50</p>
         </div>
         <div class="btns">
@@ -119,7 +120,7 @@
         </div>
         <p class="pop1Remind">责任用户取消交易权限3天。仲裁3次，永久关闭交易权限</p>
         <div class="textarea">
-          <textarea placeholder="填写终止交易的理由" ref="pop3Text" v-model="pop3Text" @input="onPop3Input"></textarea>
+          <textarea placeholder="填写终止交易的理由" ref="pop3Text" v-model.trim="pop3Text"  maxlength="50"></textarea>
           <p>{{pop3Text.length}}/50</p>
         </div>
         <div class="btns">
@@ -128,36 +129,11 @@
         </div>
       </div>
     </BasePopup>
-    <!--<BasePopup :width="470" :height="430" :top="50" :show="showPop3">-->
-      <!--<div class="pop">-->
-        <!--<h2>选择终止交易的责任人</h2>-->
-        <!--<div class="head2">-->
-          <!--<div class="hi hi-left" @click="pop3Radio = 0">-->
-            <!--<img :src="stopTradeUserIcon">-->
-            <!--<span>{{stopTradeUser}}</span>-->
-            <!--<span class="radio" :class="{check: pop3Radio === 0}"></span>-->
-          <!--</div>-->
-          <!--<div class="hi hi-right" @click="pop3Radio = 1">-->
-            <!--<img :src="stopTradeOtherIcon">-->
-            <!--<span>{{stopTradeOther}}</span>-->
-            <!--<span class="radio" :class="{check: pop3Radio === 1}"></span>-->
-          <!--</div>-->
-        <!--</div>-->
-        <!--<div class="textarea">-->
-          <!--<textarea placeholder="填写强制放币的理由" ref="pop3Text" v-model="pop3Text" @input="onPop3Input"></textarea>-->
-          <!--<p>{{pop3Text.length}}/50</p>-->
-        <!--</div>-->
-        <!--<div class="btns">-->
-          <!--<button class="b1" @click="onPop3Ok">确认</button>-->
-          <!--<button class="b2" @click="showPop3 = false">我再想想</button>-->
-        <!--</div>-->
-      <!--</div>-->
-    <!--</BasePopup>-->
     <!--证明无效弹窗-->
     <BasePopup :width="470" :height="280" :top="50" :show="showPop4">
       <div class="pop">
         <div class="textarea">
-          <textarea placeholder="填写证明无效的理由" ref="pop4Text" v-model="pop4Text" @input="onPop4Input"></textarea>
+          <textarea placeholder="填写证明无效的理由" ref="pop4Text" v-model.trim="pop4Text" maxlength="50"></textarea>
           <p>{{pop4Text.length}}/50</p>
         </div>
         <div class="btns">
@@ -165,6 +141,10 @@
           <button class="b2" @click="showPop4 = false">我再想想</button>
         </div>
       </div>
+    </BasePopup>
+    <!-- 普通提示框 -->
+    <BasePopup :show="errLayer" class="err-layer" @click.native="errLayer=false">
+      {{errText}}
     </BasePopup>
   </div>
 </template>
@@ -192,9 +172,7 @@
         // updateTime: "", // 标记时间
         // msgHis: [],
 
-        // appl: 0, // 申诉人：0-买家,1-卖家
         recv: 0, // 收件人：0-买家,1-卖家
-        // resp: 0, // 责任人：0-买家,2-卖家
         orderId: "",
         isBuyer: "", // 显示买卖家
 
@@ -203,20 +181,16 @@
 
         showPop1: false, // 控制强制放币弹出框
         pop1Text: "", // 填写强制放币的理由
-        pop1TextOld: "",
 
         showPop2: false, // 控制驳回申诉弹出框
         pop2Text: "", // 填写驳回申诉的理由
-        pop2TextOld: "",
 
         showPop3: false, // 控制终止交易弹出框
         pop3Text: "", // 填写强制放币的理由
-        pop3TextOld: "",
         pop3Radio: 1, // 控制单选按钮显示
 
         showPop4: false, // 控制证明无效弹窗
         pop4Text: "", // 填写证明无效的理由
-        pop4TextOld: "",
 
         forceIconName: "", // 强制放币弹窗
         forceIconNameIcon: "", // 强制放币头像
@@ -233,7 +207,9 @@
         paymentProofs: "", // 付款证明输入框内容
         noticeCoin: "", // 通知放币
 
-
+        errText: "", // 错误提示
+        errLayer: false,
+        swiperIndex: 0
       }
     },
     computed: {
@@ -275,7 +251,7 @@
             this.isBuyer = this.otherInfo[0].buyer_id == this.serviceNow ?  "买家" : "卖家";
           } else {
             applUser = 1;
-            this.recv = this.otherInfo[0].buyer_id == this.serviceNow ?  0 : 1; // 是否为买家 1 买 0 卖
+            this.recv = this.otherInfo[0].buyer_id == this.serviceNow ?  0 : 1; // 是否为买家 0 买 1 卖
             this.isBuyer = this.otherInfo[0].buyer_id == this.serviceNow ?  "买家" : "卖家";
           }
 
@@ -313,13 +289,10 @@
             observeParents: true,//修改swiper的父元素时，自动初始化swiper
             on: {
               slideChangeTransitionEnd() {
-                _this.isBuyer = _this.otherInfo && _this.otherInfo[this.activeIndex].buyer_id == _this.serviceNow ?  "买家" : "卖家";
-                // 证明无效输入框内容
-                this.ineffectiveProof = MSGS.get(1, this.appl, this.recv) ? MSGS.get(1, this.appl, this.recv).replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<i style="color:#FF794C">[${_this.otherInfo[this.activeIndex].trade_code}]</i>`) : '';
-                // 上传付款证明
-                this.paymentProofs = MSGS.get(0, this.appl, this.recv) ? MSGS.get(0, this.appl, this.recv).replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.activeIndex].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[this.activeIndex].trade_code}]</i>`) : '';
-                // 通知放币
-                this.noticeCoin = MSGS.get(3, this.appl, this.recv) ? MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.activeIndex].sid})</a>`) : '';
+                _this.$refs.textarea.innerHTML = ''
+                _this.swiperIndex = this.activeIndex
+                _this.isBuyer = _this.otherInfo[this.activeIndex].buyer_id == _this.serviceNow ?  "买家" : "卖家";
+                //_this.recv = _this.otherInfo && _this.otherInfo[this.activeIndex].buyer_id == _this.serviceNow ?  0 : 1; // 是否为买家 0 买 1 卖
               }
             }
           })
@@ -492,10 +465,8 @@
         return time2.formatTime()
       },
       onClickM0() { // 点击上传付款证明按钮
-        if (this.otherInfo && this.otherInfo.length === 1) {
-          this.paymentProofs = MSGS.get(0, this.appl, this.recv);
-          this.paymentProofs = this.paymentProofs ? this.paymentProofs.replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`) : '';
-        }
+        this.paymentProofs = MSGS.get(0, this.appl, this.recv);
+        this.paymentProofs = this.paymentProofs ? this.paymentProofs.replace(/orderId/, `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.swiperIndex].sid})</a>`).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[this.swiperIndex].trade_code}]</i>`) : '';
         this.$refs.textarea.innerHTML = this.paymentProofs;
         this.$refs.textarea.focus();
       },
@@ -504,26 +475,21 @@
         this.showPop4 = true
       },
       onPop4Ok() { // 证明无效确认
-        this.showPop4 = false
-        if (this.otherInfo && this.otherInfo.length === 1) {
-          this.ineffectiveProof = MSGS.get(1, this.appl, this.recv);
-          this.ineffectiveProof = this.ineffectiveProof ? this.ineffectiveProof.replace(/reason/, this.pop4TextOld).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[0].trade_code}]</i>`) : '';
+        if(this.pop4Text == '') {
+          this.showPop4 = false
+          this.errLayer = true
+          this.errText = '请填写证明无效确认理由'
+          return
         }
+        this.showPop4 = false
+          this.ineffectiveProof = MSGS.get(1, this.appl, this.recv);
+          this.ineffectiveProof = this.ineffectiveProof ? this.ineffectiveProof.replace(/reason/, this.pop4Text).replace(/trade_code/, `<i style="color:#FF794C">[${this.otherInfo[this.swiperIndex].trade_code}]</i>`) : '';
+
         this.sendMsg = this.ineffectiveProof;
         this.$refs.textarea.focus();
       },
-      onPop4Input() { // 填写证明无效理由
-        if (this.pop4Text.length > 50) {
-          this.pop4Text = this.pop4TextOld;
-          this.$refs.pop4Text.value = this.pop4TextOld;
-        } else {
-          this.pop4TextOld = this.pop4Text;
-        }
-      },
       onClickM1() { // 点击通知放币按钮
-        if (this.otherInfo && this.otherInfo.length === 1) {
-          this.noticeCoin = MSGS.get(3, this.appl, this.recv) ? MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[0].sid})</a>`) : '';
-        }
+        this.noticeCoin = MSGS.get(3, this.appl, this.recv) ? MSGS.get(3, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.swiperIndex].sid})</a>`) : '';
         this.$refs.textarea.innerHTML = this.noticeCoin;
         this.$refs.textarea.focus();
       },
@@ -552,19 +518,17 @@
         }
         this.judgeStopTradeOther(index)
       },
-      onPop1Input() { // 填写强制放币理由(责任人已定)
-        if (this.pop1Text.length > 50) {
-          this.pop1Text = this.pop1TextOld;
-          this.$refs.pop1Text.value = this.pop1TextOld;
-        } else {
-          this.pop1TextOld = this.pop1Text;
-        }
-      },
       onPop1Ok() { // 强制放币确认
+        if(this.pop1Text == '') {
+          this.showPop1 = false
+          this.errLayer = true
+          this.errText = '请填写强制放币理由'
+          return
+        }
         this.showPop1 = false
         let time = new Date() - 0,
-            text1 = MSGS.get(4, this.appl, this.recv) ? MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1TextOld) : '',
-            text2 = MSGS.get(5, this.appl, this.recv) ? MSGS.get(5, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1TextOld) : ''
+            text1 = MSGS.get(4, this.appl, this.recv) ? MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1Text) : '',
+            text2 = MSGS.get(5, this.appl, this.recv) ? MSGS.get(5, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1Text) : ''
         // 发送消息
         this.WsProxy.sendMessage({ // 发送给买家
           type: 'text',
@@ -598,7 +562,7 @@
         });
 
         this.WsProxy.send('control', 'a_send_order',
-          Object.assign(this.forceIconObj, {"info": this.pop1TextOld})
+          Object.assign(this.forceIconObj, {"info": this.pop1Text})
         ).then((data)=>{
           console.log('强制放币', data)
           this.$store.commit({type: 'stopTrade', data: {params: this.otherInfo[this.popIndex], length: this.otherInfo.length}})
@@ -616,14 +580,6 @@
         this.comfirmStopTradeObj(index)
         this.judgeStopTradeOther(index)
       },
-      onPop3Input() { // 填写选择终止交易理由
-        if (this.pop3Text.length > 50) {
-          this.pop3Text = this.pop3TextOld;
-          this.$refs.pop3Text.value = this.pop3TextOld;
-        } else {
-          this.pop3TextOld = this.pop3Text;
-        }
-      },
       comfirmStopTradeObj(index) { // 定义终止交易弹窗对象
         this.stopTradeObj = {
           "id": this.JsonBig.parse(this.otherInfo[index].sid),
@@ -639,10 +595,16 @@
       onPop3Ok() { // 终止交易确认
         // console.log('this.popIndex', this.popIndex)
         // console.log('this.stopTradeObj', this.stopTradeObj, this.pop3Radio)
+        if(this.pop3Text == '') {
+          this.showPop3 = false
+          this.errLayer = true
+          this.errText = '请填写终止交易理由'
+          return
+        }
         this.showPop3 = false;
         let time = new Date() - 0,
-          text1 = MSGS.get(6, this.appl, this.recv) ? MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld) : '', // 非责任人
-          text2 = MSGS.get(7, this.appl, this.recv) ? MSGS.get(7, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3TextOld) : ''; // 责任人
+          text1 = MSGS.get(6, this.appl, this.recv) ? MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3Text) : '', // 非责任人
+          text2 = MSGS.get(7, this.appl, this.recv) ? MSGS.get(7, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3Text) : ''; // 责任人
 
         // 发送消息
         if (this.pop3Radio == 1) { // 双方无责
@@ -713,7 +675,7 @@
         this.WsProxy.send('control', 'a_terminate_order',
           Object.assign(this.stopTradeObj, {
             "type": 1, // 1: 订单, 2: 担保
-            "info": this.pop3TextOld
+            "info": this.pop3Text
           })
         ).then((data)=>{
           this.$store.commit({type: 'stopTrade', data: {params: this.otherInfo[this.popIndex], length: this.otherInfo.length}})
@@ -733,17 +695,15 @@
         }
         this.judgeStopTradeOther(index)
       },
-      onPop2Input() { // 填写驳回申述理由
-        if (this.pop2Text.length > 50) {
-          this.pop2Text = this.pop2TextOld;
-          this.$refs.pop2Text.value = this.pop2TextOld;
-        } else {
-          this.pop2TextOld = this.pop2Text;
-        }
-      },
       onPop2Ok() { // 驳回申述确认
+        if(this.pop2Text == '') {
+          this.showPop2 = false
+          this.errLayer = true
+          this.errText = '请填写驳回申述理由'
+          return
+        }
         this.showPop2 = false
-        let text = MSGS.get(2, this.appl, this.recv) ? MSGS.get(2, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop2TextOld) : '';
+        let text = MSGS.get(2, this.appl, this.recv) ? MSGS.get(2, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop2Text) : '';
         // 发送消息
         if (this.appl === 0 && this.recv === 0) {
           this.WsProxy.sendMessage({ // 发送给买家
@@ -1123,38 +1083,6 @@
           background url(/static/images/unselect.png) no-repeat center center
           &.check
             background-image url(/static/images/selected.png)
-    /*.head2*/
-      /*display flex*/
-      /*justify-content center*/
-      /*align-items center*/
-      /*height 130px*/
-      /*.hi*/
-        /*display flex*/
-        /*flex-direction column*/
-        /*cursor pointer*/
-        /*margin 0 50px*/
-        /*font-size 14px*/
-        /*letter-spacing 0.29px*/
-        /*&:hover*/
-          /*color #666*/
-        /*.radio*/
-          /*margin-top 5px*/
-          /*width 40px*/
-          /*height 20px*/
-          /*font-size 13px*/
-          /*color #333*/
-          /*letter-spacing 0.27px*/
-          /*display inline-block*/
-          /*cursor pointer*/
-          /*background url(/static/images/unselect.png) no-repeat center center*/
-          /*&.check*/
-            /*background-image url(/static/images/selected.png)*/
-        /*> img*/
-          /*width 40px*/
-          /*height 40px*/
-          /*border-radius 50%*/
-        /*> span*/
-          /*margin-top 5px*/
     .textarea
       width 350px
       height 150px
@@ -1221,6 +1149,12 @@
     margin-top -7px
   .swiper-button-prev
     transform rotate(-135deg)
+
+
+
+  .err-layer
+    line-height 94px
+    text-align center
 
 
 

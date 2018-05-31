@@ -13,16 +13,17 @@
           <input type="text"
                  placeholder="搜索币种"
                  v-model.trim="inputValue"
-                 @input="selectData"
-                 @keyup.enter="getCoinsData"
+                 @input="getCoinInfo"
+                 @keyup.enter="getCoinsData()"
                  @focus="(showActive=true) && (canCancel=true)"
                  @blur="blurInput"
-                 @click="showResult = true"><button @click="getCoinsData"></button>
+                 @click="showResult = true"><button @click="getCoinsData()"></button>
           <img src="/static/images/cancel_icon.png" alt="" v-show="canCancel && inputValue" @mousedown="inputValue=''">
         </p>
         <ul class="search-result" v-if="showResult && inputValue"  v-clickoutside="closeSelect">
           <li v-if="!result.length">{{nothingText}}</li>
           <li v-for="(item,index) of result" :key="index" @click="selectResultContent(item)">{{item}}</li>
+          <!--@click="selectResultContent(item)"-->
         </ul>
       </div>
       <div class="coin-content">
@@ -33,7 +34,7 @@
               <li>{{coinDataObj.name}}({{coinDataObj.cnName}})</li>
               <li>{{coinDataObj.price && (coinDataObj.price.cny === 0 ? '-' : (coinDataObj.price.cny * 1).format('cny'))}}</li>
               <li>
-                <router-link to="/transaction">去交易</router-link>
+                <router-link :to="{path:'/transaction', query:{currency: selectCoinList[0].currency, name: selectCoinList[0].name, icon: selectCoinList[0].icon}}">去交易</router-link>
                 <!--<span @click="goRecharge">去充币</span>-->
                 <!--<router-link to="">去充币</router-link>-->
               </li>
@@ -68,7 +69,7 @@
       return {
         coinDataObj: {}, // 获取币种资料数据
         coinDataList: [], // 筛选所结有数据
-        selectCoinList: [], // 匹配结果数据
+        selectCoinList: [], // 筛选币种数组
         inputValue: '', // input值
         selectValue: 'btc',
         result: [], // 模糊搜索结果
@@ -81,52 +82,67 @@
     },
     async created() {
       this.selectValue = this.$route.query.coin || "btc";
-      await this.selectData() // 筛选出btcID 加载数据
+      //await this.selectData(); // 筛选出btcID 加载数据
+      await this.getCoinInfo()
       this.getCoinsData();
+
     },
     mounted() {
     },
     methods: {
-      async selectData() { // 模糊筛选
+      async getCoinInfo() {
+        this.nothingText = '加载中...'
         this.result = [];
         this.inputValue && (this.selectValue = this.inputValue);
-        this.nothingText = '加载中...'
-        await this.Proxy.searchTips({word: this.selectValue, app: 0}).then(res => {
-          console.log('搜索this.selectValue', this.selectValue, res)
-          if (res.data.currency.length === 0) {
+        await this.Proxy.coinSearch({keyword: this.selectValue}).then(res => { // 模糊搜索
+          console.log('币种资料', res)
+          console.log('搜索币种资料', this.selectValue, res)
+          if (!res.data.coins) {
             this.nothingText = '暂无数据'
             return
           }
-          this.id = res.data.currency[0].id;
-          this.coinDataList = res.data.currency
-          res.data.currency && res.data.currency.forEach(v => {
+          this.coinDataList = res.data.coins
+          res.data.coins && res.data.coins.forEach(v => {
             this.result.push(v.name)
           })
+        });
+        await this.Proxy.searchTips({word: this.selectValue, app: 0}).then(res => { // 获取币种ID
+          this.id = res.data.currency[0].id;
+          console.log('搜索this.selectValue', this.selectValue, this.id )
         }).catch(msg => {
           console.log(msg)
         })
+        this.selectCoinList = this.coinDataList
+        console.log(1111, this.coinDataList, this.selectCoinList)
+      },
+
+
+      async selectResultContent(item) { // 根据筛选结果赋值
+        this.selectValue = this.inputValue = item;
+        this.showResult = false
+        await this.Proxy.searchTips({word: this.selectValue, app: 0}).then(res => { // 获取币种ID
+          this.id = res.data.currency[0].id;
+          this.selectCoinList = this.coinDataList.filter(item => { // 获取图片
+            return item.name == this.selectValue
+          });
+          console.log('搜索this.selectValue5555', this.selectValue, this.id, this.selectCoinList )
+        }).catch(msg => {
+          console.log(msg)
+        })
+        this.getCoinsData()
       },
 
       async getCoinsData() { // 获取币种资料数据
-        this.inputValue = '';
+        //this.inputValue = '';
         await this.Proxy.getCoinDataAll({app: 0, symbolId: this.id, period: '24h'}).then(res => {
-          console.log('资料', res.data, this.JsonBig.stringify(res.data.price.cny), this.JsonBig.stringify(res.data.totalValue.cny))
+          console.log('资料', res)
           this.coinDataObj = res.data
+          this.coinDataObj.logo = `${this.HostUrl.http}image/${this.selectCoinList[0].icon}`
         }).catch(msg => {
           console.log(msg)
         })
       },
 
-      selectResultContent(item) { // 根据筛选结果赋值
-        this.selectValue = this.inputValue = item;
-        this.showResult = false
-        this.selectCoinList = this.coinDataList.filter(item => {
-          return item.name == this.selectValue
-        });
-        console.log('选择数组', this.selectCoinList)
-        this.id = this.selectCoinList[0].id;
-        //console.log('赋值', this.selectValue, this.inputValue, item)
-      },
       blurInput() {
         this.showActive = false
         this.canCancel = false
