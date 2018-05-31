@@ -488,7 +488,7 @@
             }else{
               item.num="-"+item.num+" "+item.coin;
             }
-            item.fee=item.fee+item.coin;
+            item.fee=item.fee+" "+item.coin;
             //资金划转
             if(item.billType===5){
               item.user=item.isIn?"法币账户":"币币账户";
