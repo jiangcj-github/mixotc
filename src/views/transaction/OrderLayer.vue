@@ -78,6 +78,9 @@
             case 55:
               this.remindText = '状态不匹配';
               break;
+            case 81:
+              this.remindText = '请创建钱包';
+              break;
             default:
               this.remindText= '下单出错';
               break;

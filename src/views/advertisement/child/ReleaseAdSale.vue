@@ -296,17 +296,17 @@
           data.wallets.forEach(v => {
             this.coinType.push(v.currency.toUpperCase())
             this.coinData.push(v.currency)
+            this.Bus.$emit('saleCoinData', this.coinData)
           })
           this.balanceList = data.wallets.filter(item => {
             return item.currency === this.adSaleObj.currency;
           })
-          console.log('this.balanceList', this.balanceList)
+          //console.log('this.balanceList', this.adSaleObj.currency)
         }).catch((msg)=>{
           // console.log('出售币种错误', msg);
         });
-        this.userBalance = this.balanceList[0] && (this.JsonBig.stringify(this.balanceList[0].balance)).formatFixed(6) || 0
+        this.userBalance = this.balanceList[0] && this.balanceList[0].balance.formatFixed(6)
         this.Bus.$emit('saleSlideLength', this.userBalance)
-        this.Bus.$emit('saleCoinData', this.coinData)
         this.coinMinText = `0${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
         this.coinMaxText = `${this.userBalance}${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
       },

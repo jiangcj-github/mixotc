@@ -156,6 +156,14 @@ Number.prototype.formatFixed=function(n){
   return this.toString().formatFixed(n);
 };
 
+// 特殊价格格式化
+String.prototype.formatPrice=function(){
+  if (this === 0) return "-";
+  let i=this.indexOf(".");
+  if(i<=0) return this;
+  return this.substr(0,i+3);
+};
+
 //格式化地址，msHdsbs......dxkdkdw
 String.prototype.formatAddr=function(){
   if(!this || this.length<=14) return;

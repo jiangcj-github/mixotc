@@ -82,10 +82,8 @@
     },
     async created() {
       this.selectValue = this.$route.query.coin || "btc";
-      //await this.selectData(); // 筛选出btcID 加载数据
       await this.getCoinInfo()
       this.getCoinsData();
-
     },
     mounted() {
     },
@@ -95,8 +93,8 @@
         this.result = [];
         this.inputValue && (this.selectValue = this.inputValue);
         await this.Proxy.coinSearch({keyword: this.selectValue}).then(res => { // 模糊搜索
-          console.log('币种资料', res)
-          console.log('搜索币种资料', this.selectValue, res)
+          // console.log('币种资料', res)
+          // console.log('搜索币种资料', this.selectValue, res)
           if (!res.data.coins) {
             this.nothingText = '暂无数据'
             return
@@ -108,12 +106,12 @@
         });
         await this.Proxy.searchTips({word: this.selectValue, app: 0}).then(res => { // 获取币种ID
           this.id = res.data.currency[0].id;
-          console.log('搜索this.selectValue', this.selectValue, this.id )
+          // console.log('搜索this.selectValue', this.selectValue, this.id )
         }).catch(msg => {
           console.log(msg)
         })
         this.selectCoinList = this.coinDataList
-        console.log(1111, this.coinDataList, this.selectCoinList)
+        // console.log(1111, this.coinDataList, this.selectCoinList)
       },
 
 
@@ -125,7 +123,7 @@
           this.selectCoinList = this.coinDataList.filter(item => { // 获取图片
             return item.name == this.selectValue
           });
-          console.log('搜索this.selectValue5555', this.selectValue, this.id, this.selectCoinList )
+          //console.log('搜索this.selectValue5555', this.selectValue, this.id, this.selectCoinList )
         }).catch(msg => {
           console.log(msg)
         })
@@ -135,7 +133,7 @@
       async getCoinsData() { // 获取币种资料数据
         //this.inputValue = '';
         await this.Proxy.getCoinDataAll({app: 0, symbolId: this.id, period: '24h'}).then(res => {
-          console.log('资料', res)
+          console.log('资料', res, this.JsonBig.stringify(res.data.price.cny))
           this.coinDataObj = res.data
           this.coinDataObj.logo = `${this.HostUrl.http}image/${this.selectCoinList[0].icon}`
         }).catch(msg => {
@@ -213,6 +211,7 @@
           background url("/static/images/search_icon.png") #E1E1E1 no-repeat 27px 7px
           background-size 16px 16px
           border-radius 0 2px 2px 0
+          cursor pointer
         img
           position absolute
           right 80px
