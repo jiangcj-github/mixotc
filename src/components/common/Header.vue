@@ -14,14 +14,13 @@
           <li class="tag ad"
               @mouseenter="adChild = true"
               @mouseleave="adChild = false"
-              @click="!$store.state.isLogin && changeLoginForm(true)"
+              @click="!$store.state.isLogin && changeLoginForm(true) || selectAd()"
               :class="{active: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
             <span v-if="$route.path=='/advertisement'">我的广告</span>
             <span v-else>发广告</span>
-            <!--$store.state.userInfo.verify == 2 && -->
             <ol v-show="$store.state.isLogin && adChild">
-              <li @click="releaseAd()">发广告</li>
-              <li @click="goMyAd()">我的广告</li>
+              <li @click="releaseAd()" v-if="$route.path=='/advertisement'">发广告</li>
+              <li @click="goMyAd()" v-else>我的广告</li>
             </ol>
           </li>
           <router-link to="/order" tag="li" class="tag order tag-hover" v-if="this.$store.state.isLogin" active-class="selected">订单<span v-if="newOrder"><i>{{newOrder}}</i></span></router-link>
@@ -119,7 +118,7 @@
         this.showMenu = false
       },
       releaseAd() { // 发广告操作
-        if (this.$store.state.userInfo.verify !== 2) {
+        if (this.$store.state.userInfo.verify !== 2) { // 未实名
           this.realLayer = true
           setTimeout(() => {
             this.realLayer = false
@@ -134,7 +133,7 @@
         this.$store.commit({type: 'releaseAd', data:{flag: 0}})
       },
       goMyAd() { // 我的广告操作
-        if (this.$store.state.userInfo.verify !== 2) {
+        if (this.$store.state.userInfo.verify !== 2) { // 未实名
           this.realLayer = true
           setTimeout(() => {
             this.realLayer = false
@@ -143,6 +142,13 @@
         }
         this.adChild = false
         this.$router.push({path:'/advertisement'})
+      },
+      selectAd() {
+        if (this.$route.path=='/advertisement') {
+          this.goMyAd()
+        } else {
+          this.releaseAd()
+        }
       },
       closeLayer() {
         this.realLayer = false
@@ -257,6 +263,12 @@
             width 80px
           &.ad
             width 70px
+            span
+              display block
+              width 100%
+              height 100%
+              &:hover
+                background #FFF3EB
             ol
               position absolute
               top 70px
