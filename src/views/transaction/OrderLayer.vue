@@ -28,7 +28,7 @@
 
   export default {
     name: "order-layer",
-    props: ['orderLayerShow', 'id', 'price', 'currency', 'money', 'type'],
+    props: ['orderLayerShow', 'id', 'price', 'currency', 'money', 'type'], // 1: 购买 2: 出售
     data() {
       return {
         titleType: ['购买', '出售'],
@@ -57,7 +57,9 @@
           money: this.money * 1,
           update_time: Math.floor(new Date().getTime() / 1000)
         }).then((data)=>{
-          this.$store.state.newOrder = true;
+          if (this.type == 1) {
+            this.$store.state.newOrder = true;
+          }
           this.$router.push({ path: '/order', query: {id: this.JsonBig.stringify(data.id)}});
         }).catch((msg)=>{
           this.closeOrderLayer();
