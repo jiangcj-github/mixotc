@@ -11,28 +11,9 @@
             <a href="javascript:void(0);" @click="exportXls"><img src="/static/images/wallet/export.png">导出账单</a>
           </div>
           <div class="filter">
-            <div class="input-group">
-              <p class="term" v-clickoutside="()=>isShowUl0=false" @click="isShowUl0=!isShowUl0">{{ul0[ul0Sel].text}}</p>
-              <!--搜索条件-->
-              <ul class="drop" v-show="isShowUl0">
-                <li v-for="(e,i) in ul0" @click="ul0Sel=i">{{e.text}}</li>
-              </ul>
-              <input class="input" type="text" v-model="srchText"
-                     v-clickoutside="()=>isShowTip=false" @input="onFuzzyInput">
-              <img class="clear" src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
-              <button class="addin" @click="loadBills"><img src="/static/images/search.png"></button>
-              <!--模糊搜索结果-->
-              <ul class="drop" v-show="isShowTip">
-                <li v-for="(e,i) in tips" @click="loadBills">
-                  <p v-if="e.type===2 && e.isUser===1" @mousedown="srchText=e.nickname">
-                    <span>{{e.nickname}}</span><span class="fz-gray">{{e.account}}</span>
-                  </p>
-                  <p v-if="e.type===2 && e.isUser===0" @mousedown="srchText=e.addr" class="fz-addr">{{e.addr}}</p>
-                  <p v-if="e.type===1" @mousedown="srchText=e.orderId">{{e.orderId}}</p>
-                </li>
-                <li v-show="tips.length<=0" class="empty">无搜索结果</li>
-              </ul>
-            </div>
+            <SearchGroup :terms="ul0">
+
+            </SearchGroup>
             <div class="f2">
               <DateInterval ref="di"></DateInterval>
             </div>
@@ -134,8 +115,10 @@
   import DateInterval from "@/components/common/DateInterval";
   import Pagination from "../verify/component/Pagination";
   import JsonExcel from "./js/JsonExcel.js";
+  import SearchGroup from "../common/widget/SearchGroup";
   export default {
     components: {
+      SearchGroup,
       Notify,
       LeftBar,
       DateInterval,

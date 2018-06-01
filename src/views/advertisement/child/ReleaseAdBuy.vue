@@ -58,7 +58,7 @@
           <b v-show="!switchValue">{{lowerPrice}} CNY/{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</b>
         </p>
         <input type="text"
-               v-model="adBuyObj.price"
+               v-model.trim="adBuyObj.price"
                @focus="clearPrice=true && (errPrice=true)"
                @blur="clearPrice=false"
                maxlength="9"
@@ -75,7 +75,7 @@
         <input type="text"
                :disabled="adBuyObj.vary == 2"
                :class="{disabledInput: adBuyObj.vary == 2}"
-               v-model="adBuyObj.tradeable"
+               v-model.trim="adBuyObj.tradeable"
                @focus="clearTradeable=true && (errTradeable=true)"
                @blur="clearTradeable=false"
                @input="tradeableInput"/>
@@ -86,7 +86,7 @@
       <li class="input-li">
         <p>最小订单额<b class="limit">最小200</b></p>
         <input type="text"
-               v-model="adBuyObj.min"
+               v-model.trim="adBuyObj.min"
                maxlength="8"
                @focus="clearMin=true && (errMin=true)"
                @blur="clearMin=false"
@@ -98,7 +98,7 @@
       <li class="input-li">
         <p>最大订单额<b class="limit">最大{{maxLimit}}</b></p>
         <input type="text"
-               v-model="adBuyObj.max"
+               v-model.trim="adBuyObj.max"
                maxlength="8"
                @focus="clearMax = true && (errMax=true)"
                @blur="clearMax=false"
@@ -244,7 +244,6 @@
       this.adBuyObj.uid = this.$store.state.userInfo.uid
       this.selectUserCoin()
       this.getPrice()
-      this.getLowerPrice()
       this.initData()
       this.Bus.$on(this.selectCoin, data => { // 币种筛选
         this.adBuyObj.currency = data
@@ -281,8 +280,9 @@
           res.data.coins.forEach(v => {
             this.coinType.push(v.currency.toUpperCase())
             this.coinData.push(v.currency)
+            this.Bus.$emit('buyCoinData', this.coinData)
           })
-          this.Bus.$emit('buyCoinData', this.coinData)
+          this.getLowerPrice() // 获取相应币种最低价
         }).catch(msg => {
           console.log('购买币种错误', msg)
         });
@@ -316,8 +316,12 @@
           tradeable: 0,
           page: 0,
         }).then(res => {
-          console.log('最低价格', res.data.sales[0].price)
-          this.lowerPrice = res.data.sales[0].price
+          let lowerList = res.data.sales ? res.data.sales : []
+          console.log('最低价格', res.data.sales)
+          if (lowerList.length == 0) {
+            this.lowerPrice = '-'
+          }
+          this.lowerPrice = lowerList && lowerList[0].price
         }).catch((msg) => {
           console.log(msg)
         });
@@ -406,14 +410,16 @@
         this.adBuyObj.info = ''
         this.adBuyObj.vary = 1
         this.adBuyObj.tradeable = ''
+        this.getPrice()
+        this.getLowerPrice()
         this.Bus.$emit('paymentNum', this.$store.state.PaymentSoreData)
       },
       closeLayer() {
         this.adErrLayer = false
       },
       priceInput() { // 表格验证
-        if (!(/^(0|([1-9]{1,6}))(\.\d+)?$/).test(this.adBuyObj.price)) {
-          this.errPriceText = '请输入整数部分不大于6位的2位小数'
+        if (!(/^(0|([1-9]\d{0,5}))(\.\d+)?$/).test(this.adBuyObj.price)) {
+          this.errPriceText = '请输入合理的数字'
           return
         }
 
@@ -422,7 +428,7 @@
       },
       tradeableInput() {
         if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adBuyObj.tradeable)) {
-          this.errTradeableText = '请输入正确的数字格式'
+          this.errTradeableText = '请输入合理的数字'
           return
         }
         this.adBuyObj.tradeable = this.adBuyObj.tradeable.replace(/^(\d+)\.(\d{0,6})\d*$/g, '$1' + '.' + '$2');
@@ -430,7 +436,7 @@
       },
       minInput() {
         if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adBuyObj.min)) {
-          this.errMinText = '请输入正确的数字格式'
+          this.errMinText = '请输入合理的数字'
           return
         }
         if (this.adBuyObj.min < 200) {
@@ -446,7 +452,7 @@
       },
       maxInput() {
         if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adBuyObj.max)) {
-          this.errMaxText = '请输入正确的数字格式'
+          this.errMaxText = '请输入合理的数字'
           return
         }
         if (this.adBuyObj.max < 200) {

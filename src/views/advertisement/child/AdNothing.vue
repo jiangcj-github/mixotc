@@ -3,13 +3,15 @@
     <div>
       <img src="/static/images/no_order.png">
     </div>
-    <p>您暂时没有广告，<router-link to="/advertisement/release">去发布</router-link></p>
+    <p v-if="type == 1">您暂时没有广告，<router-link to="/advertisement/release">去发布</router-link></p>
+    <p v-if="type == 2">您暂时没有下架广告哦～</p>
   </div>
 </template>
 
 <script>
   export default {
-    name: "ad-nothing"
+    name: "ad-nothing",
+    props: ['type']
   }
 </script>
 

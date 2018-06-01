@@ -97,7 +97,7 @@
       </table>
     </div>
      <!--订单无内容-->
-    <AdNothing v-if="!saleList.length"></AdNothing>
+    <AdNothing v-if="!saleList.length" :type="contentTabIndex"></AdNothing>
      <!--分页-->
     <Pagination  v-if="saleList.length"
                  :total="pageTotal"
