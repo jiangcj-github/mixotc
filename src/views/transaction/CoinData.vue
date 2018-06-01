@@ -34,7 +34,7 @@
               <li>{{coinDataObj.name}}({{coinDataObj.cnName}})</li>
               <li>{{coinDataObj.price && (coinDataObj.price.cny === 0 ? '-' : (coinDataObj.price.cny * 1).format('cny'))}}</li>
               <li>
-                <router-link :to="{path:'/transaction', query:{currency: selectCoinList[0].currency, name: selectCoinList[0].name, icon: selectCoinList[0].icon}}">去交易</router-link>
+                <router-link :to="{path:'/transaction', query:{currency: selectCoinList[0] && selectCoinList[0].currency, name: selectCoinList[0] && selectCoinList[0].name, icon: selectCoinList[0] && selectCoinList[0].icon}}">去交易</router-link>
                 <!--<span @click="goRecharge">去充币</span>-->
                 <!--<router-link to="">去充币</router-link>-->
               </li>
