@@ -10,9 +10,9 @@
         <p>您的账号已在其他地方登录，请重新登录</p>
       </slot>
     </BasePopup>
-    <BasePopup :show="showError" class="app-popup"  :top="40">
+    <BasePopup :show="showError" class="app-popup"  :top="40"  @click.native="hideErr">
       <slot>
-        <img src="/static/images/close_btn_tr2.png" alt="" @click="showError = false">
+        <img src="/static/images/close_btn_tr2.png" alt="" @click="hideErr">
         <p>抱歉，服务器维护中，请耐心等待。</p>
       </slot>
     </BasePopup>
@@ -38,6 +38,7 @@
     },
     data() {
       return {
+        timer: null,
         timer2: null,
         timer3: null,
         timer4: null,
@@ -136,12 +137,24 @@
     destroyed() {
       clearInterval(this.timer2);
       cancelAnimationFrame(this.timer3);
+      clearTimeout(this.timer);
       clearTimeout(this.timer4);
       window.removeEventListener('scroll', this.handleScroll);
       window.onmousedown = null;
-
     },
     methods: {
+      hideErr(){
+        this.showError = false;
+        clearTimeout(this.timer);
+      },
+      showErr(){
+        this.showError = true;
+        clearTimeout(this.timer);
+        this.timer = setTimeout(() => {
+          this.showError = false;
+          clearTimeout(this.timer)
+        }, 3000);
+      },
       hidePopup(){
         this.showTip = false;
         clearTimeout(this.timer4);
@@ -165,8 +178,8 @@
               return;
             };
             //错误码为250时，提示服务器维护中，做退出操作
-            if(res.body && res.body.ret === 250) {
-              this.showError = true;
+            if(res.body && (res.body.ret === 250 || res.body.type === 'offline_maintaining' && [3, 4].includes(res.body.data.mantain))) {
+              this.showErr();
               this.logout();
               return;
             }
@@ -200,6 +213,7 @@
       //退出登录逻辑
       logout() {
         // 一个选项卡退出，所有选项卡均退出
+        console.log('appLogout')
         localStorage.setItem("removeSessionStorage", Date.now());
         this.$store.commit({type: 'changeToken', data: ''});
         //改变vuex登录状态
