@@ -1,6 +1,10 @@
 <template>
   <div class="personal inner">
-    <h3>mixOTC-个人中心</h3>
+    <h3>
+       <router-link to="/transaction" tag="span">mixOTC</router-link>
+        -
+       <router-link to="/personal" tag="span">个人中心</router-link>
+    </h3>
     <div class="nav">
       <ul>
         <!--<router-link to="/personal/evaluate" tag="li" active-class="selected" class="evaluate">我的评价</router-link>-->
@@ -29,6 +33,9 @@
       font-size $fz12
       color $col333
       letter-spacing 0.25px
+      span:hover
+        color $col422
+        cursor pointer
     .nav
       float left
       width 180px

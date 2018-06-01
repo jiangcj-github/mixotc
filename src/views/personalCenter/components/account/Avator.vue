@@ -5,7 +5,7 @@
     <div class="wrap1" v-show="panel">
       <div class="wrap2">
           <div class="container">  
-            <img id="image" :src="url ? url : '/static/images/default_avator.png'" alt="Picture" style="width: 100%">  
+            <img id="image" :src="url" alt="Picture" style="width: 100%" v-show="false">  
           </div>
         <button type="button" class="button" @click="crop">确定</button>
         <button type="button" class="button cancel" @click="panel = false">取消</button>
@@ -43,25 +43,27 @@ export default {
       croppable:false,
       scalable: false,  
       panel:false,  
-      url:'',
+      url:'/static/images/default_avator.png',
       img: null,
       image: null
     }  
   },  
   mounted () {  
     //初始化这个裁剪框  
-    let self = this;  
     this.image = document.getElementById('image');  
-    this.cropper = new Cropper(this.image, {  
-      aspectRatio: 1,  
-      viewMode: 1,  
-      background:false,  
-      zoomable:true,
-      // center:false,
-      ready: function () {  
-        self.croppable = true;  
-      }  
-    });  
+    this.image.onload = ()=>{
+      let self = this;  
+      this.cropper = new Cropper(this.image, {  
+        aspectRatio: 1,  
+        viewMode: 1,  
+        background:false,  
+        zoomable:true,
+        // center:false,
+        ready: function () {  
+          self.croppable = true;  
+        }  
+      });  
+    }
   },
   destroyed () {
     this.image.onload = null
@@ -86,13 +88,12 @@ export default {
 
       this.url = this.getObjectURL(this.picValue);  
       //每次替换图片要重新得到新的url  
-      if(this.cropper){  
-        this.cropper.replace(this.url);  
+      this.image.onload = ()=>{
+        if(this.cropper){  
+          this.cropper.replace(this.url);  
+        }
+        this.panel = true;  
       }
-      this.panel = true;  
-      // this.image.onload = function(){
-      //   console.log(99)
-      // }
     },  
     crop () {  
         this.panel = false;  

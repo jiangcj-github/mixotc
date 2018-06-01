@@ -142,7 +142,11 @@
       @offRelease="openReleaseCoin">
     </ReleaseCoinLayer>
     <!-- 提醒放币弹窗 -->
-    <BasePopup :show="remindCoinLayer" class="remind-coin-layer">{{remindCoinContent}}</BasePopup>
+    <BasePopup :show="remindCoinLayer"
+               class="remind-coin-layer"
+               @click.native="remindCoinLayer=false">
+      {{remindCoinContent}}
+    </BasePopup>
     <!-- 取消订单 -->
     <SelectLayer :selectShow="showSelect"
                  @offSelet="openSelect"
@@ -239,7 +243,7 @@
         showType: 0, // 确定弹窗类型
 
         remindCoinLayer: false, // 提醒弹窗
-        remindCoinContent: '提醒发送成功', // 提醒弹窗内容
+        remindCoinContent: '', // 提醒弹窗内容
 
         showTransform: false, // 资金互转弹窗
 
@@ -632,6 +636,7 @@
       remindCoin(content) { // 提醒弹窗
         console.log('content', content)
         this.remindCoinLayer = true;
+        this.remindCoinContent = '提醒发送成功'
         this.WsProxy.send('otc','remind_order',{
           uid: content.sid,
           id: content.id,
@@ -657,7 +662,23 @@
         }
       },
       openTransform(st) { // 资金互转弹窗
-        this.showTransform = st === 'false' ? false : true
+        this.Proxy.hp_account({ // 币币账户
+          uid:this.$store.state.userInfo.uid
+        }).then(res => {
+          console.log('币币账户', res)
+          if (res.ret == 300) {
+            this.remindCoinLayer = true
+            this.remindCoinContent = '请前往交易所开通币币账户'
+            setTimeout(() => {
+              this.remindCoinLayer = false
+            }, 3000)
+            return
+          }
+          this.showTransform = st === 'false' ? false : true
+        }).catch(msg => {
+
+        });
+
       },
       openSelect(st, operation, index, content) { // 双选择公共弹窗
         if (st === 'false') {

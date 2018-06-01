@@ -476,6 +476,11 @@
         return this.$store.state.trustList;
       },
       hotCoinList() { // 热门币种数据
+        let coinArr = []
+        this.$store.state.coinLoopData.forEach((v, i) => {
+          coinArr.push(v.currency)
+        })
+        this.hotNum = this.$route.query.icon ? coinArr.indexOf(this.$route.query.currency) : coinArr.indexOf('btc')
         return this.$store.state.coinLoopData
       }
     },

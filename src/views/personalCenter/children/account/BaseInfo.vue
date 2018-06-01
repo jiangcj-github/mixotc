@@ -179,6 +179,7 @@ import AddressInfo from "../../components/account/AddressInfo";
       },
       updateName() {
         if(this.name === '' || this.userInfo.name === this.name) {
+          this.name = this.userInfo.name;
           this.isSetting=false;
           return;
         };
