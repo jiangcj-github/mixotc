@@ -213,6 +213,7 @@ import { mapState } from 'vuex';
       async uploadImage(){
         let index = this.curPhoto;
         this.data.iconArr[index] = '';
+        this.data.iconArr = this.data.iconArr.concat([])
         let a = new FormData(),
             file = this.$refs.up_img.files[0];
           if(!file) return;

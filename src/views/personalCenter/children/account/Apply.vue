@@ -142,7 +142,7 @@
             </li>
           </ul>
           <div class="upload-photo">
-            <h4>上传照片{{showArr}}<br> {{data.iconArr}}</h4>
+            <h4>上传照片</h4>
             <ul class="clearfix input">
               <li v-for="item of 3" :key="item" class="upload" @click="()=>{curPhoto = item - 1; $refs.up_img.click();}">
                 <img :src="`/static/images/personal/${defaultIdentity[item - 1]}`" alt="">
@@ -331,6 +331,7 @@ import BasePopup from '@/components/common/BasePopup';
       async uploadImage(){
         let index = this.curPhoto;
         this.data.iconArr[index] = '';
+        this.data.iconArr = this.data.iconArr.concat([])
         let a = new FormData(),
             file = this.$refs.up_img.files[0];
         if(!file) return;
