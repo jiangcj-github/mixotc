@@ -110,6 +110,9 @@
       release() { // 发布评价
         if (this.score === 0) {
           this.remindLayer = true
+          setTimeout(() => {
+            this.remindLayer = false
+          }, 3000)
           return
         }
 

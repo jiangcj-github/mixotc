@@ -174,7 +174,7 @@
         this.getCoinIcon();
         this.getBalance();
       }).catch((msg)=>{
-        alert(JSON.stringify(msg));
+        //alert(JSON.stringify(msg));
       });
     },
     destroyed(){
@@ -186,13 +186,13 @@
           this.errorFlag=0;
           return false;
         }
-        if (this.money > this.contentData.max) { // 超过交易额
+        if (this.money * 1 > this.contentData.max) { // 超过交易额
           this.errorFlag = 1;
           return false;
-        }else if (this.money < this.contentData.min) { // 低于最小交易额
+        }else if (this.money * 1 < this.contentData.min) { // 低于最小交易额
           this.errorFlag = 2;
           return false;
-        }else if (this.amount > this.contentData.tradeable) { // 超过交易量
+        }else if (this.amount * 1 > this.contentData.tradeable) { // 超过交易量
           this.errorFlag = 3;
           return false;
         }else{
@@ -211,7 +211,7 @@
             return item.currency === this.contentData.currency;
           })
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          //alert(JSON.stringify(msg));
         });
         console.log('价格数组', this.selectPrice, this.rate)
         this.rate = this.selectPrice[0] && this.selectPrice[0].cny
@@ -224,7 +224,7 @@
             return item.currency === this.contentData.currency;
           })
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          //alert(JSON.stringify(msg));
         });
         this.coinIcon = selectIconList[0] && (selectIconList[0].icon);
       },
@@ -239,7 +239,7 @@
           })
           console.log('this.balanceList', this.balanceList)
         }).catch((msg)=>{
-          alert(JSON.stringify(msg));
+          //alert(JSON.stringify(msg));
         });
         this.balance = balanceList[0] && (this.JsonBig.stringify(balanceList[0].balance)).formatFixed(6) || 0
       },

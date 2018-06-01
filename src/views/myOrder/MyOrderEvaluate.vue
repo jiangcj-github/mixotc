@@ -72,13 +72,14 @@
       this.Bus.$on('showReult', data => { // 接收订单完成后的变量提示，变为订单结果
         // console.log('111', data)
         this.showContent = data
+        this.$route.query.type = 1
       })
       console.log('this.orderList', this.orderList)
-    }
+    },
     // beforeRouteUpdate(to, from, next) { // 路由更新获取新的值
     //   this.showContent = to.query.type;
     //   next();
-    // },
+    // }
   }
 </script>
 

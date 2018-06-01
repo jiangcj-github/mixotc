@@ -480,7 +480,7 @@
         this.$store.state.coinLoopData.forEach((v, i) => {
           coinArr.push(v.currency)
         })
-        this.hotNum = coinArr.indexOf('btc')
+        this.hotNum = this.$route.query.icon ? coinArr.indexOf(this.$route.query.currency) : coinArr.indexOf('btc')
         return this.$store.state.coinLoopData
       }
     },
