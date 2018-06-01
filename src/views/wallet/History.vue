@@ -81,7 +81,7 @@
               <div class="booth">
                 <div class="time"><p>{{e.time1}}</p><p>{{e.time2}}</p></div>
                 <div class="type"><p :class="{in:e.isIn,out:!e.isIn}">{{e.type}}</p></div>
-                <div class="coin"><p><img :src="e.coinIcon">{{e.coin}}</p></div>
+                <div class="coin"><p>{{e.coin}}</p></div>
                 <div class="addr">
                   <p v-if="e.billType===0">{{e.addr}}</p>
                   <p v-if="e.billType===1"> <a :href="'/#/homepage?uid='+e.uid" target="_blank">{{e.nickname}}</a></p>
@@ -407,7 +407,6 @@
             type: ["充币","提币","购买","出售","转账-入账","转账-出账","担保-入账","担保-出账",
               "红包-入账","红包-出账","资产划入","资产划出"][e.type-1],
             coin: e.currency && e.currency.toUpperCase(),
-            coinIcon: "http://192.168.113.26//image/B012F109359B4872",
             nickname: e.trader_name || "-",
             uid: e.trader_id,
             uidStr: this.JsonBig.stringify(e.trader_id),

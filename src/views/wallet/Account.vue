@@ -275,7 +275,7 @@
         this.loadBb();
       },
       createWallet(i){
-        let curr=this.fb[i].abbr;
+        let curr=this.fb[i].abbr.toLowerCase();
         this.WsProxy.send("wallet", "new_wallet",{currency:curr}).then((data)=> {
           this.loadFb();
         }).catch(()=>{

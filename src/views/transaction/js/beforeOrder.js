@@ -55,7 +55,7 @@ let beforeOrder=async function(vue,param) {
         ws.send('wallet', 'new_wallet',{currency: opt.currency}).then((data)=> {
           resolve();
         }).catch(()=>{
-          reject("创建" + opt.currency + "钱包失败");
+          reject("创建" + opt.currency.toLowerCase() + "钱包失败");
         });
       }
     }).catch(()=>{
