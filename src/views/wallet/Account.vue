@@ -59,7 +59,7 @@
                 <i :class="{up:fbSubSort===2,down:fbSubSort===3}"></i></p>
               <p class="th avail sortable" @click="fbSort=++fbSort%2">可用余额
                 <i :class="{up:fbSort===0,down:fbSort===1}"></i></p>
-              <p class="th frozen sortable" @click="fbSort=++fbSort%2+2">冻结中余额
+              <p class="th frozen sortable" @click="fbSort=++fbSort%2+2" title="出售未完成、担保未完成">冻结中余额
                 <i :class="{up:fbSort===2,down:fbSort===3}"></i></p>
               <p class="th assess sortable" @click="fbSort=++fbSort%2+4">估值(CNY)
                 <i :class="{up:fbSort===4,down:fbSort===5}"></i></p>
