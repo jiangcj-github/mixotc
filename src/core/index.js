@@ -184,11 +184,11 @@ const RUN_APP = (App, config, plugin) => {
     },
     methods: {
       reload() {
-        console.log('this.isReload', this.isReload)
+        // console.log('this.isReload', this.isReload)
         this.isReload = true;
         this.$nextTick(() => {
           this.isReload = false;
-          console.log(this.$route.path)
+          // console.log(this.$route.path)
           if (["/transaction", "/", "/homepage", "/helpcenter", "/coinData"].includes(toPath)) {
             return;
           }
@@ -222,7 +222,7 @@ const RUN_APP = (App, config, plugin) => {
   // }
 
   window.addEventListener("storage", function(event) {
-    console.log(event.key, !sessionStorage.length);
+    // console.log(event.key, !sessionStorage.length);
     if (event.key == "getSessionStorage") {
       // console.log(2, 'getSessionStorage',tabIndex)
       // 已存在的标签页会收到这个事件
@@ -235,7 +235,7 @@ const RUN_APP = (App, config, plugin) => {
       store.commit({ type: "changeToken", data: "" });
     } else if (event.key == "sessionStorage" && isNewTab) {
       // 新开启的标签页会收到这个事件
-      console.log('新开启的标签页')
+      // console.log('新开启的标签页')
       let data = JsonBig.parse(event.newValue);
       // console.log(3, 'sessionStorage 0', event.newValue, data)
       for (let key in data) {
@@ -260,7 +260,7 @@ const RUN_APP = (App, config, plugin) => {
       // 一个页面登录，让其他页面获取token
       if (!event.newValue) return;
       let params = JSON.parse(event.newValue);
-      console.log(params);
+      // console.log(params);
       store.commit({ type: "changeToken", data: params.token});
       store.commit({ type: "changeCode", data: {
         code: params.code,

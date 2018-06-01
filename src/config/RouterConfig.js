@@ -1,8 +1,29 @@
+import { Loading } from 'element-ui';
+let unique;
+const spinRoute = {
+  show() {
+    let opt = {body: true, text: 'Loading...'};
+    if(!unique) unique = Loading.service(opt);
+  },
+  resolve(resolve) {
+    return function (component) {
+      if (unique) {
+        unique.close();
+        unique = null;
+      }
+      resolve(component)
+    }
+  }
+}
+
 const ROUTES = [
   {
     path: "/",
     name: "index",
-    component: resolve => require(["@/views/transaction/Transaction"], resolve), // 交易中心
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/transaction/Transaction"], spinRoute.resolve(resolve))
+    }, // 交易中心
     meta: {
       title: "交易中心"
     }
@@ -10,7 +31,10 @@ const ROUTES = [
   {
     path: "/transaction",
     name: "transaction",
-    component: resolve => require(["@/views/transaction/Transaction"], resolve), // 交易中心
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/transaction/Transaction"], spinRoute.resolve(resolve))
+    }, // 交易中心
     meta: {
       title: "交易中心"
     }
@@ -18,7 +42,10 @@ const ROUTES = [
   {
     path: "/transaction/order",
     name: "order",
-    component: resolve => require(["@/views/transaction/Order"], resolve), // 交易中心购买BTC
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/transaction/Order"], spinRoute.resolve(resolve))
+    }, // 交易中心购买BTC
     meta: {
       title: "订单"
     }
@@ -26,7 +53,10 @@ const ROUTES = [
   {
     path: "/helpcenter",
     name: "helpCenter",
-    component: resolve => require(["@/views/transaction/HelpCenter"], resolve), // 帮助中心
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/transaction/HelpCenter"], spinRoute.resolve(resolve))
+    }, // 帮助中心
     meta: {
       title: "帮助中心"
     }
@@ -34,7 +64,10 @@ const ROUTES = [
   {
     path: "/coinData",
     name: "coinData",
-    component: resolve => require(["@/views/transaction/CoinData"], resolve), // 币种资料
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/transaction/CoinData"], spinRoute.resolve(resolve))
+    }, // 币种资料
     meta: {
       title: "币种资料"
     }
@@ -42,7 +75,10 @@ const ROUTES = [
   {
     path: "/order",
     name: "MyOrder",
-    component: resolve => require(["@/views/myOrder/MyOrder"], resolve), // 我的订单
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/myOrder/MyOrder"], spinRoute.resolve(resolve))
+    }, // 我的订单
     meta: {
       title: "我的订单"
     }
@@ -50,7 +86,10 @@ const ROUTES = [
   {
     path: "/order/evaluate",
     name: "MyOrderEvaluate",
-    component: resolve => require(["@/views/myOrder/MyOrderEvaluate"], resolve), // 我的订单评价
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/myOrder/MyOrderEvaluate"], spinRoute.resolve(resolve))
+    }, // 我的订单评价
     meta: {
       title: "我的订单"
     }
@@ -58,7 +97,10 @@ const ROUTES = [
   {
     path: "/homepage", //?uid=xxx
     name: "homepage",
-    component: resolve => require(["@/views/homepage/Home"], resolve), // 买卖家个人中心-他的发布
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/homepage/Home"], spinRoute.resolve(resolve))
+    }, // 买卖家个人中心-他的发布
     meta: {
       title: "个人中心"
     }
@@ -67,7 +109,10 @@ const ROUTES = [
     path: "/advertisement/release", // 发广告
     name: "ReleaseAd",
     redirect: "/advertisement/release/buy",
-    component: resolve => require(["@/views/advertisement/ReleaseAd"], resolve), // 发广告
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/advertisement/ReleaseAd"], spinRoute.resolve(resolve))
+    }, // 发广告
     meta: {
       title: "发广告"
     },
@@ -76,8 +121,10 @@ const ROUTES = [
       {
         path: "/advertisement/release/buy",
         name: "releaseBuy",
-        component: resolve =>
-          require(["@/views/advertisement/child/ReleaseAdBuy"], resolve), // 购买广告
+        component: resolve => {
+          spinRoute.show();
+            require(["@/views/advertisement/child/ReleaseAdBuy"], spinRoute.resolve(resolve))
+          }, // 购买广告
         meta: {
           title: "发广告"
         }
@@ -86,8 +133,10 @@ const ROUTES = [
       {
         path: "/advertisement/release/sale",
         name: "releaseSale",
-        component: resolve =>
-          require(["@/views/advertisement/child/ReleaseAdSale"], resolve), // 购买广告
+        component: resolve => {
+          spinRoute.show();
+            require(["@/views/advertisement/child/ReleaseAdSale"], spinRoute.resolve(resolve))
+          }, // 购买广告
         meta: {
           title: "发广告"
         }
@@ -97,7 +146,10 @@ const ROUTES = [
   {
     path: "/advertisement", // 我的广告
     name: "MyAd",
-    component: resolve => require(["@/views/advertisement/MyAd"], resolve), // 我的广告
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/advertisement/MyAd"], spinRoute.resolve(resolve))
+    }, // 我的广告
     meta: {
       title: "我的广告"
     }
@@ -114,8 +166,10 @@ const ROUTES = [
     path: "/personal",
     name: "personal",
     redirect: "/personal/account",
-    component: resolve =>
-      require(["@/views/personalCenter/personalCenter"], resolve), // 个人中心
+    component: resolve => {
+      spinRoute.show();
+        require(["@/views/personalCenter/personalCenter"], spinRoute.resolve(resolve))
+      }, // 个人中心
     meta: {
       title: "个人中心"
     },
@@ -124,10 +178,12 @@ const ROUTES = [
       {
         path: "evaluate",
         name: "personal-evaluate",
-        component: resolve =>
-          require([
+        component: resolve => {
+          spinRoute.show();
+            require([
             "@/views/personalCenter/children/evaluate/Evaluate"
-          ], resolve),
+          ], spinRoute.resolve(resolve))
+        },
         meta: {
           title: "个人中心"
         }
@@ -137,8 +193,10 @@ const ROUTES = [
         path: "account",
         name: "personal-account",
         redirect: "/personal/account/baseInfo",
-        component: resolve =>
-          require(["@/views/personalCenter/children/account"], resolve),
+        component: resolve => {
+          spinRoute.show();
+            require(["@/views/personalCenter/children/account"], spinRoute.resolve(resolve))
+          },
         meta: {
           title: "个人中心"
         },
@@ -146,10 +204,12 @@ const ROUTES = [
           {
             path: "baseInfo",
             name: "personal-baseInfo",
-            component: resolve =>
-              require([
+            component: resolve => {
+              spinRoute.show();
+                require([
                 "@/views/personalCenter/children/account/BaseInfo"
-              ], resolve),
+              ], spinRoute.resolve(resolve))
+            },
             meta: {
               title: "个人中心"
             }
@@ -157,10 +217,12 @@ const ROUTES = [
           {
             path: "apply",
             name: "personal-apply",
-            component: resolve =>
-              require([
+            component: resolve => {
+              spinRoute.show();
+                require([
                 "@/views/personalCenter/children/account/Apply"
-              ], resolve),
+              ], spinRoute.resolve(resolve))
+            },
             meta: {
               title: "个人中心"
             }
@@ -168,10 +230,12 @@ const ROUTES = [
           {
             path: "auth",
             name: "personal-auth",
-            component: resolve =>
-              require([
+            component: resolve => {
+              spinRoute.show();
+                require([
                 "@/views/personalCenter/children/account/Auth"
-              ], resolve),
+              ], spinRoute.resolve(resolve))
+            },
             meta: {
               title: "个人中心"
             }
@@ -182,8 +246,10 @@ const ROUTES = [
       {
         path: "safe",
         name: "safe",
-        component: resolve =>
-          require(["@/views/personalCenter/children/safe"], resolve),
+        component: resolve => {
+          spinRoute.show();
+            require(["@/views/personalCenter/children/safe"], spinRoute.resolve(resolve))
+          },
         meta: {
           title: "个人中心"
         }
@@ -193,7 +259,10 @@ const ROUTES = [
   {
     path: "/verify/identifyAuth",
     name: "identifyAuth",
-    component: resolve => require(["@/views/verify/Idcard"], resolve), // 审核中心-身份审核
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/verify/Idcard"], spinRoute.resolve(resolve))
+    }, // 审核中心-身份审核
     meta: {
       title: "审核中心"
     }
@@ -201,7 +270,10 @@ const ROUTES = [
   {
     path: "/verify/largeTransaction",
     name: "largeTransaction",
-    component: resolve => require(["@/views/verify/LgTran"], resolve), // 审核中心-大额交易审核
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/verify/LgTran"], spinRoute.resolve(resolve))
+    }, // 审核中心-大额交易审核
     meta: {
       title: "审核中心"
     }
@@ -209,7 +281,10 @@ const ROUTES = [
   {
     path: "/verify/arbitrationRecord",
     name: "arbitrationRecord",
-    component: resolve => require(["@/views/verify/ArbiRec"], resolve), // 审核中心-仲裁记录
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/verify/ArbiRec"], spinRoute.resolve(resolve))
+    }, // 审核中心-仲裁记录
     meta: {
       title: "审核中心"
     }
@@ -217,7 +292,10 @@ const ROUTES = [
   {
     path: "/verify/service",
     name: "Service",
-    component: resolve => require(["@/views/kefu/Dialog"], resolve), // 客服交易对话框
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/kefu/Dialog"], spinRoute.resolve(resolve))
+    }, // 客服交易对话框
     meta: {
       title: "对话"
     }
@@ -229,42 +307,60 @@ const ROUTES = [
   },
   {
     path: "/wallet/account",
-    component: resolve => require(["@/views/wallet/Account"], resolve), // 账户余额
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/wallet/Account"], spinRoute.resolve(resolve))
+    }, // 账户余额
     meta: {
       title: "钱包"
     }
   },
   {
     path: "/wallet/charge",
-    component: resolve => require(["@/views/wallet/Charge"], resolve), // 充币
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/wallet/Charge"], spinRoute.resolve(resolve))
+    }, // 充币
     meta: {
       title: "钱包"
     }
   },
   {
     path: "/wallet/withdraw",
-    component: resolve => require(["@/views/wallet/Withdraw"], resolve), // 提币
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/wallet/Withdraw"], spinRoute.resolve(resolve))
+    }, // 提币
     meta: {
       title: "钱包"
     }
   },
   {
     path: "/wallet/conversion",
-    component: resolve => require(["@/views/wallet/Conversion"], resolve), // 资产互转
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/wallet/Conversion"], spinRoute.resolve(resolve))
+    }, // 资产互转
     meta: {
       title: "钱包"
     }
   },
   {
     path: "/wallet/history",
-    component: resolve => require(["@/views/wallet/History"], resolve), // 账单明细
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/wallet/History"], spinRoute.resolve(resolve))
+    }, // 账单明细
     meta: {
       title: "钱包"
     }
   },
   {
     path: "/wallet/address",
-    component: resolve => require(["@/views/wallet/Address"], resolve), // 地址管理
+    component: resolve => {
+      spinRoute.show();
+      require(["@/views/wallet/Address"], spinRoute.resolve(resolve))
+    }, // 地址管理
     meta: {
       title: "钱包"
     }

@@ -183,7 +183,7 @@
         ws.onMessage[seq] = {
           callback: (res)=>{
             if(res && res.body.ret === 201) {
-              this.restTime = res.body.rest_time/60 + 1;
+              this.restTime = res.body.rest_time%60 === 0 ? res.body.rest_time/60 : parseInt(res.body.rest_time/60) + 1;
               this.showFrequently()
             }
           },
