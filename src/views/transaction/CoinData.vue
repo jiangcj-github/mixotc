@@ -133,7 +133,7 @@
       async getCoinsData() { // 获取币种资料数据
         //this.inputValue = '';
         await this.Proxy.getCoinDataAll({app: 0, symbolId: this.id, period: '24h'}).then(res => {
-          console.log('资料', res, this.JsonBig.stringify(res.data.price.cny))
+          // console.log('资料', res, this.JsonBig.stringify(res.data.price.cny))
           this.coinDataObj = res.data
           this.coinDataObj.logo = `${this.HostUrl.http}image/${this.selectCoinList[0].icon}`
         }).catch(msg => {

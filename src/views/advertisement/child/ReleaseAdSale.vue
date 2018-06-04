@@ -239,7 +239,7 @@
       if (this.$store.state.editFlag == 1) {
         this.isDisabled = true
         this.adSaleObj = this.$store.state.editContent
-        console.log('赋值完毕',this.adSaleObj.length)
+        // console.log('赋值完毕',this.adSaleObj.length)
       }
       if(this.$route.params.saleCon){
         this.adSaleObj = this.$route.params.saleCon;
@@ -310,7 +310,7 @@
       },
       async getPrice() { // 当前价格
         await this.Proxy.getPrice().then(res => {
-          console.log('价格', res)
+          // console.log('价格', res)
           this.selectPrice = res.data.prices.filter(item => {
             return item.currency === this.adSaleObj.currency;
           })
@@ -338,10 +338,13 @@
           page: 0,
         }).then(res => {
           let higherList = res.data.sales ? res.data.sales : []
+          // console.log('最高价格',higherList )
           if (higherList.length == 0) {
             this.higherPrice = '-'
+            return
           }
           this.higherPrice = res.data.sales && res.data.sales[0].price
+
         }).catch((msg) => {
           console.log(msg)
         });
@@ -391,7 +394,7 @@
             }, 3000)
             return
           }
-          console.log('发布广告', data)
+          // console.log('发布广告', data)
           this.adSuccLayer = true
           let _this = this
           let timerFn = function () {

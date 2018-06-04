@@ -166,7 +166,7 @@
       this.WsProxy.send('otc','sale_detail',{
         id: this.JsonBig.parse(this.$route.query.id)
       }).then((data)=>{
-        console.log('下单内容', data)
+        // console.log('下单内容', data)
         this.contentData = data;
         this.type = data.type;
         this.tradeable = this.contentData.tradeable && (this.contentData.tradeable * 1 + "").formatFixed(6) || 0
@@ -205,7 +205,7 @@
       // 获取价格
       async getPrice() {
         await this.Proxy.getPrice().then(res => {
-          console.log('价格', res.data.prices)
+          // console.log('价格', res.data.prices)
           this.priceList = res.data.prices;
           this.selectPrice = this.priceList.filter(item => {
             return item.currency === this.contentData.currency;
@@ -213,7 +213,7 @@
         }).catch((msg)=>{
           //alert(JSON.stringify(msg));
         });
-        console.log('价格数组', this.selectPrice, this.rate)
+        // console.log('价格数组', this.selectPrice, this.rate)
         this.rate = this.selectPrice[0] && this.selectPrice[0].cny
       },
       // 获取币种图标
@@ -237,7 +237,7 @@
           balanceList = data.wallets.filter(item => {
             return item.currency === this.contentData.currency;
           })
-          console.log('this.balanceList', this.balanceList)
+          // console.log('this.balanceList', this.balanceList)
         }).catch((msg)=>{
           //alert(JSON.stringify(msg));
         });

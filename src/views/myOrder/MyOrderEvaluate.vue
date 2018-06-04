@@ -69,11 +69,11 @@
       this.propsType = this.orderList.type;
       this.propsSid = this.orderList.sid;
       this.propsReceiver = this.JsonBig.stringify(this.orderList.buyer) == this.userId ? this.orderList.seller : this.orderList.buyer;
-      this.Bus.$on('showReult', data => { // 接收订单完成后的变量提示，变为订单结果
-        // console.log('111', data)
-        this.showContent = data
-        this.$route.query.type = 1
-      })
+      // this.Bus.$on('showReult', data => { // 接收订单完成后的变量提示，变为订单结果
+      //   // console.log('111', data)
+      //   this.showContent = data
+      //   this.$route.query.type = 1
+      // })
       console.log('this.orderList', this.orderList)
     },
     // beforeRouteUpdate(to, from, next) { // 路由更新获取新的值

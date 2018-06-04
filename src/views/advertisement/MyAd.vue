@@ -281,7 +281,7 @@
           })
           this.isDisabled = data.coins == null ? true : false
         }).catch((msg)=>{
-          console.log(msg);
+          console.log('获取币种错误', msg);
         });
       },
       initData() { // 初始化信息
@@ -301,10 +301,14 @@
           "origin": this.curPage - 1, // 分页
           "count": 20,
         }).then((data)=>{
-          console.log('广告列表', data)
+          // console.log('广告列表', data)
           this.saleList = data.sales ? data.sales : []
           this.saleList.forEach(v => {
-            v.tradeable = this.JsonBig.stringify(v.tradeable).formatFixed(6)
+            if(v.type == 2 && v.tradeable == 0) {
+              v.tradeable = (v.max / v.price).formatFixed(6)
+            } else {
+              v.tradeable = this.JsonBig.stringify(v.tradeable).formatFixed(6)
+            }
             v.volume = this.JsonBig.stringify(v.volume).formatFixed(6)
             v.price_avg = this.JsonBig.stringify(v.price_avg).formatFixed(2)
           })
@@ -334,10 +338,10 @@
           "id": content.id,
           "online": 1 //1在售 2下架
         }).then((data)=>{
-          console.log('上架', data)
+          // console.log('上架', data)
           window.location.reload()
         }).catch((msg)=>{
-          console.log(msg);
+          console.log('上架错误', msg);
           switch (msg.ret) {
             case 22:
               this.errText = '一个币种同时只能上架一条广告'
@@ -365,7 +369,7 @@
         }
       },
       async edit(content) { // 编辑
-        console.log('ddfasfas', content.payments)
+        // console.log('ddfasfas', content.payments)
         let lengthList, length
         await this.WsProxy.send('wallet', 'wallets', {
           id: this.$store.state.userInfo.uid, // 用户id
@@ -373,7 +377,7 @@
           lengthList = data.wallets.filter(item => {
             return item.currency === content.currency
           })
-          console.log('lengthList', lengthList)
+          // console.log('lengthList', lengthList)
         }).catch((msg)=>{
           // console.log('出售币种错误', msg);
         });

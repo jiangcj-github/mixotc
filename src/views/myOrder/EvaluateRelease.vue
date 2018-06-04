@@ -140,7 +140,8 @@
           }
         }))
         // 发送改变状态值，显示评论结果
-        this.Bus.$emit('showReult', 1);
+        // this.Bus.$emit('showReult', 1);
+        this.$router.push({path: '/order/evaluate', query: {type: '1'}});
       },
       closeLayer() { // 关闭提示勾选弹窗
         this.remindLayer = false

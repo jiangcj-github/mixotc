@@ -88,7 +88,7 @@
     },
     created() {
       this.Bus.$on('saleSlideLength', data => {
-        console.log('saleSlideLength', data)
+        // console.log('saleSlideLength', data)
         this.saleObj.length = data * 1
         this.saleObj.tradeable = this.saleObj.tradeable ? this.saleObj.tradeable : data * 1
       }),
