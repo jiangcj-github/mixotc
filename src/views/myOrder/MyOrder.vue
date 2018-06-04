@@ -145,7 +145,7 @@
     <BasePopup :show="remindCoinLayer"
                class="remind-coin-layer"
                @click.native="remindCoinLayer=false">
-      {{remindCoinContent}}
+      <span v-html="remindCoinContent"></span>
     </BasePopup>
     <!-- 取消订单 -->
     <SelectLayer :selectShow="showSelect"
@@ -308,7 +308,7 @@
       this.$route.query.classify && (this.$route.query.classify == 0 && (this.selectState = "1,2,3") || ((this.contentTabIndex = 2) && (this.selectState = "4,5,6,7,8,9,10,11"))) || (this.selectState = "1,2,3")
       // 获取用户id
       this.userId = typeof this.$store.state.userInfo.uid  === 'string' ? this.$store.state.userInfo.uid : this.JsonBig.stringify(this.$store.state.userInfo.uid);
-      console.log( this.JsonBig.stringify(this.$store.state.userInfo.uid))
+      // console.log( this.JsonBig.stringify(this.$store.state.userInfo.uid))
       //console.log('这是个字符串', this.$store.state.userInfo.uid,  typeof this.$store.state.userInfo.uid)
       //console.log('1111', typeof this.userId, this.userId, typeof this.$store.state.userInfo.uid, this.$store.state.userInfo.uid)
       // 获取进行状态
@@ -316,7 +316,6 @@
       this.getInitNum();
       this.getOrderCoin();
       this.getCompleteData(); // 获取完成数据
-      this.getRemindData();
     },
     mounted() {
       // 监听下拉框值，将值传给子组件
@@ -332,13 +331,13 @@
         let a = data.indexOf('6,7'), b = data.indexOf('8,9'), selectStateArr = ['1,2,3', '4,5,6,7,8,9,10,11']
         !((a + 1) && (b + 1)) && ((a + 1) && (this.comment = 1) && data.splice(a, 1) || (b + 1) && (this.comment = 2) && data.splice(b, 1)) || (this.comment = 0)
         this.selectState = data.length && data.join(',') || !this.comment && (this.selectState = selectStateArr[this.contentTabIndex - 1]) || ''
-        console.log('selectState', this.selectState, this.comment)
+        // console.log('selectState', this.selectState, this.comment)
         this.initData()
       });
       // 监听搜索框title值
       this.Bus.$on(this.searchValue,(data) => {
         this.title = data
-        console.log('searchValue', data)
+        // console.log('searchValue', data)
       });
       // 监听搜索框值
       this.Bus.$on('changeInputContent', ({type, data}) => {
@@ -365,7 +364,7 @@
         }
         this.contentList.length == 0 && (this.contentTabIndex === 1 && ((this.selectState = '4,5,6,7,8,9,10,11') && (this.contentTabIndex = 2)) || ((this.selectState = '1,2,3') && (this.contentTabIndex = 1)))
         this.initData()
-        console.log('搜索', this.contentList, this.contentList.length)
+        // console.log('搜索', this.contentList, this.contentList.length)
       })
       // 模糊搜索
       this.Bus.$on(this.searchResult,({type, data}) => {
@@ -382,7 +381,7 @@
         }).catch((msg)=>{
           console.log(msg);
         });
-        console.log('searchResult', this.result, data)
+        // console.log('searchResult', this.result, data)
       });
       // this.Bus.$on('offTime', data => this.showTime = data);
       // 时间框值
@@ -458,7 +457,7 @@
         ws.onMessage[seq] = { // 监听
           callback: (data) => {
             if(!data || data.body.ret !== 0) return;
-            console.log('order', data.body)
+            // console.log('order', data.body)
             this.contentList = data.body.data.orders ? data.body.data.orders : []
             this.pageTotal = data.body.data.amount
             // 购买成功的订单显示弹窗
@@ -549,21 +548,11 @@
           },
         };
       },
-      getRemindData() { // 接收到提醒状态
-        let ws = this.WebSocket; // 创建websocket连接
-        ws.onMessage['rmd_ord'] = { // 完成状态的action
-          callback: (res) => {
-            if (res.op && res.op === 24 && res.body.type === 'rmd_ord') {
-              console.log(1111)
-            }
-          },
-        };
-      },
       getInitNum() { // 获取进行中和已完成数量
         this.WsProxy.send('otc','get_orders_num',{
           type: 1 // 1: 进行中, 2: 已完成
         }).then((data)=>{
-          console.log('num', data)
+          // console.log('num', data)
           this.conductNum = data.amount ? data.amount : 0
         }).catch((msg)=>{
           console.log(msg);
@@ -571,7 +560,7 @@
         this.WsProxy.send('otc','get_orders_num',{
           type: 2 // 1: 进行中, 2: 已完成
         }).then((data)=>{
-          console.log('num', data)
+          // console.log('num', data)
           this.completeNum = data.amount ? data.amount : 0
         }).catch((msg)=>{
           console.log(msg);
@@ -641,7 +630,7 @@
         }
       },
       remindCoin(content) { // 提醒弹窗
-        console.log('content', content)
+        // console.log('content', content)
         this.remindCoinLayer = true;
         this.remindCoinContent = '提醒发送成功'
         this.WsProxy.send('otc','remind_order',{
@@ -650,7 +639,7 @@
           state: content.state,
           info: content.info
         }).then((data)=>{
-          console.log('remind_order', data)
+          // console.log('remind_order', data)
         }).catch((msg)=>{
           console.log(msg);
         });
@@ -670,7 +659,7 @@
       },
       goExchange() {
         this.remindCoinLayer = true
-        this.remindCoinContent = '请前往交易所开通币币账户'
+        this.remindCoinContent = '请前往<a href="" style="text-decoration: underline; color: #FFB422">交易所</a>开通币币账户'
         setTimeout(() => {
           this.remindCoinLayer = false
         }, 3000)
@@ -683,7 +672,7 @@
           this.showSelect = false
         } else {
           this.showType = operation.flag;
-          console.log('this.showType', this.showType)
+          // console.log('this.showType', this.showType)
           switch (operation.flag) {
             case 4: // 取消订单弹窗
               this.selectContent = '确定取消订单？'; // 内容

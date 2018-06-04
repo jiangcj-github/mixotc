@@ -53,7 +53,6 @@
     },
     mounted() {
       this.Bus.$on('paymentNum', data => { // 支付情况初始值
-        console.log('孙子接收', data)
         this.soreItem = data
         this.paymentItem(this.soreItem)
       })

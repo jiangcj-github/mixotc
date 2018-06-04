@@ -257,7 +257,7 @@
       this.Bus.$on(this.premiumValue, data => { // 溢价滑动价格
         this.adBuyObj.premium = data
         this.changePrice = this.priceNow * (1 + (data/100))
-        console.log('现在的价格', this.changePrice)
+        // console.log('现在的价格', this.changePrice)
       });
       this.Bus.$on(this.limitValue, data => { // 期限滑动价格
         this.adBuyObj.limit = data
@@ -295,7 +295,7 @@
         }).catch((msg)=>{
           console.log(msg)
         });
-        console.log('this.selectPrice', this.selectPrice)
+        // console.log('this.selectPrice', this.selectPrice)
         this.changePrice = this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
       },
       async getLowerPrice() { // 最低价格获取
@@ -317,9 +317,10 @@
           page: 0,
         }).then(res => {
           let lowerList = res.data.sales ? res.data.sales : []
-          console.log('最低价格', res.data.sales)
+          // console.log('最低价格', res.data.sales)
           if (lowerList.length == 0) {
             this.lowerPrice = '-'
+            return
           }
           this.lowerPrice = lowerList && lowerList[0].price
         }).catch((msg) => {
@@ -367,7 +368,7 @@
             }, 3000)
             return
           }
-          console.log('发布广告', data)
+          // console.log('发布广告', data)
           this.adSuccLayer = true
           let _this = this
           let timerFn = function () {

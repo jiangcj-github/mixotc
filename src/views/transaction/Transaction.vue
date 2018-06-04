@@ -28,7 +28,7 @@
                  @click="srchText=''"
                  v-show="srchTipShow && srchText.length>0">
             <a href="javascript:void(0)" @click="searchStr"></a>
-            <b v-if="searchTip">您还未输入币种</b>
+            <b v-if="searchTip">您还未输入{{srchUls[srchUlSel].title}}</b>
             <!--币种模糊搜索结果-->
             <ul v-show="srchTipShow" v-if="this.srchType===0">
               <li v-for="e in coinTips" @click="search(e)">
@@ -343,7 +343,7 @@
             this.err = 0;
             this.total=res.data.amount;
             this.parseResult(res.data.sales);
-            console.log('广告2', res.data.sales)
+            // console.log('广告2', res.data.sales)
           }
         }).catch((msg) => {
           if (!msg)
@@ -368,14 +368,14 @@
             pay_zfb: e.payments % 2 === 1,
             pay_wx: [2, 3, 6, 7].includes(e.payments),
             pay_yhk: [4, 5, 6, 7].includes(e.payments),
-            amount: e.tradeable && (e.tradeable + "").formatFixed(6) || 0,
+            amount: (this.typeNum == 1 && e.tradeable == 0) && ((e.max / e.price).formatFixed(6)) || ((e.tradeable + "").formatFixed(6)),
             price: e.price && (e.price + "").formatFixed(2) || 0,
             currency: e.currency,
             isLargeTran: e.bt_verify===2?1:0,
             type: this.filte.type
           });
         });
-        console.log('广告', this.result)
+        // console.log('广告', this.result)
       },
       //最小限额输入处理
       inputDealMin() {

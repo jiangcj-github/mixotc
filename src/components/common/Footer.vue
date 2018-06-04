@@ -56,6 +56,8 @@
         color $col999
         a
           color $col999
+          &:hover
+            color #FFF
   .faq
     position relative
     height 200px

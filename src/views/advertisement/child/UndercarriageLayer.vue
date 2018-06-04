@@ -26,7 +26,7 @@
       BasePopup
     },
     mounted() {
-      console.log()
+
     },
     watch: {
       underShow(state) {
