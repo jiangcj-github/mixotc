@@ -389,6 +389,9 @@
             case 21:
               this.errText = '最多可同时发布3条广告'
               break;
+            case 33:
+              this.errText = '小于提币限额'
+              break;
             case 82:
               this.errText = '创建钱包失败'
               break;

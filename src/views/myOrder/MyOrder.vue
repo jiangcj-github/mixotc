@@ -26,7 +26,7 @@
     <div class="order-item clearfix">
       <span @click="selectStatus(1)" :class="contentTabIndex === 1 ? 'content-btn-active' : 'content-btn'">进行中({{conductNum}})</span>
       <span @click="selectStatus(2)" :class="contentTabIndex === 2 ? 'content-btn-active' : 'content-btn'">完成({{completeNum}})</span>
-      <button @click="openTransform()">资金划转</button>
+      <button @click="exchangeFlag ? goExchange() : openTransform()">资金划转</button>
     </div>
 
     <div class="order-content">
@@ -297,7 +297,9 @@
 
         pageTotal: 0, // 分页总数
         curPage: 1, // 当前页
-        flagNow: true // 倒计时标志
+        flagNow: true, // 倒计时标志
+
+        exchangeFlag: true // 是否弹出资金互转弹窗
       }
     },
     created() {
@@ -396,6 +398,10 @@
         this.curPage = data;
         this.initData();
       });
+      this.Bus.$on('transformRet', data => {
+        console.log(111, data)
+        this.exchangeFlag = data == 300 ? true : false
+      })
     },
     destroyed() {
       this.Bus.$off(this.orderTypeValue);
@@ -405,6 +411,7 @@
       this.Bus.$off('changeInputContent');
       this.Bus.$off('onDiChange');
       this.Bus.$off('onPageChange');
+      this.Bus.$off('transformRet');
     },
     methods: {
       contactSomeone(id){
@@ -661,24 +668,15 @@
           this.$store.commit({type: 'showTransform', data: 0}) // 支付标识来源
         }
       },
+      goExchange() {
+        this.remindCoinLayer = true
+        this.remindCoinContent = '请前往交易所开通币币账户'
+        setTimeout(() => {
+          this.remindCoinLayer = false
+        }, 3000)
+      },
       openTransform(st) { // 资金互转弹窗
-        this.Proxy.hp_account({ // 币币账户
-          uid:this.$store.state.userInfo.uid
-        }).then(res => {
-          console.log('币币账户', res)
-          if (res.ret == 300) {
-            this.remindCoinLayer = true
-            this.remindCoinContent = '请前往交易所开通币币账户'
-            setTimeout(() => {
-              this.remindCoinLayer = false
-            }, 3000)
-            return
-          }
-          this.showTransform = st === 'false' ? false : true
-        }).catch(msg => {
-
-        });
-
+        this.showTransform = st === 'false' ? false : true
       },
       openSelect(st, operation, index, content) { // 双选择公共弹窗
         if (st === 'false') {
