@@ -1,15 +1,14 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
-import Vue from 'vue';
+// import Vue from 'vue';
 
 import App from './App';
 
-import { DatePicker } from "element-ui"; // 引入日历组件
-import { Slider } from "element-ui"; // 引入滑块
-import { Switch } from "element-ui"; // 引入开关
+// import { DatePicker } from "element-ui"; // 引入日历组件
+// import { Slider } from "element-ui"; // 引入滑块
+// import { Switch } from "element-ui"; // 引入开关
 import '@/stylus/rest.styl'
 import "@/stylus/base.styl"
-import "vue-happy-scroll/docs/happy-scroll.css";
 
 import BaseFunction from '@/js/BaseFunction'//引入自定义插件
 import BasePrototype from '@/js/BasePrototype'//引入自定义原型方法
@@ -38,7 +37,7 @@ RUN_APP(
     PrototypeConfig: PrototypeConfig.core,
     LoopTaskConfig
   },
-  [DatePicker, Slider, Switch]
+  // [DatePicker, Slider, Switch]
 );
 
 

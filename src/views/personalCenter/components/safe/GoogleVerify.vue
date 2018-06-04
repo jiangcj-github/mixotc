@@ -66,7 +66,7 @@
 
 <script>
 import BasePopup from '@/components/common/BasePopup';
-import QrcodeVue from 'qrcode.vue';
+// import QrcodeVue from 'qrcode.vue';
   export default {
     props:['emitValue'],
     data(){

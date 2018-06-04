@@ -114,7 +114,7 @@
   import LeftBar from "./layout/LeftBar";
   import Pagination from "../verify/component/Pagination";
   import BasePopup from "../../components/common/BasePopup";
-  import QrcodeVue from "qrcode.vue";
+  // import QrcodeVue from "qrcode.vue";
   import Alert from "../common/widget/Alert";
 
   export default {

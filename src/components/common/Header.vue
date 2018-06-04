@@ -65,7 +65,7 @@
   import Login from '@/components/common/Login'
   import HeaderPrice from '@/components/common/HeaderPrice'
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
-  import QrcodeVue from 'qrcode.vue'
+  // import QrcodeVue from 'qrcode.vue'
 
   export default {
     data() {
@@ -108,17 +108,21 @@
         this.$store.commit({type: 'changeLogin', data: false});
         this.WebSocket.reConnectFlag = false;
         this.WebSocket.close();
+        console.log(this.$route.path)
         if (["/transaction", "/", "/homepage", "/helpcenter", "/coinData"].includes(this.$route.path)) {
             return;
         }
-        this.$router.push('transaction')
+
+        this.$router.push({
+              name: "transaction"
+            })
       },
       hideShowMenu() {
         if (!this.showMenu) return;
         this.showMenu = false
       },
       releaseAd() { // 发广告操作
-        if (this.$store.state.userInfo.verify !== 2) { // 未实名
+        if (this.$store.state.userInfo && this.$store.state.userInfo.verify !== 2) { // 未实名
           this.realLayer = true
           setTimeout(() => {
             this.realLayer = false

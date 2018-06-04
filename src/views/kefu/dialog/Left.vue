@@ -28,10 +28,10 @@
   </div>
 </template>
 <script>
-  import { HappyScroll } from 'vue-happy-scroll';
+  // import { HappyScroll } from 'vue-happy-scroll';
   export default {
     components: {
-      HappyScroll,
+      // HappyScroll,
     },
     data() {
       return {

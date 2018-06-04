@@ -15,6 +15,14 @@ module.exports = {
   entry: {
     app: ["babel-polyfill", "./src/main.js"]
   },
+  externals: {
+    vue: "Vue",
+    cropperjs: "Cropper",
+    "exif-js": "EXIF",
+    "vue-clipboard2": "VueClipboard"
+    // 'vue-router': 'Router',
+    // 'vuex':'Vuex'
+  },
   output: {
     path: config.build.assetsRoot,
     filename: "[name].js",

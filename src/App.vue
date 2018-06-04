@@ -2,6 +2,7 @@
   <div id="app">
     <Header v-if="$route.path !== '/verify/service'"></Header>
     <router-view class="main-container" v-if="showView" :key="JsonBig.stringify($route.query)" />
+    <div style="width:100%;height:100%"></div>
     <Footer v-if="$route.path !== '/verify/service'"></Footer>
     <News v-if="$store.state.userInfo && !$store.state.userInfo.is_admin"></News>
     <img src="/static/images/to_top.png" alt="" class="to-top" :class="{show:showTop}" @click="toTop">
@@ -48,7 +49,6 @@
       }
     },
     beforeCreate(){
-      console.log(detectOS())
       let u = navigator.userAgent;
       let isAndroid = u.indexOf("Android") > -1 || u.indexOf("Adr") > -1; //android终端
       let isiOS = !!u.match(/\(i[^;]+;( U;)? CPU. + Mac OS X/); //ios终端
@@ -103,7 +103,7 @@
           if (this.authority(this.$route.path)) {
             return;
           }
-          this.$router.push('/transaction');
+          this.$router.push({name: "transaction"})
           return;
         }
         ws.send(sendConfig('login', {
@@ -179,7 +179,7 @@
               return;
             };
             //错误码为250时，提示服务器维护中，做退出操作
-            if(res.body && (res.body.ret === 250 || res.body.type === 'offline_maintaining' && [3, 4].includes(res.body.data.mantain))) {
+            if(res.body && (res.body.ret === 250 || res.body.type === 'offline_maintaining' && res.body.data.mantain && [3, 4].includes(res.body.data.mantain))) {
               this.showErr();
               this.logout();
               return;
@@ -214,7 +214,6 @@
       //退出登录逻辑
       logout() {
         // 一个选项卡退出，所有选项卡均退出
-        console.log('appLogout')
         localStorage.setItem("removeSessionStorage", Date.now());
         this.$store.commit({type: 'changeToken', data: ''});
         //改变vuex登录状态
@@ -225,7 +224,9 @@
         this.WebSocket.close();
         //其他页面跳转至主页'
         if (this.authority(this.$route.path)) return;
-        this.$router.push('transaction')
+        this.$router.push({
+              name: "transaction"
+            })
       }
     },
     computed: {
@@ -237,7 +238,7 @@
           return true;
         }
         if (["/verify", "/verify/identifyAuth", "/verify/largeTransaction", "/verify/arbitrationRecord", "/verify/service"].includes(this.$route.path) && this.$store.state.userInfo && !this.$store.state.userInfo.is_admin) {
-          this.$router.push('/transaction');
+          this.$router.push({name: "transaction"})
           return true;
         }
         if(this.isLogin) return true;

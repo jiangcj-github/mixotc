@@ -42,8 +42,8 @@
 
 <script>
   import { mapGetters } from 'vuex'
-  import { HappyScroll } from 'vue-happy-scroll'
-  import QrcodeVue from 'qrcode.vue'
+  // import { HappyScroll } from 'vue-happy-scroll'
+  // import QrcodeVue from 'qrcode.vue'
   export default {
     name: "new-info-left",
     data() {
@@ -75,7 +75,7 @@
       }
     },
     components: {
-      HappyScroll,
+      // HappyScroll,
       QrcodeVue
     },
     methods: {

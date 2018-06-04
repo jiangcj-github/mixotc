@@ -106,8 +106,8 @@
 
 <script>
   import { mapGetters } from 'vuex'
-  import { HappyScroll } from 'vue-happy-scroll'
-  import EXIF from 'exif-js'
+  // import { HappyScroll } from 'vue-happy-scroll'
+  // import EXIF from 'exif-js'
 
   export default {
     name: "news-info-right-content",
@@ -120,7 +120,7 @@
       }
     },
     components: {
-      HappyScroll
+      // HappyScroll
     },
     computed: {
       ...mapGetters([

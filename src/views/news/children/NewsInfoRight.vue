@@ -111,7 +111,7 @@
   import AddGroup from '@/views/news/AddGroup' // 添加群
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
   import GroupInfo from '@/views/news/GroupInfo' // 查看群
-  import { HappyScroll } from 'vue-happy-scroll'
+  // import { HappyScroll } from 'vue-happy-scroll'
   import RightContent from './right/RightContent.vue';
 
   export default {
@@ -145,7 +145,7 @@
       BasePopup,
       GroupInfo,
       RightContent,
-      HappyScroll
+      // HappyScroll
     },
     mounted() {
       this.fetchAddress()//拉取收款地址

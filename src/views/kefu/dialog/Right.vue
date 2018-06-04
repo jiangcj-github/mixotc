@@ -149,18 +149,18 @@
   </div>
 </template>
 <script>
-  import {HappyScroll} from 'vue-happy-scroll';
+  // import {HappyScroll} from 'vue-happy-scroll';
   import BasePopup from "@/components/common/BasePopup";
   import ImagePopup from "../widges/ImagePopup";
   import MSGS from "./msg.js";
   import Swiper from 'swiper'; // 引入swiper
   import 'swiper/dist/css/swiper.min.css';
   import Util from "@/js/Util.js";
-  import EXIF from 'exif-js' // 大图不旋转
+  // import EXIF from 'exif-js' // 大图不旋转
 
   export default {
     components: {
-      HappyScroll,
+      // HappyScroll,
       BasePopup,
       ImagePopup,
     },

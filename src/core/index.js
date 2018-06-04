@@ -1,4 +1,4 @@
- import Vue from 'vue'
+//  import Vue from 'vue'
 import Router from "vue-router";
 import Vuex from "vuex";
 
@@ -40,7 +40,7 @@ import Logger from './libs/Logger' //自定义logger
 Vue.prototype.Logger = Logger
 
 import VueClipboard from "vue-clipboard2";
-Vue.use(VueClipboard);
+// Vue.use(VueClipboard);
 
 Vue.prototype.Bus = new Vue();
 

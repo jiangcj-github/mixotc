@@ -185,8 +185,11 @@ import AddressInfo from "../../components/account/AddressInfo";
         };
         this.WsProxy.send('control', 'user_update', { name: this.name }).then(res =>{
           this.$store.commit({type: 'updateUserInfo', data:{name: this.name}})
-        }).catch(error=>{
-          error.ret === 93 && this.showPopup();
+        }).catch(error => {
+          if(error.ret === 93) {
+            this.showPopup();
+            this.name = this.userInfo.name
+          } 
         })
         this.isSetting=false;
       },

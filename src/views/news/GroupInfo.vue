@@ -82,7 +82,7 @@
   import AddGroup from '@/views/news/AddGroup' // 添加群
   import DeletGroup from '@/views/news/DeletGroup' // 删除群成员
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
-  import { HappyScroll } from 'vue-happy-scroll'
+  // import { HappyScroll } from 'vue-happy-scroll'
 
   export default {
     name: "group-info",
@@ -107,7 +107,7 @@
       DeletGroup,
       AddGroup,
       BasePopup,
-      HappyScroll
+      // HappyScroll
     },
     async created() {
       await this.fetchGroup()
