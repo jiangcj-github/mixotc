@@ -9,7 +9,7 @@ const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
 const portfinder = require('portfinder')
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 
 const HOST = process.env.HOST
@@ -47,11 +47,7 @@ const devWebpackConfig = merge(baseWebpackConfig, {
     }
   },
   plugins: [
-    module.exports = {
-      plugins: [
-        new BundleAnalyzerPlugin()
-      ]
-    },
+    // new BundleAnalyzerPlugin(),
     new webpack.DefinePlugin({
       'process.env': require('../config/dev.env')
     }),
