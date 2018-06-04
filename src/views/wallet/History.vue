@@ -92,6 +92,7 @@
                   <p v-if="e.billType===3">{{e.nickname}}</p>
                   <p v-if="e.billType===4">{{e.addr}}</p>
                   <p v-if="e.billType===5">{{e.isIn?"法币账户":"币币账户"}}</p>
+                  <p v-if="e.billType===6">红包退款</p>
                 </div>
                 <div class="num">
                   <p :class="{in:e.isIn,out:!e.isIn}">{{e.num}}</p>
@@ -405,7 +406,7 @@
             time1: new Date(e.date*1000).dateHandle("yyyy/MM/dd"),
             time2: new Date(e.date*1000).dateHandle("HH:mm:ss"),
             type: ["充币","提币","购买","出售","转账-入账","转账-出账","担保-入账","担保-出账",
-              "红包-入账","红包-出账","资产划入","资产划出"][e.type-1],
+              "红包-入账","红包-出账","资产划入","资产划出","红包退款"][e.type-1],
             coin: e.currency && e.currency.toUpperCase(),
             nickname: e.trader_name || "-",
             uid: e.trader_id,
@@ -415,8 +416,8 @@
             stateStr: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
             state: e.state,
             orderId: e.type_id.toString(),
-            isIn: [1,3,5,7,9,11].indexOf(e.type)>=0, // 进出账：true-进账,false-出账
-            billType: Math.ceil(e.type/2)-1,  // 账单类型：0-充提,1-交易,2-担保,3-红包,4-转账,5-资金互转
+            isIn: [1,3,5,7,9,11,13].indexOf(e.type)>=0, // 进出账：true-进账,false-出账
+            billType: Math.ceil(e.type/2)-1,  // 账单类型：0-充提,1-交易,2-担保,3-红包,4-转账,5-资金互转,6-红包退款
           };
           if(item.isIn){
             item.addr=e.from && e.from.formatAddr();
@@ -480,7 +481,7 @@
               state: ["已完成","进行中","取消","超时","申诉中","强制放币","终止交易"][e.state],
               orderId: e.type_id.toString(),
               isIn: [1,3,5,7,9,11].indexOf(e.type)>=0, // 进出账：true-进账,false-出账
-              billType: Math.ceil(e.type/2)-1,  // 账单类型：0-充提,1-交易,2-担保,3-红包,4-转账,5-资金互转
+              billType: Math.ceil(e.type/2)-1,  // 账单类型：0-充提,1-交易,2-担保,3-红包,4-转账,5-资金互转,6-红包退款
             };
             if(item.isIn){
               item.num="+"+item.num+" "+item.coin;
@@ -491,6 +492,10 @@
             //资金划转
             if(item.billType===5){
               item.user=item.isIn?"法币账户":"币币账户";
+            }
+            //红包退款
+            if(item.billType===6){
+              item.user="红包退款";
             }
             jsonData.push(item);
           });
