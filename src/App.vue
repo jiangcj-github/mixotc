@@ -54,10 +54,16 @@
       let isiOS = !!u.match(/\(i[^;]+;( U;)? CPU. + Mac OS X/); //ios终端
       if (isAndroid) {
         window.location.href = this.HostUrl.http + "otc/download/app/?pkg=apk";
+        setTimeout(function() {
+          window.history.back(-1);
+        }, 0);
         return;
       }
       if (isiOS) {
         window.location.href = this.HostUrl.http + "otc/download/app/?pkg=ipa";
+        setTimeout(function() {
+          window.history.back(-1);
+        }, 0);
         // window.location.href = `itms-services://?action=download-manifest&url=${this.HostUrl.http}otc/download/app/ipa.plist`;
         return;
       }
@@ -218,6 +224,7 @@
         this.$store.commit({type: 'changeToken', data: ''});
         //改变vuex登录状态
         this.$store.commit({type: 'changeLogin', data: false});
+        this.$store.commit({type: 'initState'});
         //重连置否
         this.WebSocket.reConnectFlag = false;
         //websocket链接关闭

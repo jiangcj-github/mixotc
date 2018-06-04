@@ -106,13 +106,12 @@
         localStorage.setItem("removeSessionStorage", Date.now());
         this.$store.commit({type: 'changeToken', data: ''});
         this.$store.commit({type: 'changeLogin', data: false});
+        this.$store.commit({type: 'initState'});
         this.WebSocket.reConnectFlag = false;
         this.WebSocket.close();
-        console.log(this.$route.path)
         if (["/transaction", "/", "/homepage", "/helpcenter", "/coinData"].includes(this.$route.path)) {
             return;
         }
-
         this.$router.push({
               name: "transaction"
             })

@@ -1,7 +1,7 @@
 <template>
   <div class="wrap">
     <div class="login" v-if="showForm" >
-      <img src="/static/images/close_btn.png" alt="" class="close-btn" @click="hideLoginForm">
+      <img src="/static/images/close_btn_tr2.png" alt="" class="close-btn" @click="hideLoginForm">
       <h2 class="title">登录/注册</h2>
 
       <div :class="{'hide-tip1':type,'show-tip1':!type}">请输入正确的手机号/邮箱</div>

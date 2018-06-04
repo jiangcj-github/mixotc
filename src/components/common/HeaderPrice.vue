@@ -57,7 +57,7 @@
         await this.Proxy.coinLoop({count: 4}).then(res => {
           // console.log('轮询1', res)
           this.exchange = res.data.Quotations
-          this.$store.commit({type: 'coinLoop', data: this.exchange})
+          this.exchange && this.$store.commit({type: 'coinLoop', data: this.exchange})
         }).catch();
 
         this.Loop.topCurrency.clear()

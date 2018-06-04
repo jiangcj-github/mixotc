@@ -509,7 +509,7 @@
             this.WsProxy.send('otc', 'get_trust_ids', {type: 1}).then(data => {
               data.ids && this.$store.commit('changeTrustList', {
                 data: data.ids.map(item => {
-                  return this.JsonBig.stringify(item.Id);
+                  return this.JsonBig.stringify(item.id);
                 })
               });
               !data && this.$store.commit('changeTrustList', {data: []})

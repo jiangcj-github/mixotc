@@ -188,8 +188,8 @@ import AddressInfo from "../../components/account/AddressInfo";
         }).catch(error => {
           if(error.ret === 93) {
             this.showPopup();
-            this.name = this.userInfo.name
           } 
+          this.name = this.userInfo.name
         })
         this.isSetting=false;
       },

@@ -294,11 +294,9 @@ export default {
     state.unreadNumber = 0;
     state.curChat = ""; //当前聊天
     state.systemMessage = 0; //未读系统消息
-    state.token = "";
     state.chat = [];
     state.moneyAddress = [];
     state.messages = { system: [] };
-    state.isLogin = false;
   },
 
   [types.updateStrangerInfo](
