@@ -86,23 +86,16 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl"
   .my-order-evaluate-wrap
-    margin-top 40px
+    margin-top 10px
     margin-bottom 40px
     h1
-      font-size $fz20
-      font-weight bold
-      color $col333
-      margin-bottom 30px
-      &:before
-        display inline-block
-        width 3px
-        height 20px
-        position relative
-        top 2px
-        left 0
-        content ''
-        margin-right 9px
-        background-color $col422
+      font-size 12px
+      color #333
+      letter-spacing 0.25px
+      margin-bottom 20px
+      a:hover
+        color $col422
+
     .evaluate-content
       padding 0 30px
       background #FFF

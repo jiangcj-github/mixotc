@@ -33,7 +33,7 @@
               <li>
                 <p>转至</p>
                 <p class="to-p">币币账户</p>
-                <span>(币币账户余额为：1.12345678 {{fromCoin}})</span>
+                <span>(币币账户余额为：{{toAmount}} {{fromCoin}})</span>
               </li>
             </ol>
           </li>
@@ -83,6 +83,7 @@
         coinTypeValue: 'coinTypeValue',
         amount: '',
         fromAmount: 0,
+        toAmount: 0,
         fromCoin: '',
         showReleaseCoin: false, // 支付
         errText: '',
@@ -119,6 +120,7 @@
         this.coinValue = data
         console.log('333', data)
         this.initData()
+        this.getToCoinData()
       });
       this.initData()
       this.getToCoinData()
@@ -136,18 +138,15 @@
         this.WsProxy.send('wallet', 'wallets', { // 法币账户
           id: this.$store.state.userInfo.uid, // 用户id
         }).then((data)=>{
-          console.log('钱包', data)
           this.userFromList = data.wallets
           data.wallets.forEach(v => {
             this.otcCoinList.push(v.currency)
           })
-          console.log('法币账户', this.userFromList)
         }).catch((msg)=>{
           console.log(msg);
         });
 
         this.Proxy.hp_account_coin().then(res => { // 判断币币上架币种
-          console.log('上架币种', res)
           let balanceArr
           this.groundingList = res.objects.filter(v => { // 取上架币种
             return v.status
@@ -174,16 +173,26 @@
         this.Proxy.hp_account({ // 币币账户
           uid:this.$store.state.userInfo.uid
         }).then(res => {
-          console.log('币币账户', res)
+          this.Bus.$emit('transformRet', res.ret)
+          let toList = res.objects.filter(v => {
+            return v.cat == this.coinValue.toLowerCase()
+          })
+          this.toAmount = toList[0] && toList[0].avail.formatFixed(6)
+          console.log('bibi', res.objects, this.coinType[0].toLowerCase(), toList, this.toAmount)
         }).catch(msg => {
 
         });
+
       },
       allCheck() { // 数量下的全部按钮
         this.amount = this.fromAmount
       },
       checkInput() { // 输入框事件
-        console.log('errText', this.amount, this.fromAmount, this.amount * 1 > this.fromAmount * 1)
+        if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.amount)) {
+          this.errText = '请输入合理的数字'
+          return
+        }
+        this.amount = this.amount.replace(/^(\d+)\.(\d{0,6})\d*$/g, '$1' + '.' + '$2');
         this.paymentCurreny = this.coinValue
         this.paymentAmount = this.amount
         this.toPayment = this.toText
@@ -195,7 +204,7 @@
           this.errText = '请输入数量'
           return
         }
-        if (this.amount * 1 > this.fromAmount * 1) return // 大于划转资金
+        if ((this.amount * 1 > this.fromAmount * 1) || (this.errText !== '')) return // 大于划转资金 有错误提示
         if (st === 'false') {
           this.showReleaseCoin = false
         } else {

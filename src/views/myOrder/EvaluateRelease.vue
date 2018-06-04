@@ -195,6 +195,7 @@
       background #FFB422
       color #FFF
       border-radius 2px
+      font-size 13px
       cursor pointer
   .remind-layer
     text-align center

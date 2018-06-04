@@ -64,7 +64,7 @@
     </BasePopup>
     <!-- 资金互转成功 -->
     <BasePopup class="remind-layer" :show="remindLayer">
-      <p v-clickoutside="closeLayer"><span>{{amount}}{{currency}}</span>成功转到{{toTitle}}</p>
+      <p v-clickoutside="closeLayer"><span>{{amount}}{{currency}}</span>成功转到币币账户</p>
     </BasePopup>
   </div>
 </template>
@@ -75,7 +75,7 @@
 
   export default {
     name: "release-coin-layer",
-    props: ['releaseCoinShow', 'uid', 'id', 'currency', 'amount', 'toTitle'],
+    props: ['releaseCoinShow', 'uid', 'id', 'currency', 'amount'],
     data() {
       return {
         buyLayer: this.releaseCoinShow,
@@ -217,7 +217,14 @@
         }).then((data) => {
           console.log('确定', data)
           this.verifyLayer = false
-          this.$store.state.transformInfo === 1 ? this.remindLayer = true : window.location.reload()
+          if (this.$store.state.transformInfo === 1) {
+            this.remindLayer = true
+            setTimeout(() => {
+              window.location.reload()
+            }, 3000)
+            return
+          }
+          window.location.reload()
         }).catch((msg)=>{
           msg.ret !== 0 && (this.errorShow = true)
           switch (msg.ret) {
