@@ -270,9 +270,9 @@
       height 67px
       line-height 67px
       .type
-        color #57A100
+        color #d66c49
         &.buy
-          color #d66c49
+          color #57A100
       .pay-method img
         vertical-align -4px
       .operation .buy-to
