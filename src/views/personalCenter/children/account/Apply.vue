@@ -144,9 +144,13 @@
           <div class="upload-photo">
             <h4>上传照片</h4>
             <ul class="clearfix input">
-              <li v-for="item of 3" :key="item" class="upload" @click="()=>{curPhoto = item - 1; $refs.up_img.click()}">
+              <li v-for="item of 3" :key="item" class="upload" @click="()=>{curPhoto = item - 1; $refs.up_img.click();}">
                 <img :src="`/static/images/personal/${defaultIdentity[item - 1]}`" alt="">
-                <img :src="`${HostUrl.http}image/${data.iconArr[item - 1]}`" alt="" class="up-img" v-if="data.iconArr[item - 1]">
+                <img :src="data.iconArr[item - 1] ? `${HostUrl.http}image/${data.iconArr[item - 1]}` : showArr[item - 1]" alt="" class="up-img" v-if="data.iconArr[item - 1] || showArr[item - 1]">
+                <div class="loading" v-if="data.iconArr[item - 1] === '' && showArr[item - 1] !== ''">
+                  <img src="/static/images/loading2.png" alt="" style="width:32px; height:32px">
+                </div>
+                <img src="/static/images/personal/add.png" alt="" class="add" v-else>
                 <p>{{copy[item - 1]}}</p>
               </li>
               <li class="hint" v-if="photoTip || sizeTip">{{`${photoTip ? '银行卡照片信息缺失' : ''} ${sizeTip ? '图片大小需小于10M' : ''}`}}</li>
@@ -208,11 +212,12 @@ import BasePopup from '@/components/common/BasePopup';
         sizeTip: false,
         numberTip: false,
         defaultIdentity:['bank_card0.png','bank_card1.png','bank_card2.png'],
+        showArr:['', '', ''],
         copy:['银行卡正面照片', '银行卡反面照片', '手持银行卡照片'],
         data: {
           number: '',
           bank: '',
-          iconArr: ['', '', '']
+          iconArr: ['', '', ''],
         }
       }
     },
@@ -267,6 +272,17 @@ import BasePopup from '@/components/common/BasePopup';
       }
     },
     methods: {
+      getObjectURL (file) {  
+      let url = null ;   
+      if (window.createObjectURL!=undefined) { // basic  
+        url = window.createObjectURL(file) ;  
+      } else if (window.URL!=undefined) { // mozilla(firefox)  
+        url = window.URL.createObjectURL(file) ;  
+      } else if (window.webkitURL!=undefined) { // webkit or chrome  
+        url = window.webkitURL.createObjectURL(file) ;  
+      }  
+      return url ;  
+    },
       select(card){
         this.data.number = card.number.formatCard();
         this.data.bank = card.bank;
@@ -313,6 +329,9 @@ import BasePopup from '@/components/common/BasePopup';
         this.data.number = this.data.number.formatCard();
       },
       async uploadImage(){
+        let index = this.curPhoto;
+        this.data.iconArr[index] = '';
+        this.data.iconArr = this.data.iconArr.concat([])
         let a = new FormData(),
             file = this.$refs.up_img.files[0];
         if(!file) return;
@@ -321,10 +340,11 @@ import BasePopup from '@/components/common/BasePopup';
           this.photoTip = false;
           return;
         }
+        this.showArr[index] = this.getObjectURL(file);
+        this.showArr = this.showArr.concat([])
         this.sizeTip = false;
         a.append("uploadimage", file);
         this.$refs.up_img.value = ''
-        let index = this.curPhoto;
         await fetch(`${this.HostUrl.http}image/`, {
           method: 'Post',
           body: a
@@ -522,26 +542,28 @@ import BasePopup from '@/components/common/BasePopup';
             width 190px
             margin-right 20px
             cursor pointer
-            &.upload::before
-              position absolute
-              top 65px
-              left 50%
-              content ''
-              width 6px
-              height 44px
-              margin -22px 0 0 -3px
-              background rgba(255, 180, 34, 0.7)
-              z-index 99
-            &.upload::after
-              position absolute
-              top 65px
-              left 50%
-              content ''
-              width 44px
-              height 6px
-              margin -3px 0 0 -22px
-              background rgba(255, 180, 34, 0.7)
-              z-index 99
+            &.upload
+              .loading
+                position absolute
+                top 0
+                left 0
+                width 190px
+                height 130px
+                background-color rgba(0,0,0,0.4)
+                img
+                  position absolute
+                  left 50%
+                  top 50%
+                  margin -16px 0 0 -16px
+                  animation mymove 1.5s linear infinite;
+                  -webkit-animation mymove 1.5s linear infinite;
+              .add
+                position absolute
+                top 0
+                left 50%
+                width 44px
+                height 44px
+                margin 43px 0 0 -22px
             img
               width 100%
               height 100%

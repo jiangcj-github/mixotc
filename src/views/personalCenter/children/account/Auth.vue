@@ -95,7 +95,11 @@
           <li v-for="item of 3" :key="item" class="upload"  @click="()=>{curPhoto = item - 1; $refs.up_img.click()}">
             <img :src="`/static/images/personal/${defaultIdentity[item - 1]}`" alt="" v-if="data.type">
             <img :src="`/static/images/personal/${defaultPassport[item - 1]}`" alt="" v-else>
-            <img :src="`${HostUrl.http}image/${data.iconArr[item - 1]}`" alt="" class="up-img" v-if="data.iconArr[item - 1]">
+            <img :src="data.iconArr[item - 1] ? `${HostUrl.http}image/${data.iconArr[item - 1]}` : showArr[item - 1]" alt="" class="up-img" v-if="data.iconArr[item - 1] || showArr[item - 1]">
+            <div class="loading" v-if="data.iconArr[item - 1] === '' && showArr[item - 1] !== ''">
+              <img src="/static/images/loading2.png" alt="" style="width:32px; height:32px">
+            </div>
+            <img src="/static/images/personal/add.png" alt="" class="add" v-else>
             <p>{{copy[data.type][item - 1]}}</p>
           </li>
           <li class="hint" v-if="photoTip || sizeTip">{{`${photoTip ? '证件照片信息缺失' : ''} ${sizeTip ? '图片大小需小于10M' : ''}`}}</li>
@@ -143,6 +147,7 @@ import { mapState } from 'vuex';
         faileTime: 0,
         defaultIdentity:['identity_0.png','identity_1.png','identity_2.png'],
         defaultPassport:['passport_0.png','passport_2.png','passport_1.png'],
+        showArr:['', '', ''],
         copy:[
           ['护照正面照片', '手持护照照片', '住址证明'],
           ['身份证正面照片', '身份证反面照片', '手持身份证照片']
@@ -183,6 +188,17 @@ import { mapState } from 'vuex';
       this.authState = this.userInfo.verify
     },
     methods: {
+      getObjectURL (file) {  
+        let url = null ;   
+        if (window.createObjectURL!=undefined) { // basic  
+          url = window.createObjectURL(file) ;  
+        } else if (window.URL!=undefined) { // mozilla(firefox)  
+          url = window.URL.createObjectURL(file) ;  
+        } else if (window.webkitURL!=undefined) { // webkit or chrome  
+          url = window.webkitURL.createObjectURL(file) ;  
+        }  
+        return url ;  
+      },
       dealCertificate() {
         this.data.number = this.data.number.trim().replace(/\s/g,"");
         if(this.data.number[0] == 0) {
@@ -195,6 +211,9 @@ import { mapState } from 'vuex';
         this.data.number = this.data.number.formatCertificate();
       },
       async uploadImage(){
+        let index = this.curPhoto;
+        this.data.iconArr[index] = '';
+        this.data.iconArr = this.data.iconArr.concat([])
         let a = new FormData(),
             file = this.$refs.up_img.files[0];
           if(!file) return;
@@ -203,10 +222,11 @@ import { mapState } from 'vuex';
             this.photoTip = false;
             return;
           }
-          this.sizeTip = false;
+        this.showArr[index] = this.getObjectURL(file);
+        this.showArr = this.showArr.concat([])
+        this.sizeTip = false;
         a.append("uploadimage", file);
         this.$refs.up_img.value = ''
-        let index = this.curPhoto;
         await fetch(`${this.HostUrl.http}image/`, {
           method: 'Post',
           body: a
@@ -398,26 +418,28 @@ import { mapState } from 'vuex';
           width 190px
           margin-right 20px
           cursor pointer
-          &.upload::before
-            position absolute
-            top 65px
-            left 50%
-            content ''
-            width 6px
-            height 44px
-            margin -22px 0 0 -3px
-            background rgba(255, 180, 34, 0.7)
-            z-index 99
-          &.upload::after
-            position absolute
-            top 65px
-            left 50%
-            content ''
-            width 44px
-            height 6px
-            margin -3px 0 0 -22px
-            background rgba(255, 180, 34, 0.7)
-            z-index 99
+          &.upload
+            .loading
+              position absolute
+              top 0
+              left 0
+              width 190px
+              height 130px
+              background-color rgba(0,0,0,0.4)
+              img
+                position absolute
+                left 50%
+                top 50%
+                margin -16px 0 0 -16px
+                animation mymove 1.5s linear infinite;
+                -webkit-animation mymove 1.5s linear infinite;
+            .add
+              position absolute
+              top 0
+              left 50%
+              width 44px
+              height 44px
+              margin 43px 0 0 -22px
           img
             width 100%
             height 100%

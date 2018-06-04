@@ -59,7 +59,7 @@
           <b v-show="!switchValue">{{higherPrice}} CNY/{{adSaleObj.currency && adSaleObj.currency.toUpperCase()}}</b>
         </p>
         <input type="text"
-               v-model="adSaleObj.price"
+               v-model.trim="adSaleObj.price"
                @focus="clearPrice=true && (errPrice=true)"
                maxlength="9"
                @blur="clearPrice = false"
@@ -91,7 +91,7 @@
       <li class="input-li">
         <p>最小订单额<b class="limit">最小200</b></p>
         <input type="text"
-               v-model="adSaleObj.min"
+               v-model.trim="adSaleObj.min"
                maxlength="8"
                @focus="clearMin=true && (errMin=true)"
                @blur="clearMin = false"
@@ -103,7 +103,7 @@
       <li class="input-li">
         <p>最大订单额<b class="limit">最大{{maxLimit}}</b></p>
         <input type="text"
-               v-model="adSaleObj.max"
+               v-model.trim="adSaleObj.max"
                maxlength="8"
                @focus="clearMax = true && (errMax=true)"
                @blur="clearMax = false"
@@ -236,7 +236,6 @@
       }
     },
     created() {
-
       if (this.$store.state.editFlag == 1) {
         this.isDisabled = true
         this.adSaleObj = this.$store.state.editContent
@@ -253,7 +252,6 @@
       this.selectUserCoin()
       this.getPrice()
       this.initData()
-      this.getHigherPrice()
       this.Bus.$on(this.selectCoin, data => { // 币种筛选
         this.adSaleObj.currency = data
         this.adSaleObj.tradeable = 0
@@ -301,10 +299,10 @@
           this.balanceList = data.wallets.filter(item => {
             return item.currency === this.adSaleObj.currency;
           })
-          //console.log('this.balanceList', this.adSaleObj.currency)
         }).catch((msg)=>{
           // console.log('出售币种错误', msg);
         });
+        this.getHigherPrice() // 请求到相应币种最高价
         this.userBalance = this.balanceList[0] && this.balanceList[0].balance.formatFixed(6)
         this.Bus.$emit('saleSlideLength', this.userBalance)
         this.coinMinText = `0${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
@@ -322,7 +320,7 @@
         this.changePrice = this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
       },
       async getHigherPrice() { // 最高价格获取
-        this.Proxy.sales({
+        await this.Proxy.sales({
           type: 1, // 出售
           payment: 0,
           currency: this.adSaleObj.currency,
@@ -339,8 +337,11 @@
           tradeable: 0,
           page: 0,
         }).then(res => {
-          console.log('最高价格', res.data.sales[0].price)
-          this.higherPrice = res.data.sales[0].price
+          let higherList = res.data.sales ? res.data.sales : []
+          if (higherList.length == 0) {
+            this.higherPrice = '-'
+          }
+          this.higherPrice = res.data.sales && res.data.sales[0].price
         }).catch((msg) => {
           console.log(msg)
         });
@@ -422,7 +423,7 @@
         });
       },
       reset() {
-        this.adSaleObj.currency =  this.coinType[0]
+        this.adSaleObj.currency = this.coinType[0]
         this.adSaleObj.mode = 1
         this.adSaleObj.premium = 0
         this.adSaleObj.price = ''
@@ -432,15 +433,29 @@
         this.adSaleObj.limit = 10
         this.adSaleObj.info = ''
         this.adSaleObj.vary = 1
-        this.adSaleObj.tradeable = this.userBalance * 1
+        this.WsProxy.send('wallet', 'wallets', { // 重新获取余额
+          id: this.$store.state.userInfo.uid,
+        }).then((data)=>{
+          this.balanceList = data.wallets.filter(item => {
+            return item.currency === this.coinType[0].toLowerCase()
+          })
+          this.userBalance = this.balanceList[0] && this.balanceList[0].balance.formatFixed(6)
+          this.adSaleObj.tradeable = this.userBalance * 1
+          this.coinMinText = `0${this.coinType[0].toUpperCase()}`
+          this.coinMaxText = `${this.userBalance}${this.coinType[0].toUpperCase()}`
+        }).catch((msg)=>{
+          // console.log('出售币种错误', msg);
+        });
+        this.getHigherPrice()
+        this.getPrice()
         this.Bus.$emit('paymentNum', this.$store.state.PaymentSoreData)
       },
       closeLayer() {
         this.adErrLayer = false
       },
       priceInput() { // 表格验证
-        if (!(/^(0|([1-9]{1,6}))(\.\d+)?$/).test(this.adSaleObj.price)) {
-          this.errPriceText = '请输入整数部分不大于6位的2位小数'
+        if (!(/^(0|([1-9]\d{0,5}))(\.\d+)?$/).test(this.adSaleObj.price)) {
+          this.errPriceText = '请输入合理的数字'
           return
         }
         this.adSaleObj.price = this.adSaleObj.price.replace(/^(\d+)\.(\d{0,2})\d*$/g, '$1' + '.' + '$2');
@@ -448,7 +463,7 @@
       },
       minInput() {
         if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adSaleObj.min)) {
-          this.errMinText = '请输入正确的数字格式'
+          this.errMinText = '请输入合理的数字'
           return
         }
         if (this.adSaleObj.min < 200) {
@@ -460,7 +475,7 @@
       },
       maxInput() {
         if (!(/^(0|([1-9]\d*))(\.\d+)?$/).test(this.adSaleObj.max)) {
-          this.errMaxText = '请输入正确的数字格式'
+          this.errMaxText = '请输入合理的数字'
           return
         }
         if (this.adSaleObj.max > this.maxNum) {

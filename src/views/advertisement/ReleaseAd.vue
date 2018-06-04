@@ -93,7 +93,6 @@
         this.saleObj.tradeable = this.saleObj.tradeable ? this.saleObj.tradeable : data * 1
       }),
       this.Bus.$on('saleCoinData', data => {
-        console.log('父亲的coin', data)
         this.saleObj.currency = this.saleObj.currency ? this.saleObj.currency : data[0]
       }),
       this.Bus.$on('buyCoinData', data => {
