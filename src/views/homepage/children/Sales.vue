@@ -32,7 +32,7 @@
       <div class="li" v-for="(e,i) in sales" :key="i">
         <div class="booth">
           <span class="time">{{e.create}}</span>
-          <span class="type">{{e.type}}</span>
+          <span class="type" :class="{buy:e.isBuy}">{{e.type}}</span>
           <span class="coin">{{e.currency}}</span>
           <span class="price">{{e.price}}</span>
           <span class="limit">{{e.minmax}}</span>
@@ -271,6 +271,8 @@
       line-height 67px
       .type
         color #57A100
+        &.buy
+          color #d66c49
       .pay-method img
         vertical-align -4px
       .operation .buy-to
