@@ -93,4 +93,8 @@
           border-radius 2px
           color #FFB422
           cursor pointer
+          &:hover
+            background #FFB422
+            color #FFF
+
 </style>

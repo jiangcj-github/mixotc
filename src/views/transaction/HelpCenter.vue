@@ -1,7 +1,7 @@
 <template>
   <div class="rule-wrap inner">
     <h1>
-      <router-link to="">mixOTC帮助中心</router-link> -
+      <router-link to="/helpcenter">mixOTC帮助中心</router-link> -
       <span v-for="(item,index) in titleList" v-if="showActive == index"> {{item}}</span>
     </h1>
     <div class="clearfix">
@@ -277,6 +277,8 @@
       font-size 12px
       letter-spacing 0.25px
       margin-bottom 20px
+      a:hover
+        color $col422
     h2
       font-size 24px
       margin-bottom 40px
