@@ -56,7 +56,7 @@
       <div class="amount">
         <div class="amount-title">
           <h3>{{titleType[type-1]}}多少？</h3>
-          <router-link to="/wallet/charge" tag="span" v-if="contentData.type == 2">去充币</router-link>
+          <router-link :to="{path: '/wallet/charge', query: {coin: contentData.currency}}" tag="span" v-if="contentData.type == 2">去充币</router-link>
         </div>
         <p class="rate" v-if="contentData.type == 1">{{selectPrice[0] && selectPrice[0].cny}} CNY = 1 {{contentData.currency && contentData.currency.toUpperCase()}}</p>
         <p class="balance" v-if="contentData.type == 2"><span>可用余额{{balance}}{{contentData.currency && contentData.currency.toUpperCase()}}</span></p>
@@ -95,6 +95,7 @@
                 :currency="currencyLayer"
                 :money="moneyLayer"
                 :type="typeLayer"
+                :coinType="coinTypeLayer"
                 @offOrderLayer="openOrderLayer">
     </OrderLayer>
     <!-- 引入勾选购买规则弹窗 -->
@@ -149,6 +150,7 @@
         moneyLayer: '',
         typeLayer: '',
         tradeable: '',
+        coinTypeLayer: '',
         coinIcon: '' // 币种图标
       }
     },
@@ -278,6 +280,7 @@
           this.currencyLayer = this.amount;
           this.moneyLayer = this.money;
           this.typeLayer = this.contentData.type;
+          this.coinTypeLayer = this.contentData.currency.toUpperCase()
           this.showOrderLayer = true;
         }
       },

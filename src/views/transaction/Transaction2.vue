@@ -11,7 +11,7 @@
           </p>
         </h2>
         <div class="f1">
-          <div class="search" :class="{active:isActive}" v-clickoutside="onClickOutside">
+          <div class="search">
             <span @click="srchUlShow=!srchUlShow" v-clickoutside="()=>{srchUlShow=false}">
               搜索{{srchUls[srchUlSel].title}}
             </span>
@@ -23,14 +23,12 @@
                    v-clickoutside="()=>{srchTipShow=false}"
                    @keyup.enter="()=>{searchStr();srchTipShow=false;}"
                    @input="fuzzyInput"
-                   @focus="onFocus">
+                   @focus="srchTipShow=true">
             <img src="/static/images/cancel_icon.png"
                  @click="srchText=''"
                  v-show="srchTipShow && srchText.length>0">
             <a href="javascript:void(0)" @click="searchStr"></a>
-            <!--
             <b v-if="searchTip">您还未输入{{srchUls[srchUlSel].title}}</b>
-            -->
             <!--币种模糊搜索结果-->
             <ul v-show="srchTipShow" v-if="this.srchType===0">
               <li v-for="e in coinTips" @click="search(e)">
@@ -189,7 +187,6 @@
         srchUlShow: false,
         srchTipShow: false,
         srchText: "",
-        isActive: false,  // 搜索框是否激活状态
 
         coinTips: [],
         userTips: [],
@@ -253,29 +250,17 @@
       this.Bus.$off("onPageChange");
     },
     methods: {
-      onFocus(){
-        this.isActive=true;
-        if(this.srchText.length<=0){
-          this.srchTipShow=false;
-          return;
-        }
-        this.loadTips();
-      },
-      onClickOutside(){
-        if(this.srchText.length<=0){
-          this.isActive=false;
-        }
-      },
       fuzzyInput() { // 搜索框数据
-        this.searchTip = false;
+        this.searchTip = false
         if (this.srchType === 0) { // 不能输入汉字
           this.srchText = this.srchText.replace(/[\u4E00-\u9FA5]/g, '');
         }
         if (this.srchText.length <= 0) {
           this.srchTipShow = false;
-          return;
+        } else {
+          this.srchTipShow = true;
+          this.loadTips();
         }
-        this.loadTips();
       },
       //列表项搜索
       search(e) {
@@ -292,7 +277,7 @@
       searchStr() {
         if (this.srchText == ''){
           this.searchTip = true
-          //return
+          return
         }
         if (this.srchType === 0 && this.srchText.length > 0) {
           let exist = 0;
@@ -318,12 +303,11 @@
                 type: 0
               });
             });
-            this.srchTipShow=true;
           });
         } else {
+          this.userTips = [];
           let currency=this.filte.currency || "btc";
           this.Proxy["userSearch"]({keyword: srchKey,currency:currency,type:1}).then(res => {
-            this.userTips = [];
             res.data.users && res.data.users.forEach(v => {
               this.userTips.push({
                 name: v.name || "-",
@@ -331,7 +315,6 @@
                 type: 1
               });
             });
-            this.srchTipShow=true;
           });
         }
       },
