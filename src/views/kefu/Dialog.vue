@@ -27,12 +27,14 @@
 <style scoped lang="stylus">
   @import "../../stylus/base.styl";
   .kefu
+    position fixed !important
+    width 100%
+    height 100%
     background-image url(/static/images/kefu/background.jpg)
     background-size 100% 100%
     display flex
     align-items center
     justify-content center
-    height 100%
     margin-top -100px
     .dialog
       height 600px
