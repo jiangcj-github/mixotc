@@ -1,7 +1,6 @@
 import Vuex from 'vuex'
 import VuexPersistence from 'vuex-persist'
-// import JsonBig from 'json-bigint'
-import createLogger from "vuex/dist/logger.js";
+// import createLogger from "vuex/dist/logger.js";
 
 
 const STORE = {
@@ -18,7 +17,8 @@ const STORE = {
       mutations: Object.assign(config.mutations, {}),
       actions: Object.assign(config.actions, {}),
       getters: Object.assign(config.getters, {}),
-      plugins: [vuexLocal.plugin, createLogger()]
+      // plugins: [vuexLocal.plugin, createLogger()]
+      plugins: [vuexLocal.plugin]
     });
   }
 };

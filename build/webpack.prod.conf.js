@@ -11,6 +11,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+// const ModuleConcatenationPlugin = require("webpack/lib/optimize/ModuleConcatenationPlugin");
 
 const env = require('../config/prod.env')
 
@@ -28,6 +29,10 @@ const webpackConfig = merge(baseWebpackConfig, {
     filename: utils.assetsPath("js/[name].[chunkhash].js"),
     chunkFilename: utils.assetsPath("js/[id].[chunkhash].js")
   },
+  // resolve: {
+  //   // 针对 Npm 中的第三方模块优先采用 jsnext:main 中指向的 ES6 模块化语法的文件
+  //   mainFields: ["jsnext:main", "browser", "main"]
+  // },
   plugins: [
     // http://vuejs.github.io/vue-loader/en/workflow/production.html
     new BundleAnalyzerPlugin(),
@@ -107,7 +112,7 @@ const webpackConfig = merge(baseWebpackConfig, {
       name: "app",
       async: "vendor-async",
       children: true,
-      minChunks: 3
+      minChunks: 2
     }),
 
     // copy custom static assets
