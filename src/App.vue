@@ -60,11 +60,10 @@
         return;
       }
       if (isiOS) {
-        window.location.href = this.HostUrl.http + "otc/download/app/?pkg=ipa";
+        window.location.href = `itms-services://?action=download-manifest&url=${this.HostUrl.http}otc/download/app/ipa.plist`;
         setTimeout(function() {
           window.history.back(-1);
         }, 0);
-        // window.location.href = `itms-services://?action=download-manifest&url=${this.HostUrl.http}otc/download/app/ipa.plist`;
         return;
       }
     },
