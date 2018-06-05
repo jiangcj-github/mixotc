@@ -14,7 +14,7 @@
           <li class="tag ad"
               @mouseenter="adChild = true"
               @mouseleave="adChild = false"
-              @click="!$store.state.isLogin && changeLoginForm(true) || selectAd()"
+              @click="!$store.state.isLogin ? changeLoginForm(true) : selectAd()"
               :class="{active: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
             <span v-if="$route.path=='/advertisement'">我的广告</span>
             <span v-else>发广告</span>

@@ -60,7 +60,7 @@
             return v.new_price !== 0
           });
           zeroList= res.data.Quotations.filter(v => {
-            return v.new_price == 0
+            return v.new_price === 0
           });
           newList = this.exchange.concat(zeroList);
           this.exchange = this.exchange.length > 4 ? this.exchange.slice(0, 4) : this.exchange;
@@ -80,7 +80,7 @@
             });
             currencyList = currencyList.length > 4 ? currencyList.slice(0, 4) : currencyList;
             zeroLoopList = res.data.Quotations.filter(v => {
-              return v.new_price == 0
+              return v.new_price === 0
             });
             newLoopList = currencyList.concat(zeroLoopList);
             this.exchangeCopy = this.flag && currencyList || this.exchangeCopy;
