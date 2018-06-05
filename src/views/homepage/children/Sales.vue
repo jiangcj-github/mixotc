@@ -177,7 +177,11 @@
         }).then(()=>{
           this.$router.push({ name: 'order', query: { id:e.id}})
         }).catch((res)=>{
-          this.$refs.alert.showAlert({content:res});
+          if(res==="未登录") {
+            this.$store.commit({type: 'changeLoginForm', data: true});
+          }else{
+            this.$refs.alert.showAlert({content:res});
+          }
         });
       },
     }
