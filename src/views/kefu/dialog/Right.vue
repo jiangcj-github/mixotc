@@ -519,7 +519,7 @@
         this.judgeStopTradeOther(index)
       },
       onPop1Ok() { // 强制放币确认
-        console.log('我是谁', this.otherInfo[this.swiperIndex].type)
+        // console.log('我是谁', this.otherInfo[this.swiperIndex].type)
         if(this.pop1Text == '') {
           this.showPop1 = false
           this.errLayer = true

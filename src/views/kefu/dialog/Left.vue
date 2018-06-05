@@ -129,7 +129,7 @@
         this.WsProxy.send('control', 'a_get_user_appeals', { // 获取点击人资料
           "user_id": this.JsonBig.parse(this.uls[index].user_id),
         }).then(data => {
-          // console.log('申述人', data);
+          console.log('申述人', data);
           data.forEach(v => {
             v.buyer_id = this.JsonBig.stringify(v.buyer_id) // 买家
             v.seller_id = this.JsonBig.stringify(v.seller_id) // 卖家

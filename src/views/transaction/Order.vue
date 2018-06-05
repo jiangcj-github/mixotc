@@ -168,10 +168,10 @@
       this.WsProxy.send('otc','sale_detail',{
         id: this.JsonBig.parse(this.$route.query.id)
       }).then((data)=>{
-        // console.log('下单内容', data)
+        //console.log('下单内容', data)
         this.contentData = data;
         this.type = data.type;
-        this.tradeable = this.contentData.tradeable && (this.contentData.tradeable * 1 + "").formatFixed(6) || 0
+        this.tradeable = (data.type == 2 && data.tradeable == 0) ? ((data.max / data.price).formatFixed(6)) : (data.tradeable.formatFixed(6)),
         this.getPrice();
         this.getCoinIcon();
         this.getBalance();

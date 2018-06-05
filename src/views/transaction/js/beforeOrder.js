@@ -48,7 +48,22 @@ let beforeOrder=async function(vue,param) {
 
   //钱包
   let hasWallet=new Promise((resolve,reject)=>{
-    ws.send("wallet", "wallets", {}).then((data)=> {
+    ws.send("wallet", "wallets", {uid: loginUid,}).then((data)=> {
+      let walletList = [], useBalace;
+      data.wallets.forEach(v => {
+        walletList.push(v.currency)
+      })
+      if(walletList.indexOf(opt.currency) < 0) {
+        reject('请先<a href="#/wallet/account" style="text-decoration: underline; color: #FFB422">创建钱包</a>');
+        return
+      }
+      useBalace = data.wallets.filter(v => {
+        return v.currency === opt.currency
+      })
+      if(opt.type === 2 && useBalace[0].balance === 0) {
+        reject(`可用余额不足，<a href="#/wallet/charge?coin=${opt.currency}" style="text-decoration: underline; color: #FFB422">去充币</a>`)
+        return
+      }
       if(data.wallets){
         resolve();
       } else{
@@ -58,7 +73,7 @@ let beforeOrder=async function(vue,param) {
           reject("创建" + opt.currency.toLowerCase() + "钱包失败");
         });
       }
-    }).catch(()=>{
+    }).catch((msg)=>{
       reject("获取钱包失败");
     });
   });
