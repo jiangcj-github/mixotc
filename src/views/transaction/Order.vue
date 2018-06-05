@@ -100,22 +100,22 @@
     </OrderLayer>
     <!-- 引入勾选购买规则弹窗 -->
     <!--
-    <BasePopup class="remind-layer" :show="remindLayer">
-      <span v-clickoutside="closeLayer">请勾选购买规则</span>
+    <BasePopup class="remind-layer" :show="remindLayer" @click.native="remindLayer = false">
+      <span>请勾选购买规则</span>
     </BasePopup>
     -->
     <!-- 引入大额交易弹窗 -->
-    <!--<BasePopup :show="bigAmountLayer"-->
-               <!--:width=470-->
-               <!--:height=194>-->
-      <!--<div class="big-amount-layer">-->
-        <!--<p>您的交易上限为10万，是否申请大额交易</p>-->
-        <!--<div class="btn-group clearfix">-->
-          <!--<em @click="bigAmountLayer = false">取消</em>-->
-          <!--<router-link to="">去申请大额交易</router-link>-->
-        <!--</div>-->
-      <!--</div>-->
-    <!--</BasePopup>-->
+    <BasePopup :show="bigAmountLayer"
+               :width=470
+               :height=194>
+      <div class="big-amount-layer">
+        <p>您的交易上限为10万，是否申请大额交易</p>
+        <div class="btn-group clearfix">
+          <em @click="bigAmountLayer = false">取消</em>
+          <router-link to="/personal/account/apply">去申请大额交易</router-link>
+        </div>
+      </div>
+    </BasePopup>
   </div>
 </template>
 <script>
@@ -267,10 +267,10 @@
         this.amountValue = value;
       },
       openOrderLayer(st) { // 弹窗提示
-        // if (this.money > 100000) { // 大额交易
-        //   this.bigAmountLayer = true
-        // }
-
+        if ((this.money * 1 > 100000) && (this.$store.state.userInfo.btverify !== 2)) { // 大额交易
+          this.bigAmountLayer = true
+          return
+        }
         // 购买提示框
         if (st === false) {
           this.showOrderLayer = false;
@@ -283,10 +283,7 @@
           this.coinTypeLayer = this.contentData.currency.toUpperCase()
           this.showOrderLayer = true;
         }
-      },
-      // closeLayer() { // 关闭提示勾选弹窗
-      //   this.remindLayer = false
-      // }
+      }
     }
   }
 </script>

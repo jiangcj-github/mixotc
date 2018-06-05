@@ -54,10 +54,17 @@
     },
     methods: {
       async _initGetdata() {
-        await this.Proxy.coinLoop({count: 4}).then(res => {
-          // console.log('轮询1', res)
-          this.exchange = res.data.Quotations
-          this.exchange && this.$store.commit({type: 'coinLoop', data: this.exchange})
+        await this.Proxy.coinLoop({count: 10}).then(res => {
+          let zeroList, newList;
+          this.exchange = res.data.Quotations.filter(v => {
+            return v.new_price !== 0
+          });
+          zeroList= res.data.Quotations.filter(v => {
+            return v.new_price == 0
+          });
+          newList = this.exchange.concat(zeroList);
+          this.exchange = this.exchange.length > 4 ? this.exchange.slice(0, 4) : this.exchange;
+          this.exchange && this.$store.commit({type: 'coinLoop', data: newList})
         }).catch();
 
         this.Loop.topCurrency.clear()
@@ -65,11 +72,20 @@
         this.Loop.topCurrency.setDelayTime(10000)
         this.Loop.topCurrency.set(async () => {
           // let res = await fetch('http://47.74.244.196/v1/home/topCurrency').then(data => data.json())
-          await await this.Proxy.coinLoop({count: 4}).then(res => {
+          await await this.Proxy.coinLoop({count: 10}).then(res => {
             // console.log('轮询2', res)
-            this.exchangeCopy = this.flag && res.data.Quotations || this.exchangeCopy
-            this.exchange = !this.flag && res.data.Quotations || this.exchange
-            this.$store.commit({type: 'coinLoop', data: this.exchange})
+            let currencyList, zeroLoopList, newLoopList;
+            currencyList = res.data.Quotations.filter(v => {
+              return v.new_price !== 0
+            });
+            currencyList = currencyList.length > 4 ? currencyList.slice(0, 4) : currencyList;
+            zeroLoopList = res.data.Quotations.filter(v => {
+              return v.new_price == 0
+            });
+            newLoopList = currencyList.concat(zeroLoopList);
+            this.exchangeCopy = this.flag && currencyList || this.exchangeCopy;
+            this.exchange = !this.flag && currencyList || this.exchange;
+            this.$store.commit({type: 'coinLoop', data: newLoopList})
           }).catch();
 
           this.Loop.topCurrencyRoll.start()
