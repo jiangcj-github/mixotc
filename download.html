@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="shortcut icon" href="/static/images/logo_ico.ico" type="image/x-icon" />
+  <title>mixOTC-APP下载</title>
+</head>
+<body>
+  <script>
+     var u = navigator.userAgent;
+      var isAndroid = u.indexOf("Android") > -1 || u.indexOf("Adr") > -1; 
+      var isiOS = /(iPhone|iPad|iPod|iOS)/i.test(u);
+      if(isAndroid){
+        window.location.href = "http://192.168.113.26/otc/download/app/?pkg=apk";
+      }else if (isiOS) {
+        window.location.href = 'itms-services://?action=download-manifest&url=https://www.pgyer.com/app/plist/09aedfe77463b92fff4666c9b5bc3802/install/s.plist';
+      }else{
+        window.location.href = "http://192.168.113.33"
+      }</script>
+</body>
+</html>

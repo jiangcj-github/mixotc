@@ -30,7 +30,7 @@
       <div class="img phone-img">
         <img src="/static/images/phoneicon.png">
         <p>
-          <QrcodeVue class="qrcode" :value="HostUrl.download" :size="70"></QrcodeVue>
+          <QrcodeVue class="qrcode" :value="`${HostUrl.download}download.html`" :size="70"></QrcodeVue>
           <span><i>下载APP沟通更方便</i></span>
         </p>
       </div>

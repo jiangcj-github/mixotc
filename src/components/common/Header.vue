@@ -28,7 +28,7 @@
           <li class="itag" @mouseenter="showQr" @mouseleave="hideQr">
             <img class="top-logo" src="/static/images/phoneicon.png" alt="">
             <div class="show-qr" v-show="isHover">
-              <QrcodeVue class="qrcode" :value="HostUrl.download" :size="60"></QrcodeVue>
+              <QrcodeVue class="qrcode" :value="`${HostUrl.download}download.html`" :size="60"></QrcodeVue>
               <span>扫码下载APP</span>
             </div>
           </li>
