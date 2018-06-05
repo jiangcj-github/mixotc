@@ -29,9 +29,7 @@
           </div>
           <div class="filter">
             <div class="f1">
-              <input type="text" placeholder="搜索币种" v-model="srchText">
-              <img src="/static/images/cancel_icon.png" v-show="srchText.length>0" @click="srchText=''">
-              <button @click="onSearch"></button>
+              <SearchGroup ref="sg" onSearch="onSearch" placeText="搜索币种"></SearchGroup>
             </div>
             <div class="f2" v-show="tab===0">
               <span class="radio r2" :class="{check:isZero}" @click="isZero=!isZero,isPetty=false">隐藏0余额币种</span>
@@ -156,8 +154,10 @@
   import LeftBar from "./layout/LeftBar";
   import Pagination from "../verify/component/Pagination";
   import Alert from "../common/widget/Alert";
+  import SearchGroup from "../common/widget/SearchGroup";
   export default {
     components: {
+      SearchGroup,
       Alert,
       Pagination,
       Notify,
@@ -166,7 +166,6 @@
     data() {
       return {
         tab: 0,  //0-法币账户,1-币币账户
-        srchText: "",
         isZero: false,
         isPetty: false,
         isNoWa: true,
@@ -198,6 +197,9 @@
       }
     },
     computed:{
+      paramSrchText:function(){
+        return this.$refs.sg.srchText;
+      },
       paramFbSort:function(){
         let sort=this.fbSort;
         switch(sort){
@@ -249,14 +251,6 @@
       }
     },
     methods:{
-      onSearch(){
-        if(this.srchText.length<=0) return;
-        if(this.tab===0){
-          this.loadFb();
-        }else{
-          this.loadBb();
-        }
-      },
       async init(){
         // 查询价格
         let data=await this.Proxy.getPrice().catch((msg)=>{
@@ -294,7 +288,7 @@
       },
       loadFb(){
         this.WsProxy.send("wallet","wallets_v2",{
-          currency: this.srchText,
+          currency: this.paramSrchText,
           hide_zero: this.isZero,
           hide_low_price: this.isPetty,
           hide_no_wallet: this.isNoWa,
@@ -374,6 +368,13 @@
     },
     mounted(){
       this.init();
+      this.Bus.$on("onSearch",()=>{
+        if(this.tab===0){
+          this.loadFb();
+        }else{
+          this.loadBb();
+        }
+      });
       this.Bus.$on("onFbPageChange",(p)=>{
         this.fbCurPage=p;
         this.loadFb();
@@ -384,6 +385,7 @@
       });
     },
     destroyed(){
+      this.Bus.$off("onSearch");
       this.Bus.$off("onFbPageChange");
       this.Bus.$off("onBbPageChange");
     },

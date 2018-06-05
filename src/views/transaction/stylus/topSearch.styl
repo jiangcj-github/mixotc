@@ -40,7 +40,7 @@
 .header .f1{flex-grow:1; height:30px;}
 .header .f1 .search{
   width:456px;
-  border:1px solid #FFB422;
+  border:1px solid #e1e1e1;
   border-radius:2px;
   display:inline-flex;
   position:relative;
@@ -65,8 +65,7 @@
 .search>img{align-self:center;margin-right:10px;}
 .search>img:hover{cursor:pointer; opacity:0.8;}
 .search>input{ padding:0 10px; flex-grow:1;}
-.search>a{width:72px; background:url(/static/images/search.png) no-repeat center center; background-color:#FFB422;}
-.search>a:hover{background-color:#FEA350;}
+.search>a{width:72px; background:url(/static/images/search.png) no-repeat center center; background-color:#e1e1e1;}
 .search>b{
   position: absolute;
   left: 0;
@@ -74,6 +73,11 @@
   color: #FF794C;
   font-size: 11px;
 }
+
+/*输入框激活样式*/
+.header .f1 .search.active{border-color:#ffb422;}
+.header .f1 .search.active a{background-color:#ffb422;}
+.header .f1 .search.active a:hover{background-color:#fea350;}
 
 .header .top5{display:inline-block;}
 .top5 li{

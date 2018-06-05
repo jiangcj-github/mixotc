@@ -11,28 +11,17 @@
             <a href="javascript:void(0);" @click="exportXls"><img src="/static/images/wallet/export.png">导出账单</a>
           </div>
           <div class="filter">
-            <div class="input-group">
-              <p class="term" v-clickoutside="()=>isShowUl0=false" @click="isShowUl0=!isShowUl0">{{ul0[ul0Sel].text}}</p>
-              <!--搜索条件-->
-              <ul class="drop" v-show="isShowUl0">
-                <li v-for="(e,i) in ul0" @click="ul0Sel=i">{{e.text}}</li>
-              </ul>
-              <input class="input" type="text" v-model="srchText"
-                     v-clickoutside="()=>isShowTip=false" @input="onFuzzyInput">
-              <img class="clear" src="/static/images/cancel_icon.png" @click="srchText=''" v-show="srchText.length>0">
-              <button class="addin" @click="loadBills"><img src="/static/images/search.png"></button>
-              <!--模糊搜索结果-->
-              <ul class="drop" v-show="isShowTip">
-                <li v-for="(e,i) in tips" @click="loadBills">
-                  <p v-if="e.type===2 && e.isUser===1" @mousedown="srchText=e.nickname">
+            <SearchGroup :terms="ul0" :tips="tips" onSearch="onSearch" onFuzzy="onFuzzy" ref="sg">
+              <ul slot="fuzzy" class="fuzzy">
+                <li v-for="(e,i) in tips" @click="loadBills()" :key="i">
+                  <p v-if="e.type===2 && e.isUser===1" @mousedown="$refs.sg.srchText=e.nickname">
                     <span>{{e.nickname}}</span><span class="fz-gray">{{e.account}}</span>
                   </p>
-                  <p v-if="e.type===2 && e.isUser===0" @mousedown="srchText=e.addr" class="fz-addr">{{e.addr}}</p>
-                  <p v-if="e.type===1" @mousedown="srchText=e.orderId">{{e.orderId}}</p>
+                  <p v-if="e.type===2 && e.isUser===0" @mousedown="$refs.sg.srchText=e.addr" class="fz-addr">{{e.addr}}</p>
+                  <p v-if="e.type===1" @mousedown="$refs.sg.srchText=e.orderId">{{e.orderId}}</p>
                 </li>
-                <li v-show="tips.length<=0" class="empty">无搜索结果</li>
               </ul>
-            </div>
+            </SearchGroup>
             <div class="f2">
               <DateInterval ref="di"></DateInterval>
             </div>
@@ -125,6 +114,8 @@
             <div class="err empty">无数据</div>
           </div>
         </div>
+        <!--提示框-->
+        <Alert ref="alert"></Alert>
       </div>
     </div>
   </div>
@@ -135,26 +126,24 @@
   import DateInterval from "@/components/common/DateInterval";
   import Pagination from "../verify/component/Pagination";
   import JsonExcel from "./js/JsonExcel.js";
+  import Alert from "../common/widget/Alert";
+  import SearchGroup from "../common/widget/SearchGroup";
   export default {
     components: {
+      SearchGroup,
       Notify,
       LeftBar,
       DateInterval,
       Pagination,
-      JsonExcel
+      JsonExcel,
+      Alert
     },
     data() {
       return {
-        srchText: "",
-
-        isShowUl0: false,
-        ul0Sel: 0,
         ul0: [
           {text:"订单号",value:1},
           {text:"对方/地址",value:2},
         ],
-
-        isShowTip: false,
         tips: [],
         tipCount: 10,
 
@@ -226,6 +215,12 @@
         }
         return str.substr(1) || "未选择状态";
       },
+      paramSrchType(){
+        return this.$refs.sg.selectedTerm.value;
+      },
+      paramSrchText(){
+        return this.$refs.sg.srchText;
+      },
       paramSort(){
         let sort=this.sort;
         switch(sort){
@@ -239,9 +234,6 @@
       },
       paramCoin(){
         return this.ul2[this.ul2Sel].value;
-      },
-      paramSrchType(){
-        return this.ul0[this.ul0Sel].value;
       },
       paramType(){
         let type="";
@@ -337,19 +329,10 @@
           ul[0].check= (c>=ul.length-1);
         }
       },
-      onFuzzyInput(){
-        if(this.srchText.length<=0){
-          this.isShowTip=false;
-          return;
-        }
-        this.loadTips();
-      },
       loadTips(){
-        let srchType=this.ul0[this.ul0Sel].value;
-        let srchText=this.srchText;
         this.WsProxy.send("wallet","bill_tips", {
-          keyword_type: srchType,
-          keyword: srchText,
+          keyword_type: this.paramSrchType,
+          keyword: this.paramSrchText,
           count: this.tipCount,
         }).then((data)=>{
           this.parseTips(data);
@@ -365,16 +348,16 @@
             nickname: e.name || "-",
             account: e.phone || e.email || "-",
             addr: e.address || "-",
-            type: this.ul0[this.ul0Sel].value,      // 0-订单号,1-对方/地址
+            type: this.paramSrchType,      // 0-订单号,1-对方/地址
             isUser: e.address?0:1,     // 0-地址,1-人
           });
         });
-        this.isShowTip=true;
+        this.$refs.sg.isShowTip=true;
       },
       loadBills(){
         this.WsProxy.send("wallet","bills_v2",{
           keyword_type: this.paramSrchType,
-          keyword: this.srchText,
+          keyword: this.paramSrchText,
           currency: this.paramCoin,
           type: this.paramType,
           state: this.paramState,
@@ -456,7 +439,7 @@
         let jsonData=[];
         this.WsProxy.send("wallet","bills_v2",{
           keyword_type: this.paramSrchType,
-          keyword: this.srchText,
+          keyword: this.paramSrchText,
           currency: this.paramCoin,
           type: this.paramType,
           state: this.paramState,
@@ -464,7 +447,11 @@
           end: this.paramEnd,
           count: 0,
         }).then((data)=> {
-          data && data.bills && data.bills.forEach((e,i) => {
+          if(!data || !data.bills || data.bills.length<=0){
+            this.$refs.alert.showAlert({content:"没有符合条件的账单"});
+            return;
+          }
+          data.bills.forEach((e,i) => {
             let item={
               index: i+1,
               time: new Date(e.date*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
@@ -504,12 +491,19 @@
           JsonExcel.name="MixOTC-账单.xls";
           JsonExcel.generate();
         }).catch((msg)=>{
-          console.log(msg);
+          this.$refs.alert.showAlert({content:"导出账单失败"});
         });
       },
     },
     mounted(){
       this.init();
+      this.Bus.$on("onSearch",()=>{
+        this.loadBills();
+      });
+      this.Bus.$on("onFuzzy",(p)=>{
+        this.loadTips();
+      });
+      //
       this.Bus.$on("onPageChange",(p)=>{
         this.curPage=p;
         this.loadBills();
@@ -521,6 +515,8 @@
     destroyed(){
       this.Bus.$off("onDiChange");
       this.Bus.$off("onPageChange");
+      this.Bus.$off("onSearch");
+      this.Bus.$off("onFuzzy");
     }
   }
 </script>
