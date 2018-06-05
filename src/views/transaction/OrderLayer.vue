@@ -6,7 +6,7 @@
       <div class="order-layer">
         <ul>
           <li class="clearfix"><span>{{titleType[type-1]}}单价</span><b>{{price}} CNY</b></li>
-          <li class="clearfix"><span>{{titleType[type-1]}}数量</span><b>{{currency}} BTC</b></li>
+          <li class="clearfix"><span>{{titleType[type-1]}}数量</span><b>{{currency}} {{coinType}}</b></li>
           <li class="clearfix"><span>{{titleType[type-1]}}金额</span><b>{{money}} CNY</b></li>
         </ul>
         <p>提醒：请确认价格后立即下单</p>
@@ -17,8 +17,8 @@
         </div>
       </div>
     </BasePopup>
-    <BasePopup class="remind-layer" :show="remindLayer">
-      <span v-clickoutside="closeLayer">{{remindText}}</span>
+    <BasePopup class="remind-layer" :show="remindLayer" @click.native="remindLayer=false">
+      <span v-html="remindText"></span>
     </BasePopup>
   </div>
 </template>
@@ -28,7 +28,7 @@
 
   export default {
     name: "order-layer",
-    props: ['orderLayerShow', 'id', 'price', 'currency', 'money', 'type'], // 1: 购买 2: 出售
+    props: ['orderLayerShow', 'id', 'price', 'currency', 'money', 'type', 'coinType'], // 1: 购买 2: 出售
     data() {
       return {
         titleType: ['购买', '出售'],
@@ -57,11 +57,10 @@
           money: this.money * 1,
           update_time: Math.floor(new Date().getTime() / 1000)
         }).then((data)=>{
-          if (this.type == 1) {
-            this.$store.state.newOrder = true;
-          }
+          this.$store.state.newOrder = this.type == 1 ? true : false
           this.$router.push({ path: '/order', query: {id: this.JsonBig.stringify(data.id)}});
         }).catch((msg)=>{
+          console.log('下单错误', msg)
           this.closeOrderLayer();
           this.remindLayer = true;
           switch (msg.ret) {
@@ -70,6 +69,13 @@
               break;
             case 14:
               this.remindText = '当天取消订单超过5次，请明天再下单';
+              break;
+            case 15:
+            case 19:
+              this.remindText = '广告已下架';
+              break;
+            case 17:
+              this.remindText = `可用余额不足，<a href="#/wallet/charge?coin=${this.coinType}" style="text-decoration: underline; color: #FFB422">去充币</a>`;
               break;
             case 18:
               this.remindText = '买家(您)有订单未完成';
@@ -91,9 +97,6 @@
               break;
           }
         });
-      },
-      closeLayer() { // 关闭提示勾选弹窗
-        this.remindLayer = false
       }
     }
   }
