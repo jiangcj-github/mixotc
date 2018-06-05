@@ -28,7 +28,9 @@
                  @click="srchText=''"
                  v-show="srchTipShow && srchText.length>0">
             <a href="javascript:void(0)" @click="searchStr"></a>
+            <!--
             <b v-if="searchTip">您还未输入{{srchUls[srchUlSel].title}}</b>
+            -->
             <!--币种模糊搜索结果-->
             <ul v-show="srchTipShow" v-if="this.srchType===0">
               <li v-for="e in coinTips" @click="search(e)">
@@ -290,7 +292,7 @@
       searchStr() {
         if (this.srchText == ''){
           this.searchTip = true
-          return
+          //return
         }
         if (this.srchType === 0 && this.srchText.length > 0) {
           let exist = 0;
