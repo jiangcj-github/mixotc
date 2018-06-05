@@ -519,6 +519,7 @@
         this.judgeStopTradeOther(index)
       },
       onPop1Ok() { // 强制放币确认
+        console.log('我是谁', this.otherInfo[this.swiperIndex].type)
         if(this.pop1Text == '') {
           this.showPop1 = false
           this.errLayer = true
@@ -561,7 +562,7 @@
 
         });
 
-        this.WsProxy.send('control', 'a_send_order',
+        this.WsProxy.send('control', this.otherInfo[this.swiperIndex].type == 1 ? 'a_send_order' : 'a_send_secured',
           Object.assign(this.forceIconObj, {"info": this.pop1Text})
         ).then((data)=>{
           console.log('强制放币', data)
@@ -672,9 +673,8 @@
           });
         }
         // 确定终止交易
-        this.WsProxy.send('control', 'a_terminate_order',
+        this.WsProxy.send('control', this.otherInfo[this.swiperIndex].type == 1 ? 'a_terminate_order' : 'a_terminate_secured',
           Object.assign(this.stopTradeObj, {
-            "type": 1, // 1: 订单, 2: 担保
             "info": this.pop3Text
           })
         ).then((data)=>{
@@ -740,7 +740,7 @@
           });
         }
         this.WsProxy.send('control', 'a_reject_appeal',
-          Object.assign(this.rejectAppealObj, {"type": 1}) // 1: 交易, 2: 担保转账
+          Object.assign(this.rejectAppealObj, {"type": this.otherInfo[this.swiperIndex].type}) // 1: 交易, 2: 担保转账
         ).then((data)=>{
           console.log('驳回申述', data)
           this.$store.commit({type: 'stopTrade', data: {params: this.otherInfo[this.popIndex], length: this.otherInfo.length}})
