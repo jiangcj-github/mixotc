@@ -289,7 +289,7 @@
       async selectUserCoin() { // 选择币种
         this.coinType = []
         await this.WsProxy.send('wallet', 'wallets', {
-          id: this.$store.state.userInfo.uid, // 用户id
+          uid: this.$store.state.userInfo.uid, // 用户id
         }).then((data)=>{
           data.wallets.forEach(v => {
             this.coinType.push(v.currency.toUpperCase())
