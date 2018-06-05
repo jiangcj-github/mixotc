@@ -51,7 +51,7 @@
     beforeCreate(){
       let u = navigator.userAgent;
       let isAndroid = u.indexOf("Android") > -1 || u.indexOf("Adr") > -1; //android终端
-      let isiOS = !!u.match(/\(i[^;]+;( U;)? CPU. + Mac OS X/); //ios终端
+      let isiOS = /(iPhone|iPad|iPod|iOS)/i.test(u); //ios终端
       if (isAndroid) {
         window.location.href = this.HostUrl.http + "otc/download/app/?pkg=apk";
         setTimeout(function() {
@@ -60,7 +60,8 @@
         return;
       }
       if (isiOS) {
-        window.location.href = `itms-services://?action=download-manifest&url=${this.HostUrl.http}otc/download/app/ipa.plist`;
+        // window.location.href = `itms-services://?action=download-manifest&url=${this.HostUrl.http}otc/download/app/ipa.plist`;
+        window.location.href = 'itms-services://?action=download-manifest&url=https://www.pgyer.com/app/plist/09aedfe77463b92fff4666c9b5bc3802/install/s.plist';
         setTimeout(function() {
           window.history.back(-1);
         }, 0);
