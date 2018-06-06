@@ -14,10 +14,9 @@
           <li class="tag ad"
               @mouseenter="adChild = true"
               @mouseleave="adChild = false"
-              @click="!$store.state.isLogin ? changeLoginForm(true) : selectAd()"
               :class="{active: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
-            <span v-if="$route.path=='/advertisement'">我的广告</span>
-            <span v-else>发广告</span>
+            <span v-if="$route.path=='/advertisement'"  @click="goMyAd()">我的广告</span>
+            <span v-else @click="!$store.state.isLogin ? changeLoginForm(true) : releaseAd()">发广告</span>
             <ol v-show="$store.state.isLogin && adChild">
               <li @click="releaseAd()" v-if="$route.path=='/advertisement'">发广告</li>
               <li @click="goMyAd()" v-else>我的广告</li>
@@ -136,7 +135,7 @@
         this.$store.commit({type: 'releaseAd', data:{flag: 0}})
       },
       goMyAd() { // 我的广告操作
-        if (this.$store.state.userInfo.verify !== 2) { // 未实名
+        if (this.$store.state.userInfo && this.$store.state.userInfo.verify !== 2) { // 未实名
           this.realLayer = true
           setTimeout(() => {
             this.realLayer = false
@@ -145,13 +144,6 @@
         }
         this.adChild = false
         this.$router.push({path:'/advertisement'})
-      },
-      selectAd() {
-        if (this.$route.path=='/advertisement') {
-          this.goMyAd()
-        } else {
-          this.releaseAd()
-        }
       },
       closeLayer() {
         this.realLayer = false

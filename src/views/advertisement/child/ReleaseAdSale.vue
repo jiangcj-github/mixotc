@@ -308,10 +308,11 @@
           // console.log('出售币种错误', msg);
         });
         this.getHigherPrice() // 请求到相应币种最高价
-        this.userBalance = this.balanceList[0] && this.balanceList[0].balance.formatFixed(6)
+        this.userBalance = typeof this.balanceList[0].balance == 'number' ? this.balanceList[0].balance.formatFixed(6) : this.JsonBig.stringify(this.balanceList[0].balance.formatFixed(6))
         this.Bus.$emit('saleSlideLength', this.userBalance)
         this.coinMinText = `0${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
         this.coinMaxText = `${this.userBalance}${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
+        console.log('出售币种',  this.userBalance, this.balanceList)
       },
       async getPrice() { // 当前价格
         await this.Proxy.getPrice().then(res => {

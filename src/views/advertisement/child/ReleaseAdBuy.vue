@@ -403,7 +403,7 @@
               this.errText = '小于提币限额'
               break;
             case 82:
-              this.errText = '创建钱包失败'
+              this.errText = '请先<a href="#/wallet/account" style="text-decoration: underline; color: #FFB422">创建钱包</a>'
               break;
             default:
               this.errText = '请核实广告单'

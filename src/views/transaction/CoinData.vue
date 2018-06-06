@@ -15,15 +15,19 @@
                  v-model.trim="inputValue"
                  @input="getCoinInfo"
                  @keyup.enter="getCoinsData()"
-                 @focus="(showActive=true) && (canCancel=true)"
+                 @focus="focusInput"
                  @blur="blurInput"
                  @click="showResult = true"><button @click="getCoinsData()"></button>
           <img src="/static/images/cancel_icon.png" alt="" v-show="canCancel && inputValue" @mousedown="inputValue=''">
         </p>
-        <ul class="search-result" v-if="showResult && inputValue"  v-clickoutside="closeSelect">
+        <ul class="search-result" v-if="showResult"  v-clickoutside="closeSelect">
           <li v-if="!result.length">{{nothingText}}</li>
-          <li v-for="(item,index) of result" :key="index" @click="selectResultContent(item)">{{item}}</li>
-          <!--@click="selectResultContent(item)"-->
+          <!--<li v-for="(item,index) of result" :key="index" @click="selectResultContent(item)">{{item}}</li>-->
+          <li v-for="(item,index) of result" :key="index" @click="selectResultContent(item.name)">
+            <img :src="`${HostUrl.http}image/${item.icon}`">
+            <span>{{item.currency}}</span>
+            <b>{{item.name}}</b>
+          </li>
         </ul>
       </div>
       <div class="coin-content">
@@ -72,7 +76,7 @@
         inputValue: '', // input值
         selectValue: 'btc',
         result: [], // 模糊搜索结果
-        showResult: true, // 控制下拉框显示隐藏
+        showResult: false, // 控制下拉框显示隐藏
         id: '',
         nothingText: '', // 无搜索结果提示文字
         showActive: false,
@@ -89,23 +93,22 @@
     methods: {
       async getCoinInfo() {
         this.nothingText = '加载中...'
-        this.result = [];
         this.inputValue && (this.selectValue = this.inputValue);
         await this.Proxy.coinSearch({keyword: this.selectValue}).then(res => { // 模糊搜索
-          // console.log('币种资料', res)
-          // console.log('搜索币种资料', this.selectValue, res)
+          this.result = []
           if (!res.data.coins) {
             this.nothingText = '暂无数据'
             return
           }
           this.coinDataList = res.data.coins
           res.data.coins && res.data.coins.forEach(v => {
-            this.result.push(v.name)
+            // this.result.push(v.name)
+            this.result = res.data.coins
           })
         });
+        console.log('111', this.result)
         await this.Proxy.searchTips({word: this.selectValue, app: 0}).then(res => { // 获取币种ID
           this.id = res.data.currency[0].id;
-          // console.log('搜索this.selectValue', this.selectValue, this.id )
         }).catch(msg => {
           console.log(msg)
         })
@@ -138,7 +141,21 @@
           console.log(msg)
         })
       },
-
+      focusInput() {
+        this.showActive = true
+        this.canCancel = true
+        this.showResult = true
+        this.nothingText = '加载中...'
+        this.Proxy.getCoinData().then(res => {
+          console.log('币种', res)
+          res.data.coins && res.data.coins.forEach(v => {
+            // this.result.push(v.name)
+            this.result = res.data.coins
+          })
+        }).catch(msg => {
+          console.log('购买币种错误', msg)
+        });
+      },
       blurInput() {
         this.showActive = false
         this.canCancel = false
@@ -221,11 +238,23 @@
         overflow-y auto
         z-index 2
         li
+          height 20px
+          line-height 20px
           font-size 12px
           padding 3px
           cursor pointer
           &:hover
             background-color $col3EB
+          img
+            width 16px
+            height 16px
+            margin-right 15px
+            vertical-align middle
+          span
+            display inline-block
+            width 50px
+          b
+            color #999
     .coin-content
       margin-top 58px
       margin-left 70px

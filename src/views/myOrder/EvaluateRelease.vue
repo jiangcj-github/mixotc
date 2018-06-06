@@ -12,7 +12,10 @@
       </span>
       <b>{{rateText}}</b>
     </div>
-    <textarea placeholder="评价对方：字数限制0～50个字符" v-model.trim="comment" @input="evaluateInput" ref="comment"></textarea>
+    <div class="text-group">
+      <textarea placeholder="评价对方：字数限制0～50个字符" v-model.trim="comment" maxlength="50" ref="comment"></textarea>
+      <p class="comment-length">{{comment.length}}/50</p>
+    </div>
     <button @click="release">发布</button>
     <!-- 弹窗 -->
     <BasePopup class="remind-layer" :show="remindLayer">
@@ -35,7 +38,6 @@
         scoreCache: 0,
         comment: '',
         rateText:'',
-        commentOld: '',
         remindLayer: false
       }
     },
@@ -98,15 +100,15 @@
           this.rateStandard()
         }
       },
-      evaluateInput() { // 控制评价输入框字数
-        // console.log('this.comment', this.comment.length)
-        if (this.comment.length > 50) {
-          this.comment = this.commentOld;
-          this.$refs.comment.value = this.commentOld;
-        } else {
-          this.commentOld = this.comment;
-        }
-      },
+      // evaluateInput() { // 控制评价输入框字数
+      //   // console.log('this.comment', this.comment.length)
+      //   if (this.comment.length > 50) {
+      //     this.comment = this.commentOld;
+      //     this.$refs.comment.value = this.commentOld;
+      //   } else {
+      //     this.commentOld = this.comment;
+      //   }
+      // },
       release() { // 发布评价
         if (this.score === 0) {
           this.remindLayer = true
@@ -179,17 +181,26 @@
       .rate.off
         background-image url('/static/images/evaluate_gray.png')
 
-    textarea
-      width 600px
-      height 131px
+    .text-group
+      position relative
       margin-bottom 30px
-      padding 10px 10px
-      border 1px solid #E1E1E1
-      border-radius 2px
-      resize none
-      outline none
-      &::-webkit-input-placeholder
-        color #333
+      textarea
+        width 600px
+        height 131px
+        padding 10px 10px
+        border 1px solid #E1E1E1
+        border-radius 2px
+        resize none
+        outline none
+        &::-webkit-input-placeholder
+          color #333
+      p
+        position absolute
+        right 5px
+        top 130px
+        font-size 13px
+        color #999
+
     button
       width 464px
       height 40px
