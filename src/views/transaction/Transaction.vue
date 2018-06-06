@@ -255,7 +255,7 @@
     methods: {
       onFocus(){
         this.isActive=true;
-        if(this.srchText.length<=0){
+        if(this.srchText.length<=0 && this.srchType!==0){
           this.srchTipShow=false;
           return;
         }
