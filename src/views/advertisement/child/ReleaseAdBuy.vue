@@ -280,6 +280,7 @@
     methods: {
       async selectUserCoin() { // 选择币种
         this.coinType = []
+        this.coinData = []
         await this.Proxy.getCoinData().then(res => {
           res.data.coins.forEach(v => {
             this.coinType.push(v.currency.toUpperCase())
@@ -404,6 +405,8 @@
             case 82:
               this.errText = '创建钱包失败'
               break;
+            default:
+              this.errText = '请核实广告单'
           }
           setTimeout(() => {
             this.adErrLayer = false
@@ -411,7 +414,8 @@
         });
       },
       reset() {
-        this.adBuyObj.currency =  this.coinType[0]
+        this.selectNum = false
+        this.adBuyObj.currency = this.$store.state.editFlag == 2 ? this.$store.state.editContent.currency : this.coinType[0].toLowerCase()
         this.adBuyObj.mode = 1
         this.adBuyObj.premium = 0
         this.adBuyObj.price = ''
@@ -422,7 +426,14 @@
         this.adBuyObj.info = ''
         this.adBuyObj.vary = 1
         this.adBuyObj.tradeable = ''
-        this.getPrice()
+        this.Proxy.getPrice().then(res => {
+          this.selectPrice = res.data.prices.filter(item => {
+            return item.currency === this.adBuyObj.currency
+          })
+          this.changePrice = this.selectPrice[0] && (this.selectPrice[0].cny)
+        }).catch((msg)=>{
+          console.log(msg)
+        });
         this.getLowerPrice()
         this.Bus.$emit('paymentNum', this.$store.state.PaymentSoreData)
       },

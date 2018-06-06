@@ -1,7 +1,8 @@
 <template>
   <div class="rule-wrap inner">
     <h1>
-      <router-link to="/helpcenter">mixOTC帮助中心</router-link> -
+      <router-link to="/transaction">mixOTC</router-link> -
+      <router-link to="/helpcenter">帮助中心</router-link> -
       <span v-for="(item,index) in titleList" v-if="showActive == index"> {{item}}</span>
     </h1>
     <div class="clearfix">
@@ -315,9 +316,12 @@
         background #FFF
         line-height 60px
         cursor pointer
-      li.active
-        background #FFF3EB
-        border-bottom 2px solid  #FFB422
+        &.active
+          background #FFF3EB
+          border-bottom 2px solid  #FFB422
+        &:hover
+          background #FFF3EB
+
         /*-moz-box-shadow 0 2px 4px 0 rgba(153,153,153,0.70)
         -webkit-box-shadow 0 2px 4px 0 rgba(153,153,153,0.70)
         box-shadow 0 2px 4px 0 rgba(153,153,153,0.70)

@@ -530,42 +530,42 @@
         let time = new Date() - 0,
             text1 = MSGS.get(4, this.appl, this.recv) ? MSGS.get(4, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1Text) : '',
             text2 = MSGS.get(5, this.appl, this.recv) ? MSGS.get(5, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop1Text) : ''
-        // 发送消息
-        this.WsProxy.sendMessage({ // 发送给买家
-          type: 'text',
-          // gid: this.JsonBig.parse("197129593973379072"),
-          tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-          data:{
-            uid: this.$store.state.userInfo.uid,
-            rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-            msg: text1
-          }
-        }).then(data => { // 发送消息成功后更改原保存信息
-
-        }).catch(error => {
-
-        });
-        this.WsProxy.sendMessage({ // 发送给买家
-          type: 'text',
-          // gid: this.JsonBig.parse("197129593973379072"),
-          tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-          data:{
-            uid: this.$store.state.userInfo.uid,
-            rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-            msg: text2
-          }
-        }).then(data => { // 发送消息成功后更改原保存信息
-
-        }).catch(error => {
-
-        });
-
         this.WsProxy.send('control', this.otherInfo[this.swiperIndex].type == 1 ? 'a_send_order' : 'a_send_secured',
           Object.assign(this.forceIconObj, {"info": this.pop1Text})
         ).then((data)=>{
           console.log('强制放币', data)
+          // 发送消息
+          this.WsProxy.sendMessage({ // 发送给买家
+            type: 'text',
+            // gid: this.JsonBig.parse("197129593973379072"),
+            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+            data:{
+              uid: this.$store.state.userInfo.uid,
+              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+              msg: text1
+            }
+          }).then(data => { // 发送消息成功后更改原保存信息
+
+          }).catch(error => {
+
+          });
+          this.WsProxy.sendMessage({ // 发送给买家
+            type: 'text',
+            // gid: this.JsonBig.parse("197129593973379072"),
+            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+            data:{
+              uid: this.$store.state.userInfo.uid,
+              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+              msg: text2
+            }
+          }).then(data => { // 发送消息成功后更改原保存信息
+
+          }).catch(error => {
+
+          });
+
           this.$store.commit({type: 'stopTrade', data: {params: this.otherInfo[this.popIndex], length: this.otherInfo.length}})
         }).catch((msg)=>{
           console.log(msg);
@@ -607,77 +607,78 @@
           text1 = MSGS.get(6, this.appl, this.recv) ? MSGS.get(6, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3Text) : '', // 非责任人
           text2 = MSGS.get(7, this.appl, this.recv) ? MSGS.get(7, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop3Text) : ''; // 责任人
 
-        // 发送消息
-        if (this.pop3Radio == 1) { // 双方无责
-          this.WsProxy.sendMessage({ // 发送给买家
-            type: 'text',
-            // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-            data:{
-              uid: this.$store.state.userInfo.uid,
-              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-              msg: text1
-            }
-          }).then(data => { // 发送消息成功后更改原保存信息
-
-          }).catch(error => {
-
-          });
-          this.WsProxy.sendMessage({ // 发送给买家
-            type: 'text',
-            // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-            data:{
-              uid: this.$store.state.userInfo.uid,
-              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-              msg: text1
-            }
-          }).then(data => { // 发送消息成功后更改原保存信息
-
-          }).catch(error => {
-
-          });
-        }
-        if (this.pop3Radio == 0) { // 买家责任
-          this.WsProxy.sendMessage({ // 发送给买家
-            type: 'text',
-            // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-            data:{
-              uid: this.$store.state.userInfo.uid,
-              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-              msg: text2
-            }
-          }).then(data => { // 发送消息成功后更改原保存信息
-
-          }).catch(error => {
-
-          });
-          this.WsProxy.sendMessage({ // 发送给卖家
-            type: 'text',
-            // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-            data:{
-              uid: this.$store.state.userInfo.uid,
-              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-              msg: text1
-            }
-          }).then(data => { // 发送消息成功后更改原保存信息
-
-          }).catch(error => {
-
-          });
-        }
         // 确定终止交易
         this.WsProxy.send('control', this.otherInfo[this.swiperIndex].type == 1 ? 'a_terminate_order' : 'a_terminate_secured',
           Object.assign(this.stopTradeObj, {
             "info": this.pop3Text
           })
         ).then((data)=>{
+
+          // 发送消息
+          if (this.pop3Radio == 1) { // 双方无责
+            this.WsProxy.sendMessage({ // 发送给买家
+              type: 'text',
+              // gid: this.JsonBig.parse("197129593973379072"),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+              data:{
+                uid: this.$store.state.userInfo.uid,
+                rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+                tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+                msg: text1
+              }
+            }).then(data => { // 发送消息成功后更改原保存信息
+
+            }).catch(error => {
+
+            });
+            this.WsProxy.sendMessage({ // 发送给买家
+              type: 'text',
+              // gid: this.JsonBig.parse("197129593973379072"),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+              data:{
+                uid: this.$store.state.userInfo.uid,
+                rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+                tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+                msg: text1
+              }
+            }).then(data => { // 发送消息成功后更改原保存信息
+
+            }).catch(error => {
+
+            });
+          }
+          if (this.pop3Radio == 0) { // 买家责任
+            this.WsProxy.sendMessage({ // 发送给买家
+              type: 'text',
+              // gid: this.JsonBig.parse("197129593973379072"),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+              data:{
+                uid: this.$store.state.userInfo.uid,
+                rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+                tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+                msg: text2
+              }
+            }).then(data => { // 发送消息成功后更改原保存信息
+
+            }).catch(error => {
+
+            });
+            this.WsProxy.sendMessage({ // 发送给卖家
+              type: 'text',
+              // gid: this.JsonBig.parse("197129593973379072"),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+              data:{
+                uid: this.$store.state.userInfo.uid,
+                rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+                tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+                msg: text1
+              }
+            }).then(data => { // 发送消息成功后更改原保存信息
+
+            }).catch(error => {
+
+            });
+          }
           this.$store.commit({type: 'stopTrade', data: {params: this.otherInfo[this.popIndex], length: this.otherInfo.length}})
           console.log('终止交易', data)
         }).catch((msg)=>{
@@ -704,45 +705,45 @@
         }
         this.showPop2 = false
         let text = MSGS.get(2, this.appl, this.recv) ? MSGS.get(2, this.appl, this.recv).replace(/orderId/,  `<a href="#/order" style="color:#00A123">(${this.otherInfo[this.popIndex].sid})</a>`).replace(/reason/, this.pop2Text) : '';
-        // 发送消息
-        if (this.appl === 0 && this.recv === 0) {
-          this.WsProxy.sendMessage({ // 发送给买家
-            type: 'text',
-            // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-            data:{
-              uid: this.$store.state.userInfo.uid,
-              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
-              msg: text
-            }
-          }).then(data => { // 发送消息成功后更改原保存信息
-
-          }).catch(error => {
-
-          });
-        }
-        if (this.appl === 0 && this.recv === 1) {
-          this.WsProxy.sendMessage({ // 发送给卖家
-            type: 'text',
-            // gid: this.JsonBig.parse("197129593973379072"),
-            tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-            data:{
-              uid: this.$store.state.userInfo.uid,
-              rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
-              msg: text
-            }
-          }).then(data => { // 发送消息成功后更改原保存信息
-
-          }).catch(error => {
-
-          });
-        }
         this.WsProxy.send('control', 'a_reject_appeal',
           Object.assign(this.rejectAppealObj, {"type": this.otherInfo[this.swiperIndex].type}) // 1: 交易, 2: 担保转账
         ).then((data)=>{
           console.log('驳回申述', data)
+          // 发送消息
+          if (this.appl === 0 && this.recv === 0) {
+            this.WsProxy.sendMessage({ // 发送给买家
+              type: 'text',
+              // gid: this.JsonBig.parse("197129593973379072"),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+              data:{
+                uid: this.$store.state.userInfo.uid,
+                rid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+                tid: this.JsonBig.parse(this.otherInfo[this.popIndex].buyer_id),
+                msg: text
+              }
+            }).then(data => { // 发送消息成功后更改原保存信息
+
+            }).catch(error => {
+
+            });
+          }
+          if (this.appl === 0 && this.recv === 1) {
+            this.WsProxy.sendMessage({ // 发送给卖家
+              type: 'text',
+              // gid: this.JsonBig.parse("197129593973379072"),
+              tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+              data:{
+                uid: this.$store.state.userInfo.uid,
+                rid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+                tid: this.JsonBig.parse(this.otherInfo[this.popIndex].seller_id),
+                msg: text
+              }
+            }).then(data => { // 发送消息成功后更改原保存信息
+
+            }).catch(error => {
+
+            });
+          }
           this.$store.commit({type: 'stopTrade', data: {params: this.otherInfo[this.popIndex], length: this.otherInfo.length}})
         }).catch((msg)=>{
           console.log(msg);

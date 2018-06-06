@@ -35,8 +35,7 @@
               <li>{{coinDataObj.price && (coinDataObj.price.cny === 0 ? '-' : (coinDataObj.price.cny * 1).format('cny'))}}</li>
               <li>
                 <router-link :to="{path:'/transaction', query:{currency: selectCoinList[0] && selectCoinList[0].currency, name: selectCoinList[0] && selectCoinList[0].name, icon: selectCoinList[0] && selectCoinList[0].icon}}">去交易</router-link>
-                <!--<span @click="goRecharge">去充币</span>-->
-                <!--<router-link to="">去充币</router-link>-->
+                <span @click="goRecharge">去充币</span>
               </li>
             </ol>
           </div>
@@ -114,7 +113,6 @@
         // console.log(1111, this.coinDataList, this.selectCoinList)
       },
 
-
       async selectResultContent(item) { // 根据筛选结果赋值
         this.selectValue = this.inputValue = item;
         this.showResult = false
@@ -147,13 +145,14 @@
       },
       closeSelect() {
         this.showResult = false
+      },
+      goRecharge() {
+        if (!this.$store.state.isLogin) {
+          this.$store.commit({type: 'changeLoginForm', data: true});
+          return;
+        }
+        this.$router.push({path: '/wallet/charge', query: {coin: this.coinDataObj.name.toLowerCase()}})
       }
-      // goRecharge() {
-      //   if (!this.$store.state.isLogin) {
-      //     this.$store.commit({type: 'changeLoginForm', data: true});
-      //     return;
-      //   }
-      // }
     }
   }
 </script>
@@ -163,9 +162,11 @@
 
   .coin-wrap
     width 100%
+    height 100%
     background-color #FFF
 
   .coin-data
+    height 100%
     margin-top 10px
     margin-bottom 40px
     h1
@@ -175,21 +176,6 @@
       margin-bottom 20px
       a:hover
         color $col422
-    /*h1
-      font-size $fz20
-      font-weight bold
-      color $col333
-      margin-bottom 56px
-      &:before
-        display inline-block
-        width 3px
-        height 20px
-        position relative
-        top 2px
-        left 0
-        content ''
-        margin-right 9px
-        background-color $col422*/
     .search-box
       position relative
       width 456px
@@ -197,6 +183,7 @@
       margin-left 382px
       p
         position relative
+        height 30px
         input
           width 374px
           height 28px
@@ -225,9 +212,9 @@
       /* 币种筛选下拉框 */
       .search-result
         position absolute
-        width 453px
+        width 454px
         max-height 200px
-        margin-top -4px
+        margin-top 0
         background #FFF
         border 1px solid #EEE
         border-top none
@@ -282,13 +269,17 @@
               margin-right 20px
               &:hover
                 color $col350
-      /*a:last-child*/
-      /*padding 5px 10px*/
-      /*font-size 13px*/
-      /*color #FFB422*/
-      /*letter-spacing 0.27px*/
-      /*border 1px solid #FFB422*/
-      /*border-radius 2px*/
+            span
+              padding 2px 5px
+              font-size 13px
+              color #FFB422
+              letter-spacing 0.27px
+              border 1px solid #FFB422
+              border-radius 2px
+              cursor pointer
+              &:hover
+                background #FFB422
+                color #FFF
       .coin-content-right
         float left
         width 630px

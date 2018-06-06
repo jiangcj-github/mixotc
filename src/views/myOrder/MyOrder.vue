@@ -26,7 +26,7 @@
     <div class="order-item clearfix">
       <span @click="selectStatus(1)" :class="contentTabIndex === 1 ? 'content-btn-active' : 'content-btn'">进行中({{conductNum}})</span>
       <span @click="selectStatus(2)" :class="contentTabIndex === 2 ? 'content-btn-active' : 'content-btn'">完成({{completeNum}})</span>
-      <button @click="exchangeFlag ? goExchange() : openTransform()">资金划转</button>
+      <!--<button @click="exchangeFlag ? goExchange() : openTransform()">资金划转</button>-->
     </div>
 
     <div class="order-content">
@@ -160,9 +160,9 @@
     </SelectLayer>
 
     <!-- 资金互转弹窗 -->
-    <TransformLayer :transformShow="showTransform"
-                    @offTransform="openTransform">
-    </TransformLayer>
+    <!--<TransformLayer :transformShow="showTransform"-->
+                    <!--@offTransform="openTransform">-->
+    <!--</TransformLayer>-->
   </div>
 </template>
 
@@ -179,7 +179,7 @@
   import SelectLayer from '@/views/myOrder/orderLayer/SelectLayer' // 申诉弹窗
   import CheckBox from '@/components/common/CheckBox' // 引入多选弹窗
   import CountDown from '@/components/common/CountDown' // 引入倒计时
-  import TransformLayer from '@/views/myOrder/orderLayer/TransformLayer' // 申诉弹窗
+  // import TransformLayer from '@/views/myOrder/orderLayer/TransformLayer' // 资金互转弹窗
   import Pagination from "@/views/verify/component/Pagination";
 
   export default {
@@ -196,7 +196,7 @@
       SelectLayer,
       CheckBox,
       CountDown,
-      TransformLayer
+      // TransformLayer
     },
     data() {
       return {
@@ -245,7 +245,7 @@
         remindCoinLayer: false, // 提醒弹窗
         remindCoinContent: '', // 提醒弹窗内容
 
-        showTransform: false, // 资金互转弹窗
+        // showTransform: false, // 资金互转弹窗
 
         updateId: '', //标记已付款弹窗所用id
         updateInfo: '',
@@ -663,9 +663,9 @@
           this.remindCoinLayer = false
         }, 3000)
       },
-      openTransform(st) { // 资金互转弹窗
-        this.showTransform = st === 'false' ? false : true
-      },
+      // openTransform(st) { // 资金互转弹窗
+      //   this.showTransform = st === 'false' ? false : true
+      // },
       openSelect(st, operation, index, content) { // 双选择公共弹窗
         if (st === 'false') {
           this.showSelect = false

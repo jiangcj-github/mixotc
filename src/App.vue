@@ -189,7 +189,7 @@
           self.timer3 = requestAnimationFrame(fn);
           }else{
             cancelAnimationFrame(self.timer3);
-          } 
+          }
         });
       },
       handleScroll () {
@@ -287,7 +287,7 @@
 </script>
 
 <style lang="stylus">
-  #app 
+  #app
     height 100%
     box-sizing()
     display flex

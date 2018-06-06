@@ -292,6 +292,7 @@
     methods: {
       async selectUserCoin() { // 选择币种
         this.coinType = []
+        this.coinData = []
         await this.WsProxy.send('wallet', 'wallets', {
           uid: this.$store.state.userInfo.uid, // 用户id
         }).then((data)=>{
@@ -314,7 +315,6 @@
       },
       async getPrice() { // 当前价格
         await this.Proxy.getPrice().then(res => {
-          // console.log('价格', res)
           this.selectPrice = res.data.prices.filter(item => {
             return item.currency === this.adSaleObj.currency;
           })
@@ -385,6 +385,14 @@
         this.adSaleObj.min = this.adSaleObj.min * 1
         this.adSaleObj.price = this.adSaleObj.price * 1
         let editeErrNum = 200 * 1.005
+        if (this.adSaleObj.tradeable === 0) {
+          this.adErrLayer = true
+          this.errText = `可用余额不足，<a href="#/wallet/charge?coin=${this.adSaleObj.currency}" style="text-decoration: underline; color: #FFB422">去充币</a>`
+          setTimeout(() => {
+            this.adErrLayer = false
+          }, 3000)
+          return
+        }
         if (this.$store.state.editFlag == 1 && (this.adSaleObj.tradeable * this.priceNow) < editeErrNum) {
           this.adErrLayer = true
           this.errText = '可交易量低于最小交易额度+手续费<br/>无法上架'
@@ -428,6 +436,8 @@
             case 82:
               this.errText = '创建钱包失败'
               break;
+            default:
+              this.errText = '请核实广告单'
           }
           setTimeout(() => {
             this.adErrLayer = false
@@ -435,7 +445,9 @@
         });
       },
       reset() {
-        this.adSaleObj.currency = this.coinType[0]
+        this.selectNum = false
+        this.disabledSlide = false
+        this.adSaleObj.currency = this.$store.state.editFlag == 1 ? this.$store.state.editContent.currency :this.coinType[0].toLowerCase()
         this.adSaleObj.mode = 1
         this.adSaleObj.premium = 0
         this.adSaleObj.price = ''
@@ -449,17 +461,25 @@
           id: this.$store.state.userInfo.uid,
         }).then((data)=>{
           this.balanceList = data.wallets.filter(item => {
-            return item.currency === this.coinType[0].toLowerCase()
+            return item.currency === this.adSaleObj.currency
           })
           this.userBalance = this.balanceList[0] && this.balanceList[0].balance.formatFixed(6)
           this.adSaleObj.tradeable = this.userBalance * 1
-          this.coinMinText = `0${this.coinType[0].toUpperCase()}`
-          this.coinMaxText = `${this.userBalance}${this.coinType[0].toUpperCase()}`
+          this.adSaleObj.length = this.userBalance * 1
+          this.coinMinText = `0${this.adSaleObj.currency.toUpperCase()}`
+          this.coinMaxText = `${this.userBalance}${this.adSaleObj.currency.toUpperCase()}`
         }).catch((msg)=>{
           // console.log('出售币种错误', msg);
         });
+        this.Proxy.getPrice().then(res => {
+          this.selectPrice = res.data.prices.filter(item => {
+            return item.currency === this.adSaleObj.currency
+          })
+          this.changePrice = this.selectPrice[0] && (this.selectPrice[0].cny)
+        }).catch((msg)=>{
+          console.log(msg)
+        });
         this.getHigherPrice()
-        this.getPrice()
         this.Bus.$emit('paymentNum', this.$store.state.PaymentSoreData)
       },
       closeLayer() {
