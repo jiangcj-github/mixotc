@@ -22,7 +22,7 @@
             <span class="checkbox" :class="{check:formResult===0}" @click="formResult=0" style="margin-left:20px">审核不通过</span>
           </p>
           <div class="textarea" :class="{disabled:formResult!==0}">
-            <textarea placeholder="不通过原因：字数限制0～50个字符。" v-model="formRemark" @input="inputRemark" ref="textarea"></textarea>
+            <textarea placeholder="不通过原因：字数限制0～50个字符。" maxlength="50" v-model="formRemark" ref="textarea"></textarea>
             <p class="indicator">{{formRemark.length}}/50</p>
           </div>
           <div class="mali">
@@ -66,7 +66,6 @@
         formResult: -1,     // 审核结果【0-不通过,1-通过】
         formMali: false,    // 是否恶意上传
         formRemark: '',     // 审核不通过原因
-        formRemarkOld: '',  // formRemark的备份，用于有效性检查
       }
     },
     computed:{
@@ -85,14 +84,6 @@
         this.formResult=1;
         this.formRemark="";
         this.formMali=false;
-      },
-      inputRemark(){
-        if(this.formRemark.length>50){
-          this.formRemark=this.formRemarkOld;
-          this.$refs.textarea.value=this.formRemarkOld;
-        }else{
-          this.formRemarkOld=this.formRemark;
-        }
       },
       submit(i){
         if(!this.canSubmit) return;
