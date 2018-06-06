@@ -92,10 +92,11 @@
     },
     methods: {
       async getCoinInfo() {
+         // this.showResult = true
         this.nothingText = '加载中...'
         this.inputValue && (this.selectValue = this.inputValue);
+        this.result = []
         await this.Proxy.coinSearch({keyword: this.selectValue}).then(res => { // 模糊搜索
-          this.result = []
           if (!res.data.coins) {
             this.nothingText = '暂无数据'
             return
@@ -147,7 +148,6 @@
         this.showResult = true
         this.nothingText = '加载中...'
         this.Proxy.getCoinData().then(res => {
-          console.log('币种', res)
           res.data.coins && res.data.coins.forEach(v => {
             // this.result.push(v.name)
             this.result = res.data.coins

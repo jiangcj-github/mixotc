@@ -464,7 +464,7 @@
           this.balanceList = data.wallets.filter(item => {
             return item.currency === this.adSaleObj.currency
           })
-          this.userBalance = this.balanceList[0] && this.balanceList[0].balance.formatFixed(6)
+          this.userBalance = typeof this.balanceList[0].balance == 'number' ? this.balanceList[0].balance.formatFixed(6) : this.JsonBig.stringify(this.balanceList[0].balance.formatFixed(6))
           this.adSaleObj.tradeable = this.userBalance * 1
           this.adSaleObj.length = this.userBalance * 1
           this.coinMinText = `0${this.adSaleObj.currency.toUpperCase()}`

@@ -171,11 +171,13 @@
         //console.log('下单内容', data)
         this.contentData = data;
         this.type = data.type;
-        this.tradeable = (data.type == 2 && data.tradeable == 0) ? ((data.max / data.price).formatFixed(6)) : (data.tradeable.formatFixed(6)),
+        this.tradeable = typeof data.tradeable == 'number' ? data.tradeable.formatFixed(6) : this.JsonBig.stringify(data.tradeable).formatFixed(6)
+        this.tradeable = (data.type == 2 && data.tradeable == 0) ? '不限量' : this.tradeable
         this.getPrice();
         this.getCoinIcon();
         this.getBalance();
       }).catch((msg)=>{
+        console.log('错误', msg)
         //alert(JSON.stringify(msg));
       });
     },
@@ -206,34 +208,26 @@
     methods: {
       // 获取价格
       async getPrice() {
-        await this.Proxy.getPrice().then(res => {
-          // console.log('价格', res.data.prices)
-          this.priceList = res.data.prices;
-          this.selectPrice = this.priceList.filter(item => {
-            return item.currency === this.contentData.currency;
-          })
-        }).catch((msg)=>{
-          //alert(JSON.stringify(msg));
-        });
-        // console.log('价格数组', this.selectPrice, this.rate)
+        let res = await this.Proxy.getPrice()
+        console.log('价格数组', res)
+        this.priceList = res.data.prices;
+        this.selectPrice = this.priceList.filter(item => {
+          return item.currency === this.contentData.currency;
+        })
         this.rate = this.selectPrice[0] && this.selectPrice[0].cny
       },
       // 获取币种图标
       async getCoinIcon() {
-        let selectIconList = []
-        await this.Proxy.coinSearch().then(res => {
-          selectIconList = res.data.coins.filter(item => {
-            return item.currency === this.contentData.currency;
-          })
-        }).catch((msg)=>{
-          //alert(JSON.stringify(msg));
-        });
+        let res = await this.Proxy.coinSearch(), selectIconList = [];
+        selectIconList = res.data.coins.filter(item => {
+          return item.currency === this.contentData.currency;
+        })
         this.coinIcon = selectIconList[0] && (selectIconList[0].icon);
       },
       // 获取可用余额
-      async getBalance() {
+      getBalance() {
         let balanceList = []
-        await this.WsProxy.send('wallet', 'wallets', {
+        this.WsProxy.send('wallet', 'wallets', {
           id: this.$store.state.userInfo.uid, // 用户id
         }).then((data)=>{
           balanceList = data.wallets.filter(item => {
