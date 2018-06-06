@@ -284,7 +284,7 @@
             uid: e.id || 0,
             nickname: e.name || "-",
             account:e.phone || e.email || "-",
-            orderId: e.Id && e.Id.toString() || 0,
+            orderId: e.id && e.id.toString() || 0,
             resType:resType,
           });
         });
