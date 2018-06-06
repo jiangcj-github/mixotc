@@ -340,6 +340,7 @@
       },
       loadBb(){
         let uid=this.$store.state.userInfo.uid;
+        /*
         this.Proxy.hp_account({uid:uid}).then((data)=> {
           if(!data||!data.objects||data.objects.length<=0){
             this.bbErr=1; //无数据
@@ -351,6 +352,7 @@
         }).catch(msg => {
           this.bbErr=3;
         });
+        */
       },
       parseBb(data){
         this.bb=[];
