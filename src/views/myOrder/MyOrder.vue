@@ -398,7 +398,6 @@
         this.initData();
       });
       this.Bus.$on('transformRet', data => {
-        console.log(111, data)
         this.exchangeFlag = data == 300 ? true : false
       })
     },

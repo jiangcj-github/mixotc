@@ -385,7 +385,7 @@
             pay_zfb: e.payments % 2 === 1,
             pay_wx: [2, 3, 6, 7].includes(e.payments),
             pay_yhk: [4, 5, 6, 7].includes(e.payments),
-            amount: (this.typeNum == 1 && e.tradeable == 0) && ((e.max / e.price).formatFixed(6)) || ((e.tradeable + "").formatFixed(6)),
+            amount: (this.typeNum == 1 && e.vary == 2) ? '不限量' : ((e.tradeable + "").formatFixed(6)),
             price: e.price && (e.price + "").formatFixed(2) || 0,
             currency: e.currency,
             isLargeTran: e.bt_verify===2?1:0,
