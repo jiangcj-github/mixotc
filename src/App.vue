@@ -55,28 +55,11 @@
       if (isAndroid || isiOS) {
         window.location.href = this.HostUrl.download + 'download.html'
       }
-      // if (isAndroid) {
-      //   window.location.href = this.HostUrl.http + "otc/download/app/?pkg=apk";
-      //   setTimeout(function() {
-      //     window.history.back(-1);
-      //   }, 0);
-      //   return;
-      // }
-      // if (isiOS) {
-      //   window.location.href = `itms-services://?action=download-manifest&url=${this.HostUrl.http}otc/download/app/ipa.plist`;
-      //   // window.location.href = 'itms-services://?action=download-manifest&url=https://www.pgyer.com/app/plist/09aedfe77463b92fff4666c9b5bc3802/install/s.plist';
-      //   setTimeout(function() {
-      //     window.history.back(-1);
-      //   }, 0);
-      //   return;
-      // }
     },
     created() {
       this.listenOffline();
       window.addEventListener('scroll', this.handleScroll);
       this.$store.commit({type: 'changeLoginForm', data: false})
-      // this.$store.commit({type: 'changeLogin', data: false});
-      // console.log(this.token)
       let ws = this.WebSocket;
       //发送token登录后的处理
       !ws.onMessage['token'] && (ws.onMessage['token'] = {

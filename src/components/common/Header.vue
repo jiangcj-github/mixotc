@@ -37,11 +37,11 @@
         <span class="log" @click="changeLoginForm(true)" v-if="!this.$store.state.isLogin">登录/注册</span>
         <div class="info" v-else>
           <img class="avator" :src="icon ? `${HostUrl.http}image/${icon}` : `/static/images/default_avator.png`" alt="">
-          <div class="name" @click="showMenu = !showMenu" >
+          <div class="name" @mouseenter="showMenu = true" @mouseleave="showMenu = false">
             <span class="login" >{{name}}</span>
             <img class="select-icon" src='/static/images/triangle_black.png' v-if="!showMenu" alt="">
             <img class="select-icon" src='/static/images/triangle_black_up.png' v-else alt="">
-            <ul v-if="showMenu" v-clickoutside="hideShowMenu">
+            <ul v-if="showMenu" @click="hideShowMenu">
               <router-link to="/personal" tag="li" active-class="selected" class="center">个人中心</router-link>
               <router-link :to="{name:'safe'}" tag="li" active-class="selected" class="safe">安全设置</router-link>
               <router-link :to="{name:'personal-auth'}" tag="li" active-class="selected" class="auth">实名认证</router-link>

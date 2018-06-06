@@ -244,7 +244,7 @@ import BasePopup from '@/components/common/BasePopup';
         }).then(({info, bank_name, number, image1, image2, image3, update})=> {
           this.btverifyFailReson = info;
           this.failTime = update;
-          this.data.number = number;
+          this.data.number = number.formatCard();
           this.data.bank = bank_name;
           this.data.iconArr = [image1, image2, image3];
         }).catch(error=>{
@@ -302,14 +302,19 @@ import BasePopup from '@/components/common/BasePopup';
       submit() {
         if(!this.verify()) return;
         let { number, bank, iconArr} = this.data;
+        let uploadNumber = number.trim().replace(/\s/g,""),
+            target = this.bankCards.filter(item=>{
+                return item.number === uploadNumber;
+              })[0];
         this.WsProxy.send('control', 'user_identity', {
           type: 2,
           name: this.authData.name,
-          number: number.trim().replace(/\s/g,""),
+          number: uploadNumber,
           bank_name: bank.trim(),
           Image1: iconArr[0],
           Image2: iconArr[1],
-          Image3: iconArr[2]
+          Image3: iconArr[2],
+          aid: target ? target.id : target
         }).then(data=>{
           this.btverifyState = 1;
           this.$store.dispatch({ type: 'updateUserInfo', ws: this.WsProxy})
