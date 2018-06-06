@@ -59,8 +59,9 @@
             background url('/static/images/personal/personal_evaluate.png') no-repeat center center;
             background-size 20px 20px
           &.selected, &:hover
-            border-bottom 2px solid $col422
             background-color $col3EB
+          &.selected
+            border-bottom 2px solid $col422
           &.trust
             &::after
               background-image url('/static/images/personal/personal_trust.png')
