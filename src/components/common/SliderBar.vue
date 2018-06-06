@@ -54,13 +54,13 @@
       }
     },
     created(){
-      console.log('created', this.max, this.choiceValue)
+      // console.log('created', this.max, this.choiceValue)
     },
     mounted() {
     },
     watch: {
       choiceValue(data) {
-        console.log('choiceValue watch', data)
+        // console.log('choiceValue watch', data)
         this.sliderValue = data
       }
     },

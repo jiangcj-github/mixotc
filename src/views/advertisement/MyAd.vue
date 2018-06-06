@@ -304,11 +304,8 @@
           // console.log('广告列表', data)
           this.saleList = data.sales ? data.sales : []
           this.saleList.forEach(v => {
-            if(v.type == 2 && v.tradeable == 0) {
-              v.tradeable = (v.max / v.price).formatFixed(6)
-            } else {
-              v.tradeable = this.JsonBig.stringify(v.tradeable).formatFixed(6)
-            }
+            v.price = this.JsonBig.stringify(v.price).formatFixed(2)
+            v.tradeable = (v.type == 2 && v.vary == 2) ? '不限量' : v.tradeable.formatFixed(6)
             v.volume = this.JsonBig.stringify(v.volume).formatFixed(6)
             v.price_avg = this.JsonBig.stringify(v.price_avg).formatFixed(2)
           })
@@ -396,7 +393,7 @@
           "limit": content.limit, // 付款期限, 分钟
           "info": content.info, // 描述信息
           "vary": content.vary, // 余额随动标志 1 不随动 2 随动
-          "tradeable": content.tradeable * 1,// 可交易量
+          "tradeable": (content.type == 2 && content.vary == 2) ? '' : content.tradeable * 1,// 可交易量
           "id": content.id,
           "length": length ? length * 1 : 0,
         }

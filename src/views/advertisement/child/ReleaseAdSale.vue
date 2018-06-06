@@ -126,7 +126,7 @@
         <span>{{adSaleObj.info.length}}/50</span>
       </li>
       <li>
-        <button class="release-btn" :class="{'release-active': canSubmit}" @click="canSubmit ? toRelease() : forbidRelease()">发布购买广告</button>
+        <button class="release-btn" :class="{'release-active': canSubmit}" @click="canSubmit ? toRelease() : forbidRelease()">发布出售广告</button>
         <span class="reset-info" @click="reset()">重置信息</span>
       </li>
       <li class="hint-li">广告成交后，手续费为成交量的0.5%</li>
@@ -239,11 +239,15 @@
       if (this.$store.state.editFlag == 1) {
         this.isDisabled = true
         this.adSaleObj = this.$store.state.editContent
-        // console.log('赋值完毕',this.adSaleObj.length)
+        if (this.$store.state.editContent.vary == 2) {
+          this.selectNum = true
+          this.disabledSlide = true
+        }
+        return
       }
       if(this.$route.params.saleCon){
         this.adSaleObj = this.$route.params.saleCon;
-        return;
+        return
       }
       this.Bus.$emit('saleInfo', this.adSaleObj)
     },
@@ -317,7 +321,12 @@
         }).catch((msg)=>{
           console.log(msg)
         });
-        this.changePrice = this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
+        this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
+        if (this.$store.state.editFlag == 1) {
+          this.changePrice = this.priceNow * (1 + (this.$store.state.editContent.premium/100))
+          return
+        }
+        this.changePrice = this.priceNow
       },
       async getHigherPrice() { // 最高价格获取
         await this.Proxy.sales({

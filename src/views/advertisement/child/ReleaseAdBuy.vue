@@ -79,7 +79,7 @@
                @focus="clearTradeable=true && (errTradeable=true)"
                @blur="clearTradeable=false"
                @input="tradeableInput"/>
-        <span>BTC</span>
+        <span>{{adBuyObj.currency && adBuyObj.currency.toUpperCase()}}</span>
         <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="adBuyObj.tradeable && clearTradeable" @mousedown="adBuyObj.tradeable=''">
         <span class="text-err" v-show="errTradeable && adBuyObj.tradeable">{{errTradeableText}}</span>
       </li>
@@ -233,10 +233,14 @@
       if (this.$store.state.editFlag == 2) {
         this.isDisabled = true
         this.adBuyObj = this.$store.state.editContent
+        if (this.$store.state.editContent.vary == 2) {
+          this.selectNum = true
+        }
+        return
       }
       if (this.$route.params.buyCon) {
         this.adBuyObj = this.$route.params.buyCon;
-        return;
+        return
       }
       this.Bus.$emit('buyInfo', this.adBuyObj)
     },
@@ -295,8 +299,12 @@
         }).catch((msg)=>{
           console.log(msg)
         });
-        // console.log('this.selectPrice', this.selectPrice)
-        this.changePrice = this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
+        this.priceNow = this.selectPrice[0] && (this.selectPrice[0].cny)
+        if (this.$store.state.editFlag == 2) {
+          this.changePrice = this.priceNow * (1 + (this.$store.state.editContent.premium/100))
+          return
+        }
+        this.changePrice = this.priceNow
       },
       async getLowerPrice() { // 最低价格获取
         this.Proxy.sales({
