@@ -3,27 +3,22 @@
     <div class="login" v-if="showForm" >
       <img src="/static/images/close_btn_tr2.png" alt="" class="close-btn" @click="hideLoginForm">
       <h2 class="title">登录/注册</h2>
-
-      <div :class="{'hide-tip1':type,'show-tip1':!type}">请输入正确的手机号/邮箱</div>
-
       <div class="account">
-        手机号/邮箱
+        <div :class="{'hide-tip1':type,'show-tip1':!type}">请输入正确的手机号/邮箱</div>
+        <span>手机号/邮箱</span>
         <input type="text" value="" @keyup.enter="login" v-model.trim="account" @focus="accountCancel = true"  v-clickoutside="accountBlur">
-        <img src="/static/images/cancel_icon.png" alt="" v-if="accountCancel" @click="account = ''">
+        <img src="/static/images/cancel_icon.png" alt="" v-if="account.length>0" @click="account = ''">
         <ul class="account-history" v-if="accountCancel && accountSearch.length">
           <li v-for="(item, index) of accountSearch" :key="index" @click="changeAccount(item)">{{item}}</li>
         </ul>
       </div>
-
       <Slider :slideStatus="slideStatus"></Slider>
-
-      <div :class="{'hide-tip2':captcha,'show-tip2':!captcha}">请输入正确的验证码</div>
-
       <div class="yzm">
-        <span v-if="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先拖拽滑块</b></span>
+        <div :class="{'hide-tip2':captcha,'show-tip2':!captcha}">请输入正确的验证码</div>
+        <span v-show="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先拖拽滑块</b></span>
         <p v-clickoutside="() => { codeCancel = false}">
           <input type="text" @keyup.enter="login" @focus="codeCancel = true"  placeholder="验证码" v-model.trim="code" :disabled="!moveTrue || !checkAccount(account)">
-          <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-if="codeCancel && code.length" @click="code = ''">
+          <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="code.length>0" @click="code = ''">
         </p>
         <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend, disable: !moveTrue || !checkAccount(account)}" @click="sendCode">{{isSend ? time + '秒后重发': sendCodeText}}</button>
       </div>
@@ -150,9 +145,8 @@
         return /^\d{6}$/.test(code);
       },
       sendCode(){
-        if (this.isSend){
-          return
-        };
+        if (this.isSend) return;
+
        this.type = this.checkAccount(this.account);
         let accType = this.checkAccount(this.account);
         if (!this.type) return;
@@ -173,7 +167,7 @@
               this.isSend = false;
               clearInterval(this.interval);
               this.interval = null;
-              this.sendCodeText = '重新发送验证码'
+              this.sendCodeText = '重新发送'
             }
           },1000);
         }
@@ -236,7 +230,7 @@
             data.body.token && localStorage.setItem('getToken', JSON.stringify({
               phone:data.body.phone,
               email:data.body.email,
-              token: data.body.token, 
+              token: data.body.token,
               code: data.body.code
             }));
             this.$store.commit({ type: 'changeLogin', data: true });
@@ -305,12 +299,14 @@
       top 50%
       left 50%
       width 400px
-      height 342px
+      height 441px
       margin-left -200px
-      margin-top -210px
-      padding 40px 0
+      margin-top -220px
+      padding 40px
       background-color: #fff
       z-index 999
+      box-sizing border-box
+      border-radius 2px
       .close-btn
         position absolute
         right 20px
@@ -320,6 +316,7 @@
         cursor pointer
       .show-tip1, .show-tip2
         position absolute
+        left 50%
         padding 0 9px
         height 28px
         background-color $col1E1
@@ -337,24 +334,23 @@
           height 1px
           bottom -3px
           left 50%
-          margin-left -10px
+          margin-left -4px
           overflow hidden
           pointer-events none
           transform rotate(135deg)
           box-shadow 2px -2px 2px $col999
       .show-tip1
-        top 22%
-        left 30%
+        top -4px
+        transform translate(-50%,0)
       .hide-tip1
         display none
       .show-tip2
-        top 53.5%
-        left 34%
+        top -32px
+        transform translate(-50%,0)
       .hide-tip2
         display none
       .title
         height 20px
-        padding-left 40px
         line-height 20px
         letter-spacing: 0.23px
         font-size $fz20
@@ -374,28 +370,29 @@
       .account
         position relative
         margin-top 40px
-        margin-left 40px
         font-size 14px
         color $col999
         img
           position absolute
-          right 55px
+          right 10px
           bottom 28px
           cursor pointer
+          width 12px
         input
           box-sizing()
           display inline-block
           width 320px
           height 40px
-          padding-left 10px
+          padding:0 30px 0 10px
           margin 10px 0 15px
           font-size $fz14
           color $col333
           letter-spacing 0.16px
           background-color $col6FA
           border-radius 2px
+          border 1px solid $col6FA
           &:focus
-            border 1px solid $col422
+            border-color $col422
         .account-history
           position absolute
           left 0
@@ -410,15 +407,19 @@
             height 30px
             line-height 30px
             cursor pointer
+            font-size 13px
             &:hover
               background $col3EB;
       .yzm
         position relative
-        margin 35px 40px 15px
+        margin 35px 0 20px 0
         span
           position absolute
           top -25px
           left 0
+          img
+            vertical-align -1px
+            margin-right 1px
           b
             display inline-block
             color $col94C
@@ -428,19 +429,24 @@
           .cancel
             position absolute
             top 15px
-            right 124px
+            right 110px
             cursor pointer
+            width 12px
           input
             float left
             box-sizing()
-            width 210px
+            width 220px
             height 40px
             font-size $fz14
             background-color: $col6FA
             placeholder()
             padding-left 10px
+            padding-right 30px
+            border 1px solid $col6FA
+            border-right none
+            border-radius 2px 0 0 2px
             &:focus
-              border 1px solid $col422
+              border-color $col422
         button
           width 100px
           height 40px
@@ -450,6 +456,7 @@
           line-height 40px
           color #fff
           cursor pointer
+          border-radius 0 2px 2px 0
           &.sendCaptcha
             background-color $col422
           &.sendedCaptcha
@@ -459,10 +466,9 @@
             background-color $col999
             cursor default
       .log
-        width 350px
+        width 320px
         height 40px
         font-size $fz14
-        margin-left 25px
         background-color: $col999
         text-align center
         line-height 40px
@@ -471,34 +477,40 @@
         &:focus
           outline 0
         &.able
+          cursor pointer
           background $col422
           &:active
             background $col350
       .yhxy
         height: 12px
         line-height 12px
-        margin 20px 0 10px 125px
-
+        width 320px
+        text-align center
+        margin-top 20px
         img
           margin-right 5px
+          vertical-align -1px
           cursor pointer
         p
           display inline-block
           letter-spacing 0.23px
           fz11()
-
           a
             color $col100
             fz11()
-
       .hide-tips
         display none
       .yhxy-tips
+        margin-top 10px
         display inline-block
-        margin-left 150px
         color $col94C
         text-align center
         line-height 12px
+        width 320px
+        >img
+          height 12px
+          width 12px
+          vertical-align -1px
         b
           display inline-block
           color $col94C

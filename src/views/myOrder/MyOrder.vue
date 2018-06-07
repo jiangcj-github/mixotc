@@ -359,6 +359,8 @@
           this.tradeCode = ''
           this.trader = ''
           this.comment = 0
+          this.startValueDate = null
+          this.endValueDate = null
           this.selectState = '1,2,3'
           this.contentTabIndex = 1
         }
@@ -368,7 +370,7 @@
       })
       // 模糊搜索
       this.Bus.$on(this.searchResult,({type, data}) => {
-        if(data == '') {
+        if(data == '') {``
           this.orderId = ''
           this.tradeCode = ''
           this.trader = ''

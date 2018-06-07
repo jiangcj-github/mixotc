@@ -32,7 +32,7 @@
             <b v-if="searchTip">您还未输入{{srchUls[srchUlSel].title}}</b>
             -->
             <!--币种模糊搜索结果-->
-            <ul v-show="srchTipShow" v-if="this.srchType===0">
+            <ul v-show="srchTipShow" v-if="srchType===0">
               <li v-for="e in coinTips" @click="search(e)">
                 <div @mousedown="srchText=e.name">
                   <img class="coin" :src="e.icon"/><span>{{e.name}}</span><span class="gray">{{e.cname}}</span>
@@ -41,12 +41,13 @@
               <li class="notip" v-show="coinTips.length<=0">暂无该币种信息</li>
             </ul>
             <!--商家模糊搜索结果-->
-            <ul v-show="srchTipShow && userTips.length>0" v-else-if="this.srchType===1">
+            <ul v-show="srchTipShow" v-else-if="srchType===1">
               <li v-for="e in userTips" @click="search(e)">
                 <div @mousedown="srchText=e.name">
                   <span>{{e.name}}</span><span class="gray">{{e.account}}</span>
                 </div>
               </li>
+              <li class="notip" v-show="userTips.length<=0">无搜索结果</li>
             </ul>
           </div>
         </div>
@@ -255,6 +256,7 @@
     methods: {
       onFocus(){
         this.isActive=true;
+        //币种搜索为空显示全部，其他搜索为空直接返回
         if(this.srchText.length<=0 && this.srchType!==0){
           this.srchTipShow=false;
           return;
@@ -271,7 +273,8 @@
         if (this.srchType === 0) { // 不能输入汉字
           this.srchText = this.srchText.replace(/[\u4E00-\u9FA5]/g, '');
         }
-        if (this.srchText.length <= 0) {
+        //搜索为空直接返回
+        if (this.srchText.length <= 0 && this.srchType!==0) {
           this.srchTipShow = false;
           return;
         }
