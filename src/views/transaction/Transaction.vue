@@ -274,7 +274,7 @@
           this.srchText = this.srchText.replace(/[\u4E00-\u9FA5]/g, '');
         }
         //搜索为空直接返回
-        if (this.srchText.length <= 0) {
+        if (this.srchText.length <= 0 && this.srchType!==0) {
           this.srchTipShow = false;
           return;
         }
