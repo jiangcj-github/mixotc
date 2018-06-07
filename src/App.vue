@@ -57,65 +57,118 @@
       }
     },
     created() {
+      let flag = this.getUrl('token');
       this.listenOffline();
       window.addEventListener('scroll', this.handleScroll);
       this.$store.commit({type: 'changeLoginForm', data: false})
       let ws = this.WebSocket;
-      //发送token登录后的处理
-      !ws.onMessage['token'] && (ws.onMessage['token'] = {
-        callback: (data) => {
-          if (data.op !== 18) return;
-          if (data.body.ret !== 0) {
-            this.$store.commit({ type: 'changeToken', data: '' })
+      let seq = ws.seq;
+      // 交易所跳转时带token处理
+      if(flag){
+        ws.onMessage[seq] = {
+         callback: (data) => {
+           if(!data || data.body.ret !== 0) {
+             window.location = 'http://127.0.0.1:8081'
+             return;
+           };
+           if(data.body && this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
+             this.$store.commit({ type: 'initState'})
+           }
+           this.$store.commit({
+               type: 'getUserInfo',
+               data: data.body
+             });
+           data.body.token && this.$store.commit({ type: 'changeToken', data: data.body.token })
+             data.body.token && localStorage.setItem('getToken', JSON.stringify({
+               phone:data.body.phone,
+               email:data.body.email,
+               token: data.body.token, 
+               code: data.body.code
+             }));
+            //  this.$store.commit({ type: 'changeLogin', data: true });
+             this.Storage.loginTime.set(new Date() - 0)
+             localStorage.removeItem('getToken')
+            window.location = 'http://127.0.0.1:8081'
+         },
+         date: new Date()
+       }
+       ws.onOpen['otherLogin'] = () => {
+           ws.send(sendConfig('login',{
+             seq: seq,
+             body:{
+               action: 'login',
+               country: 'CN',
+               version: 1,
+               mode: 0,
+               device: `${detectOS()}/${getExplorerInfo()}`,
+               os: 3,
+               token: flag
+             }
+           })
+         )
+       }
+       ws.start(this.HostUrl.ws);
+      }else{
+        // 单开新页面正常处理
+        //发送token登录后的处理
+        !ws.onMessage['token']  && (ws.onMessage['token'] = {
+          callback: (data) => {
+            if (data.op !== 18) return;
+            if (data.body.ret !== 0) {
+              this.$store.commit({ type: 'changeToken', data: '' })
+              ws.reConnectFlag = false;
+              if (!this.authority(this.toPath)) {
+                !this.$store.state.token && this.$router.push({
+                  name: "transaction"
+                });
+              }
+              return;
+            }
+            ws.reConnectFlag = true;
+            data.body['code'] = this.$store.state.userInfo.code;
+            this.$store.commit({
+              type: 'getUserInfo',
+              data: data.body
+            });
+            if(data.body && this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
+              this.$store.commit({ type: 'initState'})
+            }
+            this.$store.commit({type: 'changeLogin', data: true});
+            this.Storage.loginTime.set(new Date() - 0)
+  
+            // this.watchTokenFlag = false
+          }
+        });
+        ws.onOpen['token'] = () => {
+          if (!this.token){
             ws.reConnectFlag = false;
-            if (!this.authority(this.toPath)) {
-              !this.$store.state.token && this.$router.push({
-                name: "transaction"
-              });
+            this.$store.commit({type: 'changeLogin', data: false});
+            if (this.authority(this.$route.path)) {
+              return;
             }
+            this.$router.push({name: "transaction"})
             return;
           }
-          ws.reConnectFlag = true;
-          data.body['code'] = this.$store.state.userInfo.code;
-          this.$store.commit({
-            type: 'getUserInfo',
-            data: data.body
-          });
-          this.$store.commit({type: 'changeLogin', data: true});
-          this.Storage.loginTime.set(new Date() - 0)
-
-          // this.watchTokenFlag = false
+          ws.send(sendConfig('login', {
+            seq: ws.seq,
+            body: {
+                action: 'login',
+                phone: this.$store.state.userInfo && this.$store.state.userInfo.phone,
+                email: this.$store.state.userInfo && this.$store.state.userInfo.email,
+                // code: this.$store.state.userInfo && this.$store.state.userInfo.code,
+                country: 'CN',
+                version: 1,
+                mode: 1,
+                device: `${detectOS()}/${getExplorerInfo()}`,
+                os: 3,
+                token: this.token
+              }
+          }))
         }
-      });
-
-      ws.onOpen['token'] = () => {
-        if (!this.token){
-          ws.reConnectFlag = false;
-          this.$store.commit({type: 'changeLogin', data: false});
-          if (this.authority(this.$route.path)) {
-            return;
-          }
-          this.$router.push({name: "transaction"})
-          return;
-        }
-        ws.send(sendConfig('login', {
-          seq: ws.seq,
-          body: {
-              action: 'login',
-              phone: this.$store.state.userInfo && this.$store.state.userInfo.phone,
-              email: this.$store.state.userInfo && this.$store.state.userInfo.email,
-              code: this.$store.state.userInfo && this.$store.state.userInfo.code,
-              country: 'CN',
-              version: 1,
-              mode: 1,
-              device: `${detectOS()}/${getExplorerInfo()}`,
-              os: 3,
-              token: this.token
-            }
-        }))
+        this.token && ws.start(this.HostUrl.ws);
       }
-      if (!this.token) return;
-      ws.start(this.HostUrl.ws);
+
+
     },
     mounted() {
       //websock发包接口需先判断登录状态
@@ -136,6 +189,15 @@
       window.onmousedown = null;
     },
     methods: {
+      getUrl(para){
+        let paraArr = window.location.search.substring(1).split('&');
+        for(let i = 0;i < paraArr.length;i++){
+          if(para == paraArr[i].split('=')[0]){
+            return paraArr[i].split('=')[1]
+          }
+        }
+        return false;
+      },
       hideErr(){
         this.showError = false;
         clearTimeout(this.timer);
