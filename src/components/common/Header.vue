@@ -292,7 +292,7 @@
           .show-qr
             position absolute
             left 0
-            top 72px
+            top 70px
             width 100px
             height 100px
             background-color #FFF
