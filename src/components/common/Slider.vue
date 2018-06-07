@@ -83,9 +83,10 @@
     background-color #e8e8e8
     width 320px
     height 40px
-    margin 0 auto
     line-height 40px
     text-align center
+    border-radius 2px
+    overflow hidden
     .txt
       position absolute
       top 0
