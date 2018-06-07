@@ -308,11 +308,11 @@
           // console.log('出售币种错误', msg);
         });
         this.getHigherPrice() // 请求到相应币种最高价
-        this.userBalance = typeof this.balanceList[0].balance == 'number' ? this.balanceList[0].balance.formatFixed(6) : this.JsonBig.stringify(this.balanceList[0].balance.formatFixed(6))
+        console.log('出售币种', this.balanceList, typeof this.balanceList[0].balance, this.balanceList[0].balance)
+        this.userBalance = typeof this.balanceList[0].balance == 'number' ? this.balanceList[0].balance.formatFixed(6) : this.JsonBig.stringify(this.balanceList[0].balance).formatFixed(6)
         this.Bus.$emit('saleSlideLength', this.userBalance)
         this.coinMinText = `0${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
         this.coinMaxText = `${this.userBalance}${this.adSaleObj.currency && this.adSaleObj.currency.toUpperCase()}`
-        console.log('出售币种',  this.userBalance, this.balanceList)
       },
       async getPrice() { // 当前价格
         await this.Proxy.getPrice().then(res => {
@@ -464,7 +464,7 @@
           this.balanceList = data.wallets.filter(item => {
             return item.currency === this.adSaleObj.currency
           })
-          this.userBalance = typeof this.balanceList[0].balance == 'number' ? this.balanceList[0].balance.formatFixed(6) : this.JsonBig.stringify(this.balanceList[0].balance.formatFixed(6))
+          this.userBalance = typeof this.balanceList[0].balance == 'number' ? this.balanceList[0].balance.formatFixed(6) : this.JsonBig.stringify(this.balanceList[0].balance).formatFixed(6)
           this.adSaleObj.tradeable = this.userBalance * 1
           this.adSaleObj.length = this.userBalance * 1
           this.coinMinText = `0${this.adSaleObj.currency.toUpperCase()}`

@@ -92,7 +92,6 @@
     },
     methods: {
       async getCoinInfo() {
-         // this.showResult = true
         this.nothingText = '加载中...'
         this.inputValue && (this.selectValue = this.inputValue);
         this.result = []
@@ -113,7 +112,6 @@
           console.log(msg)
         })
         this.selectCoinList = this.coinDataList
-        console.log(1111, this.coinDataList, this.selectCoinList)
       },
 
       async selectResultContent(item) { // 根据筛选结果赋值
@@ -134,7 +132,6 @@
       async getCoinsData() { // 获取币种资料数据
         //this.inputValue = '';
         await this.Proxy.getCoinDataAll({app: 0, symbolId: this.id, period: '24h'}).then(res => {
-          console.log('资料', res)
           this.coinDataObj = res.data
           this.coinDataObj.logo = `${this.HostUrl.http}image/${this.selectCoinList[0].icon}`
         }).catch(msg => {
