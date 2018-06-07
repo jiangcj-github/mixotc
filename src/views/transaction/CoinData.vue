@@ -107,14 +107,13 @@
             this.result = res.data.coins
           })
         });
-        console.log('111', this.result)
         await this.Proxy.searchTips({word: this.selectValue, app: 0}).then(res => { // 获取币种ID
           this.id = res.data.currency[0].id;
         }).catch(msg => {
           console.log(msg)
         })
         this.selectCoinList = this.coinDataList
-        // console.log(1111, this.coinDataList, this.selectCoinList)
+        console.log(1111, this.coinDataList, this.selectCoinList)
       },
 
       async selectResultContent(item) { // 根据筛选结果赋值
@@ -135,7 +134,7 @@
       async getCoinsData() { // 获取币种资料数据
         //this.inputValue = '';
         await this.Proxy.getCoinDataAll({app: 0, symbolId: this.id, period: '24h'}).then(res => {
-          // console.log('资料', res, this.JsonBig.stringify(res.data.price.cny))
+          console.log('资料', res)
           this.coinDataObj = res.data
           this.coinDataObj.logo = `${this.HostUrl.http}image/${this.selectCoinList[0].icon}`
         }).catch(msg => {
@@ -143,18 +142,11 @@
         })
       },
       focusInput() {
-        this.showActive = true
+        this.selectValue = ''
         this.canCancel = true
+        this.showActive = true
         this.showResult = true
-        this.nothingText = '加载中...'
-        this.Proxy.getCoinData().then(res => {
-          res.data.coins && res.data.coins.forEach(v => {
-            // this.result.push(v.name)
-            this.result = res.data.coins
-          })
-        }).catch(msg => {
-          console.log('购买币种错误', msg)
-        });
+        this.getCoinInfo();
       },
       blurInput() {
         this.showActive = false
