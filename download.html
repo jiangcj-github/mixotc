@@ -13,10 +13,10 @@
   </style>
 </head>
 <body>
-  <h3></h3>
+  <h3 id="h"></h3>
   <script>
     var u = navigator.userAgent;
-    function isWeiXin() {
+    function isWeiXin(u) {
       var ua = u.toLowerCase();
       if (ua.match(/MicroMessenger/i) == 'micromessenger') {
         return true;
@@ -27,16 +27,18 @@
       var isAndroid = u.indexOf("Android") > -1 || u.indexOf("Adr") > -1; 
       var isiOS = /(iPhone|iPad|iPod|iOS)/i.test(u);
       if(isAndroid){
-        if (isWeiXin()) {
-          var h = document.getElementsByTagName('h3');
-          h[0].innerHTML = '请在浏览器中打开。';
+        if (isWeiXin(u)) {
+          var h = document.getElementById('h');
+          h.innerHTML = '请在浏览器中打开。';
         }
-       !isWeiXin() && (window.location.href = "https://mixotc.com/otc/download/app/?pkg=apk");
+       !isWeiXin(u) && (window.location.href = "http://192.168.113.26/otc/download/app/?pkg=apk");
+      //  !isWeiXin() && (window.location.href = "https://mixotc.com/otc/download/app/?pkg=apk");
       }else if (isiOS) {
-        // window.location.href = 'itms-services://?action=download-manifest&url=https://www.pgyer.com/app/plist/09aedfe77463b92fff4666c9b5bc3802/install/s.plist';
-        window.location.href = 'itms-services://?action=download-manifest&url=https://mixotc.com/otc/download/app/ipa.plist';
+        window.location.href = 'itms-services://?action=download-manifest&url=https://www.pgyer.com/app/plist/09aedfe77463b92fff4666c9b5bc3802/install/s.plist';
+        // window.location.href = 'itms-services://?action=download-manifest&url=https://mixotc.com/otc/download/app/ipa.plist';
       } else {
-        window.location.href = "https://mixotc.com"
+        window.location.href = "http://192.168.113.33"
+        // window.location.href = "https://mixotc.com"
       }</script>
 </body>
 </html>
