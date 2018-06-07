@@ -342,22 +342,22 @@
       // 监听搜索框值
       this.Bus.$on('changeInputContent', ({type, data}) => {
         if (type == 'order_id') {
+          this.tradeCode = ''
+          this.trader = ''
           this.orderId = data
-          this.contentList = this.contentList.filter(v => {
-            return this.JsonBig.stringify(v.id) == data
-          })
         } else if (type == 'order_tradecode') {
+          this.orderId = ''
+          this.trader = ''
           this.tradeCode = data
-          this.contentList = this.contentList.filter(v => {
-            return v.trade_code == data
-          })
         } else{
+          this.orderId = ''
+          this.tradeCode = ''
           this.trader = data
-          this.contentList = this.contentList.filter(v => {
-            return v.name == data
-          })
         }
         if (this.result.length === 0) { // 无搜索直接的点击
+          this.orderId = ''
+          this.tradeCode = ''
+          this.trader = ''
           this.comment = 0
           this.selectState = '1,2,3'
           this.contentTabIndex = 1
@@ -368,6 +368,13 @@
       })
       // 模糊搜索
       this.Bus.$on(this.searchResult,({type, data}) => {
+        if(data == '') {
+          this.orderId = ''
+          this.tradeCode = ''
+          this.trader = ''
+          this.initData()
+          return
+        }
         this.result = []
         this.WsProxy.send('otc',`fuzzy_search_${type}`,{ // 请求数据
           keyword: data
@@ -381,7 +388,6 @@
         }).catch((msg)=>{
           console.log(msg);
         });
-        // console.log('searchResult', this.result, data)
       });
       // this.Bus.$on('offTime', data => this.showTime = data);
       // 时间框值
@@ -606,7 +612,6 @@
         if (index === 2) {
           this.$refs.di.setDays(7);
         }
-        //this.contentList.length == 0 && (this.contentTabIndex === 1 && ((this.selectState = '4,5,6,7,8,9,10,11') && (this.contentTabIndex = 2)) || ((this.selectState = '1,2,3') && (this.contentTabIndex = 1)))
       },
       showOperation(index) { // 去评价
         if (this.contentList[index].operationList[0].flag == 1) { // 去评价
