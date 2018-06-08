@@ -68,7 +68,7 @@
         ws.onMessage[seq] = {
          callback: (data) => {
            if(!data || data.body.ret !== 0) {
-             window.location = /'
+             window.location = '/'
              return;
            };
            if(data.body && this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
