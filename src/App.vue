@@ -68,7 +68,7 @@
         ws.onMessage[seq] = {
          callback: (data) => {
            if(!data || data.body.ret !== 0) {
-             window.location = 'http://127.0.0.1:8081'
+             window.location = /'
              return;
            };
            if(data.body && this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
@@ -82,13 +82,13 @@
              data.body.token && localStorage.setItem('getToken', JSON.stringify({
                phone:data.body.phone,
                email:data.body.email,
-               token: data.body.token, 
+               token: data.body.token,
                code: data.body.code
              }));
             //  this.$store.commit({ type: 'changeLogin', data: true });
              this.Storage.loginTime.set(new Date() - 0)
              localStorage.removeItem('getToken')
-            window.location = 'http://127.0.0.1:8081'
+            window.location = '/'
          },
          date: new Date()
        }
@@ -135,7 +135,7 @@
             }
             this.$store.commit({type: 'changeLogin', data: true});
             this.Storage.loginTime.set(new Date() - 0)
-  
+
             // this.watchTokenFlag = false
           }
         });

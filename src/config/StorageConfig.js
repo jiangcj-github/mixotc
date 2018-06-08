@@ -25,7 +25,8 @@ export default {
       expiryTime: 0,
       default: [],
       useDefault: false
-    } //自选
+    },
+    //自选
     // {
     //   name: "token",
     //   duration: 0,
