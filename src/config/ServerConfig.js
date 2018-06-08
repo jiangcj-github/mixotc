@@ -14,3 +14,4 @@ export default {
   // type: 1,//1表示https 0或缺省表示http
   // port: 443 //主机端口
 };
+
