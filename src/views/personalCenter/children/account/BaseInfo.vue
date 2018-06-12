@@ -13,8 +13,10 @@
             <span>昵称</span>
             <i v-if="!isSetting">{{name}}</i>
             <i class="set" v-if="!isSetting" @click="()=>{name = userInfo.name;isSetting=true}">设置</i>
-            <input type="text" placeholder="输入昵称" v-if="isSetting" v-model.trim="name" ref="name" maxlength="20" v-clickoutside="()=>{name = userInfo.name; isSetting = false}">
-            <b 
+            <input type="text" placeholder="输入昵称" v-if="isSetting" v-model.trim="name" ref="name" maxlength="20"
+                   @keydown.enter="updateName"
+                   v-clickoutside="()=>{name = userInfo.name; isSetting = false}">
+            <b
               v-if="name && isSetting"
               @click.stop="()=>{name = ''; $refs.name.focus()}"
             >
@@ -75,7 +77,7 @@
         </p>
       </div>
     </div>
-    
+
     <AddressInfo v-if="isShowInfo" :isNew="isNew" :accountInfo="accountInfo"></AddressInfo>
   <!-- 删除确认弹窗 -->
     <BasePopup :show="isShowConfirm" :top="40" :width="470" :height="194">
@@ -189,7 +191,7 @@ import AddressInfo from "../../components/account/AddressInfo";
         }).catch(error => {
           if(error.ret === 93) {
             this.showPopup();
-          } 
+          }
           this.name = this.userInfo.name
         })
       },
@@ -326,7 +328,7 @@ import AddressInfo from "../../components/account/AddressInfo";
                 height 13px
                 background url('/static/images/personal/edit.png') no-repeat center center;
                 background-size 13px 13px
-            i.confirm  
+            i.confirm
               position relative
               left 10px
               bottom -10px

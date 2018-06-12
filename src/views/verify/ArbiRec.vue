@@ -139,10 +139,10 @@
         sort: 1,                      // 排序状态【0-提交时间升序，1-提交时间降序，2-用时升序，3-用时降序】
 
         resUlShow: false,           // 【申诉结果】筛选下拉框
-        resUlSel: 0,                 // 下拉选中项
+        resUlSel: 1,                 // 下拉选中项
         resUls:[                     // 下拉列表
           {text:"全部结果",key:0},
-          {text:"申诉中",key:1},
+          {text:"处理中",key:1},
           {text:"撤销申诉",key:2},
           {text:"终止交易",key:5},
           {text:"强制放币",key:4},
@@ -312,7 +312,7 @@
             finishTime1: (e.result===1?"-":new Date(e.update*1000).dateHandle("yyyy/MM/dd")),
             finishTime2: (e.result===1?"":new Date(e.update*1000).dateHandle("HH:mm:ss")),
             spend: (e.result===1?"-":(e.update-e.create).formatSecord()),
-            result: e.result && ["申诉中","撤回申诉","驳回申诉","强制放币","终止交易"][e.result-1],
+            result: e.result && ["处理中","撤回申诉","驳回申诉","强制放币","终止交易"][e.result-1],
             resultFlag: e.result-1,
             respU1: e.responsible_name || "-",
             respU2: e.responsible_account || "",

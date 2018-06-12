@@ -17,7 +17,7 @@
         <div class="show-tip2" v-show="showTip2">请输入正确的验证码</div>
         <span v-show="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先拖拽滑块</b></span>
         <p>
-          <input type="text" placeholder="验证码" v-model.trim="code" :disabled="!canInputCode" @focus="onCodeFocus" @blur="onCodeBlur">
+          <input type="text" placeholder="验证码" @keydown.enter="login" v-model.trim="code" :disabled="!canInputCode" @focus="onCodeFocus" @blur="onCodeBlur">
           <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="code.length>0" @click="code = ''">
         </p>
         <button :class="{able:canSendCode}" @click="sendCode">{{isSend ? time + '秒后重发': sendCodeText}}</button>
@@ -74,6 +74,7 @@
 
         showTip1: false,
         showTip2: false,
+        loginErr: 0,    //登录状态标识，0-正常，1-登录中
       }
 
     },
@@ -90,7 +91,7 @@
         return this.moveTrue && this.checkAccount() && !this.isSend;
       },
       canLogin:function () {
-        return this.moveTrue && this.agree && this.checkAccount() && this.checkCaptcha();
+        return this.moveTrue && this.agree && this.checkAccount() && this.checkCaptcha() && this.loginErr===0;
       },
     },
     watch:{
@@ -171,34 +172,47 @@
       sendCode(){
         if(this.isSend) return;
         this.type = this.checkAccount();
-        let accType = this.checkAccount();
+        this.accType = this.type;
         if (!this.type) return;
         if (!this.moveTrue) {
           this.moveTip = true;
           return;
         }
-        //60秒倒计时
-        this.sendCodeTimer(60);
         //发送验证码
-        this.accType = this.type;
-        this.WebSocket.start(this.HostUrl.ws);
-        this.WsProxy.send("send_code","send_code",{
-          phone: this.accType === "phone" ? this.account : "",
-          email: this.accType === "email" ? this.account : "",
-          os: 3
-        }).then(data=>{
-          //发送成功
-        }).catch(msg=>{
-          if(msg && msg.ret===201){
-            let time=msg.body.rest_time;
-            let restTime=Math.ceil(time/60);
-            this.$refs.alert.showAlert({content:"本账号操作频繁，请"+restTime+"分钟后再登录"});
-          }else if(msg && msg.ret===3){
-            this.$refs.alert.showAlert({content:"已发送过验证码"});
-          }else{
-            this.$refs.alert.showAlert({content:"发送失败"});
-          }
-        });
+        let ws =this.WebSocket;
+        ws.start(this.HostUrl.ws);
+        let seq = ws.seq;
+        ws.onMessage[seq] = {
+          callback: (data)=>{
+            this.loginErr=0;    //正常
+            let msg=data.body;
+            if(msg && msg.ret===0){
+              //60秒倒计时
+              this.sendCodeTimer(60);
+            }else if(msg && msg.ret===201){
+              let time=msg.rest_time;
+              let restTime=Math.ceil(time/60);
+              this.$refs.alert.showAlert({content:"本账号操作频繁，请"+restTime+"分钟后再登录"});
+            }else if(msg && msg.ret===3){
+              this.$refs.alert.showAlert({content:"已发送过验证码"});
+            }else{
+              this.$refs.alert.showAlert({content:"发送失败"});
+            }
+          },
+          date:new Date()
+        };
+        ws.onOpen[seq]= () =>{
+          this.loginErr=1;        //登录中...
+          ws.send(sendConfig("send_code",{
+            seq: seq,
+            body:{
+              action:"send_code",
+              phone: this.accType === "phone" ? this.account : "",
+              email: this.accType === "email" ? this.account : "",
+              os: 3
+            }
+          }))
+        };
       },
       login(){
         this.type = this.checkAccount();
@@ -210,7 +224,23 @@
         let seq = ws.seq;
         ws.onMessage[seq] = {
           callback: (data)=>{
-            if(!data || data.body.ret !== 0 && data.body.ret !== 8) return;
+            if(!data||!data.body||data.body.ret===1){
+              this.$refs.alert.showAlert({content:"登录失败"});
+              return;
+            }
+            if(data.body.ret===2){
+              this.$refs.alert.showAlert({content:"验证超时"});
+              return;
+            }else if(data.body.ret===3){
+              this.$refs.alert.showAlert({content:"验证码失效"});
+              return;
+            }else if(data.body.ret===8){
+              this.$refs.alert.showAlert({content:"验证码错误"});
+              return;
+            }else if(data.body.ret!==0){
+              this.$refs.alert.showAlert({content:"登录失败"});
+              return;
+            }
             if(data.body.ret === 8) {
               this.captcha = false;
               return;

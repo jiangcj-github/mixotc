@@ -8,7 +8,7 @@
         <i>大额交易审核</i><img src="/static/images/verify/dejy.png" alt="">
       </router-link>
       <router-link tag="li" :class="{active:leftBar===4}" to="/verify/arbitrationRecord">
-        <i>申诉记录</i><img src="/static/images/verify/zcjl.png" alt="">
+        <i>交易申诉</i><img src="/static/images/verify/zcjl.png" alt="">
       </router-link>
     </ul>
 </template>

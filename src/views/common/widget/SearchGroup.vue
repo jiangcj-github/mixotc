@@ -15,6 +15,7 @@
            v-model="srchText"
            v-clickoutside="()=>{isShowTip=false}"
            :placeholder="placeText"
+           @keydown.enter="onKeyEnter"
            @input="onInput"
            @focus="onFocus">
     <img class="clear" src="/static/images/cancel_icon.png"
@@ -79,6 +80,9 @@
         this.Bus.$emit(this.onFuzzy);
       },
       onClick(){
+        this.Bus.$emit(this.onSearch);
+      },
+      onKeyEnter(){
         this.Bus.$emit(this.onSearch);
       },
       onClickOutside(){

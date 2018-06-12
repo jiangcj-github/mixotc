@@ -28,9 +28,6 @@
                  @click="srchText=''"
                  v-show="srchText.length>0">
             <a href="javascript:void(0)" @click="searchStr"></a>
-            <!--
-            <b v-if="searchTip">您还未输入{{srchUls[srchUlSel].title}}</b>
-            -->
             <!--币种模糊搜索结果-->
             <ul v-show="srchTipShow" v-if="srchType===0">
               <li v-for="e in coinTips" @click="search(e)">
@@ -198,7 +195,6 @@
         transTypeList: ['购买', '出售'],
         typeNum: 0, // 购买出售选择
         tip: false,//限额错误文案提示
-        searchTip: false, // 搜索错误提示
         showPayment: false,
         payment:[{type: '支付宝', score: 1, state: true}, {type: '微信', score: 2, state: true}, {type: '银行卡', score:4, state: true}],
         filte:{
@@ -268,7 +264,6 @@
         }
       },
       fuzzyInput() { // 搜索框数据
-        this.searchTip = false;
         if (this.srchType === 0) { // 不能输入汉字
           this.srchText = this.srchText.replace(/[\u4E00-\u9FA5]/g, '');
         }
@@ -281,31 +276,29 @@
       },
       //列表项搜索
       search(e) {
+        if(!e) e={};
         if (this.srchType === 0) {
           this.filte.user = "";
-          this.filte.currency = this.srchText || "btc";
-          this.filte.cName = this.filte.currency == "btc" && "Bitcoin" || !this.srchTipShow && this.filte.cName || e.cname;
-          this.filte.coinImg = this.filte.currency == "btc" && "/static/images/btc_icon.png" || !this.srchTipShow && this.filte.coinImg || e.icon;
+          this.filte.currency = e.name || "btc";
+          this.filte.cName = e.cname || "Bitcoin";
+          this.filte.coinImg = e.icon || "/static/images/btc_icon.png";
         } else {
           this.filte.user = this.srchText;
         }
       },
       //按钮搜索，不存在的币种，默认给模糊搜索结果第一条
       searchStr() {
-        if (this.srchText == ''){
-          this.searchTip = true
-          //return
-        }
         if (this.srchType === 0 && this.srchText.length > 0) {
-          let exist = 0;
-          this.coinTips.forEach(e => {
-            if (e.name.toLowerCase() === this.srchText.toLowerCase()) exist++;
+          this.coinTips.forEach((e,i) => {
+            if (e.name.toLowerCase() === this.srchText.toLowerCase()){
+              this.search(e);
+              return;
+            }
           });
-          if (exist <= 0) {
-            this.srchText = this.coinTips[0] && this.coinTips[0].name || "";
-          }
+          this.search(this.coinTips[0]);
+        }else{
+          this.search(null);
         }
-        this.search();
       },
       loadTips() {
         let srchKey = this.srchText;
@@ -496,7 +489,7 @@
       hotCoinList() { // 热门币种数据
         let hotArr = this.$store.state.coinLoopData.slice(0, 4)
         return hotArr;
-      }
+      },
     },
     watch: {
       filte: {

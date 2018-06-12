@@ -17,7 +17,11 @@
             <p class="p1">
               <span class="s1">{{content.user_name}}</span>
               <!--<span class="s2">{{(content.msg_time * 1000).formatTime()}}</span>-->
-              <span class="s2">{{serviceMessage[content.user_id] && serviceMessage[content.user_id].length ? (serviceMessage[content.user_id])[serviceMessage[content.user_id].length - 1].time.formatTime() : (content.msg_time * 1000).formatTime()}}</span>
+              <span class="s2">{{
+                serviceMessage[content.user_id] &&
+                serviceMessage[content.user_id].length ?
+                (serviceMessage[content.user_id])[serviceMessage[content.user_id].length - 1].time.formatTime() :
+                content.msg_data ? content.msg_time.formatTime():""}}</span>
             </p>
             <!--<p class="p2">{{content.msg_data ? (content.msg_type === "image" ? '[图片]' : content.msg_data.msg) : ''}}</p>-->
             <p class="p2" v-html="serviceMessage[content.user_id] && serviceMessage[content.user_id].length ? ((serviceMessage[content.user_id])[serviceMessage[content.user_id].length - 1].type === 1 ? '[图片]' : (serviceMessage[content.user_id])[serviceMessage[content.user_id].length - 1].content) : (content.msg_data ? (content.msg_type === 'image' ? '[图片]' : content.msg_data.msg) : (content.msg_data ? (content.msg_type === 'image' ? '[图片]' : content.msg_data.msg) : ''))"></p>
@@ -229,10 +233,18 @@
           height 100%
           .p1
             line-height 20px
+            display flex
             >span.s1
               color #fff
               font-size 14px
+              overflow: hidden;
+              white-space: nowrap;
+              text-overflow: ellipsis;
+              flex-grow 1
+              flex-shrink 1
+              min-width 0
             >span.s2
+              flex-shrink 0
               font-size 11px
               color #999
               float right

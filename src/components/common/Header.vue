@@ -14,7 +14,7 @@
           <li class="tag ad"
               @mouseenter="adChild = true"
               @mouseleave="adChild = false"
-              :class="{active: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
+              :class="{selected: $route.path=='/advertisement/release/buy' || $route.path=='/advertisement/release/sale' || $route.path=='/advertisement'}">
             <span v-if="$route.path=='/advertisement'"  @click="goMyAd()">我的广告</span>
             <span v-else @click="!$store.state.isLogin ? changeLoginForm(true) : releaseAd()">发广告</span>
             <ol v-show="$store.state.isLogin && adChild">
@@ -31,12 +31,11 @@
               <span>扫码下载APP</span>
             </div>
           </li>
-
         </ul>
         <span class="log" @click="changeLoginForm(true)" v-if="!this.$store.state.isLogin">登录/注册</span>
         <div class="info" v-else>
           <img class="avator" :src="icon ? `${HostUrl.http}image/${icon}` : `/static/images/default_avator.png`" alt="">
-          <div class="name" @mouseenter="showMenu = true" @mouseleave="showMenu = false">
+          <div class="name" @mouseenter="showMenu = true" @mouseleave="showMenu = false" :class="{selected:/^\/personal.*$/.test(path)}">
             <span class="login" >{{name}}</span>
             <img class="select-icon" src='/static/images/triangle_black.png' v-if="!showMenu" alt="">
             <img class="select-icon" src='/static/images/triangle_black_up.png' v-else alt="">
@@ -281,8 +280,7 @@
                   background: #FFF3EB
           &.selected
             border-bottom 2px solid $col422
-          &.active
-            border-bottom 2px solid $col422
+            background-color #fff3eb
         .itag
           line-height 60px
           padding 0 41.5px
@@ -328,35 +326,31 @@
           float left
           width 120px
           cursor pointer
-          &:hover::after
-            position absolute
-            left 0
-            bottom 0
-            content ''
-            width 100%
-            height 2px
-            background $col422
+          box-sizing border-box
+          &.selected,&:hover
+            border-bottom 2px solid $col422
+            background-color #fff3eb
           .login
             float left
             position relative
             overflow hidden
-            width 104px
-            height 70px
-            margin-right 5px
+            width 100px
+            height 68px
             white-space nowrap
             text-overflow ellipsis
-            line-height 70px
+            line-height 68px
+            padding 0 5px 0 10px
+            box-sizing border-box
           .select-icon
             position absolute
             top 50%
-            right 0
+            right 5px
             margin-top -2.5px
           ul
             position absolute
-            top 68px
+            top 70px
             left 0
             background #FFF
-            border-top 2px solid $col422
             box-shadow: 0 2px 4px 0 $col1E1;
             z-index 9
             li

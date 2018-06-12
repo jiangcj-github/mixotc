@@ -8,22 +8,22 @@
           <p class="tip">*出于安全方面的考虑，修改密码后，你的账户将在24小时内无法提现。</p>
           <div class="password1" :class="{show: flag1}">
             <p>密码<span>密码为8--12位字符，且同时包含字母和数字</span></p>
-            <input :type="type1" v-model="password1" autocomplete="new-password" maxlength="12" @blur="verifyPassword1" >
+            <input :type="type1" v-model="password1" autocomplete="new-password" maxlength="12" @blur="verifyPassword1" @keydown.enter="submit">
             <i class="hint" v-if="tip1">{{copy1}}</i>
-            <img src="/static/images/visible.png" alt="" v-if="flag1" @click="()=>{flag1=false; type1='password'}">                    
-            <img src="/static/images/invisible.png" alt="" v-else @click="()=>{flag1=true; type1='text'}">    
+            <img src="/static/images/visible.png" alt="" v-if="flag1" @click="()=>{flag1=false; type1='password'}">
+            <img src="/static/images/invisible.png" alt="" v-else @click="()=>{flag1=true; type1='text'}">
           </div>
           <div class="password2" :class="{show: flag2}">
             <p>再输一遍</p>
-            <input :type="type2" v-model="password2" autocomplete="new-password" maxlength="12" @blur="verifyPassword2">
+            <input :type="type2" v-model="password2" autocomplete="new-password" maxlength="12" @blur="verifyPassword2" @keydown.enter="submit">
             <i class="hint" v-if="tip2">两次输入密码不一致</i>
-            <img src="/static/images/visible.png" alt="" v-if="flag2" @click="()=>{flag2=false; type2='password'}">                    
+            <img src="/static/images/visible.png" alt="" v-if="flag2" @click="()=>{flag2=false; type2='password'}">
             <img src="/static/images/invisible.png" alt="" v-else @click="()=>{flag2=true; type2='text'}">
           </div>
           <div class="verify" v-if="!isnew">
             <div class="message" v-if="type">
               <p>手机验证码</p>
-              <input type="text" v-model="messageWord" maxlength="6" @focus="timeout = false" @input="dealCode" @blur="verifyCode"><button @click="getCode" :disabled="!canSend" :class="{disable: !canSend}">{{codeCopy}}</button>
+              <input type="text" v-model="messageWord" maxlength="6" @focus="timeout = false" @input="dealCode" @blur="verifyCode" @keydown.enter="submit"><button @click="getCode" :disabled="!canSend" :class="{disable: !canSend}">{{codeCopy}}</button>
               <i class="hint" v-if="tip3">请输入正确的验证码</i>
               <i class="hint" v-if="!tip3 && timeout">验证码超时</i>
             </div>
@@ -38,12 +38,12 @@
                   @input="dealInput(index-1)"
                   :key="index"
                   @keydown="delNum(index)"
-                />                    
+                />
               </div>
               <i class="hint" v-if="tip4">请输入正确的验证码</i>
             </div>
           </div>
-          <button 
+          <button
             class="submit"
             @click="submit"
           >
@@ -192,7 +192,7 @@
         !this.isnew && this.verifyCode();
         if(this.tip1 || this.tip2 || this.tip3 || this.tip4) return;
         let uid = this.JsonBig.stringify(this.$store.state.userInfo.uid);
-        this.WsProxy.send('control', this.isnew ? 'user_update' : 'reset_pass', 
+        this.WsProxy.send('control', this.isnew ? 'user_update' : 'reset_pass',
           this.isnew ? {
             newpass: encrypt(this.password1, uid)
             } : {
@@ -300,7 +300,7 @@
         display inline-block
         color $col999
         fz11()
-    input 
+    input
       width 350px
       height 40px
   .verify
