@@ -4,26 +4,26 @@
       <img src="/static/images/close_btn_tr2.png" alt="" class="close-btn" @click="hideLoginForm">
       <h2 class="title">登录/注册</h2>
       <div class="account">
-        <div :class="{'hide-tip1':type,'show-tip1':!type}">请输入正确的手机号/邮箱</div>
+        <div class="show-tip1" v-show="showTip1">请输入正确的手机号/邮箱</div>
         <span>手机号/邮箱</span>
-        <input type="text" value="" @keyup.enter="login" v-model.trim="account" @focus="accountCancel = true"  v-clickoutside="accountBlur">
+        <input type="text" value="" v-model.trim="account" @focus="onAccountFocus" @blur="onAccountBlur">
         <img src="/static/images/cancel_icon.png" alt="" v-if="account.length>0" @click="account = ''">
-        <ul class="account-history" v-if="accountCancel && accountSearch.length">
-          <li v-for="(item, index) of accountSearch" :key="index" @click="changeAccount(item)">{{item}}</li>
+        <ul class="account-history" v-if="showAccountHistory && accountHistory.length">
+          <li v-for="(item, index) of accountHistory" :key="index" @mousedown="account=item">{{item}}</li>
         </ul>
       </div>
-      <Slider :slideStatus="slideStatus"></Slider>
+      <Slider onSliderOk="onSliderOk" ref="slider"></Slider>
       <div class="yzm">
-        <div :class="{'hide-tip2':captcha,'show-tip2':!captcha}">请输入正确的验证码</div>
+        <div class="show-tip2" v-show="showTip2">请输入正确的验证码</div>
         <span v-show="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先拖拽滑块</b></span>
-        <p v-clickoutside="() => { codeCancel = false}">
-          <input type="text" @keyup.enter="login" @focus="codeCancel = true"  placeholder="验证码" v-model.trim="code" :disabled="!moveTrue || !checkAccount(account)">
+        <p>
+          <input type="text" placeholder="验证码" v-model.trim="code" :disabled="!canInputCode" @focus="onCodeFocus" @blur="onCodeBlur">
           <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="code.length>0" @click="code = ''">
         </p>
-        <button :class="{'sendCaptcha':!isSend,'sendedCaptcha':isSend, disable: !moveTrue || !checkAccount(account)}" @click="sendCode">{{isSend ? time + '秒后重发': sendCodeText}}</button>
+        <button :class="{able:canSendCode}" @click="sendCode">{{isSend ? time + '秒后重发': sendCodeText}}</button>
       </div>
 
-      <button class="log" :class="{able: moveTrue && agree}" :disabled="!moveTrue || !agree" @click="login">登录</button>
+      <button class="log" :class="{able:canLogin}" @click="login">登录</button>
 
       <div class="yhxy">
         <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
@@ -38,12 +38,7 @@
         <p>登录成功</p>
       </slot>
     </BasePopup>
-    <BasePopup class="popup" :show="frequentlyTip" :top="40" @click.native="hideFrequently">
-      <slot>
-        <p>本账号操作频繁，请{{restTime}}分钟后再登录</p>
-      </slot>
-    </BasePopup>
-
+    <Alert ref="alert"></Alert>
   </div>
 </template>
 
@@ -53,6 +48,8 @@
   import sendConfig from '@/api/SendConfig.js'
   import getExplorerInfo from '@/js/Browser.js'
   import detectOS from '@/js/Os.js'
+  import Alert from "@/views/common/widget/Alert"
+  import timeout from "@/js/Timeout.js"
 
   export default {
     name: "login",
@@ -60,13 +57,11 @@
       return {
         showForm: true,
         moveTrue: false,
-        slideStatus: 'slideStatuss',
         agree: true,
         account: '',
-        accountCancel: false,
+        showAccountHistory: false,
         accountHistory: [],
         code: '',
-        codeCancel: false,
         type: true,
         accType: '',
         captcha: true,
@@ -74,48 +69,53 @@
         moveTip: false,
         loginSuccess: false,
         time:'',
-        interval: null,
         timer: null,
-        timer1: null,
         sendCodeText: '发送验证码',
-        frequentlyTip: false,
-        restTime: ''
+
+        showTip1: false,
+        showTip2: false,
       }
 
     },
     components: {
       Slider,
-      BasePopup
+      BasePopup,
+      Alert,
     },
-    computed: {
-      accountSearch() {
-        return this.accountHistory.filter(item => {
-          return item.includes(this.account)
-        })
+    computed:{
+      canInputCode:function(){
+        return this.moveTrue && this.checkAccount();
+      },
+      canSendCode:function(){
+        return this.moveTrue && this.checkAccount() && !this.isSend;
+      },
+      canLogin:function () {
+        return this.moveTrue && this.agree && this.checkAccount() && this.checkCaptcha();
+      },
+    },
+    watch:{
+      account:function(){
+        //账号改变，重置验证码状态
+        this.isSend=false;
+        this.sendCodeText="发送验证码";
+        this.moveTrue=false;
+        this.$refs.slider.reset();
+        timeout(null,0,"timer_code");
       }
     },
     methods: {
-      hideFrequently(){
-        this.frequentlyTip = false;
-        clearTimeout(this.timer1);
-      },
-      showFrequently(){
-        this.frequentlyTip = true;
-        clearTimeout(this.timer1);
-        this.timer1 = setTimeout(() => {
-          this.frequentlyTip = false;
-          clearTimeout(this.timer1)
-        }, 3000);
-      },
       hidePopup() {
         this.loginSuccess = false
         this.hideLoginForm();
       },
-      checkAccount(account) {
-        return /^1[34578]\d{9}$/.test(account) ? 'phone' : (/^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(account) ? 'email' : false)
-      },
-      changeAccount(account) {
-        this.account = account;
+      checkAccount() {
+        let account=this.account;
+        if(/^1[34578]\d{9}$/.test(account)){
+          return "phone";
+        }else if(/^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/.test(account)){
+          return "email";
+        }
+        return false;
       },
       //保存登录账号最多5个
       saveAccount(account) {
@@ -137,68 +137,72 @@
           storage.set(list)
         }
       },
-      accountBlur() {
-        this.accountCancel = false
-        this.type = this.checkAccount(this.account)
+      onAccountFocus(){
+        this.showAccountHistory=true;
+        this.showTip1=false;
       },
-      checkCaptcha(code) {
-        return /^\d{6}$/.test(code);
+      onAccountBlur() {
+        this.type = this.checkAccount();
+        this.showAccountHistory=false;
+        this.showTip1=!this.checkAccount();
+      },
+      onCodeFocus(){
+        this.showTip2=false;
+      },
+      onCodeBlur(){
+        this.showTip2=!this.checkCaptcha();
+      },
+      checkCaptcha() {
+        return /^\d{6}$/.test(this.code);
+      },
+      sendCodeTimer(time){
+        if(time<=0){
+          this.isSend = false;
+          this.sendCodeText = '重新发送';
+          return;
+        }
+        time--;
+        this.isSend = true;
+        this.time=time;
+        timeout(()=>{
+          this.sendCodeTimer(time)
+        },1000,"timer_code");
       },
       sendCode(){
-        if (this.isSend) return;
-
-       this.type = this.checkAccount(this.account);
-        let accType = this.checkAccount(this.account);
+        if(this.isSend) return;
+        this.type = this.checkAccount();
+        let accType = this.checkAccount();
         if (!this.type) return;
         if (!this.moveTrue) {
           this.moveTip = true;
           return;
         }
+        //60秒倒计时
+        this.sendCodeTimer(60);
+        //发送验证码
         this.accType = this.type;
-        const $ = 60;
-        if(!this.interval){
-          this.time = $;
-          this.isSend = true;
-          clearInterval(this.interval);
-          this.interval = setInterval(() =>{
-            if(this.time > 0 && this.time <= $){
-              this.time--;
-            } else {
-              this.isSend = false;
-              clearInterval(this.interval);
-              this.interval = null;
-              this.sendCodeText = '重新发送'
-            }
-          },1000);
-        }
-        let ws = this.WebSocket;
-        ws.start(this.HostUrl.ws);
-        let seq = ws.seq;
-        ws.onMessage[seq] = {
-          callback: (res)=>{
-            if(res && res.body.ret === 201) {
-              this.restTime = res.body.rest_time%60 === 0 ? res.body.rest_time/60 : parseInt(res.body.rest_time/60) + 1;
-              this.showFrequently()
-            }
-          },
-          date:new Date()
-        }
-        ws.onOpen[seq]= () =>{
-          ws.send(sendConfig('send_code',{
-            seq: seq,
-            body:{
-              action: 'send_code',
-              phone: this.accType === "phone" ? this.account : "",
-              email: this.accType === "email" ? this.account : "",
-              os: 3
-            }
-          }))
-        }
-
+        this.WebSocket.start(this.HostUrl.ws);
+        this.WsProxy.send("send_code","send_code",{
+          phone: this.accType === "phone" ? this.account : "",
+          email: this.accType === "email" ? this.account : "",
+          os: 3
+        }).then(data=>{
+          //发送成功
+        }).catch(msg=>{
+          if(msg && msg.ret===201){
+            let time=msg.body.rest_time;
+            let restTime=Math.ceil(time/60);
+            this.$refs.alert.showAlert({content:"本账号操作频繁，请"+restTime+"分钟后再登录"});
+          }else if(msg && msg.ret===3){
+            this.$refs.alert.showAlert({content:"已发送过验证码"});
+          }else{
+            this.$refs.alert.showAlert({content:"发送失败"});
+          }
+        });
       },
       login(){
-        this.type = this.checkAccount(this.account);
-        this.captcha = this.checkCaptcha(this.code);
+        this.type = this.checkAccount();
+        this.captcha = this.checkCaptcha();
         this.accType = this.type;
         if(!this.type || !this.captcha) return;
         let ws =this.WebSocket;
@@ -262,23 +266,21 @@
       }
     },
     mounted() {
-      let otcAccount = this.Storage.otcAccount.get()
+      let otcAccount = this.Storage.otcAccount.get();
       if (otcAccount) {
         this.accountHistory = otcAccount;
         this.account = otcAccount[0]
       }
-      this.Bus.$on(this.slideStatus, (status) => {
-        this.moveTrue = status;
+      this.Bus.$on("onSliderOk", () => {
+        this.moveTrue = true;
         this.moveTip = false;
-        // console.log(this.moveTrue)
-        this.sendCode()
+        this.canSendCode && this.sendCode();
       })
     },
     destroyed() {
-      this.Bus.$off(this.slideStatus);
-      clearInterval(this.interval);
+      this.Bus.$off("onSliderOk");
+      timeout(null,0,"timer_code");
       clearTimeout(this.timer);
-      clearTimeout(this.timer1);
     }
   }
 </script>
@@ -342,13 +344,9 @@
       .show-tip1
         top -4px
         transform translate(-50%,0)
-      .hide-tip1
-        display none
       .show-tip2
         top -32px
         transform translate(-50%,0)
-      .hide-tip2
-        display none
       .title
         height 20px
         line-height 20px
@@ -457,14 +455,13 @@
           color #fff
           cursor pointer
           border-radius 0 2px 2px 0
-          &.sendCaptcha
-            background-color $col422
-          &.sendedCaptcha
-            background-color $col999
-            cursor default
-          &.disable
-            background-color $col999
-            cursor default
+          background-color #999
+          pointer-events none
+          &.able
+            background-color #ffb422
+            pointer-events all
+            &:hover
+              background-color fea350
       .log
         width 320px
         height 40px
@@ -474,13 +471,15 @@
         line-height 40px
         color #FFF
         border-radius 2px
-        &:focus
-          outline 0
+        outline none
+        cursor default
+        pointer-events none
         &.able
           cursor pointer
-          background $col422
-          &:active
-            background $col350
+          background #ffb422
+          pointer-events all
+          &:hover
+            background #fea350
       .yhxy
         height: 12px
         line-height 12px

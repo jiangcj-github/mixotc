@@ -9,7 +9,7 @@
             <li class="first">
               <img src="/static/images/personal/google_1.png" alt="" width="32px" height="32px">
               <div class="details">
-                <p>安装双重验证程序：Google Authenticator</p>
+                <p>安装安全身份验证程序：Google Authenticator</p>
                 <a href="https://itunes.apple.com/cn/app/google-authenticator/id388497605?mt=8" target="_blank" class="store">
                   APP Store
                 </a>
@@ -24,7 +24,7 @@
             <li class="second">
               <img src="/static/images/personal/google_2.png" alt="" width="32px" height="32px">
               <p class="tip">在“Google Authenticator(身份验证器)”应用程序中,点击“添加账户”扫描下方二维码</p>
-              <QrcodeVue class="qrcode" :value="secretKey" :size="90"></QrcodeVue>
+              <QrcodeVue class="qrcode" :value="'otpauth://totp/mixotc?secret='+secretKey" :size="90"></QrcodeVue>
               <p class="key">
                 如果您无法扫描成功上图的条形码，您可以手动添加账户，输入如下密钥：
                 <span>{{secretKey}}</span>
@@ -136,7 +136,7 @@ import BasePopup from '@/components/common/BasePopup';
       position absolute
       right 15px
       top 15px
-      cursor pointer  
+      cursor pointer
     h4
       position relative
       padding-left 12px
@@ -159,7 +159,7 @@ import BasePopup from '@/components/common/BasePopup';
         &.first
           p
             height 58px
-            line-height 58px  
+            line-height 58px
             font-size $fz13
             color $col94C
             letter-spacing 0.05px

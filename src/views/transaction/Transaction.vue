@@ -52,7 +52,7 @@
           </div>
         </div>
         <ul class="top5">
-          <li v-for="(item, index) in hotCoinList" @click="hotCoinSelect(item, index)" :class="{'top-active': index == hotNum}">
+          <li v-for="(item, index) in hotCoinList" @click="hotCoinSelect(item, index)" :class="{'top-active': item.currency == filte.currency}">
             <img src="/static/images/hot_coin.png" alt="">
             <p>
               <img :src="`${HostUrl.http}image/${item.icon}`" alt="">
@@ -195,7 +195,6 @@
         coinTips: [],
         userTips: [],
 
-        hotNum: 0, // 热门币种选择
         transTypeList: ['购买', '出售'],
         typeNum: 0, // 购买出售选择
         tip: false,//限额错误文案提示
@@ -205,7 +204,7 @@
         filte:{
           type: 1,// 1出售，2购买
           payment: '',//1支付宝，2微信，4银行卡，可相加，共6种
-          currency: '',// 币种全称
+          currency: 'btc',// 币种全称
           coinImg: '', // 币种图片
           cName: '',
           min: null,
@@ -451,10 +450,9 @@
         },3000);
       },
       hotCoinSelect(item, index) { // 热门选择
-        this.filte.currency = item.currency
-        this.filte.cName = item.name
-        this.filte.coinImg = `${this.HostUrl.http}image/${item.icon}`,
-        this.hotNum = index
+        this.filte.currency = item.currency;
+        this.filte.cName = item.name;
+        this.filte.coinImg = `${this.HostUrl.http}image/${item.icon}`;
       },
       selectType(item, index) { // 出售购买tab切换选择
         this.typeNum = index
@@ -496,18 +494,14 @@
         return this.$store.state.trustList;
       },
       hotCoinList() { // 热门币种数据
-        let coinArr = [],
-            hotArr = this.$store.state.coinLoopData.slice(0, 4)
-        hotArr.forEach((v, i) => {
-          coinArr.push(v.currency)
-        })
-        this.hotNum = this.$route.query.icon ? coinArr.indexOf(this.$route.query.currency) : coinArr.indexOf('btc')
-        return hotArr
+        let hotArr = this.$store.state.coinLoopData.slice(0, 4)
+        return hotArr;
       }
     },
     watch: {
       filte: {
         handler(curVal) {
+          //限额检查
           let min = Number(curVal.min), max = Number(curVal.max);
           if ((min > max && curVal.min && curVal.max) || (curVal.min && curVal.min < 200)) {
             this.tip = true;

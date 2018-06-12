@@ -248,16 +248,6 @@
     },
     mounted(){
       this.init();
-      this.Bus.$on("onFbPageChange",(p)=>{
-        this.fbCurPage=p;
-      });
-      this.Bus.$on("onBbPageChange",(p)=>{
-        this.bbCurPage=p;
-      });
-    },
-    destroyed(){
-      this.Bus.$off("onFbPageChange");
-      this.Bus.$off("onBbPageChange");
     },
   }
 </script>

@@ -73,7 +73,7 @@
         this.loadChargeList();
         timeout(()=>{
           this.tick();
-        },5000,"timer0");
+        },1000,"timer0");
       },
       slide(){
         if(this.lists.length>1){

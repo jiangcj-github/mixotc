@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div class="movebox">
-      <div class="movego"></div>
-      <div class="txt" id="txt">将滑块拖拽到最右边</div>
-      <div class="move moveBefore" v-move="slideStatuss"></div>
+    <div class="movebox" ref="movebox">
+      <div class="movego" ref="movego"></div>
+      <div class="txt" ref="txt">将滑块拖拽到最右边</div>
+      <div class="move moveBefore" ref="move" @mousedown="onMouseDown"></div>
     </div>
   </div>
 </template>
@@ -12,7 +12,55 @@
   export default{
     name:'Slider',
     props:{
-      slideStatus: String
+      onSliderOk: {type:String,default:"onSliderOk"}
+    },
+    data(){
+      return{
+        canDrag: false,
+        x0: 0,
+        endx:0,
+      }
+    },
+    mounted(){
+      let _this=this;
+      let $move=this.$refs.move;
+      let $movebox=this.$refs.movebox;
+      let $movego=this.$refs.movego;
+      let $txt=this.$refs.txt;
+      let maxLeft=$movebox.clientWidth-$move.clientWidth;
+      document.onmousemove=function(e){
+        if(!_this.canDrag) return;
+        let endx= e.clientX - _this.x0;
+        $move.className = 'move moveBefore';
+        $move.style.left = endx+ 'px';
+        $movego.style.width = endx + 'px';
+        $txt.innerHTML = '将滑块拖拽到最右边';
+        //临界值小于
+        if (endx <= 0) {
+          endx = 0;
+          $move.style.left = 0;
+          $movego.style.width = 0;
+        }
+        //临界值大于
+        if (endx >= maxLeft) {
+          endx=maxLeft;
+          $move.style.left = maxLeft + 'px';
+          $movego.style.width = maxLeft + 'px';
+          $txt.innerHTML = '验证通过';
+          $move.className = 'move moveSuccess';
+          _this.canDrag=false;
+          _this.Bus.$emit(_this.onSliderOk);
+        }
+        _this.endx=endx;
+      };
+      document.onmouseup = function (e) {
+        let endx=_this.endx;
+        if (endx > 0 && endx < maxLeft){
+          $move.style.left = 0;
+          $movego.style.width=0;
+        }
+        _this.canDrag=false;
+      };
     },
     destroyed() {
       document.onmousemove = null;
@@ -21,58 +69,22 @@
     methods: {
       slideStatuss() {
         this.Bus.$emit(this.slideStatus, true)
-      }
+      },
+      onMouseDown(e){
+        let $move=this.$refs.move;
+        this.canDrag=true;
+        this.x0= e.clientX - $move.offsetLeft;
+      },
+      reset(){
+        let $move=this.$refs.move;
+        let $movego=this.$refs.movego;
+        let $txt=this.$refs.txt;
+        $move.style.left=0;
+        $move.className = 'move moveBefore';
+        $movego.style.width=0;
+        $txt.innerHTML="将滑块拖拽到最右边";
+      },
     },
-    directives: {
-      move: {
-        bind: function (el, binding) {
-          // console.log(binding);
-          el.onmousedown = function (e) {
-            let X = e.clientX - el.offsetLeft;
-            document.onmousemove = function (e) {
-              el.endx = e.clientX - X;
-              el.className = 'move moveBefore';
-              el.style.left = el.endx + 'px';
-              // console.log(el.parentNode.children[0])
-              let movebox = document.querySelector('.movebox');
-              let move = document.querySelector('.move');
-              el.width = movebox.clientWidth - move.clientWidth;
-              el.parentNode.children[0].style.width = el.endx + 'px';
-              el.parentNode.children[1].innerHTML = '将滑块拖拽到最右边';
-              //临界值小于
-              if (el.endx <= 0) {
-                el.endx = 0 ;
-                el.style.left = el.endx + 'px';
-                el.parentNode.children[0].style.width = 0 + 'px';
-                //$('.movego').width(0)
-              }
-              //临界值大于
-              // console.log(el.style.left)
-              if (el.endx >= el.width) {
-                el.style.left = el.width + 'px';
-                el.parentNode.children[0].style.width = el.width + 'px';
-                el.parentNode.children[1].innerHTML = '验证通过';
-                el.className = 'move moveSuccess';
-                el.onmousedown = null;
-                binding.value();
-                document.onmousemove = null;
-              }
-            }
-          };
-          document.onmouseup = function (e) {
-            if (el.endx > 0 && el.endx < el.width) {
-                el.endx = 0 ;
-                el.style.left = el.endx + 'px';
-                el.parentNode.children[0].style.width = 0 + 'px';
-            }
-            document.onmousemove = null
-          };
-        },
-        unbind: function (el, binding) {
-          el.onmousedown = null;
-        }
-      }
-    }
   }
 </script>
 
