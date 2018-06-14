@@ -275,7 +275,7 @@
         this.loadTips();
       },
       //列表项搜索
-      search(e) {
+      search(e) {console.log(e);
         if(!e) e={};
         if (this.srchType === 0) {
           this.filte.user = "";
@@ -289,12 +289,13 @@
       //按钮搜索，不存在的币种，默认给模糊搜索结果第一条
       searchStr() {
         if (this.srchType === 0 && this.srchText.length > 0) {
-          this.coinTips.forEach((e,i) => {
+          for(let i=0;i<this.coinTips.length;i++){
+            let e=this.coinTips[i];
             if (e.name.toLowerCase() === this.srchText.toLowerCase()){
               this.search(e);
               return;
             }
-          });
+          }
           this.search(this.coinTips[0]);
         }else{
           this.search(null);

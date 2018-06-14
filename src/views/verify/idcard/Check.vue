@@ -173,9 +173,8 @@
           case 3:sort=2;break;
           default:sort=0;break;
         }
-        //更新已审核数量
-        this.Bus.$emit("onUpdateCheck");
         //WebSocket请求
+        this.err=4;
         this.WsProxy.send("control","a_get_identity_list",{
           type:1,
           state:2,

@@ -1,11 +1,11 @@
 <template>
   <div class="news-info-right">
-    <happy-scroll 
-      style="width:399px;height:325px" 
-      :resize="true" 
+    <happy-scroll
+      style="width:399px;height:325px"
+      :resize="true"
       smaller-move-h="end"
-      bigger-move-h="end" 
-      hide-horizontal 
+      bigger-move-h="end"
+      hide-horizontal
       class="main-content"
       :scroll-top="99999999">
       <div class="wrap">
@@ -23,10 +23,10 @@
               </div>
               <div v-if="!item.type">
                 <div :class="{'left-people': item.from !== JsonBig.stringify($store.state.userInfo.uid), 'right-people': item.from === JsonBig.stringify($store.state.userInfo.uid)}">
-                  <img 
-                    class="avator" 
-                    :src="chat[index].service ? '/static/images/service_icon.png' : infoDiction[item.from] && infoDiction[item.from].icon"
-                    alt="" 
+                  <img
+                    class="avator"
+                    :src="chat[index].service && item.from !== JsonBig.stringify($store.state.userInfo.uid) ? '/static/images/service_icon.png' : infoDiction[item.from] && infoDiction[item.from].icon"
+                    alt=""
                     @click="toHomepage(item.from)"
                   >
                   <p>
@@ -61,7 +61,7 @@
               <li class="system-info-name">{{infoDiction[item.id] && infoDiction[item.id].name}}</li>
               <li class="system-info-info">{{item.info ? item.info : `我是${infoDiction[item.id] && infoDiction[item.id].name},申请添加你为好友`}}</li>
             </ul>
-            <button 
+            <button
               @click="addFriend(item.id, item.info ? item.info : `我是${infoDiction[item.id] && infoDiction[item.id].name},申请添加你为好友`)"
               :class="{disable:item.isDeal}"
               :disabled="item.isDeal"
@@ -83,19 +83,19 @@
           >
         </span>
       <happy-scroll
-        style="width:370px;height:376px" 
-        :resize="true" 
-        bigger-move-h="start" 
-        hide-horizontal 
+        style="width:370px;height:376px"
+        :resize="true"
+        bigger-move-h="start"
+        hide-horizontal
         class="bigImg-content"
       >
         <div class="picture">
-          <img 
-            v-show="showBigSrc" 
+          <img
+            v-show="showBigSrc"
             :style="{visibility: bigLoading ? 'hidden' : 'visible'}"
-            :src="showBigSrc" 
-            alt="" 
-            ref="bigImg" 
+            :src="showBigSrc"
+            alt=""
+            ref="bigImg"
             @load="bigImgLoad()"
           >
         </div>
@@ -205,7 +205,7 @@
             if(!this.infoDiction[obj.from]) {
               await this.WsProxy.send('otc', 'trader_info', {id: this.JsonBig.parse(obj.from)}).then(({name, phone, email, icon }) => {
                 this.$store.commit(
-                  {type: 'updateStrangerInfo', 
+                  {type: 'updateStrangerInfo',
                     data: {
                       id: obj.from,
                       icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
@@ -450,7 +450,7 @@
             line-height 0
             &.name
               top 25px
-          b 
+          b
             display block
             position relative
             left -5px

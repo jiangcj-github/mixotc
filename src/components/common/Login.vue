@@ -20,17 +20,17 @@
           <input type="text" placeholder="验证码" @keydown.enter="login" v-model.trim="code" :disabled="!canInputCode" @focus="onCodeFocus" @blur="onCodeBlur">
           <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="code.length>0" @click="code = ''">
         </p>
-        <button :class="{able:canSendCode}" @click="sendCode">{{isSend ? time + '秒后重发': sendCodeText}}</button>
+        <button v-show="sendCodeErr===0 && time<=0" :class="{able:canSendCode}" @click="sendCode">发送验证码</button>
+        <button v-show="sendCodeErr===0 && time>0">{{time + '秒后重发'}}</button>
+        <button v-show="sendCodeErr===1">发送中...</button>
       </div>
-
-      <button class="log" :class="{able:canLogin}" @click="login">登录</button>
-
+      <button class="log" v-show="loginErr===0" :class="{able:canLogin}" @click="login">登录</button>
+      <button class="log" v-show="loginErr===1">登录中...</button>
       <div class="yhxy">
         <img src="/static/images/rules_checked.png" alt="" v-if="agree" @click="agree = false">
         <img src="/static/images/rules_unchecked.png" alt="" v-else @click="agree = true">
         <p>我已阅读并同意 <a href="/#/helpcenter?source=4" target="_blank">用户协议</a></p>
       </div>
-
       <span :class="{'hide-tips':agree,'yhxy-tips':!agree}"><img src="/static/images/hint.png" alt="">&nbsp;&nbsp;<b>请勾选用户协议</b></span>
     </div>
     <BasePopup class="popup" :show="loginSuccess" :top="29.17" v-on:click.native="hideLoginForm">
@@ -65,7 +65,6 @@
         type: true,
         accType: '',
         captcha: true,
-        isSend: false,
         moveTip: false,
         loginSuccess: false,
         time:'',
@@ -75,6 +74,7 @@
         showTip1: false,
         showTip2: false,
         loginErr: 0,    //登录状态标识，0-正常，1-登录中
+        sendCodeErr: 0, //发送验证码标识,0-正常，1-发送中
       }
 
     },
@@ -88,18 +88,19 @@
         return this.moveTrue && this.checkAccount();
       },
       canSendCode:function(){
-        return this.moveTrue && this.checkAccount() && !this.isSend;
+        return this.moveTrue && this.checkAccount() && !this.sendCodeErr;
       },
       canLogin:function () {
-        return this.moveTrue && this.agree && this.checkAccount() && this.checkCaptcha() && this.loginErr===0;
+        return this.moveTrue && this.agree && this.checkAccount() && this.checkCaptcha() && !this.loginErr;
       },
     },
     watch:{
       account:function(){
         //账号改变，重置验证码状态
-        this.isSend=false;
-        this.sendCodeText="发送验证码";
         this.moveTrue=false;
+        this.loginErr=0;
+        this.sendCodeErr=0;
+        this.time=0;
         this.$refs.slider.reset();
         timeout(null,0,"timer_code");
       }
@@ -157,20 +158,15 @@
         return /^\d{6}$/.test(this.code);
       },
       sendCodeTimer(time){
-        if(time<=0){
-          this.isSend = false;
-          this.sendCodeText = '重新发送';
-          return;
-        }
+        if(time<=0) return;
         time--;
-        this.isSend = true;
         this.time=time;
         timeout(()=>{
           this.sendCodeTimer(time)
         },1000,"timer_code");
       },
       sendCode(){
-        if(this.isSend) return;
+        if(this.time>0) return;
         this.type = this.checkAccount();
         this.accType = this.type;
         if (!this.type) return;
@@ -178,22 +174,24 @@
           this.moveTip = true;
           return;
         }
+        this.sendCodeErr=1;       //正在发送验证码
         //发送验证码
         let ws =this.WebSocket;
         ws.start(this.HostUrl.ws);
         let seq = ws.seq;
         ws.onMessage[seq] = {
           callback: (data)=>{
-            this.loginErr=0;    //正常
+            this.sendCodeErr=0;         //发送结束
             let msg=data.body;
             if(msg && msg.ret===0){
-              //60秒倒计时
-              this.sendCodeTimer(60);
+              this.sendCodeTimer(60);       //60秒倒计时
             }else if(msg && msg.ret===201){
-              let time=msg.rest_time;
+              let time=msg.rest_time || 0;
               let restTime=Math.ceil(time/60);
               this.$refs.alert.showAlert({content:"本账号操作频繁，请"+restTime+"分钟后再登录"});
             }else if(msg && msg.ret===3){
+              let time=msg.valid_time || 0;
+              this.sendCodeTimer(time);
               this.$refs.alert.showAlert({content:"已发送过验证码"});
             }else{
               this.$refs.alert.showAlert({content:"发送失败"});
@@ -202,7 +200,6 @@
           date:new Date()
         };
         ws.onOpen[seq]= () =>{
-          this.loginErr=1;        //登录中...
           ws.send(sendConfig("send_code",{
             seq: seq,
             body:{
@@ -219,11 +216,13 @@
         this.captcha = this.checkCaptcha();
         this.accType = this.type;
         if(!this.type || !this.captcha) return;
+        this.loginErr=1;          //正在登录
         let ws =this.WebSocket;
         ws.start(this.HostUrl.ws);
         let seq = ws.seq;
         ws.onMessage[seq] = {
           callback: (data)=>{
+            this.loginErr=0;      //登录结束
             if(!data||!data.body||data.body.ret===1){
               this.$refs.alert.showAlert({content:"登录失败"});
               return;
@@ -487,6 +486,7 @@
           border-radius 0 2px 2px 0
           background-color #999
           pointer-events none
+          overflow hidden
           &.able
             background-color #ffb422
             pointer-events all

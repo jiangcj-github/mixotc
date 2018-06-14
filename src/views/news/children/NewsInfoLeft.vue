@@ -36,7 +36,7 @@
       </div>
     </div>
     <!-- 查看群 -->
-    
+
   </div>
 </template>
 
@@ -101,11 +101,11 @@
         // console.log(linkman)
         linkman && linkman.forEach(item => {
           let group = null;
-          if (item.gid) {
+          if (item.gid) {     // 群
             group = this.$store.state.groupList.filter(group => {
               return this.JsonBig.stringify(item.gid) === this.JsonBig.stringify(group.id)
             })[0]
-            if(group.type === 1){
+            if(group.type === 1){     // 群-多聊
               result.push({
                 mid: item.mid ? this.JsonBig.stringify(item.mid) : 0,
                 id: this.JsonBig.stringify(item.gid),
@@ -122,7 +122,7 @@
                 moreFlag: true,
                 exists: true//踢出群聊的标志
               });
-            }else {
+            }else {     // 群-单聊
               let other = group.members.filter( item => {
                 return this.JsonBig.stringify(item.id) !== this.JsonBig.stringify(this.$store.state.userInfo.uid)
               })[0]
@@ -139,9 +139,9 @@
                 exists: true,
                 moreFlag: true,
                 unread: 0
-              }); 
+              });
             }
-          }else if (item.is_peer_admin){
+          }else if (item.is_peer_admin){      // 与客服对话
             result.push({
               mid: item.mid ? this.JsonBig.stringify(item.mid) : 0,
               id: this.JsonBig.stringify(item.uid),
@@ -153,7 +153,7 @@
               email: false,
               moreFlag: true,
               unread: 0
-            }); 
+            });
           }else {
             let id = this.JsonBig.stringify(item.uid);
             this.$store.commit(
@@ -174,7 +174,7 @@
               email: item.email,
               moreFlag: true,
               unread: 0
-            }); 
+            });
           }
         })
         linkman && this.$store.commit({type: 'changeChat', data: result});
@@ -187,13 +187,13 @@
             if (res.body && res.body.type === "req_fd") {
               let {id, info, icon, name} = res.body.data;
               const obj = {
-                sid: this.JsonBig.stringify(res.body.id), 
+                sid: this.JsonBig.stringify(res.body.id),
                 id: this.JsonBig.stringify(id),
                 info: info,
                 isDeal: false
               }
               this.$store.commit({
-                type: 'updateStrangerInfo', data: 
+                type: 'updateStrangerInfo', data:
                   {
                     id: this.JsonBig.stringify(id),
                     icon: icon ? `${this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
@@ -335,7 +335,7 @@
 
 <style scoped lang="stylus">
   @import "../../../stylus/base.styl"
-    
+
     .news-info-left
       position relative
       float left
