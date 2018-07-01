@@ -9,7 +9,7 @@
     <li :class="{active:leftBar===3}" v-show="0">
       <a href="/#/wallet/withdraw"><i>提币</i><img src="/static/images/wallet/widhdraw.png"></a>
     </li>
-    <li :class="{active:leftBar===4}" v-show="0">
+    <li :class="{active:leftBar===4}">
       <a href="/#/wallet/conversion"><i>资产互转</i><img src="/static/images/wallet/conversion.png"></a>
     </li>
     <li :class="{active:leftBar===5}">
