@@ -168,7 +168,7 @@
         tab: 0,  //0-法币账户,1-币币账户
         isZero: false,
         isPetty: false,
-        isNoWa: true,
+        isNoWa: false,
 
         prices:{},
         balance:{

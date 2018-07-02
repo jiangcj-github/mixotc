@@ -6,7 +6,7 @@
 .form .p1{position:relative;line-height:30px;}
 .form .p1>label{width:100px;float:left;font-weight:bold;font-size:14px;}
 .form .p1 .input-group{margin-left:100px;}
-.form .p1 .tip{margin-left:100px;line-height:20px;margin-top:3px;color:#ff794c;}
+.form .p1 .tip{margin-left:100px;line-height:20px;margin-top:5px;color:#ff794c;}
 
 /*灰色部分*/
 .form .card{background:#f4f6fa;padding:20px;margin-top:20px;}
@@ -42,10 +42,14 @@
 .coin{width:180px;}
 .num{width:180px;}
 .recvAddr{width:180px;}
+
 .input-group.password,.input-group.code
   margin-top 30px
 .input-group.code
   a
     width 100px !important
     &:active
-      background-color orange
+      background-color #ffb422
+    &.sended
+      background-color #ccc
+      pointer-events none

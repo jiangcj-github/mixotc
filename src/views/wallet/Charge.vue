@@ -199,7 +199,6 @@
         this.loadLists();
       },
       loadLists(){
-        let coin=this.coins[this.coinSel];
         this.WsProxy.send("wallet","bills_v2",{
           type: "1",
           state: "0,1,2,3,4,5,6",

@@ -25,8 +25,8 @@
       }
     },
     mounted(){
-      this.tick();
-      this.slide();
+      //this.tick();
+      //this.slide();
     },
     methods: {
       //获取充值确认中列表
