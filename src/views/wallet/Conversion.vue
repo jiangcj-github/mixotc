@@ -245,7 +245,7 @@ export default {
     this.otcList = data.wallets;
     console.log(this.otcList);
     let result = await fetch(
-      "http://192.168.113.26/api/v3/wallet/wallets/?user_id=" +
+      "https://mixotc.com/api/v3/wallet/wallets/?user_id=" +
         this.JsonBig.stringify(uid)
     ).then(res => res.json());
     this.tradeList = result.wallets;
