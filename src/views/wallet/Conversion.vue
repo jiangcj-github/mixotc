@@ -48,7 +48,7 @@
                 <p>可划转数量：{{selectedCoin.avail}} {{selectedCoin.coin}}</p>
                 <div class="input-group">
                   <input type="text" class="input" v-model.trim="amount">
-                  <img class="clear" src="/static/images/cancel_icon.png">
+                  <img class="clear" src="/static/images/cancel_icon.png" v-show="amount.length>0" @click="amount=''">
                   <a href="javascript:void(0)" class="addin btn green" @click="amount = selectedCoin.avail">全部</a>
                 </div>
                 <label>密码：</label>
