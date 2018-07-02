@@ -34,8 +34,8 @@
         </div>
       </div>
       <div class="sec2">
-        <div class="unit"><label>{{info.orderNum}}</label><span>订单次数</span></div>
-        <div class="unit"><label>{{info.volumn}}</label><span>历史成交量</span></div>
+        <div class="unit"><label>{{info.orderNum}}</label><span title="担保+订单">交易次数</span></div>
+        <div class="unit"><label>{{info.volumn}}</label><span>成交量</span></div>
         <div class="unit"><label>{{info.praiseRate}}</label><span>好评率</span></div>
         <div class="unit"><label>{{info.trustedNum}}</label><span>被信任</span></div>
         <div class="unit"><label>{{info.trustNum}}</label><span>信任</span></div>
@@ -171,9 +171,9 @@
           nickname: data.name || "-",
           headimg: (data.icon && this.HostUrl.http+"image/"+data.icon) || "/static/images/default_avator.png",
           tradeWidthNum: data.mytrade || 0,
-          orderNum: data.order || 0,
+          orderNum: data.trade || 0,
           volumn: data.volumes && data.volumes.toString().formatFixed(6)+"+BTC",
-          praiseRate: data.rate && data.rate+"%" || "0%",
+          praiseRate: !data.trade?"-":data.rate+"%",
           trustedNum: data.trusted || 0,
           trustNum: data.trust || 0,
           securedNum: data.secured || 0,

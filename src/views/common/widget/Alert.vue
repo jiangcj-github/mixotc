@@ -39,7 +39,7 @@
         if(this.onCancel) this.onCancel();
       },
       onClickNative(){
-        if(this.autoHide){
+        if(this.clickHide){
           this.show=false;
         }
       },

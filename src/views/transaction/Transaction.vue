@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="transacation inner" @click="showPopup=false">
+    <div class="transacation inner">
       <!--头部搜索栏-->
       <div class="header">
         <h2 class="clearfix">
@@ -49,7 +49,8 @@
           </div>
         </div>
         <ul class="top5">
-          <li v-for="(item, index) in hotCoinList" @click="hotCoinSelect(item, index)" :class="{'top-active': item.currency == filte.currency}">
+          <li v-for="(item, index) in hotCoinList" @click="hotCoinSelect(item, index)"
+              :class="{'top-active': item.currency.toLocaleString() == filte.currency.toLowerCase()}">
             <img src="/static/images/hot_coin.png" alt="">
             <p>
               <img :src="`${HostUrl.http}image/${item.icon}`" alt="">
@@ -98,19 +99,19 @@
             <span @click="sort()">广告主</span>
           </p>
           <p class="deal-volume sort"
-             title="该币种已成交总量"
+             title="已成交的数字币总量"
              :class="{'sort-add': filte.volume === 2, 'sort-minus': filte.volume === 1}"
           >
-            <span @click="sort('volume')">已成交量</span>
+            <span @click="sort('volume')">成交量</span>
           </p>
           <p class="order-volume sort"
-             title="该币种已成交的订单量"
+             title="已完成的交易次数（订单和担保）"
              :class="{'sort-add': filte.order === 2, 'sort-minus': filte.order === 1}"
           >
-            <span @click="sort('order')">完成订单量</span>
+            <span @click="sort('order')">交易次数</span>
           </p>
           <p class="good-reputation sort"
-             title="该币种交易中获得的好评率"
+             title="该用户的好评率（订单和担保）"
              :class="{'sort-add': filte.rate === 2, 'sort-minus': filte.rate === 1}"
           >
             <span @click="sort('rate')">好评率</span>
@@ -155,12 +156,7 @@
         </div>
       </div>
     </div>
-    <!--<img src="/static/images/hint.png"> v-clickoutside="closeLayer"-->
-    <BasePopup class="popup" :show="showPopup" :top="29.17" v-on:click.native="showPopup=false">
-      <slot>
-        <p class="popErr"><span v-html="popupTip"></span></p>
-      </slot>
-    </BasePopup>
+    <Alert ref="alert"></Alert>
   </div>
 </template>
 
@@ -168,13 +164,14 @@
   import ResultListItem from './children/ResultListItem';
   import Pagination from '@/views/verify/component/Pagination';
   import BasePopup from '@/components/common/BasePopup';
-  import timeout from "@/js/Timeout.js";
+  import Alert from "../common/widget/Alert"
 
   export default {
     components: {
       ResultListItem,
       Pagination,
       BasePopup,
+      Alert,
     },
     data() {
       return {
@@ -215,9 +212,6 @@
         },
         largeTran: 0, //大额交易选择状态
 
-        showPopup: false,
-        popupTip: '出错',
-
         result: [],
         total: 1,
         curPage: 1,
@@ -236,8 +230,11 @@
       }
       this.fetchData();
       this.Bus.$on("onOrderFail",(msg) => {
-        this.verifyState(msg);
-
+        if(msg==="未登录"){
+          this.$store.commit({type: 'changeLoginForm', data: true});
+        }else{
+          this.$refs.alert.showAlert({content:msg});
+        }
       });
       this.Bus.$on("onPageChange",(p) => {
         this.curPage=p;
@@ -275,7 +272,7 @@
         this.loadTips();
       },
       //列表项搜索
-      search(e) {console.log(e);
+      search(e) {
         if(!e) e={};
         if (this.srchType === 0) {
           this.filte.user = "";
@@ -356,7 +353,6 @@
             this.err = 0;
             this.total=res.data.amount;
             this.parseResult(res.data.sales);
-            // console.log('广告2', res.data.sales)
           }
         }).catch((msg) => {
           if (!msg)
@@ -375,7 +371,7 @@
             nickname: e.trader || "-",
             dealVolume: e.volume && (e.volume + "").formatFixed(6) || 0,
             orderVolume: e.trade && (e.trade + "").formatFixed(6) || 0,
-            rate: e.rate && e.rate + "%" || "-",
+            rate: !e.trade ? "-":e.rate + "%" ,
             priceMin: e.min,
             priceMax: e.max,
             pay_zfb: e.payments % 2 === 1,
@@ -388,7 +384,6 @@
             type: this.filte.type
           });
         });
-        // console.log('广告', this.result)
       },
       //最小限额输入处理
       inputDealMin() {
@@ -435,13 +430,6 @@
           return;
         }
         title && this.filte[title] === 2 && (this.filte[title] = 1);
-      },
-      verifyState(msg) {
-        this.popupTip = msg;
-        this.showPopup = true;
-        timeout(()=>{
-          this.showPopup=false;
-        },3000);
       },
       hotCoinSelect(item, index) { // 热门选择
         this.filte.currency = item.currency;

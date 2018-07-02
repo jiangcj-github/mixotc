@@ -15,7 +15,6 @@
       <Slider onSliderOk="onSliderOk" ref="slider"></Slider>
       <div class="yzm">
         <div class="show-tip2" v-show="showTip2">请输入正确的验证码</div>
-        <span v-show="moveTip"><img src="/static/images/hint.png" alt="">&nbsp;<b>请先拖拽滑块</b></span>
         <p>
           <input type="text" placeholder="验证码" @keydown.enter="login" v-model.trim="code" :disabled="!canInputCode" @focus="onCodeFocus" @blur="onCodeBlur">
           <img class="cancel" src="/static/images/cancel_icon.png" alt="" v-show="code.length>0" @click="code = ''">
@@ -55,21 +54,18 @@
     name: "login",
     data() {
       return {
-        showForm: true,
-        moveTrue: false,
-        agree: true,
-        account: '',
         showAccountHistory: false,
         accountHistory: [],
+
+        account: '',
+        moveTrue: false,      //滑块标识
         code: '',
-        type: true,
-        accType: '',
-        captcha: true,
-        moveTip: false,
+        agree: true,
+        time:'',    // 验证码倒计时
+
+        showForm: true,
         loginSuccess: false,
-        time:'',
         timer: null,
-        sendCodeText: '发送验证码',
 
         showTip1: false,
         showTip2: false,
@@ -107,7 +103,7 @@
     },
     methods: {
       hidePopup() {
-        this.loginSuccess = false
+        this.loginSuccess = false;
         this.hideLoginForm();
       },
       checkAccount() {
@@ -166,14 +162,8 @@
         },1000,"timer_code");
       },
       sendCode(){
-        if(this.time>0) return;
-        this.type = this.checkAccount();
-        this.accType = this.type;
-        if (!this.type) return;
-        if (!this.moveTrue) {
-          this.moveTip = true;
-          return;
-        }
+        if(!this.canSendCode) return;
+        let accType = this.checkAccount();
         this.sendCodeErr=1;       //正在发送验证码
         //发送验证码
         let ws =this.WebSocket;
@@ -204,18 +194,16 @@
             seq: seq,
             body:{
               action:"send_code",
-              phone: this.accType === "phone" ? this.account : "",
-              email: this.accType === "email" ? this.account : "",
+              phone: accType === "phone" ? this.account : "",
+              email: accType === "email" ? this.account : "",
               os: 3
             }
           }))
         };
       },
       login(){
-        this.type = this.checkAccount();
-        this.captcha = this.checkCaptcha();
-        this.accType = this.type;
-        if(!this.type || !this.captcha) return;
+        if(!this.canLogin) return;
+        let accType = this.checkAccount();
         this.loginErr=1;          //正在登录
         let ws =this.WebSocket;
         ws.start(this.HostUrl.ws);
@@ -223,7 +211,8 @@
         ws.onMessage[seq] = {
           callback: (data)=>{
             this.loginErr=0;      //登录结束
-            if(!data||!data.body||data.body.ret===1){
+            // 登陆失败
+            if(!data||!data.body){
               this.$refs.alert.showAlert({content:"登录失败"});
               return;
             }
@@ -240,16 +229,13 @@
               this.$refs.alert.showAlert({content:"登录失败"});
               return;
             }
-            if(data.body.ret === 8) {
-              this.captcha = false;
-              return;
-            }
+            //登陆成功
             this.showForm = false;
             this.loginSuccess = true;
             clearTimeout(this.timer);
             this.timer = setTimeout(() => {
               this.hidePopup();
-            },3000)
+            },3000);
             if(data.body && this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
               this.$store.commit({ type: 'initState'})
             }
@@ -278,8 +264,8 @@
             seq: seq,
             body:{
               action: 'login',
-              phone: this.accType === "phone" ? this.account : "",
-              email: this.accType === "email" ? this.account : "",
+              phone: accType === "phone" ? this.account : "",
+              email: accType === "email" ? this.account : "",
               code: this.code,
               country: 'CN',
               version: 1,
@@ -302,7 +288,6 @@
       }
       this.Bus.$on("onSliderOk", () => {
         this.moveTrue = true;
-        this.moveTip = false;
         this.canSendCode && this.sendCode();
       })
     },

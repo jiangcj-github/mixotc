@@ -74,7 +74,9 @@
             <b>{{contentData.currency && contentData.currency.toUpperCase()}}</b>
           </div>
         </div>
+        <!--
         <p class="charge" v-if="contentData.type == 2">手续费：0.2% {{processNum}}{{contentData.currency && contentData.currency.toUpperCase()}}</p>
+        -->
         <div class="rules" @click="agree = !agree">
           <img src="/static/images/rules_checked.png" alt="" v-if="agree">
           <img src="/static/images/rules_unchecked.png" alt="" v-else>
@@ -214,7 +216,7 @@
         this.selectPrice = this.priceList.filter(item => {
           return item.currency === this.contentData.currency;
         })
-        this.rate = this.selectPrice[0] && this.selectPrice[0].cny
+        this.rate = this.contentData.price;
       },
       // 获取币种图标
       async getCoinIcon() {
@@ -246,7 +248,7 @@
         this.money = /^\d+\.?\d{0,2}$/.test(this.money) || this.money === '' ? this.money : this.moneyValue;
         this.amount = (this.money / (this.rate)).formatFixed(6);
         this.money === '' && (this.amount = '');
-        this.processNum = 0.002 * (this.amount * 1)
+        //this.processNum = 0.002 * (this.amount * 1)
       },
       checkMoney(value) {
         this.moneyValue = value
@@ -255,7 +257,7 @@
         this.amount = /^\d+\.?\d{0,6}$/.test(this.amount) || this.amount === '' ? this.amount : this.amountValue;
         this.money = (this.amount * this.rate).formatFixed(2);
         this.amount === '' && (this.money = '');
-        this.processNum = 0.002 * (this.amount * 1)
+        //this.processNum = 0.002 * (this.amount * 1)
       },
       checkAmount(value) {
         this.amountValue = value;

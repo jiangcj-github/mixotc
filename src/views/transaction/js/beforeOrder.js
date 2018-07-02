@@ -5,14 +5,13 @@ let beforeOrder=async function(vue,param) {
     id: param.id,   //广告ID,BigInt
     sid: param.sid,   //发布人ID，BigInt
     currency: param.currency.toLowerCase(),   //广告货币,btc
-    type: param.type
+    type: param.type      //订单类型:1-出售(我买)，2-购买(我卖)
   };
 
   //是否登录
   if (!vue.$store.state.isLogin) {
     return Promise.reject("未登录");
   }
-
   let ws = vue.WsProxy;
   let isVerify = vue.$store.state.userInfo.verify;
   let loginUid = vue.$store.state.userInfo.uid;
@@ -24,7 +23,7 @@ let beforeOrder=async function(vue,param) {
   }
 
   // 是否设置资金密码
-  if (opt.type == 2 && fundPass === 1) { // 提醒设置支付密码
+  if (opt.type === 2 && fundPass === 1) { // 提醒设置支付密码
     return Promise.reject('请先设置<a href="#/personal/safe" style="text-decoration: underline; color: #FFB422">支付密码</a>');
   }
 
@@ -37,7 +36,7 @@ let beforeOrder=async function(vue,param) {
   let isExist=new Promise((resolve,reject)=>{
     ws.send("otc", "sale_detail", {id:opt.id}).then(data => {
       if(data.state === 2 ) {
-        reject("广告不存在");
+        reject("广告已下架");
       }else{
         resolve();
       }
@@ -48,31 +47,23 @@ let beforeOrder=async function(vue,param) {
 
   //钱包
   let hasWallet=new Promise((resolve,reject)=>{
-    ws.send("wallet", "wallets", {uid: loginUid,}).then((data)=> {
+    ws.send("wallet", "wallets", {uid: loginUid}).then((data)=>{
       let walletList = [], useBalace;
       data.wallets.forEach(v => {
         walletList.push(v.currency)
-      })
+      });
       if(walletList.indexOf(opt.currency) < 0) {
         reject('请先<a href="#/wallet/account" style="text-decoration: underline; color: #FFB422">创建钱包</a>');
         return
       }
       useBalace = data.wallets.filter(v => {
         return v.currency === opt.currency
-      })
+      });
       if(opt.type === 2 && useBalace[0].balance === 0) {
         reject(`可用余额不足，<a href="#/wallet/charge?coin=${opt.currency}" style="text-decoration: underline; color: #FFB422">去充币</a>`)
         return
       }
-      if(data.wallets){
-        resolve();
-      } else{
-        ws.send('wallet', 'new_wallet',{currency: opt.currency}).then((data)=> {
-          resolve();
-        }).catch(()=>{
-          reject("创建" + opt.currency.toLowerCase() + "钱包失败");
-        });
-      }
+      resolve();
     }).catch((msg)=>{
       reject("获取钱包失败");
     });
@@ -82,7 +73,7 @@ let beforeOrder=async function(vue,param) {
   let hasUnfinishOrder=new Promise((resolve,reject)=>{
     ws.send('otc', 'orders', {type:1, state: '1,2,3', origin: 0}).then(data => {
       if(data.orders){
-        reject("有未完成的订单");
+        reject('有未完成的订单，<a href="#/order" style="text-decoration: underline; color: #FFB422">我的订单</a>');
       }else{
         resolve();
       }

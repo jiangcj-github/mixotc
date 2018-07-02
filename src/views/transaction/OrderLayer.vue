@@ -13,7 +13,7 @@
         <p>下单后此订单的比特币将托管锁定，请放心{{titleType[type-1]}}</p>
         <div class="btn-group clearfix">
           <em @click="closeOrderLayer">取消</em>
-          <i @click="firmOrder">确认订单</i>
+          <i @click="firmOrder">确认{{titleType[type-1]}}</i>
         </div>
       </div>
     </BasePopup>

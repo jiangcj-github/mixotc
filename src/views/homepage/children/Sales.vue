@@ -115,25 +115,6 @@
     },
     methods: {
       loadSales(){
-        /*
-        this.WsProxy.send('otc','his_sales',{
-          id: this.uid,origin:0,type:this.fltType,currency: this.fltCoin
-        }).then((data)=>{
-          if(!data||!data.sales||data.sales.length<=0){
-            this.err=1;
-          }else{
-            this.err=0;
-            this.Bus.$emit("onSaleTotalUpdate",data.sales.length);
-            this.parseSales(data.sales);
-          }
-        }).catch((msg)=>{
-          if(!msg){
-            this.err=2; //网络异常
-          }else if(msg.ret!==0){
-            this.err=3; //加载异常
-          }
-        });
-        */
         this.Proxy.hp_sales({
           uid: this.uid,origin:0,type:this.fltType,currency: this.fltCoin
         }).then((data)=>{

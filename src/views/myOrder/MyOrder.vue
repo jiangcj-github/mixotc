@@ -82,7 +82,7 @@
           </li>
           <li>
             <p :class="JsonBig.stringify(content.buyer) == userId ? 'text-g' : 'text-r'" class="hidden-text" :title="content.amountc">{{JsonBig.stringify(content.buyer) == userId ? `+${content.amountc && content.amountc.toString().formatFixed(6)}` : `-${content.amountc && content.amountc.toString().formatFixed(6)}`}}</p>
-            <p class="hidden-text" :title="content.fee !==0 && content.fee">{{content.fee === 0 ? '' : content.fee.toString().formatFixed(6)}}</p>
+            <p class="hidden-text" :title="content.fee !==0 && content.fee" v-show="content.showFee">{{content.fee === 0 ? '' : content.fee.toString().formatFixed(6)}}</p>
           </li>
           <li>
             <em class="hidden-text" :title="content.amountm">{{content.amountm}}</em>
@@ -104,7 +104,7 @@
               <span v-else-if="operation.flag===7" @click="openSelect($event, operation, index, content)" :class="{disabled:content.timeToAppeal>0}">
                 {{operation.name}}<i v-if="content.timeToAppeal>0">({{content.timeToAppeal.formatSecord()}})</i>
               </span>
-              <span v-else-if="operation.flag===9" @click="openSelect($event, operation, index, content)">{{operation.name}}</span>
+              <span v-else-if="operation.flag===9 && !content.isApealed" @click="openSelect($event, operation, index, content)">{{operation.name}}</span>
               <span v-else-if="operation.flag===5" @click="remindCoin(content)">{{operation.name}}</span>
               <span v-else-if="operation.flag===6" @click="remindCoin(content)">{{operation.name}}</span>
             </p>
@@ -480,8 +480,12 @@
                 this.endTime = (v.limit - (Math.floor(new Date().getTime() / 1000) - v.create * 1) / 60) * 60000
                 this.showOverTimer();
               }
+              //交易失败不显示手续费
+              v.showFee=!(v.state===4|| v.state===5||v.state===11);
+              //是否被申诉人
+              v.isApealed=(v.type===1&&v.flag===2)||(v.type===2&&v.flag===1);
               // 数据格式化
-              v.price = this.JsonBig.stringify(v.price).formatFixed(2)
+              v.price = this.JsonBig.stringify(v.price).formatFixed(2);
               // 状态数组
               let stateListObject = {
                 1: [{name: '待付款', flag: 3}],

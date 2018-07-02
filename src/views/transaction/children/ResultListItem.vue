@@ -44,12 +44,8 @@ export default {
         type: data.type
       }).then(()=>{
         this.$router.push({ name: 'order', query: { id: data.id}});
-      }).catch((res)=>{
-        if(res==="未登录") {
-          this.$store.commit({type: 'changeLoginForm', data: true});
-        }else{
-          this.Bus.$emit(this.onOrderFail,res);
-        }
+      }).catch((res)=>{console.log(data);
+        this.Bus.$emit(this.onOrderFail,res);
       });
     },
   },

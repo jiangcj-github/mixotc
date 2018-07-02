@@ -75,7 +75,7 @@
                   <p class="opera op1" v-if="e.hasWallet">
                     <a class="btn white" :href="'/#/wallet/charge?coin='+e.abbr">充币</a>
                     <!--<a class="btn white" :href="'/#/wallet/withdraw'+e.abbr">提币</a>-->
-                    <a class="btn white" href="/#/">交易</a>
+                    <a class="btn white" :href="'/#/transaction?icon='+e.icon0+'&currency='+e.abbr+'&name='+e.name">交易</a>
                   </p>
                   <p class="opera op2" v-else="">
                     <button class="btn green" @click="createWallet(i)">加入钱包</button>
@@ -318,6 +318,7 @@
           let item={};
           item.hasWallet=(e.address!=null);
           item.icon=this.HostUrl.http + "/image/"+e.icon;
+          item.icon0=e.icon;
           item.abbr=e.currency.toUpperCase();
           item.name=e.name;
           item.avail=item.hasWallet?"0":"-";
