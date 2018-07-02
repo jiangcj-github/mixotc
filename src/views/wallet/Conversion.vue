@@ -48,7 +48,7 @@
                 <p>可划转数量：{{selectedCoin.avail}} {{selectedCoin.coin}}</p>
                 <div class="input-group">
                   <input type="text" class="input" v-model.trim="amount">
-                  <img class="clear" src="/static/images/cancel_icon.png" v-show="amount.length>0" @click="amount=''">
+                  <img class="clear" src="/static/images/cancel_icon.png" v-show="amount.length!=null" @click="amount=''">
                   <a href="javascript:void(0)" class="addin btn green" @click="amount = selectedCoin.avail">全部</a>
                 </div>
                 <label>密码：</label>
@@ -70,8 +70,8 @@
           <div class="list">
             <div class="title">
               <h3>账户互转明细</h3>
-              <a href="#" class="btn white a1">去交易</a>
-              <a href="#" class="a2">查看全部</a>
+              <a href="/#/transaction" class="btn white a1">去交易</a>
+              <a href="/#/wallet/history?type=12" class="a2">查看全部</a>
             </div>
             <div class="thead">
               <p class="th time">时间</p>
