@@ -238,7 +238,7 @@
       });
       this.Bus.$on("onPageChange",(p) => {
         this.curPage=p;
-        this.fetchData();
+        this.fetchData(p-1);
       });
     },
     destroyed() {
@@ -329,7 +329,7 @@
         }
       },
       //拉取广告数据
-      fetchData() {
+      fetchData(p=0) {
         this.Proxy.sales({
           type: this.filte.type,
           payment: this.filte.payment,
@@ -345,7 +345,7 @@
           volume: this.filte.volume,
           rate: this.filte.rate,
           tradeable: this.filte.tradeable,
-          page: this.curPage-1,
+          page: p,
         }).then(res => {
           if (!res || !res.data || !res.data.sales || res.data.sales.length <= 0)
             this.err = 1; //无数据
@@ -496,6 +496,7 @@
           } else {
             this.largeTran = 0
           }
+          //拉取数据
           this.fetchData();
         },
         deep: true

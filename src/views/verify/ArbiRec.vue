@@ -171,7 +171,7 @@
       this.loadArbiLists();
       this.Bus.$on("onPageChange",(p) => {
         this.curPage=p;
-        this.loadArbiLists();
+        this.loadArbiLists(p-1);
       });
       this.Bus.$on("onDiChange",()=>{
         this.loadArbiLists();
@@ -189,7 +189,7 @@
       search(){
         this.loadArbiLists();
       },
-      loadArbiLists(){
+      loadArbiLists(p=0){
         //请求参数
         let srchKey1=null;  //申诉人
         let srchKey2=null;  //被申诉人
@@ -227,7 +227,7 @@
           end: end,
           duration: sortByDuration,
           create: sortByCreate,
-          origin: this.curPage-1,
+          origin: p,
           count: this.pageSize,
         }).then((data)=>{
           if(!data||!data.appeals||data.appeals.length<=0){

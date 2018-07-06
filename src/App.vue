@@ -56,87 +56,80 @@
         window.location.href = this.HostUrl.download + 'download.html'
       }
     },
+
     created() {
       let flag = this.getUrl('token');
-      this.listenOffline();
       window.addEventListener('scroll', this.handleScroll);
-      this.$store.commit({type: 'changeLoginForm', data: false})
+      this.$store.commit({type: 'changeLoginForm', data: false});
       let ws = this.WebSocket;
       let seq = ws.seq;
       // 交易所跳转时带token处理
       if(flag){
         ws.onMessage[seq] = {
          callback: (data) => {
-           if(!data || data.body.ret !== 0) {
-             window.location = '/'
-             return;
-           };
-           if(data.body && this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
-             this.$store.commit({ type: 'initState'})
-           }
-           this.$store.commit({
-               type: 'getUserInfo',
-               data: data.body
-             });
-           data.body.token && this.$store.commit({ type: 'changeToken', data: data.body.token })
-             data.body.token && localStorage.setItem('getToken', JSON.stringify({
-               phone:data.body.phone,
-               email:data.body.email,
-               token: data.body.token,
-               code: data.body.code
-             }));
-            //  this.$store.commit({ type: 'changeLogin', data: true });
-             this.Storage.loginTime.set(new Date() - 0)
-             localStorage.removeItem('getToken')
-            window.location = '/'
+            if(!data || !data.body || data.body.ret !== 0) return;
+
+            //let data={"ver":1,"op":18,"seq":1,"body":{"ret":0,"msg":"","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJwaG9uZSI6IjE1ODEwMjY5NjUzIiwiZW1haWwiOiIiLCJjb2RlIjoiIiwiY291bnRyeSI6IkNOIiwidmVyc2lvbiI6MSwiZGV2aWNlIjoiV2luZG93cyAxMC9DaHJvbWU2Ny4wLjMzOTYuOTkiLCJtb2RlIjowLCJvcyI6MywiaXAiOiIxMjcuMC4wLjEiLCJzZXJ2ZXIiOjEsImltZWkiOiIiLCJ0b2tlbiI6ImV5SmhiR2NpT2lKSVV6STFOaUlzSW5SNWNDSTZJa3BYVkNKOS5leUpwWVhRaU9qRTFNekEzTURJNU16TXNJbVZ0WVdsc0lqb2lJaXdpZFdsa0lqb3lNakl6T0RJd01qRTVOREUwTURNMk5EZ3NJbkJvYjI1bElqb2lNVFU0TVRBeU5qazJOVE1pZlEucHpsZUUwRUxZTkFKY2h0bE05LWg1UFliaWdTOE5aaXpBZEY1c0pCQzVUSSJ9.i9Bm-dOsBaViET99whaQRUl9yBv-XGTek4TCbLQ69kc","uid":222382021941403645,"is_admin":false,"name":"lindakai2","phone":"15810269653","email":"","icon":"","friend":0,"group":0,"verify":2,"verifytime":1527822893,"btverify":0,"bt_verifytime":1527822893,"is_new":0,"version":0,"must_update":false,"os":0,"auth":0,"race_keys":null}}
+
+           let userInfo=this.$store.state.userInfo;
+            if(userInfo && this.JsonBig.stringify(userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
+              this.$store.commit({ type: 'initState'})
+            }
+            this.$store.commit({type: 'getUserInfo', data: data.body});
+            if(data.body.token){
+              this.$store.commit({ type: 'changeToken', data: data.body.token });
+              localStorage.setItem('getToken', JSON.stringify({
+                phone:data.body.phone,
+                email:data.body.email,
+                token: data.body.token,
+                code: data.body.code
+              }));
+              localStorage.removeItem("getToken");
+            }
+            this.$store.commit({ type: 'changeLogin', data: true });
+            this.Storage.loginTime.set(new Date() - 0);
          },
          date: new Date()
-       }
-       ws.onOpen['otherLogin'] = () => {
+       };
+        ws.onOpen['otherLogin'] = () => {
            ws.send(sendConfig('login',{
              seq: seq,
              body:{
                action: 'login',
                country: 'CN',
                version: 1,
-               mode: 0,
+               mode: 2,
                device: `${detectOS()}/${getExplorerInfo()}`,
                os: 3,
                token: flag
              }
            })
          )
-       }
-       ws.start(this.HostUrl.ws);
-      }else{
-        // 单开新页面正常处理
-        //发送token登录后的处理
+       };
+        ws.start(this.HostUrl.ws);
+
+      }else if(this.token){
+        //有token自动登录
         !ws.onMessage['token']  && (ws.onMessage['token'] = {
           callback: (data) => {
-            if (data.op !== 18) return;
-            if (data.body.ret !== 0) {
+            if (!data || data.op !== 18) return;
+            if (!data.body || data.body.ret !== 0) {
               this.$store.commit({ type: 'changeToken', data: '' })
               ws.reConnectFlag = false;
               if (!this.authority(this.toPath)) {
-                !this.$store.state.token && this.$router.push({
-                  name: "transaction"
-                });
+                !this.token && this.$router.push({name: "transaction"});
               }
               return;
             }
             ws.reConnectFlag = true;
             data.body['code'] = this.$store.state.userInfo.code;
-            this.$store.commit({
-              type: 'getUserInfo',
-              data: data.body
-            });
-            if(data.body && this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
+            this.$store.commit({type: 'getUserInfo', data: data.body});
+            let userInfo=this.$store.state.userInfo;
+            if(userInfo && this.JsonBig.stringify(userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
               this.$store.commit({ type: 'initState'})
             }
             this.$store.commit({type: 'changeLogin', data: true});
             this.Storage.loginTime.set(new Date() - 0)
-
-            // this.watchTokenFlag = false
           }
         });
         ws.onOpen['token'] = () => {
@@ -158,17 +151,16 @@
                 // code: this.$store.state.userInfo && this.$store.state.userInfo.code,
                 country: 'CN',
                 version: 1,
-                mode: 1,
+                mode: 2,
                 device: `${detectOS()}/${getExplorerInfo()}`,
                 os: 3,
                 token: this.token
               }
           }))
-        }
-        this.token && ws.start(this.HostUrl.ws);
+        };
+        ws.start(this.HostUrl.ws);
       }
-
-
+      this.listenOffline();
     },
     mounted() {
       //websock发包接口需先判断登录状态
@@ -176,7 +168,7 @@
         let op =  this.JsonBig.parse(txt).op;
         //发送验证码17 登录15 需放行
         if (this.token || op === 17 || op === 15) return true;
-        this.$store.commit({type: 'changeLoginForm', data: true})
+        this.$store.commit({type: 'changeLoginForm', data: true});
         return false;
       }
     },
@@ -231,7 +223,7 @@
               this.showPopup();
               this.logout();
               return;
-            };
+            }
             //错误码为250时，提示服务器维护中，做退出操作
             if(res.body && (res.body.ret === 250 || res.body.type === 'offline_maintaining' && res.body.data.mantain && [3, 4].includes(res.body.data.mantain))) {
               this.showErr();
@@ -279,9 +271,7 @@
         this.WebSocket.close();
         //其他页面跳转至主页'
         if (this.authority(this.$route.path)) return;
-        this.$router.push({
-              name: "transaction"
-            })
+        this.$router.push({name: "transaction"});
       }
     },
     computed: {
@@ -314,19 +304,18 @@
           //登录时设置定时器，绑定事件监听用户操作(任意一个选项卡有点击即重新计时)
             window.onmousedown = (event) => {
               //用户操作时重新计时
-              console.log('click', new Date())
               this.Storage.loginTime.set(new Date() - 0);
-            }
+            };
             this.Loop.isOverTime.clear();
             this.Loop.isOverTime.set(() => {
               // 10分钟无操作则自动退出
               let flag = new Date() - 0 - this.Storage.loginTime.get() > 3600000;
               if(flag) {
-                console.log('十分钟无操作， 退出', new Date(), new Date(this.Storage.loginTime.get()))
-                this.logout()
-              };
-            }, 1000)
-            this.Loop.isOverTime.start()
+                console.log('十分钟无操作， 退出', new Date(), new Date(this.Storage.loginTime.get()));
+                this.logout();
+              }
+            }, 1000);
+            this.Loop.isOverTime.start();
 
             //定时查询token，token删除即退出登录
             this.timer2 && (this.timer2 = clearInterval(this.timer2));

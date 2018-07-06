@@ -5,7 +5,7 @@ export default {
   // http: "http://192.168.113.26/",
 
   // 正式服
-   ws: "wss://mixotc.com/sub",
+  ws: "wss://mixotc.com/sub",
   http: "https://mixotc.com/",
 
   // app地址前缀

@@ -236,26 +236,24 @@
             this.timer = setTimeout(() => {
               this.hidePopup();
             },3000);
-            if(data.body && this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
+            if(this.$store.state.userInfo && this.JsonBig.stringify(this.$store.state.userInfo.uid) !== this.JsonBig.stringify(data.body.uid)) {
               this.$store.commit({ type: 'initState'})
             }
             data.body['code'] = this.code;
-            this.$store.commit({
-              type: 'getUserInfo',
-              data: data.body
-            });
-            this.saveAccount(this.account)
-            data.body.token && this.$store.commit({ type: 'changeToken', data: data.body.token })
-            data.body.token && localStorage.setItem('getToken', JSON.stringify({
-              phone:data.body.phone,
-              email:data.body.email,
-              token: data.body.token,
-              code: data.body.code
-            }));
+            this.$store.commit({type: 'getUserInfo', data: data.body});
+            this.saveAccount(this.account);
+            if(data.body.token){
+              this.$store.commit({ type: 'changeToken', data: data.body.token });
+              localStorage.setItem('getToken', JSON.stringify({
+                phone:data.body.phone,
+                email:data.body.email,
+                token: data.body.token,
+                code: data.body.code
+              }));
+              localStorage.removeItem("getToken");
+            }
             this.$store.commit({ type: 'changeLogin', data: true });
-            this.Storage.loginTime.set(new Date() - 0)
-            localStorage.removeItem('getToken')
-
+            this.Storage.loginTime.set(new Date() - 0);
           },
           date:new Date()
         };

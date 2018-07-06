@@ -201,25 +201,15 @@ const RUN_APP = (App, config, plugin) => {
     }
   });
 
-
-
   let changeTabIndex = function() {
     if (localStorage["tabIndex"]) {
-      tabIndex = Number(localStorage["tabIndex"]) + 1;
-      localStorage["tabIndex"] = tabIndex;
-    }
-
-    if (!localStorage["tabIndex"]) {
+      localStorage["tabIndex"] = Number(localStorage["tabIndex"]) + 1;
+    }else{
       localStorage["tabIndex"] = 0;
     }
   };
 
   changeTabIndex();
-
-  // console.log('vm.reload',Number(localStorage['tabIndex']),!Number(localStorage['tabIndex']))
-  // if (!Number(localStorage["tabIndex"])) {
-  //   vm.reload();
-  // }
 
   window.addEventListener("storage", function(event) {
     // console.log(event.key, !sessionStorage.length);
@@ -235,7 +225,7 @@ const RUN_APP = (App, config, plugin) => {
       store.commit({ type: "changeToken", data: "" });
     } else if (event.key == "sessionStorage" && isNewTab) {
       // 新开启的标签页会收到这个事件
-      // console.log('新开启的标签页')
+       //console.log('新开启的标签页')
       let data = JsonBig.parse(event.newValue);
       // console.log(3, 'sessionStorage 0', event.newValue, data)
       for (let key in data) {
@@ -260,20 +250,32 @@ const RUN_APP = (App, config, plugin) => {
       // 一个页面登录，让其他页面获取token
       if (!event.newValue) return;
       let params = JSON.parse(event.newValue);
-      // console.log(params);
       store.commit({ type: "changeToken", data: params.token});
       store.commit({ type: "changeCode", data: {
         code: params.code,
         email: params.email,
         phone: params.phone
       }});
-      location.reload()
+      //清除totken
+      if(getUrl("token")){
+        location = '/';
+      }else{
+        location.reload();
+      }
     }
   });
 
+  let getUrl=function(para){
+    let paraArr = window.location.search.substring(1).split('&');
+    for(let i = 0;i < paraArr.length;i++){
+      if(para == paraArr[i].split('=')[0]){
+        return paraArr[i].split('=')[1]
+      }
+    }
+    return false;
+  }
+
 };
-
-
 
 export {
   RUN_APP

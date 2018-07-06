@@ -53,6 +53,7 @@ export default {
   },
   [types.changeToken](state, { data }) {
     state.token = data;
+    state.userInfo.token=data;
   },
   [types.changeCode](state, { data }) {
     state.userInfo = {};
@@ -160,7 +161,7 @@ export default {
       if (item.id === data.msg.id) isSame = true;
     });
     !isSame && state.messages[data.id].push(data.msg);
-    
+
     data.id === "system" && state.curChat !== "system" && state.systemMessage++;
     data.id !== "system" &&
       state.curChat !== data.id &&

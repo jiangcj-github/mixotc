@@ -94,6 +94,10 @@
     components: {
       BasePopup
     },
+    mounted(){
+      //let uid = this.JsonBig.stringify(this.$store.state.userInfo.uid);
+      //console.log("===================",encrypt("12345678a","197154964416499712"),uid,this.$store.state.userInfo.uid)
+    },
     destroyed() {
       clearInterval(this.timer);
       clearTimeout(this.timer2);

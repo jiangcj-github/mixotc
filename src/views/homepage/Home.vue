@@ -1,7 +1,7 @@
  <template>
   <div class="homepage inner">
     <div class="navigation">
-      <h3><a href="/#/">mixOTC</a>-<a :href="'/#/homepage?uid='+uid">{{info.nickname}}的个人主页</a></h3>
+      <h3><router-link tag="a" to="/">mixOTC</router-link>-<router-link tag="a" :to="'/homepage?uid='+uid">{{info.nickname}}的个人主页</router-link></h3>
     </div>
     <!-- 个人交易信息 -->
     <div class="info-sec">
@@ -23,7 +23,7 @@
               <button class="btn green" v-else="" @click="joinTrust">加入信任</button>
             </div>
           </div>
-          <div v-else="">
+          <div v-else>
             <div class="trust clearfix">
               <span class="contact isTrust" @click="$store.commit({type:'changeLoginForm', data:true})">
                 <img src="/static/images/talk.png" alt=""><i>联系TA</i>
@@ -103,6 +103,7 @@
     },
     mounted(){
       this.uid=this.$route.query.uid;
+      this.loadTraderInfo();
       this.Bus.$on("onRateTotalUpdate",(num)=>{
         this.rateNum=num;
       });
@@ -115,11 +116,8 @@
       this.Bus.$off("onSaleTotalUpdate");
     },
     watch:{
-      isLogin:{
-        handler(){
-          this.loadTraderInfo();
-        },
-        immediate: true
+      isLogin:function(){
+        this.loadTraderInfo();
       }
     },
     methods: {

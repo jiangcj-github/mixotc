@@ -42,6 +42,7 @@
       //事件
       onSearch:{type:String,default:"onSearch"},
       onFuzzy:{type:String,default:"onFuzzy"},
+      onFuzzyEmpty:{type:String,default:"onFuzzyEmpty"},
     },
     data(){
       return {
@@ -68,6 +69,7 @@
         this.isActive=true;
         if(this.srchText.length<=0){
           this.isShowTip=false;
+          this.Bus.$emit(this.onFuzzyEmpty);
           return;
         }
         this.Bus.$emit(this.onFuzzy);
@@ -75,6 +77,7 @@
       onInput(){
         if(this.srchText.length<=0){
           this.isShowTip=false;
+          this.Bus.$emit(this.onFuzzyEmpty);
           return;
         }
         this.Bus.$emit(this.onFuzzy);

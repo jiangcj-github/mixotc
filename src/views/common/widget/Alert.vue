@@ -6,8 +6,8 @@
       </div>
       <div class="alert-content"  v-html="content"></div>
       <div class="alert-btns" v-show="isShowBtns">
-        <button class="btn white" @click="onClickCancel">取消</button>
         <button class="btn green" @click="onClickOk">确定</button>
+        <button class="btn white" @click="onClickCancel">取消</button>
     </div>
     </div>
   </div>
@@ -44,20 +44,16 @@
         }
       },
       showAlert(opt={}){
-        this.isShowBtns=opt.isShowBtns || false;
-        this.isShowTitle=opt.isShowTitle || false;
-        this.title=opt.title || "标题";
-        this.content=opt.content || "内容";
-        this.onOk=opt.onOk || null;
-        this.onCancel=opt.onCancel || null;
+        this.isShowBtns=false;
+        this.isShowTitle=false;
+        this.title="标题";
+        this.content="内容";
+        this.onOk=null;
+        this.onCancel=null;
         this.autoHide=true;
-        if(opt.autoHide!=null){
-          this.autoHide=opt.autoHide;
-        }
         this.clickHide=true;
-        if(opt.clickHide!=null){
-          this.clickHide=opt.clickHide;
-        }
+        Object.assign(this,opt);
+
         this.show=true;
         if(this.autoHide){
           timeout(()=>{

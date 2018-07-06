@@ -40,8 +40,6 @@ RUN_APP(
   // [DatePicker, Slider, Switch]
 );
 
-
-
 Vue.config.productionTip = false;
 
 

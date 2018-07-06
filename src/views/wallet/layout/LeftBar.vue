@@ -1,22 +1,22 @@
 <template>
   <ul>
     <li :class="{active:leftBar===1}">
-      <a href="/#/wallet/account"><i>账号余额</i><img src="/static/images/wallet/account.png"></a>
+      <router-link tag="span" to="/wallet/account"><i>账号余额</i><img src="/static/images/wallet/account.png"></router-link>
     </li>
     <li :class="{active:leftBar===2}">
-      <a href="/#/wallet/charge"><i>充币</i><img src="/static/images/wallet/charge.png"></a>
+      <router-link tag="span" to="/wallet/charge"><i>充币</i><img src="/static/images/wallet/charge.png"></router-link>
     </li>
     <li :class="{active:leftBar===3}" v-show="0">
-      <a href="/#/wallet/withdraw"><i>提币</i><img src="/static/images/wallet/widhdraw.png"></a>
+      <router-link tag="span" to="/wallet/withdraw"><i>提币</i><img src="/static/images/wallet/widhdraw.png"></router-link>
     </li>
     <li :class="{active:leftBar===4}">
-      <a href="/#/wallet/conversion"><i>资产互转</i><img src="/static/images/wallet/conversion.png"></a>
+      <router-link tag="span" to="/wallet/conversion"><i>资产划转</i><img src="/static/images/wallet/conversion.png"></router-link>
     </li>
     <li :class="{active:leftBar===5}">
-      <a href="/#/wallet/history"><i>账单</i><img src="/static/images/wallet/bid.png"></a>
+      <router-link tag="span" to="/wallet/history"><i>账单</i><img src="/static/images/wallet/bid.png"></router-link>
     </li>
     <li :class="{active:leftBar===6}" v-show="0">
-      <a href="/#/wallet/address"><i>地址管理</i><img src="/static/images/wallet/address.png"></a>
+      <router-link tag="span" to="/wallet/address"><i>地址管理</i><img src="/static/images/wallet/address.png"></router-link>
     </li>
   </ul>
 </template>
@@ -32,8 +32,8 @@
   ul>li{height:60px;background:#fff;}
   ul>li.active{border-bottom:2px solid #ffb422;background:#fff3eb;pointer-events:none;}
   ul>li:hover{background:#fff3eb;}
-  ul>li>a{height:58px;line-height:58px;padding:0 20px 0 30px;display:block;}
-  ul>li>a:hover{background:#fff3eb;}
-  ul>li>a>i{font-size: 14px;color: #333333;letter-spacing: 0.16px;}
-  ul>li>a>img{width:auto;height:20px;float:right;margin-top:18px;}
+  ul>li>span{height:58px;line-height:58px;padding:0 20px 0 30px;display:block;cursor:pointer;}
+  ul>li>span:hover{background:#fff3eb;}
+  ul>li>span>i{font-size: 14px;color: #333333;letter-spacing: 0.16px;}
+  ul>li>span>img{width:auto;height:20px;float:right;margin-top:18px;}
 </style>

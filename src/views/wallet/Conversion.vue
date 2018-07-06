@@ -11,7 +11,7 @@
           <div class="form">
             <div class="p1">
               <label>币种：</label>
-              <SearchGroup ref="sg" onSearch="onSearch" onFuzzy="onFuzzy" :tips="coinTips">
+              <SearchGroup ref="sg" onSearch="onSearch" onFuzzy="onFuzzy" onFuzzyEmpty="onFuzzyEmpty" :tips="coinTips">
                 <ul slot="fuzzy" class="fuzzy">
                   <li v-for="(e,i) in coinTips" :key="i" @click="searchCoin">
                     <p @mousedown="$refs.sg.srchText=e">{{e}}</p>
@@ -19,6 +19,7 @@
                 </ul>
               </SearchGroup>
               <div class="tip">币币交易需要资产互转</div>
+              <a :href="'https://qb.com?token='+token" target="_blank" ref="link" v-show="false"></a>
             </div>
             <div class="card">
               <div class="warn">
@@ -47,31 +48,41 @@
                 <label>数量：</label>
                 <p>可划转数量：{{selectedCoin.avail}} {{selectedCoin.coin}}</p>
                 <div class="input-group">
-                  <input type="text" class="input" v-model.trim="amount">
+                  <input type="text" class="input" v-model="amount">
                   <img class="clear" src="/static/images/cancel_icon.png" v-show="amount.length!=null" @click="amount=''">
                   <a href="javascript:void(0)" class="addin btn green" @click="amount = selectedCoin.avail">全部</a>
                 </div>
+              </div>
+              <div class="para password">
                 <label>密码：</label>
-                <div class="input-group password">
+                <div class="input-group">
                   <input type="password" class="input" v-model.trim="password">
                 </div>
+              </div>
+              <div class="para code" v-show="userInfo.phone">
                 <label>验证码：</label>
-                <div class="input-group code">
+                <div class="input-group">
                   <input type="text" class="input" v-model.trim="code">
                   <a href="javascript:void(0)" class="addin btn green" @click="sendCode" ref="sendCodeBtn">发送验证码</a>
                 </div>
               </div>
+              <div class="para code" v-show="!userInfo.phone">
+                  <label>谷歌验证码：</label>
+                  <div class="input-group">
+                    <input type="text" class="input" v-model.trim="gcode">
+                  </div>
+              </div>
               <div class="submit">
-                <button class="btn green" :class="{disabled:!canSubmit}" @click="submit">确认提交</button>
+                <button class="btn green" :class="{disabled:!canSubmit}" @click="submit" ref="submitBtn">确认提交</button>
               </div>
             </div>
           </div>
           <!--账户互转明细-->
           <div class="list">
             <div class="title">
-              <h3>账户互转明细</h3>
-              <a href="/#/transaction" class="btn white a1">去交易</a>
-              <a href="/#/wallet/history?type=12" class="a2">查看全部</a>
+              <h3>资产划转明细</h3>
+              <router-link tag="a" to="/transaction" class="btn white a1">去交易</router-link>
+              <router-link tag="a" to="/wallet/history?type=12" class="a2">查看全部</router-link>
             </div>
             <div class="thead">
               <p class="th time">时间</p>
@@ -86,7 +97,7 @@
                   <p>{{e.time1}}</p>
                   <p>{{e.time2}}</p>
                 </div>
-                <div class="type" :class="{in:e.isIn,out:!e.isIn}">转账转入</div>
+                <div class="type" :class="{in:e.isIn,out:!e.isIn}">资产划出</div>
                 <div class="coin">{{e.coin}}</div>
                 <div class="num" :class="{in:e.isIn,out:!e.isIn}">{{e.num}}</div>
                 <div class="recvAddr">{{e.recvAddr}}</div>
@@ -122,7 +133,8 @@ import encrypt from '@/js/encrypt';
 import SearchGroup from "../common/widget/SearchGroup";
 import Alert from "../common/widget/Alert";
 import timeout from "@/js/Timeout";
-
+import ErrorCode from "@/js/ErrorCode";
+import { Loading } from 'element-ui';
 
 export default {
   components: {
@@ -134,20 +146,26 @@ export default {
   data() {
     return {
       coins:{"BTC":{avail:1,addr:0,exAvail:1,exAddr:0}},
-      coinTips:["BTC","ETH"],          // 币种搜索提示列表
+      coinTips:[],          // 币种搜索提示列表
       showCoins: true,    // 显示币种搜索提示
       coin: "",        // 页面选中的币种
 
       amount: "",
       password: '',
       code: '',
+      gcode: '',
 
       lists: [],
       err: -1,
-
     };
   },
   computed:{
+    token:function(){
+      return this.$store.state.token;
+    },
+    userInfo:function(){
+      return this.$store.state.userInfo;
+    },
     selectedCoin(){
       if(this.coins[this.coin]){
         return this.coins[this.coin];
@@ -155,12 +173,18 @@ export default {
       return {coin:"",avail:0,addr:0,exAvail:1,exAddr:0}
     },
     canSubmit(){
-      return this.selectedCoin.coin && this.password && this.code;
+      if(this.userInfo.phone && !this.code){
+        return false;
+      }
+      if(this.userInfo.email && !this.gcode){
+        return false;
+      }
+      return this.selectedCoin.coin && this.password;
     }
   },
   methods: {
     searchCoin(){
-      let txt=this.$refs.sg.serchText;
+      let txt=this.$refs.sg.srchText;
       let i=0;
       for(i=0;i<this.coinTips.length;i++){
         if(txt.toUpperCase()===this.coinTips[i].toUpperCase()){
@@ -169,13 +193,13 @@ export default {
         }
       }
       if(i>=this.coinTips.length){
-        this.coin="";
+        this.coin=this.coinTips[0] || "";
       }
       this.$refs.sg.srchText=this.coin;
     },
     async init(){
       //获取otc钱包列表数据
-      let uid=this.$store.state.userInfo.uid;
+      let uid=this.userInfo.uid;
       let data=await this.WsProxy.send("wallet","wallets", {uid:uid}).catch((msg)=>{
         console.log(msg);
       });
@@ -183,6 +207,21 @@ export default {
       let data2 = await fetch(
         this.HostUrl.http+"api/v3/wallet/wallets/?user_id=" + this.JsonBig.stringify(uid)
       ).then(res => res.json());
+
+      //let data2={"wallets": [{"name": "btc", "deal": 0.0, "address": "1H8n64QLtzqbQgBJNaBChJ76LJbSrBm4VZ", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4034, "coin_id": 0}, {"name": "lsk", "deal": 0.0, "address": "15945604182327820952L", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4036, "coin_id": 2}, {"name": "bch", "deal": 0.0, "address": "bitcoincash:qrdp8zc63pekf9gpp7a4djjxg6klpp20c5623dma0t", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4037, "coin_id": 3}, {"name": "eth", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4038, "coin_id": 4}, {"name": "xas", "deal": 0.0, "address": "A4vvfDYKtfDZcgs3BR27xtf9uEeTjBDzD4", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4039, "coin_id": 5}, {"name": "iqt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4040, "coin_id": 6}, {"name": "dash", "deal": 0.0, "address": "Xf72Qv17nUqEcLdY2E9NoEVgYAWkqkCang", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4041, "coin_id": 7}, {"name": "ltc", "deal": 0.0, "address": "LhvtWBh4jJowz41NdP2BmG7dx8VS68vuSc", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4043, "coin_id": 9}, {"name": "omg", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4044, "coin_id": 10}, {"name": "pay", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4045, "coin_id": 11}, {"name": "eos", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4046, "coin_id": 12}, {"name": "rep", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4047, "coin_id": 13}, {"name": "gnt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4048, "coin_id": 14}, {"name": "mco", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4049, "coin_id": 15}, {"name": "bat", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4050, "coin_id": 16}, {"name": "icn", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4051, "coin_id": 17}, {"name": "gno", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4052, "coin_id": 18}, {"name": "dgd", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4053, "coin_id": 19}, {"name": "cvc", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4054, "coin_id": 20}, {"name": "zrx", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4055, "coin_id": 21}, {"name": "btg", "deal": 0.0, "address": "Gh5eRp9t8FZ6tkTpFpZiksnXadtFBm24Lw", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4056, "coin_id": 22}, {"name": "bcd", "deal": 0.0, "address": "14qDGS2dDFvwCnqmhZ7JNetUaYfBZHTBmY", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4057, "coin_id": 23}, {"name": "snt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4058, "coin_id": 24}, {"name": "bnt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4059, "coin_id": 25}, {"name": "fun", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4060, "coin_id": 26}, {"name": "sngls", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4061, "coin_id": 27}, {"name": "storj", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4062, "coin_id": 28}, {"name": "dnt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4063, "coin_id": 29}, {"name": "wings", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4064, "coin_id": 30}, {"name": "bqx", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4065, "coin_id": 31}, {"name": "1st", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4066, "coin_id": 32}, {"name": "rlc", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4067, "coin_id": 33}, {"name": "ae", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4068, "coin_id": 34}, {"name": "doc", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4069, "coin_id": 35}, {"name": "usdt", "deal": 0.0, "address": "14L5ifaisdmpM6WpWYzTTXqLZfzfHqBoiT", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4070, "coin_id": 36}], "user_id": "232254428780961792"}
+
+      //判断用户是否存在
+      if(!data2 || !data2.user_id){
+        this.$refs.alert.showAlert({
+          content:"还没有币币账户，是否开通",
+          autoHide:false,
+          clickHide:false,
+          isShowBtns:true,
+          onOk:()=>{
+            this.$refs.link.click();
+          }
+        })
+      }
       //计算可划转的币种
       let obj = {};
       data && data.wallets && data.wallets.forEach(e=>{
@@ -195,20 +234,60 @@ export default {
       let result={};
       data2 && data2.wallets && data2.wallets.forEach(e=>{
         if(obj[e.name.toUpperCase()]){
-          result[e.name.toUpperCase()] = Object.assign({}, obj[v.name]);
+          result[e.name.toUpperCase()] = {};
+          Object.assign(result[e.name.toUpperCase()], obj[e.name.toUpperCase()]);
           result[e.name.toUpperCase()].exAddr = e.address;
-          result[e.name.toUpperCase()].exAvail = e.address;
+          result[e.name.toUpperCase()].exAvail = e.balance.toString().formatFixed(6);
         }
       });
+      //coins格式{BTC,"...",ETH:"...}
       this.coins=result;
+      //初始选中第一个,
+      for(let k in this.coins){
+        if(this.coins.hasOwnProperty(k)){
+          let coinName=this.coins[k].coin;
+          this.$refs.sg.srchText=coinName.toUpperCase();
+          this.coin=coinName.toUpperCase();
+          break;
+        }
+      }
       //获取路由参数
-      let coin=this.$route.query.coin || "btc";
-      if(this.coins[coin.toUpperCase()]){
-        this.$refs.sg.srchText=coin.toUpperCase();
-        this.coin=coin.toUpperCase();
+      let coin=this.$route.query.coin;
+      if(coin){
+        if(this.coins[coin.toUpperCase()]){
+          this.$refs.sg.srchText=coin.toUpperCase();
+          this.coin=coin.toUpperCase();
+        }else if(!obj[coin.toUpperCase()]){
+          this.$refs.alert.showAlert({content:"无"+coin+"钱包，请先创建钱包"});
+        }else{
+          this.$refs.alert.showAlert({content:"币币账户无"+coin+"钱包"});
+        }
       }
       // 加载资金互转列表
       this.loadLists();
+      //监听事件
+      this.Bus.$on("onSearch",()=>{
+        this.searchCoin();
+      });
+      this.Bus.$on("onFuzzy",()=>{
+        let srchText=this.$refs.sg.srchText;
+        this.coinTips=[];
+        for(let k in this.coins){
+          if(!this.coins.hasOwnProperty(k)) continue;
+          if(new RegExp("^"+srchText+".*$","i").test(k)){
+            this.coinTips.push(k);
+          }
+        }
+        this.$refs.sg.isShowTip=true;
+      });
+      this.Bus.$on("onFuzzyEmpty",()=>{
+        this.coinTips=[];
+        for(let k in this.coins){
+          if(!this.coins.hasOwnProperty(k)) continue;
+          this.coinTips.push(k);
+        }
+        this.$refs.sg.isShowTip=true;
+      });
     },
     loadLists(){
       this.WsProxy.send("wallet","bills_v2",{
@@ -273,6 +352,11 @@ export default {
     },
     submit() {
       if(!this.selectedCoin || !this.password || !this.code) return;
+      //
+      let $submitBtn=this.$refs.submitBtn;
+      $submitBtn.innerText="正在提交...";
+      $submitBtn.classList.add("loading");
+      //
       let uid = this.$store.state.userInfo.uid;
       this.WsProxy.send("wallet", "withdraw", {
         uid: uid,
@@ -280,7 +364,7 @@ export default {
         to: this.selectedCoin.exAddr,
         amount: Number(this.amount),
         pass: encrypt(this.password, this.JsonBig.stringify(uid)),
-        code: this.code,
+        code: this.userInfo.phone ? this.code : this.gcode,
         mode: 1,
         trader: this.$store.state.userInfo.uid
       }).then(res=>{
@@ -288,28 +372,22 @@ export default {
         this.amount= '';
         this.password= "";
         this.code = '';
+        this.gcode= '';
+        $submitBtn.innerText="确认提交";
+        $submitBtn.classList.remove("loading");
       }).catch(msg => {
-        this.$refs.alert.showAlert({content:'转账失败'});
+        if(ErrorCode[msg.ret]){
+          this.$refs.alert.showAlert({content:ErrorCode[msg.ret]});
+        }else{
+          this.$refs.alert.showAlert({content:'转账失败'});
+        }
+        $submitBtn.innerText="确认提交";
+        $submitBtn.classList.remove("loading");
       });
     }
   },
-  mounted(){
+  created(){
     this.init();
-    this.Bus.$on("onSearch",()=>{
-      this.searchCoin();
-    });
-    //模糊搜索
-    this.Bus.$on("onFuzzy",()=>{
-      let srchText=this.$refs.sg.srchText;
-      this.coinTips=[];
-      for(let k in this.coins){
-        if(!this.coins.hasOwnProperty(k)) continue;
-        if(new RegExp("^"+srchText+".*$").test(k)){
-          this.coinTips.push(k);
-        }
-      }
-      this.$refs.sg.isShowTip=true;
-    });
   },
   destroyed(){
     this.Bus.$off();

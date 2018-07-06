@@ -20,7 +20,8 @@
 .card .para .input-group .addin.btn{color:#fff;width:80px;font-size:14px;border-radius:0 2px 2px 0;}
 .card .submit{margin:30px 0 10px 150px;}
 .card .submit button{width:500px;height:40px;}
-.card .submit button.disabled{background:#999;cursor:not-allowed;}
+.card .submit button.disabled{background:#999;pointer-events:none;}
+.card .submit button.loading{background:#999;pointer-events:none;}
 
 /*列表*/
 .right .list{background:#fff;padding:10px 30px;border-top:1px solid #e1e1e1;}
@@ -43,13 +44,16 @@
 .num{width:180px;}
 .recvAddr{width:180px;}
 
-.input-group.password,.input-group.code
-  margin-top 30px
-.input-group.code
-  a
-    width 100px !important
-    &:active
-      background-color #ffb422
-    &.sended
-      background-color #ccc
-      pointer-events none
+.para.password,
+.para.code
+  label
+    margin-top 0
+  .input-group
+    margin-top 30px
+    a
+      width 100px !important
+      &:active
+        background-color #ffb422
+      &.sended
+        background-color #ccc
+        pointer-events none

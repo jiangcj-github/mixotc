@@ -1,10 +1,10 @@
 <template>
   <div class="navigation" v-if="lists.length<=0">
-    <h3><a href="/#/">mixOTC</a>-<a href="/#/wallet">钱包</a></h3>
+    <h3><router-link tag="a" to="/">mixOTC</router-link>-<router-link tag="a" to="/wallet">钱包</router-link></h3>
   </div>
   <div class="notify" v-else="">
     <div class="wrap">
-      <h3><a href="/#/">mixOTC</a>-<a href="/#/wallet">钱包</a></h3>
+      <h3><router-link tag="a" to="/">mixOTC</router-link>-<router-link tag="a" to="/wallet">钱包</router-link></h3>
       <transition-group name="slide" tag="div" class="msg">
         <p v-for="(e,i) in lists" v-show="i===showIndex" :key="i" class="msg-li">
           <span class="p1"><img src="/static/images/wallet/notify.png">消息：充币 {{e.time}}</span>

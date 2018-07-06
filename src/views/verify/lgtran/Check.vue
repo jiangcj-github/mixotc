@@ -157,7 +157,7 @@
         this.popSel=id;
         this.pop=true;
       },
-      loadCheckedList(){
+      loadCheckedList(p=0){
         //
         let srchKey=this.srchText;
         let start= this.$refs.di.paramDate1;
@@ -181,7 +181,7 @@
           keyword:srchKey,
           start: start,
           end: end,
-          page: this.curPage-1,
+          page: p,
           count:this.pageSize
         }).then((data)=>{
           if(!data||!data.identities||data.identities.length<=0){
@@ -255,7 +255,7 @@
       this.loadCheckedList();
       this.Bus.$on("onPageChange",(p)=>{
         this.curPage=p;
-        this.loadCheckedList();
+        this.loadCheckedList(p-1);
       });
       this.Bus.$on("onDiChange",()=>{
         this.loadCheckedList();

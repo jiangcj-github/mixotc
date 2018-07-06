@@ -90,7 +90,7 @@
                 <div class="state">
                   <p>{{e.stateStr}}</p>
                 </div>
-                <div class="op"><p v-if="e.billType===1"><a :href="'/#/order?oid='+e.orderId+'&classify='+e.orderType">查看</a></p></div>
+                <div class="op"><p v-if="e.billType===1"><router-link tag="a" :to="'/order?oid='+e.orderId+'&classify='+e.orderType">查看</router-link></p></div>
               </div>
               <div class="bottom" v-if="e.billType===1">
                 <span class="orderId">订单号：{{e.orderId}}</span>
@@ -160,8 +160,8 @@
           {text:"转账-出账",value:6,check:1},
           {text:"红包-入账",value:9,check:1},
           {text:"红包-出账",value:10,check:1},
-          {text:"资金互转-转入",value:11,check:1},
-          {text:"资金互转-转出",value:12,check:1},
+          {text:"资产划入",value:11,check:1},
+          {text:"资产划出",value:12,check:1},
         ],
 
         isShowUl2: false,
@@ -354,7 +354,7 @@
         });
         this.$refs.sg.isShowTip=true;
       },
-      loadBills(){
+      loadBills(p=0){
         this.WsProxy.send("wallet","bills_v2",{
           keyword_type: this.paramSrchType,
           keyword: this.paramSrchText,
@@ -363,7 +363,7 @@
           state: this.paramState,
           start: this.paramStart,
           end: this.paramEnd,
-          page: this.curPage-1,
+          page: p,
           count: this.pageSize,
           sort: this.paramSort,
         }).then((data)=>{
@@ -506,7 +506,7 @@
       //
       this.Bus.$on("onPageChange",(p)=>{
         this.curPage=p;
-        this.loadBills();
+        this.loadBills(p-1);
       });
       this.Bus.$on("onDiChange",()=>{
         this.loadBills();

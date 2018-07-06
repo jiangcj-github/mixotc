@@ -43,7 +43,7 @@
               <h5>温馨提示</h5>
               <ul>
                 <li>使用{{coins[coinSel].coin}}地址充值需要{{coins[coinSel].checkNum}}个网络确认才能到账</li>
-                <li>充值完成后，你可以进入<a :href="'/#/wallet/history?type=1&coin='+coins[coinSel].coin">资产记录</a>页面跟踪进度</li>
+                <li>充值完成后，你可以进入<router-link tag="a" :to="'/wallet/history?type=1&coin='+coins[coinSel].coin">资产记录</router-link>页面跟踪进度</li>
               </ul>
             </div>
           </div>
@@ -51,8 +51,8 @@
           <div class="list">
             <div class="title">
               <h3>充值记录</h3>
-              <a href="/#/transaction" class="btn white a1">去交易</a>
-              <a href="/#/wallet/history?type=1" class="a2">查看全部</a>
+              <router-link tag="a" to="/transaction" class="btn white a1">去交易</router-link>
+              <router-link tag="a" to="/wallet/history?type=1" class="a2">查看全部</router-link>
             </div>
             <div class="thead">
               <p class="th time">时间</p>

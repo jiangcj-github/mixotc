@@ -133,6 +133,7 @@ pool.start = function(_url) {
  */
 pool.send = function(txt) {
   if(!(pool.beforeSend && pool.beforeSend(txt))) return;
+
   if(this.ws.readyState!==WebSocket.OPEN){
     pool.delaySend(txt);
   }else{
