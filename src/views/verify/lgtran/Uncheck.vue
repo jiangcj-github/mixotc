@@ -116,9 +116,9 @@
             submitTime: new Date(e.create*1000).dateHandle("yyyy/MM/dd HH:mm:ss"),
             bankcard: e.number || "-",
             bank: e.bank_name || "-",
-            img1: this.HostUrl.http+"image/"+e.image1,
-            img2: this.HostUrl.http+"image/"+e.image2,
-            img3: this.HostUrl.http+"image/"+e.image3,
+            img1: this.HostUrl.http+"image/"+e.image1+"?size=thumb",
+            img2: this.HostUrl.http+"image/"+e.image2+"?size=thumb",
+            img3: this.HostUrl.http+"image/"+e.image3+"?size=thumb",
             remark: e.info,
             flag: e.state,  //1:待审核,2:审核通过,3:审核未通过,4:恶意上传
           });

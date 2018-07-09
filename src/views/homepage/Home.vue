@@ -167,7 +167,7 @@
           id: data.id,
           id_str: this.JsonBig.stringify(data.id),
           nickname: data.name || "-",
-          headimg: (data.icon && this.HostUrl.http+"image/"+data.icon) || "/static/images/default_avator.png",
+          headimg: (data.icon && this.HostUrl.http+"image/"+data.icon+"?size=thumb") || "/static/images/default_avator.png",
           tradeWidthNum: data.mytrade || 0,
           orderNum: data.trade || 0,
           volumn: data.volumes && data.volumes.toString().formatFixed(6)+"+BTC",

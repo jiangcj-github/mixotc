@@ -234,9 +234,9 @@
             name: e.name || "-",
             bankcard: e.number || "-",
             bank: e.bank_name || "-",
-            img1: this.HostUrl.http+"image/"+e.image1,
-            img2: this.HostUrl.http+"image/"+e.image2,
-            img3: this.HostUrl.http+"image/"+e.image3,
+            img1: this.HostUrl.http+"image/"+e.image1+"?size=thumb",
+            img2: this.HostUrl.http+"image/"+e.image2+"?size=thumb",
+            img3: this.HostUrl.http+"image/"+e.image3+"?size=thumb",
           });
         });
       },

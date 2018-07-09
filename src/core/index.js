@@ -122,6 +122,16 @@ if (!sessionStorage.length) {
   localStorage.setItem("getSessionStorage", Date.now());
 }
 
+function getUrl(para){
+  let paraArr = window.location.search.substring(1).split('&');
+  for(let i = 0;i < paraArr.length;i++){
+    if(para == paraArr[i].split('=')[0]){
+      return paraArr[i].split('=')[1]
+    }
+  }
+  return false;
+}
+
 const RUN_APP = (App, config, plugin) => {
   // console.log(config)
   /* eslint-disable no-new */
@@ -264,16 +274,6 @@ const RUN_APP = (App, config, plugin) => {
       }
     }
   });
-
-  let getUrl=function(para){
-    let paraArr = window.location.search.substring(1).split('&');
-    for(let i = 0;i < paraArr.length;i++){
-      if(para == paraArr[i].split('=')[0]){
-        return paraArr[i].split('=')[1]
-      }
-    }
-    return false;
-  }
 
 };
 

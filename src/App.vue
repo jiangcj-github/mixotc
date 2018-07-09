@@ -76,16 +76,14 @@
               this.$store.commit({ type: 'initState'})
             }
             this.$store.commit({type: 'getUserInfo', data: data.body});
-            if(data.body.token){
-              this.$store.commit({ type: 'changeToken', data: data.body.token });
-              localStorage.setItem('getToken', JSON.stringify({
-                phone:data.body.phone,
-                email:data.body.email,
-                token: data.body.token,
-                code: data.body.code
-              }));
-              localStorage.removeItem("getToken");
-            }
+            this.$store.commit({ type: 'changeToken', data: flag });
+            localStorage.setItem('getToken', JSON.stringify({
+              phone:data.body.phone,
+              email:data.body.email,
+              token: flag,
+              code: data.body.code
+            }));
+            localStorage.removeItem("getToken");
             this.$store.commit({ type: 'changeLogin', data: true });
             this.Storage.loginTime.set(new Date() - 0);
          },
@@ -321,14 +319,14 @@
             this.timer2 && (this.timer2 = clearInterval(this.timer2));
             this.timer2 = setInterval(() => {
               if (this.token) return;
-              this.logout()
+              this.logout();
             }, 1000);
             return;
           }
           //退出登录时清理定时器，移除监听
           this.Loop.isOverTime.clear();
           this.timer2 = clearInterval(this.timer2);
-          window.onmousedown = null
+          window.onmousedown = null;
           this.$store.commit({type: 'changeTrustList', data: []});
         },
         immediate: true

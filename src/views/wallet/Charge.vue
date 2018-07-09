@@ -140,63 +140,67 @@
     },
     methods:{
       async init(){
-        //获取钱包列表数据
-        let uid=this.$store.state.userInfo.uid;
-        let data=await this.WsProxy.send("wallet","wallets", {uid:uid}).catch((msg)=>{
-          console.log(msg);
-        });
-        if(data && data.wallets){
-          let wallets=data.wallets;
-          this.coins=[];
-          wallets.forEach((e)=>{
-            this.coins.push({
-              coin: e.currency.toUpperCase(),
-              avail: e.balance.toString().formatFixed(6),
-              total: (e.balance+e.locked).toString().formatFixed(6),
-              addr: e.address || "-",
-              confirm: 0,
-              checkNum: 0,
-            });
+        try{
+          //获取钱包列表数据
+          let uid=this.$store.state.userInfo.uid;
+          let data=await this.WsProxy.send("wallet","wallets", {uid:uid}).catch((msg)=>{
+            console.log(msg);
           });
-        }
-        //排序
-        this.coins.sort(function(a,b){
-          return a.coin<b.coin?-1:1;
-        });
-        //获取币种资料
-        this.Proxy.coinSearch().then((data)=>{
-          if(data && data.data && data.data.coins) {
-            let coins = data.data.coins;
-            coins.forEach((e) => {
-              this.coins.forEach((item) => {
-                if (e.currency.toUpperCase() === item.coin) {
-                  item.checkNum = e.check_num || "0";
-                }
+          if(data && data.wallets){
+            let wallets=data.wallets;
+            this.coins=[];
+            wallets.forEach((e)=>{
+              this.coins.push({
+                coin: e.currency.toUpperCase(),
+                avail: e.balance.toString().formatFixed(6),
+                total: (e.balance+e.locked).toString().formatFixed(6),
+                addr: e.address || "-",
+                confirm: 0,
+                checkNum: 0,
               });
-            })
+            });
           }
-        }).catch((msg)=>{
-          console.log(msg);
-        });
-        //获取确认中金额
-        this.coins.forEach((e)=>{
-          this.WsProxy.send("wallet","get_checking_amount",{currency:e.coin}).then((data)=>{
-            if(data) {
-              e.confirm = data.amount.toString().formatFixed(6);
+          //排序
+          this.coins.sort(function(a,b){
+            return a.coin<b.coin?-1:1;
+          });
+          //获取币种资料
+          this.Proxy.coinSearch().then((data)=>{
+            if(data && data.data && data.data.coins) {
+              let coins = data.data.coins;
+              coins.forEach((e) => {
+                this.coins.forEach((item) => {
+                  if (e.currency.toUpperCase() === item.coin) {
+                    item.checkNum = e.check_num || "0";
+                  }
+                });
+              })
             }
           }).catch((msg)=>{
             console.log(msg);
           });
-        });
-        //获取路由参数
-        let coin=this.$route.query.coin || "btc";
-        this.coins.forEach((e,i)=>{
-          if(e.coin===coin.toUpperCase()){
-            this.coinSel=i;
-          }
-        });
-        //加载账单
-        this.loadLists();
+          //获取确认中金额
+          this.coins.forEach((e)=>{
+            this.WsProxy.send("wallet","get_checking_amount",{currency:e.coin}).then((data)=>{
+              if(data) {
+                e.confirm = data.amount.toString().formatFixed(6);
+              }
+            }).catch((msg)=>{
+              console.log(msg);
+            });
+          });
+          //获取路由参数
+          let coin=this.$route.query.coin || "btc";
+          this.coins.forEach((e,i)=>{
+            if(e.coin===coin.toUpperCase()){
+              this.coinSel=i;
+            }
+          });
+          //加载账单
+          this.loadLists();
+        }catch (e) {
+          console.log(e);
+        }
       },
       loadLists(){
         this.WsProxy.send("wallet","bills_v2",{

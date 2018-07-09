@@ -84,7 +84,7 @@
             date: new Date(item.date*1000).dateHandle("yyyy/MM/dd hh:mm:ss"),
             credit: item.credit || 0,
             credit_str: ["差评","差评","中评","好评","好评"][item.credit-1] || "-",
-            icon: item.icon && this.HostUrl.http+"image/"+item.icon || "/static/images/default_avator.png",
+            icon: item.icon && this.HostUrl.http+"image/"+item.icon+"?size=thumb" || "/static/images/default_avator.png",
             name: item.name || "-",
           });
         });

@@ -367,7 +367,7 @@
           this.result.push({
             id: e.id,
             sid: e.sid,
-            headimg: e.icon && this.HostUrl.http + "/image/" + e.icon || "/static/images/default_avator.png",
+            headimg: e.icon && this.HostUrl.http + "/image/" + e.icon + "?size=thumb" || "/static/images/default_avator.png",
             nickname: e.trader || "-",
             dealVolume: e.volume && (e.volume + "").formatFixed(6) || 0,
             orderVolume: e.trade && (e.trade + "").formatFixed(6) || 0,

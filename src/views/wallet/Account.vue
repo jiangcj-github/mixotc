@@ -43,7 +43,7 @@
               <li :class="{active:tab===1}" @click="tab=1">币币账户</li>
             </ul>
             <p class="tb-tab-r" v-show="tab===1">
-              <i>币币交易需要资产互转</i>
+              <i>币币交易需要资产划转</i>
               <a :href="'https://qb.com?token='+token" target="_blank" class="btn green">币币交易</a>
             </p>
           </div>
@@ -262,49 +262,53 @@
     },
     methods:{
       async init(){
-        // 查询价格
-        let data=await this.Proxy.getPrice().catch((msg)=>{
-          console.log(msg);
-        });
-        if(data && data.data && data.data.prices){
-          let prices=data.data.prices;
-          prices.forEach((e)=>{
-            this.prices[e.currency.toLowerCase()]=e.cny;
-          })
-        }
-        //加载法币账户信息
-        this.loadFbBalance();
-        this.loadFb();
-        //获取交易所钱包
-        let userInfo=this.$store.state.userInfo;
-
-        let exData = await fetch(
-          this.HostUrl.http+"api/v3/wallet/wallets/?user_id=" + this.JsonBig.stringify(userInfo.uid)
-        ).then(res => res.json());
-
-        //let exData={"wallets": [{"name": "btc", "deal": 0.0, "address": "1H8n64QLtzqbQgBJNaBChJ76LJbSrBm4VZ", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4034, "coin_id": 0}, {"name": "lsk", "deal": 0.0, "address": "15945604182327820952L", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4036, "coin_id": 2}, {"name": "bch", "deal": 0.0, "address": "bitcoincash:qrdp8zc63pekf9gpp7a4djjxg6klpp20c5623dma0t", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4037, "coin_id": 3}, {"name": "eth", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4038, "coin_id": 4}, {"name": "xas", "deal": 0.0, "address": "A4vvfDYKtfDZcgs3BR27xtf9uEeTjBDzD4", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4039, "coin_id": 5}, {"name": "iqt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4040, "coin_id": 6}, {"name": "dash", "deal": 0.0, "address": "Xf72Qv17nUqEcLdY2E9NoEVgYAWkqkCang", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4041, "coin_id": 7}, {"name": "ltc", "deal": 0.0, "address": "LhvtWBh4jJowz41NdP2BmG7dx8VS68vuSc", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4043, "coin_id": 9}, {"name": "omg", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4044, "coin_id": 10}, {"name": "pay", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4045, "coin_id": 11}, {"name": "eos", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4046, "coin_id": 12}, {"name": "rep", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4047, "coin_id": 13}, {"name": "gnt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4048, "coin_id": 14}, {"name": "mco", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4049, "coin_id": 15}, {"name": "bat", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4050, "coin_id": 16}, {"name": "icn", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4051, "coin_id": 17}, {"name": "gno", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4052, "coin_id": 18}, {"name": "dgd", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4053, "coin_id": 19}, {"name": "cvc", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4054, "coin_id": 20}, {"name": "zrx", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4055, "coin_id": 21}, {"name": "btg", "deal": 0.0, "address": "Gh5eRp9t8FZ6tkTpFpZiksnXadtFBm24Lw", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4056, "coin_id": 22}, {"name": "bcd", "deal": 0.0, "address": "14qDGS2dDFvwCnqmhZ7JNetUaYfBZHTBmY", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4057, "coin_id": 23}, {"name": "snt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4058, "coin_id": 24}, {"name": "bnt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4059, "coin_id": 25}, {"name": "fun", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4060, "coin_id": 26}, {"name": "sngls", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4061, "coin_id": 27}, {"name": "storj", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4062, "coin_id": 28}, {"name": "dnt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4063, "coin_id": 29}, {"name": "wings", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4064, "coin_id": 30}, {"name": "bqx", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4065, "coin_id": 31}, {"name": "1st", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4066, "coin_id": 32}, {"name": "rlc", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4067, "coin_id": 33}, {"name": "ae", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4068, "coin_id": 34}, {"name": "doc", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4069, "coin_id": 35}, {"name": "usdt", "deal": 0.0, "address": "14L5ifaisdmpM6WpWYzTTXqLZfzfHqBoiT", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4070, "coin_id": 36}], "user_id": "232254428780961792"}
-
-        //判断用户在交易所是否存在
-        if(!exData || !exData.user_id){
-          this.bbErr=5;
-        }else if(!exData.wallets){
-          this.bbErr=1;
-        }else{
-          this.bbErr=0;
-          this.bbAll=exData.wallets;
-          //排序
-          this.bbAll.sort((a,b)=>{
-            return a.name<b.name?-1:1;
+        try{
+          // 查询价格
+          let data=await this.Proxy.getPrice().catch((msg)=>{
+            console.log(msg);
           });
-          //获取账户总资产
-          if(exData.total_asset){
-            this.balance2={
-              numBtc:exData.total_asset.BTC,
-              numCny: exData.total_asset.CNY
-            };
+          if(data && data.data && data.data.prices){
+            let prices=data.data.prices;
+            prices.forEach((e)=>{
+              this.prices[e.currency.toLowerCase()]=e.cny;
+            })
           }
+          //加载法币账户信息
+          this.loadFbBalance();
+          this.loadFb();
+          //获取交易所钱包
+          let userInfo=this.$store.state.userInfo;
+
+          let exData = await fetch(
+            this.HostUrl.http+"api/v3/wallet/wallets/?user_id=" + this.JsonBig.stringify(userInfo.uid)
+          ).then(res => res.json());
+
+          //let exData={"wallets": [{"name": "btc", "deal": 0.0, "address": "1H8n64QLtzqbQgBJNaBChJ76LJbSrBm4VZ", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4034, "coin_id": 0}, {"name": "lsk", "deal": 0.0, "address": "15945604182327820952L", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4036, "coin_id": 2}, {"name": "bch", "deal": 0.0, "address": "bitcoincash:qrdp8zc63pekf9gpp7a4djjxg6klpp20c5623dma0t", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4037, "coin_id": 3}, {"name": "eth", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4038, "coin_id": 4}, {"name": "xas", "deal": 0.0, "address": "A4vvfDYKtfDZcgs3BR27xtf9uEeTjBDzD4", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4039, "coin_id": 5}, {"name": "iqt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4040, "coin_id": 6}, {"name": "dash", "deal": 0.0, "address": "Xf72Qv17nUqEcLdY2E9NoEVgYAWkqkCang", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4041, "coin_id": 7}, {"name": "ltc", "deal": 0.0, "address": "LhvtWBh4jJowz41NdP2BmG7dx8VS68vuSc", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4043, "coin_id": 9}, {"name": "omg", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4044, "coin_id": 10}, {"name": "pay", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4045, "coin_id": 11}, {"name": "eos", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4046, "coin_id": 12}, {"name": "rep", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4047, "coin_id": 13}, {"name": "gnt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4048, "coin_id": 14}, {"name": "mco", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4049, "coin_id": 15}, {"name": "bat", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4050, "coin_id": 16}, {"name": "icn", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4051, "coin_id": 17}, {"name": "gno", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4052, "coin_id": 18}, {"name": "dgd", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4053, "coin_id": 19}, {"name": "cvc", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4054, "coin_id": 20}, {"name": "zrx", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4055, "coin_id": 21}, {"name": "btg", "deal": 0.0, "address": "Gh5eRp9t8FZ6tkTpFpZiksnXadtFBm24Lw", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4056, "coin_id": 22}, {"name": "bcd", "deal": 0.0, "address": "14qDGS2dDFvwCnqmhZ7JNetUaYfBZHTBmY", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4057, "coin_id": 23}, {"name": "snt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4058, "coin_id": 24}, {"name": "bnt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4059, "coin_id": 25}, {"name": "fun", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4060, "coin_id": 26}, {"name": "sngls", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4061, "coin_id": 27}, {"name": "storj", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4062, "coin_id": 28}, {"name": "dnt", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4063, "coin_id": 29}, {"name": "wings", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4064, "coin_id": 30}, {"name": "bqx", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4065, "coin_id": 31}, {"name": "1st", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4066, "coin_id": 32}, {"name": "rlc", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4067, "coin_id": 33}, {"name": "ae", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4068, "coin_id": 34}, {"name": "doc", "deal": 0.0, "address": "0x52B62B69632522E0fc9F84F52205777208aBF849", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4069, "coin_id": 35}, {"name": "usdt", "deal": 0.0, "address": "14L5ifaisdmpM6WpWYzTTXqLZfzfHqBoiT", "date": 1530598371.0, "lock": 0.0, "balance": 0.0, "id": 4070, "coin_id": 36}], "user_id": "232254428780961792"}
+
+          //判断用户在交易所是否存在
+          if(!exData || !exData.user_id){
+            this.bbErr=5;
+          }else if(!exData.wallets){
+            this.bbErr=1;
+          }else{
+            this.bbErr=0;
+            this.bbAll=exData.wallets;
+            //排序
+            this.bbAll.sort((a,b)=>{
+              return a.name<b.name?-1:1;
+            });
+            //获取账户总资产
+            if(exData.total_asset){
+              this.balance2={
+                numBtc:exData.total_asset.BTC.toString().formatFixed(6),
+                numCny: exData.total_asset.CNY.toString().formatFixed(2)
+              };
+            }
+          }
+          this.loadBb();
+        }catch (e) {
+          console.log(e);
         }
-        this.loadBb();
       },
       createWallet(i){
         let curr=this.fb[i].abbr.toLowerCase();
@@ -429,7 +433,7 @@
             fullName: e.coin_fullname,
             avail: e.balance && e.balance.toString().formatFixed(6),
             frozen: e.lock && e.lock.toString().formatFixed(6),
-            assess: e.btc_value,
+            assess: e.btc_value && e.btc_value.toString().formatFixed(6),
           });
         }
       },

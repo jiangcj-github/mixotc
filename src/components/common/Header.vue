@@ -34,7 +34,7 @@
         </ul>
         <span class="log" @click="changeLoginForm(true)" v-if="!this.$store.state.isLogin">登录/注册</span>
         <div class="info" v-else>
-          <img class="avator" :src="icon ? `${HostUrl.http}image/${icon}` : `/static/images/default_avator.png`" alt="">
+          <img class="avator" :src="icon ? `${HostUrl.http}image/${icon}?size=thumb` : `/static/images/default_avator.png`" alt="">
           <div class="name" @mouseenter="showMenu = true" @mouseleave="showMenu = false" :class="{selected:/^\/personal.*$/.test(path)}">
             <span class="login" >{{name}}</span>
             <img class="select-icon" src='/static/images/triangle_black.png' v-if="!showMenu" alt="">

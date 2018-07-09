@@ -31,15 +31,15 @@
         <ul class="clearfix">
           <li class="input">
             <p>姓名</p>
-            <input 
-              type="text" 
-              placeholder="输入姓名" 
-              v-model="data.name" 
-              maxlength="20" 
+            <input
+              type="text"
+              placeholder="输入姓名"
+              v-model="data.name"
+              maxlength="20"
               ref='name'
               @blur="data.name.trim() === '' ? nameTip = true : nameTip = false;"
               >
-            <i 
+            <i
               v-if="data.name"
               @click="()=>{data.name = ''; $refs.name.focus()}"
             >
@@ -66,17 +66,17 @@
           </span>
         </p>
         <p class="input">
-          <input 
-            type="text" 
+          <input
+            type="text"
             ref='number'
-            placeholder="请填写身份证号码/护照号码" 
+            placeholder="请填写身份证号码/护照号码"
             v-model="data.number"
             @input="dealCertificate"
             style="ime-mode:disabled"
             maxlength="25"
             @blur="verifyNumber"
             >
-            <i 
+            <i
               v-if="data.number"
               @click="()=>{data.number = ''; $refs.number.focus()}"
             >
@@ -188,16 +188,16 @@ import { mapState } from 'vuex';
       this.authState = this.userInfo.verify
     },
     methods: {
-      getObjectURL (file) {  
-        let url = null ;   
-        if (window.createObjectURL!=undefined) { // basic  
-          url = window.createObjectURL(file) ;  
-        } else if (window.URL!=undefined) { // mozilla(firefox)  
-          url = window.URL.createObjectURL(file) ;  
-        } else if (window.webkitURL!=undefined) { // webkit or chrome  
-          url = window.webkitURL.createObjectURL(file) ;  
-        }  
-        return url ;  
+      getObjectURL (file) {
+        let url = null ;
+        if (window.createObjectURL!=undefined) { // basic
+          url = window.createObjectURL(file) ;
+        } else if (window.URL!=undefined) { // mozilla(firefox)
+          url = window.URL.createObjectURL(file) ;
+        } else if (window.webkitURL!=undefined) { // webkit or chrome
+          url = window.webkitURL.createObjectURL(file) ;
+        }
+        return url ;
       },
       dealCertificate() {
         this.data.number = this.data.number.trim().replace(/\s/g,"");
@@ -252,7 +252,7 @@ import { mapState } from 'vuex';
       },
       verify(){
         let { number, name, type} = this.data;
-        name.trim() === '' ?  this.nameTip = true : this.nameTip = false; 
+        name.trim() === '' ?  this.nameTip = true : this.nameTip = false;
         this.verifyNumber()
         this.data.iconArr.filter(item=>{return item === ''}).length === 0 ? this.photoTip = false :  this.photoTip = true;
         if(this.photoTip) this.sizeTip = false;
@@ -270,7 +270,7 @@ import { mapState } from 'vuex';
           Image3: iconArr[2]
         }).then(data=>{
           this.authState = 1;
-          this.$store.dispatch({ type: 'updateUserInfo', ws: this.WsProxy})
+          this.$store.dispatch({ type: 'updateUserInfo', ws: this.WsProxy});
         }).catch(error=>{
           console.log(error)
         })

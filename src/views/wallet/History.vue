@@ -282,37 +282,41 @@
     },
     methods: {
       async init(){
-        //加载币种列表
-        let data=await this.WsProxy.send("wallet","bill_currency_list", {}).catch((msg)=>{
-          console.log(msg);
-        });
-        data && data.forEach((e)=>{
-          this.ul2.push({text:e.toUpperCase(),value:e.toLowerCase()});
-        });
-        // 获取URL传入参数
-        let type=this.$route.query.type;        // type
-        if(type){
-          this.ul1.forEach((e)=>{
-            e.check=(e.value==type?1:0);
+        try{
+          //加载币种列表
+          let data=await this.WsProxy.send("wallet","bill_currency_list", {}).catch((msg)=>{
+            console.log(msg);
           });
-        }
-        let coin=this.$route.query.coin;        // coin
-        if(coin){
-          coin=coin.toUpperCase();
-          let exist=0;
-          for(let i=0;i<this.ul2.length;i++){
-            if(this.ul2[i].text==coin){
-              exist++;
-              this.ul2Sel=i;
+          data && data.forEach((e)=>{
+            this.ul2.push({text:e.toUpperCase(),value:e.toLowerCase()});
+          });
+          // 获取URL传入参数
+          let type=this.$route.query.type;        // type
+          if(type){
+            this.ul1.forEach((e)=>{
+              e.check=(e.value==type?1:0);
+            });
+          }
+          let coin=this.$route.query.coin;        // coin
+          if(coin){
+            coin=coin.toUpperCase();
+            let exist=0;
+            for(let i=0;i<this.ul2.length;i++){
+              if(this.ul2[i].text==coin){
+                exist++;
+                this.ul2Sel=i;
+              }
+            }
+            if(exist<=0){
+              this.ul2.push({text:coin.toUpperCase(),value:e.toLowerCase()});
+              this.ul2Sel=this.ul2.length-1;
             }
           }
-          if(exist<=0){
-            this.ul2.push({text:coin.toUpperCase(),value:e.toLowerCase()});
-            this.ul2Sel=this.ul2.length-1;
-          }
+          //加载账单
+          this.loadBills();
+        }catch (e) {
+          console.log(e);
         }
-        //加载账单
-        this.loadBills();
       },
       onClickMultiUl(ul,e){
         e.check=!e.check;
