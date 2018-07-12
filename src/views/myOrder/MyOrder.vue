@@ -97,7 +97,8 @@
           <li class="operation-li">
             <p v-for="(operation,i) in content.operationList">
               <span v-if="operation.flag===1" class="active-btn" @click="showOperation(index)">{{operation.name}}</span>
-              <span v-else-if="operation.flag===3" class="active-btn" @click="openPayment($event, index)">{{operation.name}}</span>
+              <!--标记已付款-->
+              <span v-else-if="operation.flag===3" class="active-btn" @click="markPay(content,index)" ref="markPayBtn">{{operation.name}}</span>
               <span v-else-if="operation.flag===8" class="active-btn" @click="openReleaseCoin($event, content, index)">{{operation.name}}</span>
               <span v-else-if="operation.flag===2" class="text-b" @click="showOperation(index)">{{operation.name}}</span>
               <span v-else-if="operation.flag===4" @click="openSelect($event, operation, index, content)">{{operation.name}}</span>
@@ -129,10 +130,8 @@
 
     <!-- 标记已付款弹窗 -->
     <MarkedPaymentLayer :paymentShow="showPayment"
-                        :id="updateId"
-                        :info="updateInfo"
                         :tradeCode="updateTradeCode"
-                        @offPayment="openPayment">
+                        @offPayment="closePayment">
     </MarkedPaymentLayer>
     <!-- 引入释放币弹窗 -->
     <ReleaseCoinLayer
@@ -163,6 +162,7 @@
     <!--<TransformLayer :transformShow="showTransform"-->
                     <!--@offTransform="openTransform">-->
     <!--</TransformLayer>-->
+    <Alert ref="alert"></Alert>
   </div>
 </template>
 
@@ -181,6 +181,8 @@
   import CountDown from '@/components/common/CountDown' // 引入倒计时
   // import TransformLayer from '@/views/myOrder/orderLayer/TransformLayer' // 资金互转弹窗
   import Pagination from "@/views/verify/component/Pagination";
+  import Alert from "@/views/common/widget/Alert"
+  import getErrorMsg from "@/js/ErrorCode"
 
   export default {
     name: "my-order",
@@ -196,6 +198,7 @@
       SelectLayer,
       CheckBox,
       CountDown,
+      Alert,
       // TransformLayer
     },
     data() {
@@ -460,18 +463,19 @@
       initData() {
         let ws = this.WebSocket; // 创建websocket连接
         let seq = ws.seq;
-
         ws.onMessage[seq] = { // 监听
           callback: (data) => {
             if(!data || data.body.ret !== 0) return;
-            // console.log('order', data.body)
-            this.contentList = data.body.data.orders ? data.body.data.orders : []
-            this.pageTotal = data.body.data.amount
+
+            //let data={"ver":1,"op":32,"seq":7,"body":{"action":"orders_r","ret":0,"msg":"","data":{"count":15,"amount":2,"orders":[{"id":237011823210008576,"buyer":219248926602043392,"seller":222468031110979584,"sid":226423409892921344,"name":"user_19827796","contact":"douqq@mixotc.com","icon":"","currency":"doge","amountc":6666.666666,"money":"cny","amountm":200,"price":0.03,"fee":0,"trade_code":"494252","type":1,"state":1,"flag":0,"create":1531310910,"paytime":1531310910,"update":1531310910,"info":"","limit":10,"overtime":581,"time_to_appeal":1781},{"id":237011684596649984,"buyer":222371201475944448,"seller":219248926602043392,"sid":222494969821138944,"name":"社会人","contact":"lihh@mixotc.com","icon":"9D9E5EF1A6E217AE","currency":"doge","amountc":6633.33333267,"money":"cny","amountm":200,"price":0.03,"fee":0,"trade_code":"330274","type":2,"state":1,"flag":0,"create":1531310877,"paytime":1531310877,"update":1531310877,"info":"随时在线","limit":10,"overtime":548,"time_to_appeal":1748}]}}}
+
+            this.contentList = data.body.data.orders ? data.body.data.orders : [];
+            this.pageTotal = data.body.data.amount;
             // 购买成功的订单显示弹窗
             if (this.$store.state.newOrder) {
-              this.updateTradeCode = this.contentList[0].trade_code
-              this.showPayment = true
-              this.$store.state.newOrder = false
+              this.updateTradeCode = this.contentList[0].trade_code;
+              this.showPayment = true;
+              this.$store.state.newOrder = false;
             }
             // 根据状态进行判断
             this.contentList && this.contentList.forEach((v,i) => {
@@ -504,6 +508,7 @@
               // 操作数组
               let operationListObject = {
                 1: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '标记已付款', flag: 3}, {name: '取消订单', flag: 4}] : [{name: '提醒付款', flag: 5}],
+                //1: [{name: '标记已付款', flag: 3}, {name: '取消订单', flag: 4}],
                 2: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '申诉', flag: 7}] : [{name: '释放币', flag: 8}, {name: '申诉', flag: 7}],
                 3: this.JsonBig.stringify(v.buyer) == this.userId ? [{name: '提醒放币', flag: 6}, {name: '撤销申诉', flag: 9}] : [{name: '释放币', flag: 8}, {name: '撤销申诉', flag: 9}],
                 6: [{name: '去评价', flag: 1}],
@@ -516,11 +521,9 @@
               v.timeToAppeal= 30 * 60 - (Math.floor(Date.now() / 1000) - v.paytime);
             });
             this.appealTimer();
-
-          },
-          date:new Date()
-        };
-
+      },
+      date:new Date()
+    };
         ws.send(sendConfig('otc', { // 发包
           seq: seq,
           body:{
@@ -629,15 +632,8 @@
           this.$store.commit({type: 'evaluateOrder', data: this.contentList[index]}) // 存储当前订单信息
         }
       },
-      openPayment(st, index) { // 控制标记已付款弹窗
-        if (st === 'false') {
-          this.showPayment = false
-        } else {
-          this.showPayment = true
-          this.updateId = this.contentList[index].id
-          this.updateInfo = this.contentList[index].info
-          this.updateTradeCode = this.contentList[index].trade_code
-        }
+      closePayment() { // 控制标记已付款弹窗
+        this.showPayment = false
       },
       remindCoin(content) { // 提醒弹窗
         // console.log('content', content)
@@ -720,6 +716,26 @@
         this.money = title.flag === 6 ? (this.sortActive ? 2 : 1) : 0;
         this.sortFlag = title.flag;
         this.initData()
+      },
+      markPay(content,index) { // 标记已付款
+        //禁用按钮
+        let $markPayBtn=this.$refs.markPayBtn[index];
+        $markPayBtn.style.pointerEvents="none";
+        $markPayBtn.style.opacity="0.8";
+        //
+        this.WsProxy.send("otc","update_order",{
+          "id": content.id,
+          "state": 2, // 1 等待买家付款; 2 卖家确认收款／等待卖家发货; 3申诉中; 4 已取消; 5 已超时; 6交易完成; 7 买家评价; 8 卖家评价; 9 双方已评
+          "info": content.info
+        }).then(data=>{
+          this.$refs.alert.showAlert({content:"操作成功"});
+          window.location.reload();
+        }).catch(msg=>{
+          //解除禁用
+          $markPayBtn.style.pointerEvents="all";
+          $markPayBtn.style.opacity="1";
+          this.$refs.alert.showAlert({content:getErrorMsg(msg.ret)});
+        });
       }
     }
   }

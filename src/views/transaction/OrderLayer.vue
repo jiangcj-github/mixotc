@@ -13,18 +13,23 @@
         <p>下单后此订单的比特币将托管锁定，请放心{{titleType[type-1]}}</p>
         <div class="btn-group clearfix">
           <em @click="closeOrderLayer">取消</em>
-          <i @click="firmOrder">确认{{titleType[type-1]}}</i>
+          <i @click="firmOrder" ref="btnOk">确认{{titleType[type-1]}}</i>
         </div>
       </div>
     </BasePopup>
+    <!--
     <BasePopup class="remind-layer" :show="remindLayer" @click.native="remindLayer=false">
       <span v-html="remindText"></span>
     </BasePopup>
+    -->
+    <Alert ref="alert"></Alert>
   </div>
 </template>
 
 <script>
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
+  import Alert from "@/views/common/widget/Alert"
+  import getErrorMsg from "@/js/ErrorCode"
 
   export default {
     name: "order-layer",
@@ -33,12 +38,13 @@
       return {
         titleType: ['购买', '出售'],
         orderLayer: this.orderLayerShow,
-        remindLayer: false,
-        remindText: ''
+        //remindLayer: false,
+        //remindText: ''
       }
     },
     components: {
-      BasePopup
+      BasePopup,
+      Alert,
     },
     watch: {
       orderLayerShow(state) {
@@ -50,6 +56,11 @@
         this.$emit('offOrderLayer', false);
       },
       firmOrder() {
+        // 禁用按钮
+        let $btnOk=this.$refs.btnOk;
+        $btnOk.style.pointerEvents="none";
+        $btnOk.style.opacity=0.6;
+        //
         this.WsProxy.send('otc','new_order',{
           id: this.id,
           price: this.price,
@@ -57,11 +68,16 @@
           money: this.money * 1,
           update_time: Math.floor(new Date().getTime() / 1000)
         }).then((data)=>{
-          this.$store.state.newOrder = this.type == 1 ? true : false
+          this.$store.state.newOrder = (this.type == 1 ? true : false);
           this.$router.push({ path: '/order', query: {id: this.JsonBig.stringify(data.id)}});
         }).catch((msg)=>{
-          console.log('下单错误', msg)
+          // 解除禁用
+          $btnOk.style.pointerEvents="all";
+          $btnOk.style.opacity=1;
+          //
           this.closeOrderLayer();
+          this.$refs.alert.showAlert({content:getErrorMsg(msg.ret)});
+          /*
           this.remindLayer = true;
           switch (msg.ret) {
             case 13:
@@ -96,6 +112,7 @@
               this.remindText= '下单出错';
               break;
           }
+         */
         });
       }
     }

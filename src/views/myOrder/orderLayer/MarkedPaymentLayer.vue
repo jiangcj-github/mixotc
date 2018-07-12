@@ -6,17 +6,16 @@
     <img src="/static/images/close_btn.png" alt="" @click="closePopup">
     <h2>{{tradeCode}}</h2>
     <p>付款的时候请备注“资金码”,以便对方收款</p>
-    <button @click="markPay">标记已付款</button>
+    <button @click="closePopup">我知道了</button>
   </BasePopup>
 </template>
 
 <script>
   import BasePopup from '@/components/common/BasePopup' // 引入弹窗
-  import sendConfig from '@/api/SendConfig.js'// 引入websocket发送包
 
   export default {
     name: "marked-payment-layer",
-    props: ['paymentShow', 'id', 'info', 'tradeCode'],
+    props: ['paymentShow', 'tradeCode'],
     data() {
       return {
         codeLayer: this.paymentShow
@@ -36,31 +35,6 @@
     methods: {
       closePopup() {
         this.$emit('offPayment', 'false')
-      },
-      markPay() { // 标记已付款
-        let ws = this.WebSocket; // 创建websocket连接
-        let seq = ws.seq;
-        // console.log('标记', this.id, this.info)
-        ws.onMessage[seq] = { // 监听
-          callback: (data) => {
-            if(!data || data.body.ret !== 0) return;
-            console.log('payment', data.body.data)
-          },
-          date:new Date()
-        };
-        ws.send(sendConfig('otc', { // 发包
-          seq: seq,
-          body:{
-            "action": "update_order",
-            data: {
-              "id": this.id ? this.id : this.JsonBig.parse(this.$route.query.id), //
-              "state": 2, // 1 等待买家付款; 2 卖家确认收款／等待卖家发货; 3申诉中; 4 已取消; 5 已超时; 6交易完成; 7 买家评价; 8 卖家评价; 9 双方已评
-              "info": this.info
-            }
-          }
-        }))
-        window.location.reload()
-        this.Bus.$emit('offTime', false)
       }
     }
   }

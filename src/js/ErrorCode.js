@@ -1,4 +1,4 @@
-let ErrorCode= {
+let ERROR_MSG= {
   0: " 成功",
   1: " 未知错误",
   2: " 数据库错误",
@@ -108,4 +108,6 @@ let ErrorCode= {
   200: "参数不正确",
 };
 
-export default ErrorCode;
+export default function getErrorMsg(ret) {
+  return ERROR_MSG[ret] || "未知错误";
+}

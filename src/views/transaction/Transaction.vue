@@ -371,7 +371,7 @@
             nickname: e.trader || "-",
             dealVolume: e.volume && (e.volume + "").formatFixed(6) || 0,
             orderVolume: e.trade && (e.trade + "").formatFixed(6) || 0,
-            rate: !e.trade ? "-":e.rate + "%" ,
+            rate: !e.trade ? "-": (e.rate && e.rate + "%") || "-" ,
             priceMin: e.min,
             priceMax: e.max,
             pay_zfb: e.payments % 2 === 1,

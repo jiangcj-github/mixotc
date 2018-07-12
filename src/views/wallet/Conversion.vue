@@ -133,7 +133,7 @@ import encrypt from '@/js/encrypt';
 import SearchGroup from "../common/widget/SearchGroup";
 import Alert from "../common/widget/Alert";
 import timeout from "@/js/Timeout";
-import ErrorCode from "@/js/ErrorCode";
+import getErrorMsg from "@/js/ErrorCode";
 import { Loading } from 'element-ui';
 
 export default {
@@ -375,11 +375,7 @@ export default {
         this.$refs.alert.showAlert({content:'转账成功'});
         location.reload();
       }).catch(msg => {
-        if(ErrorCode[msg.ret]){
-          this.$refs.alert.showAlert({content:ErrorCode[msg.ret]});
-        }else{
-          this.$refs.alert.showAlert({content:'转账失败'});
-        }
+        this.$refs.alert.showAlert({content:getErrorMsg(msg.ret)});
         $submitBtn.innerText="确认提交";
         $submitBtn.classList.remove("loading");
       });
