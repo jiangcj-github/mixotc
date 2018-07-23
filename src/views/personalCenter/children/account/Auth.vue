@@ -95,7 +95,7 @@
           <li v-for="item of 3" :key="item" class="upload"  @click="()=>{curPhoto = item - 1; $refs.up_img.click()}">
             <img :src="`/static/images/personal/${defaultIdentity[item - 1]}`" alt="" v-if="data.type">
             <img :src="`/static/images/personal/${defaultPassport[item - 1]}`" alt="" v-else>
-            <img :src="data.iconArr[item - 1] ? `${HostUrl.http}image/${data.iconArr[item - 1]}` : showArr[item - 1]" alt="" class="up-img" v-if="data.iconArr[item - 1] || showArr[item - 1]">
+            <img :src="data.iconArr[item - 1] ? `${HostUrl.http}usimage/thumb/${data.iconArr[item - 1]}` : showArr[item - 1]" alt="" class="up-img" v-if="data.iconArr[item - 1] || showArr[item - 1]">
             <div class="loading" v-if="data.iconArr[item - 1] === '' && showArr[item - 1] !== ''">
               <img src="/static/images/loading2.png" alt="" style="width:32px; height:32px">
             </div>
@@ -227,7 +227,7 @@ import { mapState } from 'vuex';
         this.sizeTip = false;
         a.append("uploadimage", file);
         this.$refs.up_img.value = ''
-        await fetch(`${this.HostUrl.http}image/`, {
+        await fetch(`${this.HostUrl.http}usupload/`, {
           method: 'Post',
           body: a
         }).then(res => res.text())
