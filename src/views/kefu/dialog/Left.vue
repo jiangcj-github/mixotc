@@ -11,7 +11,7 @@
                   bigger-move-h="start" smaller-move-h="start" class="scrollPane">
       <ul class="persons">
         <li v-for="(content, index) in srchText ? searchList : uls" :key="index" @click="onLiClick(index)" :class="{active: content.user_id === $store.state.serviceNow}">
-          <img :src="content.user_icon ? `${HostUrl.http}image/${content.user_icon}` : `/static/images/default_avator.png`" alt="">
+          <img :src="content.user_icon ? `${HostUrl.http}image/${content.user_icon}?size=thumb` : `/static/images/default_avator.png`" alt="">
           <i v-show="content.unread">{{content.unread}}</i>
           <div class="pinfo">
             <p class="p1">
@@ -73,7 +73,7 @@
               if (type === 'text') { // 文字
                 obj = {
                   isSend:  _this.JsonBig.stringify(uid),
-                  headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                  headimg: icon ? `${_this.HostUrl.http}image/${icon}?size=thumb` : "/static/images/default_avator.png",
                   type: 0, // 0: 发送文字, 1: 发送图片
                   isLoding: false, // 加载中
                   err: false, // 0: 发送成功, 1: 发送失败
@@ -85,7 +85,7 @@
               }
               obj = { // 图片
                 isSend:  _this.JsonBig.stringify(uid),
-                headimg: icon ? `${_this.HostUrl.http}image/${icon}` : "/static/images/default_avator.png",
+                headimg: icon ? `${_this.HostUrl.http}image/${icon}?size=thumb` : "/static/images/default_avator.png",
                 type: 1, // 0: 发送文字, 1: 发送图片
                 isLoding: false, // 加载中
                 err: false, // 0: 发送成功, 1: 发送失败

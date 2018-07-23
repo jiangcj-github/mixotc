@@ -9,7 +9,7 @@
           <div class="fixed swiper-slide" v-for="(content, index) in otherInfo" >
             <h3>{{appl === 1 ? '申诉人' : '被申诉人'}}</h3>
             <div class="mf1">
-              <img :src="content.icon ? `${HostUrl.http}image/${content.icon}` : `/static/images/default_avator.png`" @click="changeUser(index)">
+              <img :src="content.icon ? `${HostUrl.http}image/${content.icon}?size=thumb` : `/static/images/default_avator.png`" @click="changeUser(index)">
               <span class="i1" @click="changeUser(index)">{{content.name}}</span>
               <span class="i2">已标记付款</span>
               <span class="i3">{{Math.floor(((new Date().getTime() / 1000) - content.update) / 60)}}分钟</span>
@@ -446,7 +446,7 @@
             result.push({
               id: this.JsonBig.stringify(item.id),
               isSend: sender_id === uid ? uid : sender_id,
-              headimg: sender_id === uid ? `/static/images/kefu/kefu.png` : (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : `/static/images/default_avator.png`),
+              headimg: sender_id === uid ? `/static/images/kefu/kefu.png` : (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}?size=thumb` : `/static/images/default_avator.png`),
               type: item.type === 'image' ? 1 : 0,
               content: item.type === 'image' ? `${this.HostUrl.http}file/${item.data.id}` : item.data.msg,
               isLoding: false,
@@ -509,7 +509,7 @@
         this.pop1Text = ''
         this.showPop1 = true
         this.forceIconName = this.serviceNow === this.otherInfo[index].seller_id ? this.serviceUser.user_name : this.otherInfo[index].name
-        this.forceIconNameIcon = this.serviceNow === this.otherInfo[index].seller_id ? (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : "/static/images/default_avator.png") : (this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : "/static/images/default_avator.png")
+        this.forceIconNameIcon = this.serviceNow === this.otherInfo[index].seller_id ? (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}?size=thumb` : "/static/images/default_avator.png") : (this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}?size=thumb` : "/static/images/default_avator.png")
         this.forceIconObj = {
           "id": this.JsonBig.parse(this.otherInfo[index].sid),
           "seller": this.JsonBig.parse(this.otherInfo[index].seller_id),
@@ -576,7 +576,7 @@
         this.pop3Text = ''
         this.popIndex = index
         this.stopTradeUser = this.serviceNow === this.otherInfo[index].buyer_id ? this.serviceUser.user_name : this.otherInfo[index].name
-        this.stopTradeUserIcon = this.serviceNow === this.otherInfo[index].buyer_id ? (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}` : "/static/images/default_avator.png") : (this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}` : "/static/images/default_avator.png")
+        this.stopTradeUserIcon = this.serviceNow === this.otherInfo[index].buyer_id ? (this.serviceUser.user_icon ? `${this.HostUrl.http}image/${this.serviceUser.user_icon}?size=thumb` : "/static/images/default_avator.png") : (this.otherInfo[index].icon ? `${this.HostUrl.http}image/${this.otherInfo[index].icon}?size=thumb` : "/static/images/default_avator.png")
         this.showPop3 = true
         this.comfirmStopTradeObj(index)
         this.judgeStopTradeOther(index)

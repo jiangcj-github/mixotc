@@ -60,6 +60,7 @@
     created() {
       let flag = this.getUrl('token');
       window.addEventListener('scroll', this.handleScroll);
+      this.listenOffline();
       this.$store.commit({type: 'changeLoginForm', data: false});
       let ws = this.WebSocket;
       let seq = ws.seq;
@@ -158,7 +159,6 @@
         };
         ws.start(this.HostUrl.ws);
       }
-      this.listenOffline();
     },
     mounted() {
       //websock发包接口需先判断登录状态

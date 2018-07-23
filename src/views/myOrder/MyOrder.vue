@@ -728,7 +728,6 @@
           "state": 2, // 1 等待买家付款; 2 卖家确认收款／等待卖家发货; 3申诉中; 4 已取消; 5 已超时; 6交易完成; 7 买家评价; 8 卖家评价; 9 双方已评
           "info": content.info
         }).then(data=>{
-          this.$refs.alert.showAlert({content:"操作成功"});
           window.location.reload();
         }).catch(msg=>{
           //解除禁用

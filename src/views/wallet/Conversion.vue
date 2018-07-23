@@ -372,7 +372,6 @@ export default {
         mode: 1,
         trader: this.$store.state.userInfo.uid
       }).then(res=>{
-        this.$refs.alert.showAlert({content:'转账成功'});
         location.reload();
       }).catch(msg => {
         this.$refs.alert.showAlert({content:getErrorMsg(msg.ret)});
