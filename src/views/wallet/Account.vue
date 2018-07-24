@@ -44,7 +44,7 @@
             </ul>
             <p class="tb-tab-r" v-show="tab===1">
               <i>币币交易需要资产划转</i>
-              <a :href="'https://qb.com/whome/?token='+token" target="_blank" class="btn green">币币交易</a>
+              <a :href="'https://www.qb.com/whome/?token='+token" target="_blank" class="btn green">币币交易</a>
             </p>
           </div>
           <!--法币账户-->
@@ -142,7 +142,7 @@
               <div class="err loading">数据加载中...</div>
             </div>
             <div v-else-if="bbErr===5">
-              <div class="err empty">未开通币币账户，请先 <a :href="'https://qb.com/whome/?token='+token" target="_blank">开通</a></div>
+              <div class="err empty">未开通币币账户，请先 <a :href="'https://www.qb.com/whome/?token='+token" target="_blank">开通</a></div>
             </div>
             <div v-else>
               <div class="err empty">无账户数据</div>

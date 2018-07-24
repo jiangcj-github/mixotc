@@ -19,7 +19,7 @@
                 </ul>
               </SearchGroup>
               <div class="tip">币币交易需要资产划转</div>
-              <a :href="'https://qb.com/whome/?token='+token" target="_blank" ref="link" v-show="false"></a>
+              <a :href="'https://www.qb.com/whome/?token='+token" target="_blank" ref="link" v-show="false"></a>
             </div>
             <div class="card">
               <div class="warn">
