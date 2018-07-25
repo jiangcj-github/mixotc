@@ -110,7 +110,7 @@
         this.resultObj = obj;
         this.inputValue = obj.currency;
         this.showResult = false;
-        await this.Proxy.getCoinDataAll({action: 'getCoinInfo', data:{coinFlag:obj.currency.toLowerCase()}}).then(res => {
+        await this.Proxy.getCoinDataAll({action: 'ci', data:{cf:obj.currency.toLowerCase()}}).then(res => {
           this.coinDataObj = res.data
           this.coinDataObj.logo = `${this.HostUrl.http}image/${this.resultObj.icon}`
         }).catch(msg => {
