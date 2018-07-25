@@ -3,7 +3,6 @@ export default {
   ws: "ws://192.168.55.107:8090/sub",
   http: "http://192.168.55.107/",
 
-
   // 正式服
   // ws: "wss://mixotc.com/sub",
   // http: "https://mixotc.com/",
