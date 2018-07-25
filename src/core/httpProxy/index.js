@@ -6,6 +6,8 @@
  */
 
 import Fetch from "../libs/Fetch"; //引入Fetch
+import JsonBig from "json-bigint";
+
 
 let host, port, type;
 
@@ -20,7 +22,7 @@ const formatParams = req => {
   // console.log(req)
   req.url.path && (req.url = `${req.url.type ? 'https://' : 'http://'}${req.url.host}:${req.url.port}${req.url.path}`);
   if (req.data && req.data.method === "post")
-    req.data.params && Object.keys(req.data.params).length > 0 && (req.data.body = JSON.stringify(req.data.params));
+    req.data.params && Object.keys(req.data.params).length > 0 && (req.data.body = JsonBig.stringify(req.data.params));
   if (req.data && req.data.method === "get")
     req.data.params && Object.keys(req.data.params).length > 0 && (req.url += `?`) && Object.keys(req.data.params).forEach((key, index) =>
       (req.url += `${key}=${req.data.params[key]}`) && Object.keys(req.data.params).length - 1 !== index && (req.url += "&"));

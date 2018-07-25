@@ -35,7 +35,7 @@
           <div class="coin-content-left clearfix">
             <img :src="coinDataObj.logo" alt="">
             <ol>
-              <li>{{coinDataObj.name}}({{coinDataObj.cnName}})</li>
+              <li>{{coinDataObj.name && coinDataObj.name.toUpperCase()}}({{coinDataObj.cnName}})</li>
               <li>{{coinDataObj.price && (coinDataObj.price.cny === 0 ? '-' : (coinDataObj.price.cny * 1).format('cny'))}}</li>
               <li>
                 <router-link :to="{path:'/transaction', query:{currency: selectCoinList[0] && selectCoinList[0].currency, name: selectCoinList[0] && selectCoinList[0].name, icon: selectCoinList[0] && selectCoinList[0].icon}}">去交易</router-link>
@@ -44,10 +44,10 @@
             </ol>
           </div>
           <ul class="coin-content-right clearfix">
-            <li><span>市值：</span><b>{{coinDataObj.totalValue && (coinDataObj.totalValue.cny === 0 ? '-' : (coinDataObj.totalValue.cny * 1).format('cny'))}}</b></li>
+            <li><span>市值：</span><b>{{coinDataObj.totalValueCN && (coinDataObj.totalValueCN === 0 ? '-' : (coinDataObj.totalValueCN * 1).format('cny'))}}</b></li>
             <li><span>发行总量：</span><b>{{coinDataObj.totalVolume && coinDataObj.totalVolume.format()}}</b></li>
             <li><span>流通量：</span><b>{{coinDataObj.circulationVolume && coinDataObj.circulationVolume.format()}}</b></li>
-            <li><span>发行价格：</span><b>{{coinDataObj.icoPrice && (coinDataObj.icoPrice.cny === 0 ? '-' : (coinDataObj.icoPrice.cny * 1).format('cny'))}}</b></li>
+            <li><span>发行价格：</span><b>{{coinDataObj.icoPriceCN && (coinDataObj.icoPriceCN === 0 ? '-' : (coinDataObj.icoPriceCN * 1).format('cny'))}}</b></li>
             <li><span>发行日期：</span><b>{{coinDataObj.releaseTime && coinDataObj.releaseTime.toDate('yyyy/MM/dd')}}</b></li>
           </ul>
         </div>
@@ -131,7 +131,7 @@
 
       async getCoinsData() { // 获取币种资料数据
         //this.inputValue = '';
-        await this.Proxy.getCoinDataAll({app: 0, symbolId: this.id, period: '24h'}).then(res => {
+        await this.Proxy.getCoinDataAll({action: 'getCoinInfo', data:{coinFlag:'btc'}}).then(res => {
           this.coinDataObj = res.data
           this.coinDataObj.logo = `${this.HostUrl.http}image/${this.selectCoinList[0].icon}`
         }).catch(msg => {
