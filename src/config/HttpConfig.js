@@ -35,7 +35,7 @@ export default {
     //     method: "post",
     //   }
     // },
-    {name: 'searchTips', data: {url: '/v1/home/searchTips', method: 'get'}}, //币种资料模糊搜索
+    //{name: 'searchTips', data: {url: '/v1/home/searchTips', method: 'get'}}, //币种资料模糊搜索
     {name: 'getCoinDataAll', data: {url: '/v1/common/', method: 'post'}}, // 获取币种资料
 
     { name: "hp_tradeInfo", data: { url: "/otc/traderinfo/", method: "get" } }, // 个人中心-获取个人信息
@@ -43,7 +43,6 @@ export default {
     { name: "hp_sales", data: { url: "/otc/tradersales/", method: "get" } }, // 获取评价
 
     { name: "hp_account", data: { url: "/v1/common/", method: "post" } }, // 获取币币账户列表
-
     { name: "hp_account_coin", data: { url: "/v1/common/", method: "post" } } // 获取交易所上架钱包
 
 

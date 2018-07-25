@@ -8,22 +8,21 @@
         -
         <span>{{coinDataObj.name}}</span>
       </h1>
-      <div class="search-box">
+      <div class="search-box" v-clickoutside="closeSelect">
         <p :class="{'active-btn': showActive}">
           <input type="text"
                  placeholder="搜索币种"
                  v-model.trim="inputValue"
                  @input="getCoinInfo"
-                 @keyup.enter="getCoinsData()"
+                 @keyup.enter="getCoinsData"
                  @focus="focusInput"
-                 @blur="blurInput"
-                 @click="showResult = true"><button @click="getCoinsData()"></button>
+                 @blur="blurInput"><button @click="getCoinsData()"></button>
           <img src="/static/images/cancel_icon.png" alt="" v-show="canCancel && inputValue" @mousedown="inputValue=''">
         </p>
-        <ul class="search-result" v-if="showResult"  v-clickoutside="closeSelect">
+        <ul class="search-result" v-if="showResult">
           <li v-if="!result.length">{{nothingText}}</li>
           <!--<li v-for="(item,index) of result" :key="index" @click="selectResultContent(item)">{{item}}</li>-->
-          <li v-for="(item,index) of result" :key="index" @click="selectResultContent(item.name)">
+          <li v-for="(item,index) of result" :key="index" @click="selectResultContent(index)">
             <img :src="`${HostUrl.http}image/${item.icon}`">
             <span>{{item.currency}}</span>
             <b>{{item.name}}</b>
@@ -38,7 +37,7 @@
               <li>{{coinDataObj.name && coinDataObj.name.toUpperCase()}}({{coinDataObj.cnName}})</li>
               <li>{{coinDataObj.price && (coinDataObj.price.cny === 0 ? '-' : (coinDataObj.price.cny * 1).format('cny'))}}</li>
               <li>
-                <router-link :to="{path:'/transaction', query:{currency: selectCoinList[0] && selectCoinList[0].currency, name: selectCoinList[0] && selectCoinList[0].name, icon: selectCoinList[0] && selectCoinList[0].icon}}">去交易</router-link>
+                <router-link :to="{path:'/transaction', query:{currency: resultObj.currency, name: resultObj.name, icon: resultObj.icon}}">去交易</router-link>
                 <span @click="goRecharge">去充币</span>
               </li>
             </ol>
@@ -70,87 +69,66 @@
     name: "coin-data",
     data() {
       return {
-        coinDataObj: {}, // 获取币种资料数据
-        coinDataList: [], // 筛选所结有数据
-        selectCoinList: [], // 筛选币种数组
+        coinDataObj: {}, // 获取币种资料数据-交易所接口
         inputValue: '', // input值
-        selectValue: 'btc',
         result: [], // 模糊搜索结果
+        resultObj: {}, //币种选择结果-otc接口
         showResult: false, // 控制下拉框显示隐藏
-        id: '',
         nothingText: '', // 无搜索结果提示文字
         showActive: false,
         canCancel: false
       }
     },
     async created() {
-      this.selectValue = this.$route.query.coin || "btc";
-      await this.getCoinInfo()
+      this.inputValue = this.$route.query.coin || "btc";
+      await this.getCoinInfo();
       this.getCoinsData();
     },
     mounted() {
     },
     methods: {
       async getCoinInfo() {
-        this.nothingText = '加载中...'
-        this.inputValue && (this.selectValue = this.inputValue);
-        this.result = []
-        await this.Proxy.coinSearch({keyword: this.selectValue}).then(res => { // 模糊搜索
-          if (!res.data.coins) {
-            this.nothingText = '暂无数据'
+        this.nothingText = '加载中...';
+        this.result = [];
+        await this.Proxy.coinSearch({keyword: this.inputValue}).then(res => { // 模糊搜索
+          if (!res.data.coins || res.data.coins.length<=0) {
+            this.nothingText = '暂无数据';
             return
           }
-          this.coinDataList = res.data.coins
-          res.data.coins && res.data.coins.forEach(v => {
-            // this.result.push(v.name)
-            this.result = res.data.coins
-          })
+          this.result = res.data.coins;
         });
-        await this.Proxy.searchTips({word: this.selectValue, app: 0}).then(res => { // 获取币种ID
-          this.id = res.data.currency[0].id;
-        }).catch(msg => {
-          console.log(msg)
-        })
-        this.selectCoinList = this.coinDataList
       },
 
-      async selectResultContent(item) { // 根据筛选结果赋值
-        this.selectValue = this.inputValue = item;
-        this.showResult = false
-        await this.Proxy.searchTips({word: this.selectValue, app: 0}).then(res => { // 获取币种ID
-          this.id = res.data.currency[0].id;
-          this.selectCoinList = this.coinDataList.filter(item => { // 获取图片
-            return item.name == this.selectValue
-          });
-          //console.log('搜索this.selectValue5555', this.selectValue, this.id, this.selectCoinList )
-        }).catch(msg => {
-          console.log(msg)
-        })
-        this.getCoinsData()
+      async selectResultContent(i) { // 根据筛选结果赋值
+        this.inputValue = this.result[i].currency;
+        this.getCoinsData();
       },
 
       async getCoinsData() { // 获取币种资料数据
-        //this.inputValue = '';
-        await this.Proxy.getCoinDataAll({action: 'getCoinInfo', data:{coinFlag:'btc'}}).then(res => {
+        let obj=this.result.filter(e=>e.currency.toLowerCase()===this.inputValue.toLowerCase())[0];
+        obj = obj || this.result[0] || {name: "Bitcoin", icon: "B012F109359B4872", currency: "btc",};
+        this.resultObj = obj;
+        this.inputValue = obj.currency;
+        this.showResult = false;
+        await this.Proxy.getCoinDataAll({action: 'getCoinInfo', data:{coinFlag:obj.currency.toLowerCase()}}).then(res => {
           this.coinDataObj = res.data
-          this.coinDataObj.logo = `${this.HostUrl.http}image/${this.selectCoinList[0].icon}`
+          this.coinDataObj.logo = `${this.HostUrl.http}image/${this.resultObj.icon}`
         }).catch(msg => {
           console.log(msg)
         })
       },
       focusInput() {
-        this.selectValue = ''
-        this.canCancel = true
-        this.showActive = true
-        this.showResult = true
+        this.canCancel = true;
+        this.showActive = true;
+        this.showResult = true;
         this.getCoinInfo();
       },
       blurInput() {
-        this.showActive = false
-        this.canCancel = false
+        this.showActive = false;
+        this.canCancel = false;
       },
       closeSelect() {
-        this.showResult = false
+        this.showResult = false;
       },
       goRecharge() {
         if (!this.$store.state.isLogin) {
@@ -219,7 +197,7 @@
       .search-result
         position absolute
         width 454px
-        max-height 200px
+        max-height 240px
         margin-top 0
         background #FFF
         border 1px solid #EEE
@@ -227,22 +205,23 @@
         overflow-y auto
         z-index 2
         li
-          height 20px
-          line-height 20px
-          font-size 12px
-          padding 3px
+          height 30px
+          line-height 30px
+          font-size 14px
+          padding 0 12px
           cursor pointer
           &:hover
             background-color $col3EB
           img
-            width 16px
-            height 16px
-            margin-right 15px
-            vertical-align middle
+            width 20px
+            height 20px
+            margin-right 5px
+            vertical-align -5px
           span
             display inline-block
-            width 50px
+            margin-right 5px
           b
+            font-size 12px
             color #999
     .coin-content
       margin-top 58px
