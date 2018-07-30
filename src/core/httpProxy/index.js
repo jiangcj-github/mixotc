@@ -27,7 +27,7 @@ const formatParams = req => {
     req.data.params && Object.keys(req.data.params).length > 0 && (req.url += `?`) && Object.keys(req.data.params).forEach((key, index) =>
       (req.url += `${key}=${req.data.params[key]}`) && Object.keys(req.data.params).length - 1 !== index && (req.url += "&"));
 
-  req.data = JSON.parse(JSON.stringify(req.data))
+  // req.data = JSON.parse(JSON.stringify(req.data))
   delete req.data.params
   // console.log(req)
   return req
@@ -52,7 +52,7 @@ const HTTP_PROXY = {
           httpPreHandler(app, req);
         }
         req = formatParams(req)
-        // console.log(1, req)
+        console.log(1, req)
         res.result = await Fetch(req.url, req.data);
         // console.log(data.url, !result, result.code !== 200, result.msg !== 'ok', result,httpFilter)
         if (httpAfterHandler) {

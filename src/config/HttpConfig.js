@@ -18,7 +18,7 @@ export default {
    *  。。。
    * 注：其他fetch可以传入的参数，也在data里面传入
    */
-  // httpPreHandler,
+  httpPreHandler,
   // httpAfterHandler,
   httpList: [
     //test
@@ -42,9 +42,8 @@ export default {
     { name: "hp_rates", data: { url: "/otc/traderrates/", method: "get" } }, // 获取发布信息
     { name: "hp_sales", data: { url: "/otc/tradersales/", method: "get" } }, // 获取评价
 
-    { name: "hp_account", data: { url: "/v1/common/", method: "post" } }, // 获取币币账户列表
-    { name: "hp_account_coin", data: { url: "/v1/common/", method: "post" } } // 获取交易所上架钱包
-
+    { name: "hp_account", data: { url: "/v1/otc/", method: "post" } }, // 获取交易所地址列表
+    { name: "hp_gp", data: { url: "/v1/otc/", method: "post" } } // 获取交易所总资产及资产列表
 
   ]
 };
