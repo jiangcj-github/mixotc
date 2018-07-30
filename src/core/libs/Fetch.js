@@ -7,6 +7,6 @@ import JsonBig from "json-bigint";
 import 'whatwg-fetch';
 
 export default async (url, params) => {
-  console.log(url, params)
+  //console.log(url, params)
   return await fetch(url, params).then(response => response.text()).then(results => JsonBig.parse(results), (reject, obj) => obj = {code:0,msg:'JSON解析出错',data:reject})
 }
