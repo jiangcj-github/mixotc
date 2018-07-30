@@ -35,7 +35,7 @@
             <img :src="coinDataObj.logo" alt="">
             <ol>
               <li>{{coinDataObj.name && coinDataObj.name.toUpperCase()}}({{coinDataObj.cnName}})</li>
-              <li>{{coinDataObj.price && (coinDataObj.price.cny === 0 ? '-' : (coinDataObj.price.cny * 1).format('cny'))}}</li>
+              <li>{{coinDataObj.priceCN && (coinDataObj.priceCN === 0 ? '-' : (coinDataObj.priceCN * 1).format('cny'))}}</li>
               <li>
                 <router-link :to="{path:'/transaction', query:{currency: resultObj.currency, name: resultObj.name, icon: resultObj.icon}}">去交易</router-link>
                 <span @click="goRecharge">去充币</span>
@@ -54,9 +54,9 @@
           <h2>币种介绍</h2>
           <h3>{{coinDataObj.description}}</h3>
           <p>
-            <a :href="coinDataObj.webSite && coinDataObj.webSite[0]" target="_blank">官网</a>
-            <a :href="coinDataObj.blockSites && coinDataObj.blockSites[0]" target="_blank">区块浏览器</a>
-            <a :href="coinDataObj.whitePaper" target="_blank">白皮书</a>
+            <a :href="coinDataObj.webSite && coinDataObj.webSite[0]" target="_blank" v-if="coinDataObj.webSite">官网</a>
+            <a :href="coinDataObj.blockSites && coinDataObj.blockSites[0]" target="_blank" v-if="coinDataObj.blockSites">区块浏览器</a>
+            <a :href="coinDataObj.whitePaper && coinDataObj.whitePaper[0]" target="_blank" v-if="coinDataObj.whitePaper">白皮书</a>
           </p>
         </div>
       </div>
@@ -84,8 +84,6 @@
       await this.getCoinInfo();
       this.getCoinsData();
     },
-    mounted() {
-    },
     methods: {
       async getCoinInfo() {
         this.nothingText = '加载中...';
@@ -110,12 +108,51 @@
         this.resultObj = obj;
         this.inputValue = obj.currency;
         this.showResult = false;
-        await this.Proxy.getCoinDataAll({action: 'ci', data:{cf:obj.currency.toLowerCase()}}).then(res => {
-          this.coinDataObj = res.data
-          this.coinDataObj.logo = `${this.HostUrl.http}image/${this.resultObj.icon}`
+
+        /*
+        let res={"a":"cir","r":0,"m":"","d":{"id":0,"n":"btc","ne":"Bitcoin","nc":"比特币","ic":"","lu":"http://www.cointalks.com/res/5b18d3c08f661a6c7cb9fe69.png","ws":["https://bitcoin.org/","https://www.bitcoin.com/"],"wp":null,"bs":["http://blockchain.info","https://blockexplorer.com/","https://btc.com"],"des":"比特币（BitCoin）的概念最初由中本聪在2009年提出，根据中本聪的思路设计发布的开源软件以及建构其上的P2P网络。比特币是一种P2P形式的数字货币。点对点的传输意味着一个去中心化的支付系统。与大多数货币不同，比特币不依靠特定货币机构发行，它依据特定算法，通过大量的计算产生，比特币经济使用整个P2P网络中众多节点构成的分布式数据库来确认并记录所有的交易行为，并使用密码学的设计来确保货币流通各个环节安全性。P2P的去中心化特性与算法本身可以确保无法通过大量制造比特币来人为操控币值。基于密码学的设计可以使比特币只能被真实的拥有者转移或支付。这同样确保了货币所有权与流通交易的匿名性。比特币与其他虚拟货币最大的不同，是其总数量非常有限，具有极强的稀缺性。该货币系统曾在4年内只有不超过1050万个，之后的总数量将被永久限制在2100万个。","rt":1225485933,"tv":21000000,"cv":17135600,"pc":55791.1457,"pe":8162.92533193,"tvc":1171614059700,"tve":171421431970.53,"ipc":0,"ipe":0}}
+        let d = res && res.d;
+        this.coinDataObj = {
+          logo: d.lu,
+          name: d.n,
+          cnName: d.nc,
+          enName: d.ne,
+          totalValueCN: d.tvc,
+          totalVolume: d.tv,
+          circulationVolume: d.cv,
+          icoPriceCN: d.ipc,
+          releaseTime: d.rt,
+          priceCN: d.pc,
+          description: d.des,
+          webSite: d.ws,
+          blockSites: d.bs,
+          whitePaper: d.wp,
+        };
+        console.log(this.resultObj,this.coinDataObj);
+        */
+
+        await this.Proxy.getCoinDataAll({a: 'ci', d:{cf:obj.currency.toLowerCase()}}).then(res => {
+          let d = res && res.d;
+          this.coinDataObj = {
+            logo: d.lu,
+            name: d.n,
+            cnName: d.nc,
+            enName: d.ne,
+            totalValueCN: d.tvc,
+            totalVolume: d.tv,
+            circulationVolume: d.cv,
+            icoPriceCN: d.ipc,
+            releaseTime: d.rt,
+            priceCN: d.pc,
+            description: d.des,
+            webSite: d.ws,
+            blockSites: d.bs,
+            whitePaper: d.wp,
+          };
         }).catch(msg => {
           console.log(msg)
         })
+
       },
       focusInput() {
         this.canCancel = true;
