@@ -196,7 +196,7 @@
 
         bbSort: 0,  //
         bb: [],         // 当前页数据
-        bbAll: [],    //币币账户全部数据
+        bbDataBuffer: [],    //币币账户全部数据
         bbCurPage: 1,
         bbPageSize: 20,
         bbTotal: 0,
@@ -292,7 +292,7 @@
           }else{
             this.bbErr=0;
             exData.d.cl.map(item=>{
-              this.bbAll.push({
+              this.bbDataBuffer.push({
                 icon: item.cic,
                 name: item.cn,
                 fullname: item.fn,
@@ -302,7 +302,7 @@
               });
             });
             //排序
-            this.bbAll.sort((a,b)=>{
+            this.bbDataBuffer.sort((a,b)=>{
               return a.name<b.name?-1:1;
             });
             //获取账户总资产
@@ -404,7 +404,7 @@
       loadBb(p=0){
         let arr=[];
         //模糊搜索
-        this.bbAll.forEach(e=>{
+        this.bbDataBuffer.forEach(e=>{
           if(new RegExp("^"+this.paramSrchText+".*$","i").test(e.name)){
             arr.push(e);
           }

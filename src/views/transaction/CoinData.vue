@@ -131,7 +131,7 @@
         console.log(this.resultObj,this.coinDataObj);
         */
 
-        await this.Proxy.getCoinDataAll({a: 'ci', d:{cf:obj.currency.toLowerCase()}}).then(res => {
+        await this.Proxy.getCoinDataAll({a: 'ci', d:{dt:0,cf:obj.currency.toLowerCase()}}).then(res => {
           let d = res && res.d;
           this.coinDataObj = {
             logo: d.lu,
