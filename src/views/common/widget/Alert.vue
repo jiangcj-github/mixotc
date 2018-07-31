@@ -32,16 +32,14 @@
     methods:{
       onClickOk(){
         this.show = false;
-        if(this.onOk) this.onOk();
+        this.onOk && this.onOk();
       },
       onClickCancel(){
         this.show=false;
-        if(this.onCancel) this.onCancel();
+        this.onCancel && this.onCancel();
       },
       onClickNative(){
-        if(this.clickHide){
-          this.show=false;
-        }
+        this.clickHide && (this.show=false)
       },
       showAlert(opt={}){
         this.isShowBtns=false;
@@ -52,14 +50,13 @@
         this.onCancel=null;
         this.autoHide=true;
         this.clickHide=true;
+
         Object.assign(this,opt);
 
         this.show=true;
-        if(this.autoHide){
-          timeout(()=>{
+        this.autoHide && timeout(()=>{
             this.show=false;
           },3000);
-        }
       },
     }
   }
